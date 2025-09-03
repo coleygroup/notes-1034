@@ -1,0 +1,107 @@
+\ProvidesPackage{main}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{mhchem}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{csquotes}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{cleveref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\usepackage{doi}
+\usepackage[style=chem-acs]{biblatex}
+\addbibresource{main.bib}
+
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+
+\usepackage{amsmath}
+\usepackage{parskip}
+\usepackage{verbatim}
+\usepackage{csquotes}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+\usepackage{cancel}
+\usepackage{enumitem}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{10.34 Notes}
+\renewcommand{\sectionmark}[1]{\markboth{#1}{}} % get rid of section number in header
+\lhead{\nouppercase{\leftmark}}  % section title as left header
+
+\fancyfoot[C]{\thepage}
+
+\setcounter{section}{-1}  % start section at 0 (for introduction)
+\setcounter{tocdepth}{2}  % only sections and subsections in table of contents
+
+\usepackage[most]{tcolorbox}
+\tcbset{textmarker/.style={%
+        enhanced,
+        breakable, % allow to break across pages
+        parbox=false,boxrule=0mm,boxsep=1mm,arc=0mm,
+        outer arc=0mm,left=3mm,right=3mm,top=7pt,bottom=7pt,
+        toptitle=1mm,bottomtitle=1mm,}}
+\newtcolorbox{exampleBox}{textmarker,
+    borderline west={3pt}{0pt}{blue},
+    colback=blue!10!white}
+\newtcolorbox{warningBox}{textmarker,
+    borderline west={3pt}{0pt}{red},
+    colback=red!10!white}
+\newtcolorbox{theoremBox}{textmarker,
+    borderline west={3pt}{0pt}{gray},
+    colback=gray!10!white}
+
+\newtcolorbox{algorithmBox}{textmarker,
+    borderline west={3pt}{0pt}{gray},
+    colback=gray!10!white}
+
+\newtcolorbox{definitionBox}{textmarker,
+    borderline west={3pt}{0pt}{gray},
+    colback=gray!10!white}
+
+
+
+\renewcommand{\equationautorefname}{Eq.}
+
+% trick for making augmented matrices
+% use like:
+% \begin{bmatrix}
+%     1 & 0 & -1 & -2 &\aug& -1 \\
+%     0 & 1 & 2 & 3 &\aug& 1 \\
+%     0 & 0 & 0 & 0 &\aug& 0
+% \end{bmatrix}
+\newcommand\aug{\fboxsep=-\fboxrule\!\!\!\fbox{\strut}\!\!\!}
+
+
+\newcommand\mydef{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily def}}}{=}}}
+
+% Define a common bold for vectors and matrices
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}\mbox{}\\}
+
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+\numberwithin{equation}{section}
+
