@@ -86,80 +86,74 @@ The set of $n$-dimensional vectors over the field $ \mathbb{R} $ is denoted by $
 The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ (or $ \mathbb{C}^n $).
 Later in \Cref{sec:vector-space}, we will see that $\mathbb{R}^n$ and $\mathbb{C}^n$ form vector spaces, and several useful properties can be derived from the nature of vector spaces.
 
-\subsubsection{Vector Addition}
-Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), their sum is defined component-wise:
+\subsubsection{Vector Addition and Scalar Multiplication}
+Two basic arithmetic operations can be defined over the vector space: \emph{addition} and \emph{scalar multiplication}.
+Vector addition is defined for a pair of vectors with the same dimension.
+Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), their addition is defined as follows:
 \begin{equation*}
-    \mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \\ \vdots \\ u_n + v_n \end{bmatrix}
+  \mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \\ \vdots \\ u_n + v_n \end{bmatrix}
 \end{equation*}
-This operation is commutative and associative. Geometrically, vector addition corresponds to a ``tip-to-tail'' construction (see \autoref{fig:vector-operations}).
+That is, the addition is performed entry-wise.
+This operation is commutative and associative. That is,
+\begin{align*}
+  \mathbf{u} + \mathbf{v} &= \mathbf{v} + \mathbf{u} \\
+  (\mathbf{u} + \mathbf{v}) + \mathbf{w} &= \mathbf{u} + (\mathbf{v} + \mathbf{w}),
+\end{align*}
+for any vectors $ \mathbf{u}, \mathbf{v}, \mathbf{w} $ in the same vector space.
+Geometrically, vector addition can be interpreted as a ``tip-to-tail'' construction (see \autoref{fig:vector-operations}).
 
-\subsubsection{Scalar Multiplication}
-For a scalar $ c \in \mathbb{R} $ (or $ \mathbb{C} $) and a vector $ \mathbf{v} $, the scalar multiplication is
+\begin{warningBox}
+  \textbf{Warning:} Vector addition is only defined for vectors of the same dimension. Attempting to add vectors of different dimensions is undefined. If you attempt to add vectors of different dimensions on a computer (e.g., in MATLAB), you will encounter an error:
+\begin{verbatim}
+>> [1; 2] + [3; 4; 5]
+Arrays have incompatible sizes for this operation.
+\end{verbatim}
+\end{warningBox}
+
+% \subsubsection{Scalar Multiplication}
+Scalar multiplication is defined for a vector and a scalar.
+In particular, for a scalar $ c \in \mathbb{R} $ (or $ \mathbb{C} $) and a vector $ \mathbf{v}\in\mathbb{R}^{n} $ (or $\mathbb{C}^n$), the scalar multiplication is defined as follows:
 \begin{equation*}
     c\mathbf{v} = \begin{bmatrix} c v_1 \\ c v_2 \\ \vdots \\ c v_n \end{bmatrix}
 \end{equation*}
-This operation is distributive over vector addition and scalar addition. Geometrically, scalar multiplication stretches or shrinks the vector by a factor of $ c $ (see \autoref{fig:vector-operations}).
+This operation is distributive over vector addition and scalar addition. That is,
+\begin{align*}
+  c(\mathbf{u} + \mathbf{v}) &= c\mathbf{u} + c\mathbf{v} \\
+  (c + d)\mathbf{v} &= c\mathbf{v} + d\mathbf{v},
+\end{align*}
+for any vectors $ \mathbf{u}, \mathbf{v} $ in the same vector space and any scalars $ c, d $ in the same field.
+Geometrically, scalar multiplication stretches or shrinks the vector by a factor of $ c $ (see \autoref{fig:vector-operations}).
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figs/linear-algebra/vector-operations.pdf}
-    \caption{Vector addition and scalar multiplication in $ \mathbb{R}^2 $.}
-    \label{fig:vector-operations}
+  \centering
+  \includegraphics[width=0.85\textwidth]{figs/linear-algebra/vector-operations.pdf}
+  \caption{Vector addition and scalar multiplication in $ \mathbb{R}^2 $.}
+  \label{fig:vector-operations}
 \end{figure}
 
-\subsubsection{Linear Combinations and Span}
+You can also combine these two operations.
+\begin{align}\label{eqn:ax+by}
+  ax + by = \begin{bmatrix}
+    a x_1 + b y_1 \\
+    a x_2 + b y_2 \\
+    \vdots \\
+    a x_N + b y_N
+  \end{bmatrix}
+\end{align}
+where $a$ and $b$ are scalar values, and $x$ and $y$ are vectors in $\mathbb{R}^N$.
+We don't need to separetly define subtraction, since $x-y$ is equivalent to \cref{eqn:ax+by} with $a=1$ and $b=-1$.
 
-A \textbf{linear combination} of vectors $ \mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k $ is an expression of the form:
-\begin{equation*}
-    \mathbf{w} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k
-\end{equation*}
-where $ c_1, c_2, \ldots, c_k $ are scalars. The set of all possible linear combinations of $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ is called their \textbf{span}:
-\begin{equation*}
-    \text{span}\{\mathbf{v}_1, \ldots, \mathbf{v}_k\} = \left\{ \sum_{i=1}^k c_i \mathbf{v}_i \mid c_i \in \mathbb{R} \text{ or } \mathbb{C} \right\}
-\end{equation*}
 
-\begin{exampleBox}
-    \textbf{Example}: Consider vectors $ \mathbf{v}_1 = \begin{bmatrix}1 \\ 0\end{bmatrix} $ and $ \mathbf{v}_2 = \begin{bmatrix}0 \\ 1\end{bmatrix} $ in $ \mathbb{R}^2 $. Their span is the entire $ \mathbb{R}^2 $ plane since any vector $ \mathbf{w} = \begin{bmatrix}w_1 \\ w_2\end{bmatrix} $ can be written as $ w_1 \mathbf{v}_1 + w_2 \mathbf{v}_2 $
-\end{exampleBox}
+We can observe that the result of scalar multiplication, vector addition, and even their combination is \emph{closed} within the vector space where $x$ and $y$ lives in.
+This means that $ax + by$ is in $\mathbb{R}^N$, if $x$ and $y$ are in $\mathbb{R}^N$ and $a$ and $b$ are in $\mathbb{R}$.
+The same goes true if you replace $\mathbb{R}$ with $\mathbb{C}$.
+This observation is one of the key properties of vector spaces, and we will see more about vector spaces in \Cref{sec:vector-space}.
 
-\subsubsection{Linear Independence and Basis}
-Vectors $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ are \textbf{linearly independent} if the only solution to
-\begin{equation*}
-    c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k = \mathbf{0}
-\end{equation*}
-is $ c_1 = c_2 = \ldots = c_k = 0 $.
+\emph{Null vector}, or zero vector, is a special vector whose all entries are zero:
+\begin{align*}
+  \boldsymbol{0} = (0, 0, \dots, 0).
+\end{align*}
 
-A set of vectors that is linearly independent and spans the vector space is called a \textbf{basis}. The number of vectors in a basis equals the \textbf{dimension} of the space.
-
-\subsubsection{The Zero Vector}
-The \textbf{zero vector} $ \mathbf{0} $ in $ \mathbb{R}^n $ is:
-\begin{equation*}
-    \mathbf{0} = \begin{bmatrix}0 \\ 0 \\ \vdots \\ 0\end{bmatrix}
-\end{equation*}
-It acts as the additive identity: $ \mathbf{v} + \mathbf{0} = \mathbf{v} $.
-
-\subsubsection{The Unit Vectors}
-The \textbf{unit vectors} in $ \mathbb{R}^n $ are:
-\begin{equation*}
-    \mathbf{e}_i = \begin{bmatrix}0 \\ \vdots \\ 1 \\ \vdots \\ 0\end{bmatrix}, \quad \text{where } (\mathbf{e}_{i})_j = \begin{cases} 1 & \text{if } i = j \\ 0 & \text{otherwise} \end{cases}
-\end{equation*}
-The unit vectors form a basis for $ \mathbb{R}^n $, meaning any vector $ \mathbf{v} $ can be written as a linear combination of the unit vectors.
-\begin{exampleBox}
-    \textbf{Example}: In $ \mathbb{R}^3 $, the unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
-\end{exampleBox}
-
-\subsubsection{Properties of Vector Spaces}\label{sec:vector-space}
-For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c, d \in \mathbb{R} $, the following hold:
-\begin{enumerate}
-    \item $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $ (commutativity)
-    \item $ (\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w}) $ (associativity)
-    \item $ \mathbf{v} + \mathbf{0} = \mathbf{v} $ (additive identity)
-    \item $ \mathbf{v} + (-\mathbf{v}) = \mathbf{0} $ (additive inverse)
-    \item $ c(d\mathbf{v}) = (cd)\mathbf{v} $ (associativity of scalar multiplication)
-    \item $ (c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v} $ (distributivity over scalars)
-    \item $ c(\mathbf{v} + \mathbf{w}) = c\mathbf{v} + c\mathbf{w} $ (distributivity over vectors)
-    \item $ 1\mathbf{v} = \mathbf{v} $ (multiplicative identity)
-\end{enumerate}
 
 \subsection{Matrices}
 A \textbf{matrix} is a rectangular array of scalars arranged in rows and columns. An $ m \times n $ matrix $ \mathbf{A} $ has $ m $ rows and $ n $ columns:
@@ -170,10 +164,12 @@ A \textbf{matrix} is a rectangular array of scalars arranged in rows and columns
         \vdots & \vdots & \ddots & \vdots \\ 
         a_{m1} & a_{m2} & \ldots & a_{mn} 
     \end{bmatrix}.
+    % SS: notation inconsistent with the lecture slides. Fix later.
 \end{equation*}
-Matrices can represent linear transformations from $ \mathbb{R}^n $ to $ \mathbb{R}^m $. The notation $ \mathbf{A} \in \mathbb{R}^{m \times n} $ indicates the dimensions of $ \mathbf{A} $ (and the fact that the entries are drawn from $\mathbb{R}$), and the notation $ a_{ij} $ denotes the element in the $ i $-th row and $ j $-th column.
-
-Additionally, we can think of vectors as matrices with a single column---that is, as $ n \times 1 $ matrices. This perspective allows us to treat vectors and matrices uniformly.
+% Matrices can represent linear transformations from $ \mathbb{R}^n $ to $ \mathbb{R}^m $. % SS: later
+The notation $ \mathbf{A} \in \mathbb{R}^{m \times n} $ indicates the dimensions of $ \mathbf{A} $ (and the fact that the entries are drawn from $\mathbb{R}$), and the notation $ a_{ij} $ denotes the element in the $ i $-th row and $ j $-th column.
+Additionally, we can think of vectors as matrices with a single column---that is, as $ n \times 1 $ matrices.
+This perspective allows us to treat vectors and matrices in a unified manner.
 
 \subsubsection{Matrix Addition and Scalar Multiplication}
 Like vectors, matrices can be added and scaled entry-wise:
@@ -182,10 +178,65 @@ Like vectors, matrices can be added and scaled entry-wise:
     \item \textbf{Scalar Multiplication}: $ (c\mathbf{A})_{ij} = c \cdot a_{ij} $
 \end{itemize}
 
-\subsubsection{Matrix Multiplication}
-The product of an $ m \times n $ matrix $ \mathbf{A} $ and an $ n \times p $ matrix $ \mathbf{B} $ is an $ m \times p $ matrix $ \mathbf{C} $:
+\subsubsection{Dot Product}
+The \textbf{dot product} (inner product) of vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ is
 \begin{equation*}
-    c_{ij} = \sum_{k=1}^n a_{ik} b_{kj}
+    \mathbf{u}\cdot\mathbf{v} = \mathbf{u}^\top \mathbf{v} = \sum_{i=1}^n u_i v_i
+\end{equation*}
+It measures the projection of one vector onto another, which we can geometrically interpret as the product of the magnitudes of the vectors and the cosine of the angle between them (\autoref{fig:dot-product}). 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{figs/linear-algebra/dot-product.pdf}
+    \caption{Geometric interpretation of the dot product.}
+    \label{fig:dot-product}
+\end{figure}
+
+The dot product satisfies the following properties:
+\begin{itemize}
+    \item $ \mathbf{u} \cdot \mathbf{v} = \mathbf{v} \cdot \mathbf{u} $ (commutativity)
+    \item $ \mathbf{u} \cdot (\mathbf{v} + \mathbf{w}) = \mathbf{u} \cdot \mathbf{v} + \mathbf{u} \cdot \mathbf{w} $ (distributivity)
+    \item $ (\alpha \mathbf{u}) \cdot \mathbf{v} = \alpha (\mathbf{u} \cdot \mathbf{v}) $ (homogeneity)
+    \item $ \mathbf{u} \cdot \mathbf{u} \geq 0 $ and $ \mathbf{u} \cdot \mathbf{u} = 0 $ if and only if $ \mathbf{u} = \mathbf{0} $ (positive definiteness)
+\end{itemize}
+
+\subsubsection{Matrix-Vector Products}
+The product of an $m\times n$ matrix $ \mathbf{A} \in\mathbb{R}^{m\times n}$ and an $n$-dimensional vector $ \mathbf{x} $ is an $m$-dimensional vector $\mathbf{b}\in \mathbb{R}^m $:
+\begin{equation*}
+  b_i = \sum_{j=1}^n a_{ij} x_j.
+\end{equation*}
+Writing out everything explicitly, we have
+\begin{equation*}
+  \mathbf{b} = \mathbf{A}\mathbf{x} = \begin{bmatrix}
+    a_{11}x_1 + a_{12}x_2 + \cdots + a_{1n}x_n \\
+    a_{21}x_1 + a_{22}x_2 + \cdots + a_{2n}x_n \\
+    \vdots \\
+    a_{m1}x_1 + a_{m2}x_2 + \cdots + a_{mn}x_n
+  \end{bmatrix}.
+\end{equation*}
+
+The number of columns in $ \mathbf{A} $ must equal the number of elements in $ \mathbf{x} $ for the product to be defined. Since vectors can be thought of as matrices with one column, matrix-vector multiplication is just a special case of matrix multiplication.
+
+\begin{exampleBox}
+  \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{x} = \begin{bmatrix}5 \\ 6\end{bmatrix} $:
+  \begin{equation*}
+    \mathbf{A}\mathbf{x} = \begin{bmatrix}1 \cdot 5 + 2 \cdot 6 \\ 3 \cdot 5 + 4 \cdot 6\end{bmatrix} = \begin{bmatrix}17 \\ 39\end{bmatrix}
+  \end{equation*}
+\end{exampleBox}
+
+
+\subsubsection{Matrix Multiplication}
+The product of an $ m \times n $ matrix $ \mathbf{A}\in\mathbb{R}^{m\times n} $ and an $ n \times p $ matrix $ \mathbf{B} \in\mathbb{R}^{n\times p}$ is an $ m \times p $ matrix $ \mathbf{C} \in\mathbb{R}^{m\times p}$:
+\begin{equation*}
+  c_{ij} = \sum_{k=1}^n a_{ik} b_{kj}.
+\end{equation*}
+Writing out everything explicitly, we have
+\begin{equation*}
+  \mathbf{C} = \mathbf{A}\mathbf{B} = \begin{bmatrix}
+    a_{11}b_{11} + a_{12}b_{21} +  \cdots + a_{1n}b_{n2} & \cdots & a_{11}b_{1p} + a_{12}b_{2p} + \cdots + a_{1n}b_{np} \\
+    \vdots & \ddots & \vdots \\
+    a_{m1}b_{11} + a_{m2}b_{21} + \cdots + a_{mn}b_{n1} & \cdots & a_{m1}b_{1p} + a_{m2}b_{2p} + \cdots + a_{mn}b_{np}
+  \end{bmatrix}
 \end{equation*}
 Matrix multiplication is associative and distributive but generally not commutative ($ \mathbf{A}\mathbf{B} \neq \mathbf{B}\mathbf{A} $ in general). Additionally, the number of columns in $ \mathbf{A} $ must equal the number of rows in $ \mathbf{B} $ for the product to be defined.
 
@@ -201,21 +252,9 @@ Matrix multiplication is associative and distributive but generally not commutat
 
 The product of two matrices, $ \mathbf{A}\mathbf{B} $, represents the composition of two linear transformations. If matrix $ \mathbf{B} $ transforms a vector $ \mathbf{x} $ into a new vector $ \mathbf{y} = \mathbf{B}\mathbf{x} $, and matrix $ \mathbf{A} $ then transforms $ \mathbf{y} $ into $ \mathbf{z} = \mathbf{A}\mathbf{y} $, the product matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ is the single matrix that represents the entire transformation from $ \mathbf{x} $ to $ \mathbf{z} $ directly ($ \mathbf{z} = \mathbf{C}\mathbf{x} $). This is why the order of multiplication matters; applying transformation $ \mathbf{A} $ then $ \mathbf{B} $ is generally not the same as applying $ \mathbf{B} $ then $ \mathbf{A} $.
 
-\subsubsection{Matrix-Vector Products}
-The product of a matrix $ \mathbf{A} $ and a vector $ \mathbf{x} $ is a vector:
-\begin{equation*}
-    (\mathbf{A}\mathbf{x})_i = \sum_{j=1}^n a_{ij} x_j
-\end{equation*}
-The number of columns in $ \mathbf{A} $ must equal the number of elements in $ \mathbf{x} $ for the product to be defined. Since vectors can be thought of as matrices with one column, matrix-vector multiplication is just a special case of matrix multiplication.
-
-\begin{exampleBox}
-    \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{x} = \begin{bmatrix}5 \\ 6\end{bmatrix} $:
-    \begin{equation*}
-        \mathbf{A}\mathbf{x} = \begin{bmatrix}1 \cdot 5 + 2 \cdot 6 \\ 3 \cdot 5 + 4 \cdot 6\end{bmatrix} = \begin{bmatrix}17 \\ 39\end{bmatrix}
-    \end{equation*}
-\end{exampleBox}
-
-A matrix-vector product $ \mathbf{A}\mathbf{x} $ can be viewed as applying a linear transformation to the vector $ \mathbf{x} $. The matrix $ \mathbf{A} $ acts as an operator that maps the vector $ \mathbf{x} $ to a new vector, potentially rotating, scaling, or shearing it in the process. Equivalently, the resulting vector is a linear combination of the columns of $ \mathbf{A} $, with the components of $ \mathbf{x} $ serving as the weights.
+  
+% SS: revisit this later. Probably we want to bring this up later.
+% A matrix-vector product $ \mathbf{A}\mathbf{x} $ can be viewed as applying a linear transformation to the vector $ \mathbf{x} $. The matrix $ \mathbf{A} $ acts as an operator that maps the vector $ \mathbf{x} $ to a new vector, potentially rotating, scaling, or shearing it in the process. Equivalently, the resulting vector is a linear combination of the columns of $ \mathbf{A} $, with the components of $ \mathbf{x} $ serving as the weights.
 
 \subsubsection{Outer Product}
 The \textbf{outer product} of vectors $ \mathbf{u} \in \mathbb{R}^m $ and $ \mathbf{v} \in \mathbb{R}^n $ is an $ m \times n $ matrix:
@@ -236,7 +275,22 @@ To emphasize, the outer product constructs a matrix from the product of two vect
 \subsubsection{Transpose of a Matrix}
 The \textbf{transpose} of $ \mathbf{A} $, denoted $ \mathbf{A}^\top $, is obtained by swapping rows with columns:
 \begin{equation*}
-    (\mathbf{A}^\top)_{ij} = a_{ji}
+  (\mathbf{A}^\top)_{ij} = a_{ji}.
+\end{equation*}
+Writing out everything explicitly, we have
+\begin{equation*}
+  \mathbf{A} = \begin{bmatrix} 
+    a_{11} & a_{12} & \ldots & a_{1n} \\ 
+    a_{21} & a_{22} & \ldots & a_{2n} \\ 
+    \vdots & \vdots & \ddots & \vdots \\ 
+    a_{m1} & a_{m2} & \ldots & a_{mn}
+  \end{bmatrix} \implies
+  \mathbf{A}^\top = \begin{bmatrix} 
+    a_{11} & a_{21} & \ldots & a_{m1} \\ 
+    a_{12} & a_{22} & \ldots & a_{m2} \\ 
+    \vdots & \vdots & \ddots & \vdots \\ 
+    a_{1n} & a_{2n} & \ldots & a_{mn} 
+  \end{bmatrix}.
 \end{equation*}
 The transpose satisfies $ (\mathbf{A}^\top)^\top = \mathbf{A} $ and $ (\mathbf{A} + \mathbf{B})^\top = \mathbf{A}^\top + \mathbf{B}^\top $.
 
@@ -267,79 +321,128 @@ For a square matrix $ \mathbf{A} $, the \textbf{trace} is the sum of its diagona
 \begin{equation*}
     \operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n a_{ii}
 \end{equation*}
-The trace is linear: $ \operatorname{tr}(\mathbf{A} + \mathbf{B}) = \operatorname{tr}(\mathbf{A}) + \operatorname{tr}(\mathbf{B}) $. Additionally, the trace of an $n \times n$ matrix is equal to the sum of its eigenvalues:
-\begin{equation*}
-    \operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n \lambda_i
-\end{equation*}
-where the eigenvalues with algebraic multiplicity are counted multiple times. We will discuss eigenvalues and eigenvectors in more detail later. The trace also satisfies the following properties:
+The trace is linear: $ \operatorname{tr}(\mathbf{A} + \mathbf{B}) = \operatorname{tr}(\mathbf{A}) + \operatorname{tr}(\mathbf{B}) $.
+% SS: we should explain this later.
+% Additionally, the trace of an $n \times n$ matrix is equal to the sum of its eigenvalues:
+% \begin{equation*}
+%     \operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n \lambda_i
+% \end{equation*}
+% where the eigenvalues with algebraic multiplicity are counted multiple times.
+% We will discuss eigenvalues and eigenvectors in more detail later.
+The trace also satisfies the following properties:
 \begin{itemize}
-    \item $ \operatorname{tr}(\mathbf{A}^\top) = \operatorname{tr}(\mathbf{A}) $
-    \item $ \operatorname{tr}(\mathbf{A} + \mathbf{B}) = \operatorname{tr}(\mathbf{A}) + \operatorname{tr}(\mathbf{B}) $
-    \item $ \operatorname{tr}(\mathbf{AB}) = \operatorname{tr}(\mathbf{BA}) $
+\item $ \operatorname{tr}(\mathbf{A}^\top) = \operatorname{tr}(\mathbf{A}) $
+\item $ \operatorname{tr}(\mathbf{A} + \mathbf{B}) = \operatorname{tr}(\mathbf{A}) + \operatorname{tr}(\mathbf{B}) $
+\item $ \operatorname{tr}(\mathbf{AB}) = \operatorname{tr}(\mathbf{BA}) $
 \end{itemize}
-Finally, as a generalization of the last property mentioned above, we note that the trace is invariant under \textbf{cyclic permutations}, meaning that for any square matrices $ \mathbf{A}, \mathbf{B}, \mathbf{C} $ such that the product $ \mathbf{ABC} $ is defined, we have $ \operatorname{tr}(\mathbf{ABC}) = \operatorname{tr}(\mathbf{CAB}) = \operatorname{tr}(\mathbf{BCA}) $. However, note that this property does not hold for arbitrary permutations (e.g., $ \operatorname{tr}(\mathbf{ACB}) \neq \operatorname{tr}(\mathbf{ABC}) $).
+
+\begin{optionalBox}
+As a generalization of the last property mentioned above, we note that the trace is invariant under \textbf{cyclic permutations}, meaning that for any square matrices $ \mathbf{A}, \mathbf{B}, \mathbf{C} $ such that the product $ \mathbf{ABC} $ is defined, we have $ \operatorname{tr}(\mathbf{ABC}) = \operatorname{tr}(\mathbf{CAB}) = \operatorname{tr}(\mathbf{BCA}) $. However, note that this property does not hold for arbitrary permutations (e.g., $ \operatorname{tr}(\mathbf{ACB}) \neq \operatorname{tr}(\mathbf{ABC}) $).
+\end{optionalBox}
 
 \begin{exampleBox}
     \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}2 & -1\\4 & 3\end{bmatrix} $, $ \operatorname{tr}(\mathbf{A}) = 2 + 3 = 5 $.
 \end{exampleBox}
 
-\subsubsection{Determinant}
-For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation. This is why a matrix is \textbf{invertible if and only if its determinant is non-zero}.
+\subsubsection{Computational Complexity of Matrix and Vector Operations}
+\label{sec:complexity-of-matrix-and-vector-operations}
+We must understand the computational costs of basic matrix and vector operations in order to develop efficient numerical algorithms. Let's explore three fundamental operations---dot product, matrix-vector multiplication, and matrix-matrix multiplication---and analyze their computational complexities by counting the number of required multiplications and additions.
 
-The determinant has several important properties, including $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $, the multiplicative property $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $, and the fact that for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $.
-
-For a $2\times 2$ matrix, the formula is
+\textbf{Dot Product}\quad For two vectors $ \mathbf{x}, \mathbf{y} \in \mathbb{R}^N $, the dot product $ \mathbf{y}^\top \mathbf{x} $ is calculated by multiplying corresponding elements and summing the results:
 \begin{equation*}
-    \det\!\left(\begin{bmatrix} a & b \\ c & d \end{bmatrix}\right) = ad - bc
+    \mathbf{y}^\top \mathbf{x} = \sum_{i=1}^{N} y_i x_i
 \end{equation*}
-For a $3\times 3$ matrix, one common method is cofactor expansion along the first row:
-\begin{align*}
-    \det\!\left(\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}\right) &= a \det\!\left(\begin{bmatrix} e & f \\ h & i \end{bmatrix}\right) - b \det\!\left(\begin{bmatrix} d & f \\ g & i \end{bmatrix}\right) + c \det\!\left(\begin{bmatrix} d & e \\ g & h \end{bmatrix}\right) \\ &= a(ei - fh) - b(di - fg) + c(dh - eg)
-\end{align*}
-The determinant of a general $n \times n$ matrix can be defined recursively via Laplace expansion, which expresses it as a signed sum of the entries of any chosen row or column times the determinants of their $(n-1) \times (n-1)$ minors. This recursion reduces ultimately to the $2 \times 2$ case. However, in practice, Laplace expansion is only used for small matrices; large determinants are almost always computed using Gaussian elimination or LU decomposition instead.
+This operation involves $ N $ multiplications (one for each pair $ y_i x_i $) and $ N - 1 $ additions (to sum the $ N $ products). The computational complexity is therefore $ O(N + N - 1) = O(N) $.
 
-
-\subsubsection{Inverse of a Matrix}
-Conceptually, the inverse of a matrix, denoted $ \mathbf{A}^{-1} $, is an operator that reverses the linear transformation performed by the original matrix $ \mathbf{A} $. If $ \mathbf{A} $ transforms a vector $ \mathbf{x} $ into $ \mathbf{y} $ (i.e., $ \mathbf{y} = \mathbf{A}\mathbf{x} $), then its inverse $ \mathbf{A}^{-1} $ transforms $ \mathbf{y} $ back to the original vector $ \mathbf{x} $ (i.e., $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{y} $).
-
-Formally, a square matrix $ \mathbf{A} $ is \textbf{invertible} (or \textbf{non-singular}) if there exists a matrix $ \mathbf{A}^{-1} $ such that:
+\textbf{Matrix-Vector Multiplication}\quad Given a matrix $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and a vector $ \mathbf{x} \in \mathbb{R}^N $, the product $ \mathbf{A}\mathbf{x} $ results in a vector $ \mathbf{b} \in \mathbb{R}^M $:
 \begin{equation*}
-    \mathbf{A}\mathbf{A}^{-1} = \mathbf{A}^{-1}\mathbf{A} = \mathbf{I}
+    b_i = \sum_{j=1}^{N} A_{ij} x_j, \quad \text{for } i = 1, 2, \dots, M
 \end{equation*}
-where $ \mathbf{I} $ is the identity matrix. This property is analogous to a number and its reciprocal (e.g., $ 5 \cdot 5^{-1} = 1 $).
+For each of the $ M $ rows, there are $ N $ multiplications (each element $ A_{ij} $ is multiplied by $ x_j $) and $ N - 1 $ additions (to sum the products for each $ b_i $). Therefore, the total number of operations is $ O(MN + M(N - 1)) = O(MN) $.
 
-A matrix is invertible if and only if its determinant is non-zero ($ \det(\mathbf{A}) \neq 0 $). If the determinant is zero, the matrix is singular, meaning its transformation is irreversible because it collapses the space into a lower dimension (e.g., mapping a 2D plane onto a line), and the original vector cannot be uniquely recovered.
-
-This ``undoing'' capability is fundamental for solving systems of linear equations. A system represented as $ \mathbf{A}\mathbf{x} = \mathbf{b} $ can be solved for the unknown vector $ \mathbf{x} $ by applying the inverse: $ \mathbf{A}^{-1}\mathbf{A}\mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $, which simplifies to $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $.
-
-Important properties of inverses include $(\mathbf{A}\mathbf{B})^{-1} = \mathbf{B}^{-1}\mathbf{A}^{-1}$ (note the reversed order) and $(\mathbf{A}^\top)^{-1} = (\mathbf{A}^{-1})^\top$. For a $2\times 2$ matrix, the inverse can be calculated directly:
+\textbf{Matrix-Matrix Multiplication}\quad When multiplying two matrices $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and $ \mathbf{B} \in \mathbb{R}^{N \times P} $, the resulting matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ has dimensions $ M \times P $:
 \begin{equation*}
-    \text{If } \mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \text{ then } \mathbf{A}^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}, \quad \text{provided } ad-bc \neq 0
+    C_{ik} = \sum_{j=1}^{N} A_{ij} B_{jk}, \quad \text{for } i = 1, 2, \dots, M \text{ and } k = 1, 2, \dots, P
 \end{equation*}
-While the $2 \times 2$ formula is simple, computing the inverse for a general $n \times n$ matrix is a numerically intensive task. In practice, one typically avoids computing the inverse explicitly. For problems like solving $\mathbf{A}\mathbf{x} = \mathbf{b}$, it is both more efficient and more numerically stable to solve the system directly using matrix factorization or other methods instead, which we will discuss in more detail later.
+For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are $ N $ multiplications (each $ A_{ij} $ multiplied by $ B_{jk} $) and $ N - 1 $ additions (to sum the products for each $ C_{ik} $). So we get $MNP$ multiplications and $MP(N-1)$ additions and hence an overall complexity of $O(MNP)$.
 
-\subsection{Inner Products and Norms}
-\subsubsection{Dot Product}
-The \textbf{dot product} (inner product) of vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ is
+
+\begin{exampleBox}
+    \textbf{Example}: To make these concepts more tangible, let's consider multiplying two small matrices:
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix}
+        a_{11} & a_{12} & a_{13} \\
+        a_{21} & a_{22} & a_{23} \\
+        a_{31} & a_{32} & a_{33}
+        \end{bmatrix}, \quad
+        \mathbf{B} = \begin{bmatrix}
+        b_{11} & b_{12} & b_{13} \\
+        b_{21} & b_{22} & b_{23} \\
+        b_{31} & b_{32} & b_{33}
+        \end{bmatrix}, \quad
+        \mathbf{C} = \mathbf{A}\mathbf{B}
+    \end{equation*}
+    The resulting matrix $ \mathbf{C} \in \mathbb{R}^{3\times 3} $ will have elements:
+    \begin{align*}
+        c_{11} & = a_{11}b_{11} + a_{12}b_{21} + a_{13}b_{31} \\
+        c_{12} & = a_{11}b_{12} + a_{12}b_{22} + a_{13}b_{32} \\
+        c_{13} & = a_{11}b_{13} + a_{12}b_{23} + a_{13}b_{33} \\
+        \vdots &
+    \end{align*}
+    We see that each element of $ \mathbf{C} $ requires 3 multiplications and 2 additions. And since $ \mathbf{C} $ has 9 elements, the total number of operations is $ 9 \cdot (3 + 2) = 45 $. 
+    
+    But wait, isn't the complexity of matrix-matrix multiplication $ O(MNP) $? And in this case $M = N = P = 3$, so shouldn't we have $3^3 = 27$ operations? No! That is not how big-O notation works. Big-O notation is NOT a precise count of operations but rather an upper bound on the growth rate of the number of operations as the size of the matrices grows.
+\end{exampleBox}
+
+It is worth mentioning (this is not necessary to know for 10.34) that, in reality, the computational complexity of matrix-matrix multiplication is not exactly cubic. A lot of research has been done to optimize matrix-matrix multiplication due to its extreme importance in the field of optimization and machine learning. For square $N\times N$ matrices, the fastest known algorithms run in $O(N^{\omega})$ time, where, as of 2024, the record is $\omega < 2.371339$ (this upper bound is from \href{https://arxiv.org/abs/2404.16349}{this paper}). Very roughly, these bounds come from the Coppersmith-Winograd line of ideas: view matrix multiply as a tensor and look for low-rank decompositions. The recent twist is to allow more asymmetry between the three dimensions (don't force two to behave identically); similar tricks help with rectangular cases, too. But these bounds are galactic algorithms, meaning the constants (for big O) are huge, so real code sticks to near-cubic methods with blocking, cache-friendly layouts, vectorization, and parallelism. Strassen's method ($O(N^{\log_2 7})\!\approx O(N^{2.8074})$) sometimes shows up for very large $N$, but most production matrix multiplication is effectively $O(N^3)$, so you should stick with $O(N^3)$ as a rule of thumb.
+
+
+\paragraph*{Optimizing Computations in Complex Expressions}
+When working with expressions involving multiple matrix and vector operations, the order in which you perform these operations can greatly affect the computational cost. By strategically choosing the sequence of calculations, you can minimize the number of required operations and optimize performance.
+
+Matrix multiplication is associative but generally not commutative; matrix addition is both associative and commutative. The dot product is commutative, and scalars commute with everything. Some structured matrices (e.g., diagonal) commute with each other, but in general do \emph{not} assume $ \mathbf{A}\mathbf{B}=\mathbf{B}\mathbf{A} $. These properties allow some flexibility in how calculations are grouped and ordered.
+
+\textbf{Matrix-Vector Multiplication in Computation Chains}\quad As noted previously, the computational complexity of matrix-vector multiplication is ``quadratic'' while the complexity of matrix-matrix multiplication is ``cubic.'' Therefore, when given a chain of matrix-matrix multiplications that has at least one matrix-vector multiplication, it is often more efficient to perform the operations in a way that minimizes the number of matrix-matrix multiplications and maximizes the number of matrix-vector multiplications. 
+
+It is easiest to see this by example. Consider the expression:
 \begin{equation*}
-    \mathbf{u}\cdot\mathbf{v} = \mathbf{u}^\top \mathbf{v} = \sum_{i=1}^n u_i v_i
+    \mathbf{y} = \mathbf{A}\mathbf{B}\mathbf{C}\mathbf{x}
 \end{equation*}
-It measures the projection of one vector onto another, which we can geometrically interpret as the product of the magnitudes of the vectors and the cosine of the angle between them (\autoref{fig:dot-product}).
+where $\mathbf{A} \in \mathbb{R}^{3\times 3}$, $\mathbf{B} \in \mathbb{R}^{3\times 3}$, $\mathbf{C} \in \mathbb{R}^{3\times 3}$, and $\mathbf{x} \in \mathbb{R}^3$. To compute $\mathbf{y}$, we can perform the operations in a few different ways by using the associativity property of matrix multiplication. The first way we consider is to rewrite the expression as
+\begin{equation*}
+    \mathbf{y} = \mathbf{A}\mathbf{B}(\mathbf{C}\mathbf{x}) = \mathbf{A}(\mathbf{B}\mathbf{d}) = \mathbf{A}\mathbf{e}
+\end{equation*}
+where we compute $\mathbf{d} = \mathbf{C}\mathbf{x}$ first, then $\mathbf{e} = \mathbf{B}\mathbf{d}$, and finally $\mathbf{y} = \mathbf{A}\mathbf{e}$. Importantly, this sequence of operations requires only matrix-vector multiplications (three in total) and no matrix-matrix multiplications. We can compare this to a second way of computing $\mathbf{y}$:
+\begin{equation*}
+    \mathbf{y} = (\mathbf{A}\mathbf{B})\mathbf{C}\mathbf{x} = (\mathbf{DC})\mathbf{x} = \mathbf{F}\mathbf{x}
+\end{equation*}
+This requires two matrix-matrix multiplications and one matrix-vector multiplication. Therefore, the first way is more efficient than the second way (concretely, 45 operations vs.\ 105 operations---check this yourself!).
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.35\textwidth]{figs/linear-algebra/dot-product.pdf}
-    \caption{Geometric interpretation of the dot product.}
-    \label{fig:dot-product}
-\end{figure}
+\begin{warningBox} 
+    \textbf{Warning:} The advice to always perform matrix-vector products first is an excellent rule of thumb, but it is not a universal law. The true underlying principle is to \textbf{avoid creating large intermediate products}, whether they are matrices or vectors. In cases involving non-square matrices, this can lead to surprising results. Consider the expression $\mathbf{y} = \mathbf{A}\mathbf{B}\mathbf{x}$ where the dimensions are not square:
+    \begin{itemize} 
+        \item $\mathbf{A} \in \mathbb{R}^{1 \times 1000}$ 
+        \item $\mathbf{B} \in \mathbb{R}^{1000 \times 100}$ 
+        \item $\mathbf{x} \in \mathbb{R}^{100}$ 
+    \end{itemize} 
+    Let's compare the two ways of computing the result based on the number of multiplications: 
+    \begin{enumerate} 
+        \item \textbf{Matrix-Vector First: $\mathbf{y} = \mathbf{A}(\mathbf{B}\mathbf{x})$} 
+        We first compute $\mathbf{d} = \mathbf{B}\mathbf{x}$. This requires $1000 \times 100 = 100,000$ multiplications and creates a large intermediate vector $\mathbf{d} \in \mathbb{R}^{1000}$. Then, computing $\mathbf{y} = \mathbf{A}\mathbf{d}$ requires $1 \times 1000 = 1,000$ multiplications. Total Cost: $100,000 + 1,000 = 101,000$ multiplications. 
+        \item \textbf{Matrix-Matrix First: $\mathbf{y} = (\mathbf{A}\mathbf{B})\mathbf{x}$} We first compute $\mathbf{C} = \mathbf{A}\mathbf{B}$. This requires $1 \times 1000 \times 100 = 100,000$ multiplications and creates a small intermediate row vector $\mathbf{C} \in \mathbb{R}^{1 \times 100}$. Then, computing $\mathbf{y} = \mathbf{C}\mathbf{x}$ requires $1 \times 100 = 100$ multiplications. Total Cost: $100,000 + 100 = 100,100$ multiplications. 
+    \end{enumerate} 
+    In this case, performing the matrix-matrix multiplication first is slightly more efficient in terms of number of floating point operations required (the amount of additions is the same in either case: 99,999). It avoids creating the huge intermediate vector ($\mathbf{d} \in \mathbb{R}^{1000}$) and instead creates a much smaller intermediate vector ($\mathbf{C} \in \mathbb{R}^{1 \times 100}$). So we can indeed see that the optimal order depends entirely on the dimensions of all matrices in the chain. Actually, finding this optimal order is a classic computer science problem known as the matrix chain ordering problem (you can read its \href{https://en.wikipedia.org/wiki/Matrix_chain_multiplication}{Wikipedia page} if you're curious!).
+\end{warningBox}
 
-The dot product satisfies the following properties:
-\begin{itemize}
-    \item $ \mathbf{u} \cdot \mathbf{v} = \mathbf{v} \cdot \mathbf{u} $ (commutativity)
-    \item $ \mathbf{u} \cdot (\mathbf{v} + \mathbf{w}) = \mathbf{u} \cdot \mathbf{v} + \mathbf{u} \cdot \mathbf{w} $ (distributivity)
-    \item $ (\alpha \mathbf{u}) \cdot \mathbf{v} = \alpha (\mathbf{u} \cdot \mathbf{v}) $ (homogeneity)
-    \item $ \mathbf{u} \cdot \mathbf{u} \geq 0 $ and $ \mathbf{u} \cdot \mathbf{u} = 0 $ if and only if $ \mathbf{u} = \mathbf{0} $ (positive definiteness)
-\end{itemize}
+\textbf{Diagonal Matrices}\quad Suppose $ \mathbf{D} \in \mathbb{R}^{N \times N} $ is a diagonal matrix and $\mathbf{x}\in \mathbb{R}^N$, and you need to compute $ \mathbf{y} = \mathbf{D}\mathbf{x} $. Using standard matrix multiplication, this operation would be $ O(N^2) $. But since only the diagonal elements $ D_{ii} $ are non-zero, we only need to perform $ N $ multiplications (one multiplication per diagonal element) and zero additions, meaning the computational complexity can be reduced to $ O(N) $.
+
+\textbf{Sparse Matrices}\quad Sparse matrices (which are \textit{very} common in scientific applications!) are matrices for which most elements are zero. They are stored in a way that only the non-zero elements are explicitly represented (in MATLAB, this is never automatically done for you---you must use the \verb|sparse| function yourself to convert from dense to sparse format). Commonly, we must multiply a sparse matrix with a dense vector, which means that the result is the dot product of each sparse row of the matrix with the dense vector. This requires significantly fewer operations than a full matrix-vector multiplication (since we do not need to actually multiply anything with zero).
+
+\textbf{Symmetric Matrices}\quad
+Symmetric matrices are matrices that are equal to their own transpose: $ \mathbf{A} = \mathbf{A}^\top $. For a symmetric matrix $ \mathbf{A} \in \mathbb{R}^{N\times N} $, a natural question to ask is: can we halve the work in $\mathbf{y}=\mathbf{A}\mathbf{x}$ by only touching one triangle?  You \emph{can} store just one triangle (saving about half the memory), but you \emph{cannot} cut the arithmetic in half. To see why, write out the updates if you traverse only the upper triangle, and you'll find that the number of operations needed still comes out to $O(N^2)$. Where symmetry really shines is in factorizations/solves.
+
+
+\subsection{Vector and Matrix Norms}
 
 \subsubsection{Norms of Vectors}
 A \textbf{norm} is a function that assigns a non-negative length or size to vectors. The most common norms are:
@@ -391,9 +494,6 @@ We note that the 1-norm, 2-norm, and infinity norm are special cases of the p-no
         \|\mathbf{v}\|_\infty &= \max\{ |3|, |-4| \} = 4.
     \end{align*}
 \end{exampleBox}
-
-\subsubsection{Orthogonality}
-Vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ are \textbf{orthogonal} if $ \mathbf{u}^\top \mathbf{v} = 0 $. A set of vectors is \textbf{orthonormal} if vectors are mutually orthogonal and each has unit norm. A square matrix $ \mathbf{Q} $ is \textbf{orthogonal} if $ \mathbf{Q}^\top \mathbf{Q} = \mathbf{Q}\mathbf{Q}^\top = \mathbf{I} $, which implies $ \mathbf{Q}^{-1} = \mathbf{Q}^\top $ and that $ \|\mathbf{Q}\mathbf{x}\|_2 = \|\mathbf{x}\|_2 $ for all $ \mathbf{x} $.
 
 \subsubsection{Norms of Matrices}
 Matrix norms extend the concept of vector norms to matrices, providing a measure of the ``size'' or ``magnitude'' of a matrix. Just as vector norms quantify the length of vectors, matrix norms help assess various properties of matrices, such as their behavior under linear transformations, stability in numerical computations, and convergence in iterative methods.
@@ -449,6 +549,139 @@ For any matrix $ \mathbf{A} $ of size $ m \times n $ and rank $ r $, the followi
     \|\mathbf{A}\|_2 &\leq \|\mathbf{A}\|_F \leq \sqrt{r}\,\|\mathbf{A}\|_2, \\
     \|\mathbf{A}\|_2 &\leq \sqrt{\|\mathbf{A}\|_1 \, \|\mathbf{A}\|_\infty}.
 \end{align*}
+
+\subsection{Numerical Solution of Linear Systems}
+Linear systems arise in many scientific and engineering applications (even in seemingly nonlinear cases, we can Taylor expand to a locally linear system), so we should develop tools to numerically solve them. The general form of a linear system is
+\begin{equation}
+    \mathbf{A}\mathbf{x} = \mathbf{b}
+    \label{eq:linear-system}
+\end{equation}
+where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for a given $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
+
+
+\subsubsection{Condition Number}
+Before looking at specific direct and iterative methods, we introduce the notion of the \textbf{condition number} of a matrix $\mathbf{A}$, denoted $\kappa(\mathbf{A})$, which helps us understand the sensitivity of a linear system to perturbations and numerical errors. We hope that for our linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, small perturbations in $\mathbf{b}$ will lead to small changes in $\mathbf{x}$. Such a system is said to be well-conditioned. However, if small perturbations in $\mathbf{b}$ lead to large changes in $\mathbf{x}$, the system is said to be ill-conditioned. The meaning of ``small'' and ``large'' changes depending on the context (e.g., it could be relative or absolute). The condition number quantifies this sensitivity.
+
+To define the condition number, we consider a linear system $ \mathbf{A}\mathbf{x} = \mathbf{b} $ with an exact solution $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $. If we add a small perturbation (error) $\delta\mathbf{b}$ to $\mathbf{b}$, then the solution vector $\mathbf{x}$ will also change by some amount $\delta\mathbf{x}$ (which we think of as the error in $\mathbf{x}$ since the original perturbation is assumed to represent an error) so that the linear system remains satisfied:
+\begin{equation*}
+    \mathbf{A}\left(\mathbf{x} + \delta\mathbf{x}\right) = \mathbf{b} + \delta\mathbf{b}
+    \implies 
+    \delta\mathbf{x} = \mathbf{A}^{-1}\delta\mathbf{b}
+\end{equation*}
+Taking the $p$-norm of both sides, we have
+\begin{equation*}
+    \|\delta\mathbf{x}\|_p = \|\mathbf{A}^{-1}\delta\mathbf{b}\|_p \leq \|\mathbf{A}^{-1}\|_p \|\delta\mathbf{b}\|_p
+\end{equation*}
+where the inequality follows from the submultiplicative property of matrix norms. We also have $\|\mathbf{b}\|_p = \|\mathbf{A}\mathbf{x}\|_p \le \|\mathbf{A}\|_p \, \|\mathbf{x}\|_p$, hence $\|\mathbf{x}\|_p \ge \|\mathbf{b}\|_p/\|\mathbf{A}\|_p$. Dividing the two inequalities, we arrive at an expression for the relative error in the solution:
+\begin{equation*}
+    \frac{\|\delta\mathbf{x}\|_p}{\|\mathbf{x}\|_p} \leq \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \frac{\|\delta\mathbf{b}\|_p}{\|\mathbf{b}\|_p}
+\end{equation*}
+This motivates the definition of the condition number of $\mathbf{A}$ as
+\begin{equation*}
+    \kappa_p(\mathbf{A}) = \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p
+\end{equation*}
+where we add a subscript $p$ on $\kappa$ to denote the norm used and to emphasize that its value depends on the choice of norm (but the qualitative behavior is the same across norms). If $\mathbf{A}$ is singular, $\kappa_p(\mathbf{A}) = \infty$. We note that clearly $\kappa_p(\mathbf{A}) \geq 1$ since $\|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \geq \|\mathbf{A} \mathbf{A}^{-1}\|_p = \|\mathbf{I}\|_p = 1$. Moreover, a matrix with a large condition number (an ``ill-conditioned'' matrix) indicates that the linear system is more sensitive to perturbations and numerical errors, while a matrix with a small condition number (a ``well-conditioned'' matrix) indicates greater numerical robustness. As a practical rule of thumb for backward-stable solvers (e.g., Gaussian elimination with partial pivoting), the number of correct digits $\approx$ (working-precision digits) $-\log_{10}\kappa(\mathbf{A})$, and the relative forward error is typically $O(\kappa(\mathbf{A})\,\varepsilon_{\mathrm{mach}})$. A small residual $\|\mathbf{r}\| = \|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|$ does not guarantee a small error when $\kappa(\mathbf{A})$ is large; roughly,
+\[ \frac{\|\hat{\mathbf{x}}-\mathbf{x}\|}{\|\mathbf{x}\|} \lesssim \kappa(\mathbf{A})\,\frac{\|\mathbf{r}\|}{\|\mathbf{b}\|}. \]
+
+Let's take a look at the condition number for the 2-norm specifically. Here, the condition number is
+\begin{equation*}
+    \kappa_2(\mathbf{A}) = \|\mathbf{A}\|_2 \|\mathbf{A}^{-1}\|_2 = \frac{\sigma_{\text{max}}(\mathbf{A})}{\sigma_{\text{min}}(\mathbf{A})}
+\end{equation*}
+where $\sigma_{\text{max}}(\mathbf{A})$ and $\sigma_{\text{min}}(\mathbf{A})$ are the largest and smallest singular values of $\mathbf{A}$, respectively. For $\mathbf{A} \succ 0$,\footnote{If $\mathbf{A}$ is normal ($\mathbf{A}\mathbf{A}^* = \mathbf{A}^*\mathbf{A}$) over $\mathbb{C}$, then $\sigma_i(\mathbf{A}) = |\lambda_i(\mathbf{A})|$ and $\kappa_2(\mathbf{A}) = \max_i |\lambda_i(\mathbf{A})|/\min_i |\lambda_i(\mathbf{A})|$.} this is equivalent to
+\begin{equation*}
+    \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})}
+\end{equation*}
+where $\lambda_{\text{max}}(\mathbf{A})$ and $\lambda_{\text{min}}(\mathbf{A})$ are the largest and smallest eigenvalues of $\mathbf{A}$, respectively.
+
+\textbf{Preconditioning}\quad When solving linear systems numerically, we often encounter ill-conditioned matrices. One way to mitigate the effects of ill-conditioning is through \textbf{preconditioning}. Preconditioning transforms $ \mathbf{A}\mathbf{x} = \mathbf{b} $ into a system with more favorable spectral properties. Common forms are left $(\mathbf{P}^{-1}\mathbf{A})\mathbf{x} = \mathbf{P}^{-1}\mathbf{b}$, right $\ \mathbf{A}(\mathbf{P}^{-1}\mathbf{y}) = \mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1}\mathbf{y}$, and symmetric $\ \mathbf{P}^{-1/2}\mathbf{A}\mathbf{P}^{-1/2}\mathbf{z} = \mathbf{P}^{-1/2}\mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1/2}\mathbf{z}$. Examples include Jacobi (diagonal), incomplete LU/Cholesky (ILU/IC), and algebraic multigrid (AMG). The goal is to cluster eigenvalues and reduce the effective condition number to accelerate and stabilize iterative methods.
+
+Even simpler than preconditioning is \textbf{scaling} (often called equilibration), which rescales rows and/or columns to reduce element-wise dynamic range and improve pivoting. A common heuristic is to equalize row/column $\infty$-norms. This helps numerics and pivoting but does not magically fix ill-conditioning rooted in the model; think nondimensionalization and consistent units (ChemE context: Pa vs bar, mol vs kmol).
+
+\begin{exampleBox}
+    \textbf{Example:} Consider the matrix
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix}
+        10^{14} & 0 \\
+        0 & 10^{-9}
+        \end{bmatrix}
+    \end{equation*}
+    The condition number of this matrix with respect to the 2-norm is
+    \begin{equation*}
+        \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})} = \frac{10^{14}}{10^{-9}} = 10^{23}
+    \end{equation*}
+    which means that $\mathbf{A}$ is severely ill-conditioned. Such a high condition number implies that even tiny perturbations in $\mathbf{b}$ can lead to enormous errors in the computed solution $\mathbf{x}$.
+
+    To mitigate this issue, we can apply scaling by rescaling the rows of $\mathbf{A}$ to reduce the condition number. Specifically, we divide each row by the maximum absolute value in that row. For matrix $\mathbf{A}$, the scaling factors for the rows are $10^{14}$ and $10^{-9}$, respectively. We define a diagonal scaling matrix $\mathbf{D}$ as
+    \begin{equation*}
+    \mathbf{D} = \begin{bmatrix}
+    10^{-14} & 0 \\
+    0 & 10^{9}
+    \end{bmatrix}
+    \end{equation*}
+    Applying the scaling, we obtain the scaled matrix $\mathbf{A}_{\text{scaled}}$:
+    \begin{equation*}
+    \mathbf{A}_{\text{scaled}} = \mathbf{D} \mathbf{A} = \begin{bmatrix}
+    10^{-14} & 0 \\
+    0 & 10^{9}
+    \end{bmatrix} \begin{bmatrix}
+    10^{14} & 0 \\
+    0 & 10^{-9}
+    \end{bmatrix} = \begin{bmatrix}
+    1 & 0 \\
+    0 & 1
+    \end{bmatrix}
+    \end{equation*}
+    The left-scaling forms the equivalent system $\mathbf{D}\mathbf{A}\mathbf{x} = \mathbf{D}\mathbf{b}$ (same solution $\mathbf{x}$). Here, because $\mathbf{A}$ is diagonal, $\mathbf{D}\mathbf{A} = \mathbf{I}$. In general, equilibration reduces dynamic range and can reduce $\kappa$, but need not drive it to 1.
+
+    The condition number of the scaled matrix is now
+    \begin{equation*}
+        \kappa_2(\mathbf{A}_{\text{scaled}}) = \frac{\lambda_{\text{max}}(\mathbf{A}_{\text{scaled}})}{\lambda_{\text{min}}(\mathbf{A}_{\text{scaled}})} = \frac{1}{1} = 1
+    \end{equation*}
+    which means that $\mathbf{A}_{\text{scaled}}$ is perfectly conditioned. This dramatic reduction shows how scaling can improve numerical behavior in favorable cases (in this case, $\mathbf{A}$ is diagonal, so $\mathbf{D} = \mathbf{A}^{-1}$ is an exact preconditioner, hence the perfect condition number). In general, scaling is often helpful for stability and pivoting, but it does not eliminate all ill-conditioning.
+\end{exampleBox}
+
+\begin{warningBox}
+    \textbf{Warning:} Preconditioning/scaling improves the matrix the algorithm sees (e.g., reduces $\kappa(P^{-1}A)$), which speeds and stabilizes iterations, but it \emph{doesn't change the intrinsic sensitivity} of the original mapping $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$ to perturbations in $b$. So it helps the solver's numerics, not the problem's conditioning.
+\end{warningBox}
+
+
+
+\subsection{Invertibility and Determinants}
+\subsubsection{Determinant}
+For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation. This is why a matrix is \textbf{invertible if and only if its determinant is non-zero}.
+
+The determinant has several important properties, including $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $, the multiplicative property $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $, and the fact that for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $.
+
+For a $2\times 2$ matrix, the formula is
+\begin{equation*}
+    \det\!\left(\begin{bmatrix} a & b \\ c & d \end{bmatrix}\right) = ad - bc
+\end{equation*}
+For a $3\times 3$ matrix, one common method is cofactor expansion along the first row:
+\begin{align*}
+    \det\!\left(\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}\right) &= a \det\!\left(\begin{bmatrix} e & f \\ h & i \end{bmatrix}\right) - b \det\!\left(\begin{bmatrix} d & f \\ g & i \end{bmatrix}\right) + c \det\!\left(\begin{bmatrix} d & e \\ g & h \end{bmatrix}\right) \\ &= a(ei - fh) - b(di - fg) + c(dh - eg)
+\end{align*}
+The determinant of a general $n \times n$ matrix can be defined recursively via Laplace expansion, which expresses it as a signed sum of the entries of any chosen row or column times the determinants of their $(n-1) \times (n-1)$ minors. This recursion reduces ultimately to the $2 \times 2$ case. However, in practice, Laplace expansion is only used for small matrices; large determinants are almost always computed using Gaussian elimination or LU decomposition instead.
+
+
+\subsubsection{Inverse of a Matrix}
+Conceptually, the inverse of a matrix, denoted $ \mathbf{A}^{-1} $, is an operator that reverses the linear transformation performed by the original matrix $ \mathbf{A} $. If $ \mathbf{A} $ transforms a vector $ \mathbf{x} $ into $ \mathbf{y} $ (i.e., $ \mathbf{y} = \mathbf{A}\mathbf{x} $), then its inverse $ \mathbf{A}^{-1} $ transforms $ \mathbf{y} $ back to the original vector $ \mathbf{x} $ (i.e., $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{y} $).
+
+Formally, a square matrix $ \mathbf{A} $ is \textbf{invertible} (or \textbf{non-singular}) if there exists a matrix $ \mathbf{A}^{-1} $ such that:
+\begin{equation*}
+    \mathbf{A}\mathbf{A}^{-1} = \mathbf{A}^{-1}\mathbf{A} = \mathbf{I}
+\end{equation*}
+where $ \mathbf{I} $ is the identity matrix. This property is analogous to a number and its reciprocal (e.g., $ 5 \cdot 5^{-1} = 1 $).
+
+A matrix is invertible if and only if its determinant is non-zero ($ \det(\mathbf{A}) \neq 0 $). If the determinant is zero, the matrix is singular, meaning its transformation is irreversible because it collapses the space into a lower dimension (e.g., mapping a 2D plane onto a line), and the original vector cannot be uniquely recovered.
+
+This ``undoing'' capability is fundamental for solving systems of linear equations. A system represented as $ \mathbf{A}\mathbf{x} = \mathbf{b} $ can be solved for the unknown vector $ \mathbf{x} $ by applying the inverse: $ \mathbf{A}^{-1}\mathbf{A}\mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $, which simplifies to $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $.
+
+Important properties of inverses include $(\mathbf{A}\mathbf{B})^{-1} = \mathbf{B}^{-1}\mathbf{A}^{-1}$ (note the reversed order) and $(\mathbf{A}^\top)^{-1} = (\mathbf{A}^{-1})^\top$. For a $2\times 2$ matrix, the inverse can be calculated directly:
+\begin{equation*}
+    \text{If } \mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \text{ then } \mathbf{A}^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}, \quad \text{provided } ad-bc \neq 0
+\end{equation*}
+While the $2 \times 2$ formula is simple, computing the inverse for a general $n \times n$ matrix is a numerically intensive task. In practice, one typically avoids computing the inverse explicitly. For problems like solving $\mathbf{A}\mathbf{x} = \mathbf{b}$, it is both more efficient and more numerically stable to solve the system directly using matrix factorization or other methods instead, which we will discuss in more detail later.
+
 
 
 \subsection{Eigenvalues and Eigenvectors}
@@ -531,116 +764,70 @@ This decomposition reveals the fundamental behavior of $\mathbf{A}$ as a simple 
 \end{theoremBox}
 
 
-\subsection{Computational Complexity of Matrix and Vector Operations}
-\label{sec:complexity-of-matrix-and-vector-operations}
-We must understand the computational costs of basic matrix and vector operations in order to develop efficient numerical algorithms. Let's explore three fundamental operations---dot product, matrix-vector multiplication, and matrix-matrix multiplication---and analyze their computational complexities by counting the number of required multiplications and additions.
 
-\textbf{Dot Product}\quad For two vectors $ \mathbf{x}, \mathbf{y} \in \mathbb{R}^N $, the dot product $ \mathbf{y}^\top \mathbf{x} $ is calculated by multiplying corresponding elements and summing the results:
+\subsection{Existence and Uniqueness of Solutions}
+
+\subsubsection{Vector Spaces and Subspaces}
+\paragraph{Linear Combinations and Span} % SS: probably we should explain this later, after introducing the vector space.
+A \textbf{linear combination} of vectors $ \mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k $ is an expression of the form:
 \begin{equation*}
-    \mathbf{y}^\top \mathbf{x} = \sum_{i=1}^{N} y_i x_i
+    \mathbf{w} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k
 \end{equation*}
-This operation involves $ N $ multiplications (one for each pair $ y_i x_i $) and $ N - 1 $ additions (to sum the $ N $ products). The computational complexity is therefore $ O(N + N - 1) = O(N) $.
-
-\textbf{Matrix-Vector Multiplication}\quad Given a matrix $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and a vector $ \mathbf{x} \in \mathbb{R}^N $, the product $ \mathbf{A}\mathbf{x} $ results in a vector $ \mathbf{b} \in \mathbb{R}^M $:
+where $ c_1, c_2, \ldots, c_k $ are scalars. The set of all possible linear combinations of $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ is called their \textbf{span}:
 \begin{equation*}
-    b_i = \sum_{j=1}^{N} A_{ij} x_j, \quad \text{for } i = 1, 2, \dots, M
+    \text{span}\{\mathbf{v}_1, \ldots, \mathbf{v}_k\} = \left\{ \sum_{i=1}^k c_i \mathbf{v}_i \mid c_i \in \mathbb{R} \text{ or } \mathbb{C} \right\}
 \end{equation*}
-For each of the $ M $ rows, there are $ N $ multiplications (each element $ A_{ij} $ is multiplied by $ x_j $) and $ N - 1 $ additions (to sum the products for each $ b_i $). Therefore, the total number of operations is $ O(MN + M(N - 1)) = O(MN) $.
-
-\textbf{Matrix-Matrix Multiplication}\quad When multiplying two matrices $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and $ \mathbf{B} \in \mathbb{R}^{N \times P} $, the resulting matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ has dimensions $ M \times P $:
-\begin{equation*}
-    C_{ik} = \sum_{j=1}^{N} A_{ij} B_{jk}, \quad \text{for } i = 1, 2, \dots, M \text{ and } k = 1, 2, \dots, P
-\end{equation*}
-For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are $ N $ multiplications (each $ A_{ij} $ multiplied by $ B_{jk} $) and $ N - 1 $ additions (to sum the products for each $ C_{ik} $). So we get $MNP$ multiplications and $MP(N-1)$ additions and hence an overall complexity of $O(MNP)$.
-
 
 \begin{exampleBox}
-    \textbf{Example}: To make these concepts more tangible, let's consider multiplying two small matrices:
-    \begin{equation*}
-        \mathbf{A} = \begin{bmatrix}
-        a_{11} & a_{12} & a_{13} \\
-        a_{21} & a_{22} & a_{23} \\
-        a_{31} & a_{32} & a_{33}
-        \end{bmatrix}, \quad
-        \mathbf{B} = \begin{bmatrix}
-        b_{11} & b_{12} & b_{13} \\
-        b_{21} & b_{22} & b_{23} \\
-        b_{31} & b_{32} & b_{33}
-        \end{bmatrix}, \quad
-        \mathbf{C} = \mathbf{A}\mathbf{B}
-    \end{equation*}
-    The resulting matrix $ \mathbf{C} \in \mathbb{R}^{3\times 3} $ will have elements:
-    \begin{align*}
-        c_{11} & = a_{11}b_{11} + a_{12}b_{21} + a_{13}b_{31} \\
-        c_{12} & = a_{11}b_{12} + a_{12}b_{22} + a_{13}b_{32} \\
-        c_{13} & = a_{11}b_{13} + a_{12}b_{23} + a_{13}b_{33} \\
-        \vdots &
-    \end{align*}
-    We see that each element of $ \mathbf{C} $ requires 3 multiplications and 2 additions. And since $ \mathbf{C} $ has 9 elements, the total number of operations is $ 9 \cdot (3 + 2) = 45 $. 
-    
-    But wait, isn't the complexity of matrix-matrix multiplication $ O(MNP) $? And in this case $M = N = P = 3$, so shouldn't we have $3^3 = 27$ operations? No! That is not how big-O notation works. Big-O notation is NOT a precise count of operations but rather an upper bound on the growth rate of the number of operations as the size of the matrices grows.
+    \textbf{Example}: Consider vectors $ \mathbf{v}_1 = \begin{bmatrix}1 \\ 0\end{bmatrix} $ and $ \mathbf{v}_2 = \begin{bmatrix}0 \\ 1\end{bmatrix} $ in $ \mathbb{R}^2 $. Their span is the entire $ \mathbb{R}^2 $ plane since any vector $ \mathbf{w} = \begin{bmatrix}w_1 \\ w_2\end{bmatrix} $ can be written as $ w_1 \mathbf{v}_1 + w_2 \mathbf{v}_2 $
 \end{exampleBox}
 
-It is worth mentioning (this is not necessary to know for 10.34) that, in reality, the computational complexity of matrix-matrix multiplication is not exactly cubic. A lot of research has been done to optimize matrix-matrix multiplication due to its extreme importance in the field of optimization and machine learning. For square $N\times N$ matrices, the fastest known algorithms run in $O(N^{\omega})$ time, where, as of 2024, the record is $\omega < 2.371339$ (this upper bound is from \href{https://arxiv.org/abs/2404.16349}{this paper}). Very roughly, these bounds come from the Coppersmith-Winograd line of ideas: view matrix multiply as a tensor and look for low-rank decompositions. The recent twist is to allow more asymmetry between the three dimensions (don't force two to behave identically); similar tricks help with rectangular cases, too. But these bounds are galactic algorithms, meaning the constants (for big O) are huge, so real code sticks to near-cubic methods with blocking, cache-friendly layouts, vectorization, and parallelism. Strassen's method ($O(N^{\log_2 7})\!\approx O(N^{2.8074})$) sometimes shows up for very large $N$, but most production matrix multiplication is effectively $O(N^3)$, so you should stick with $O(N^3)$ as a rule of thumb.
-
-
-\subsection{Optimizing Computations in Complex Expressions}
-When working with expressions involving multiple matrix and vector operations, the order in which you perform these operations can greatly affect the computational cost. By strategically choosing the sequence of calculations, you can minimize the number of required operations and optimize performance.
-
-Matrix multiplication is associative but generally not commutative; matrix addition is both associative and commutative. The dot product is commutative, and scalars commute with everything. Some structured matrices (e.g., diagonal) commute with each other, but in general do \emph{not} assume $ \mathbf{A}\mathbf{B}=\mathbf{B}\mathbf{A} $. These properties allow some flexibility in how calculations are grouped and ordered.
-
-\textbf{Matrix-Vector Multiplication in Computation Chains}\quad As noted previously, the computational complexity of matrix-vector multiplication is ``quadratic'' while the complexity of matrix-matrix multiplication is ``cubic.'' Therefore, when given a chain of matrix-matrix multiplications that has at least one matrix-vector multiplication, it is often more efficient to perform the operations in a way that minimizes the number of matrix-matrix multiplications and maximizes the number of matrix-vector multiplications. 
-
-It is easiest to see this by example. Consider the expression:
+\paragraph{Linear Independence and Basis}
+Vectors $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ are \textbf{linearly independent} if the only solution to
 \begin{equation*}
-    \mathbf{y} = \mathbf{A}\mathbf{B}\mathbf{C}\mathbf{x}
+    c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k = \mathbf{0}
 \end{equation*}
-where $\mathbf{A} \in \mathbb{R}^{3\times 3}$, $\mathbf{B} \in \mathbb{R}^{3\times 3}$, $\mathbf{C} \in \mathbb{R}^{3\times 3}$, and $\mathbf{x} \in \mathbb{R}^3$. To compute $\mathbf{y}$, we can perform the operations in a few different ways by using the associativity property of matrix multiplication. The first way we consider is to rewrite the expression as
+is $ c_1 = c_2 = \ldots = c_k = 0 $.
+
+A set of vectors that is linearly independent and spans the vector space is called a \textbf{basis}. The number of vectors in a basis equals the \textbf{dimension} of the space.
+
+% \subsubsection{The Zero Vector}
+% The \textbf{zero vector} $ \mathbf{0} $ in $ \mathbb{R}^n $ is:
+% \begin{equation*}
+%     \mathbf{0} = \begin{bmatrix}0 \\ 0 \\ \vdots \\ 0\end{bmatrix}
+% \end{equation*}
+% It acts as the additive identity: $ \mathbf{v} + \mathbf{0} = \mathbf{v} $.
+
+\paragraph{The Unit Vectors}
+The \textbf{unit vectors} in $ \mathbb{R}^n $ are:
 \begin{equation*}
-    \mathbf{y} = \mathbf{A}\mathbf{B}(\mathbf{C}\mathbf{x}) = \mathbf{A}(\mathbf{B}\mathbf{d}) = \mathbf{A}\mathbf{e}
+    \mathbf{e}_i = \begin{bmatrix}0 \\ \vdots \\ 1 \\ \vdots \\ 0\end{bmatrix}, \quad \text{where } (\mathbf{e}_{i})_j = \begin{cases} 1 & \text{if } i = j \\ 0 & \text{otherwise} \end{cases}
 \end{equation*}
-where we compute $\mathbf{d} = \mathbf{C}\mathbf{x}$ first, then $\mathbf{e} = \mathbf{B}\mathbf{d}$, and finally $\mathbf{y} = \mathbf{A}\mathbf{e}$. Importantly, this sequence of operations requires only matrix-vector multiplications (three in total) and no matrix-matrix multiplications. We can compare this to a second way of computing $\mathbf{y}$:
-\begin{equation*}
-    \mathbf{y} = (\mathbf{A}\mathbf{B})\mathbf{C}\mathbf{x} = (\mathbf{DC})\mathbf{x} = \mathbf{F}\mathbf{x}
-\end{equation*}
-This requires two matrix-matrix multiplications and one matrix-vector multiplication. Therefore, the first way is more efficient than the second way (concretely, 45 operations vs.\ 105 operations---check this yourself!).
+The unit vectors form a basis for $ \mathbb{R}^n $, meaning any vector $ \mathbf{v} $ can be written as a linear combination of the unit vectors.
+\begin{exampleBox}
+    \textbf{Example}: In $ \mathbb{R}^3 $, the unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
+\end{exampleBox}
 
-\begin{warningBox} 
-    \textbf{Warning:} The advice to always perform matrix-vector products first is an excellent rule of thumb, but it is not a universal law. The true underlying principle is to \textbf{avoid creating large intermediate products}, whether they are matrices or vectors. In cases involving non-square matrices, this can lead to surprising results. Consider the expression $\mathbf{y} = \mathbf{A}\mathbf{B}\mathbf{x}$ where the dimensions are not square:
-    \begin{itemize} 
-        \item $\mathbf{A} \in \mathbb{R}^{1 \times 1000}$ 
-        \item $\mathbf{B} \in \mathbb{R}^{1000 \times 100}$ 
-        \item $\mathbf{x} \in \mathbb{R}^{100}$ 
-    \end{itemize} 
-    Let's compare the two ways of computing the result based on the number of multiplications: 
-    \begin{enumerate} 
-        \item \textbf{Matrix-Vector First: $\mathbf{y} = \mathbf{A}(\mathbf{B}\mathbf{x})$} 
-        We first compute $\mathbf{d} = \mathbf{B}\mathbf{x}$. This requires $1000 \times 100 = 100,000$ multiplications and creates a large intermediate vector $\mathbf{d} \in \mathbb{R}^{1000}$. Then, computing $\mathbf{y} = \mathbf{A}\mathbf{d}$ requires $1 \times 1000 = 1,000$ multiplications. Total Cost: $100,000 + 1,000 = 101,000$ multiplications. 
-        \item \textbf{Matrix-Matrix First: $\mathbf{y} = (\mathbf{A}\mathbf{B})\mathbf{x}$} We first compute $\mathbf{C} = \mathbf{A}\mathbf{B}$. This requires $1 \times 1000 \times 100 = 100,000$ multiplications and creates a small intermediate row vector $\mathbf{C} \in \mathbb{R}^{1 \times 100}$. Then, computing $\mathbf{y} = \mathbf{C}\mathbf{x}$ requires $1 \times 100 = 100$ multiplications. Total Cost: $100,000 + 100 = 100,100$ multiplications. 
-    \end{enumerate} 
-    In this case, performing the matrix-matrix multiplication first is slightly more efficient in terms of number of floating point operations required (the amount of additions is the same in either case: 99,999). It avoids creating the huge intermediate vector ($\mathbf{d} \in \mathbb{R}^{1000}$) and instead creates a much smaller intermediate vector ($\mathbf{C} \in \mathbb{R}^{1 \times 100}$). So we can indeed see that the optimal order depends entirely on the dimensions of all matrices in the chain. Actually, finding this optimal order is a classic computer science problem known as the matrix chain ordering problem (you can read its \href{https://en.wikipedia.org/wiki/Matrix_chain_multiplication}{Wikipedia page} if you're curious!).
-\end{warningBox}
+\paragraph{Properties of Vector Spaces}\label{sec:vector-space}
+For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c, d \in \mathbb{R} $, the following hold:
+\begin{enumerate}
+    \item $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $ (commutativity)
+    \item $ (\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w}) $ (associativity)
+    \item $ \mathbf{v} + \mathbf{0} = \mathbf{v} $ (additive identity)
+    \item $ \mathbf{v} + (-\mathbf{v}) = \mathbf{0} $ (additive inverse)
+    \item $ c(d\mathbf{v}) = (cd)\mathbf{v} $ (associativity of scalar multiplication)
+    \item $ (c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v} $ (distributivity over scalars)
+    \item $ c(\mathbf{v} + \mathbf{w}) = c\mathbf{v} + c\mathbf{w} $ (distributivity over vectors)
+    \item $ 1\mathbf{v} = \mathbf{v} $ (multiplicative identity)
+\end{enumerate}
 
-\textbf{Diagonal Matrices}\quad Suppose $ \mathbf{D} \in \mathbb{R}^{N \times N} $ is a diagonal matrix and $\mathbf{x}\in \mathbb{R}^N$, and you need to compute $ \mathbf{y} = \mathbf{D}\mathbf{x} $. Using standard matrix multiplication, this operation would be $ O(N^2) $. But since only the diagonal elements $ D_{ii} $ are non-zero, we only need to perform $ N $ multiplications (one multiplication per diagonal element) and zero additions, meaning the computational complexity can be reduced to $ O(N) $.
+\paragraph{Orthogonality}
+Vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ are \textbf{orthogonal} if $ \mathbf{u}^\top \mathbf{v} = 0 $. A set of vectors is \textbf{orthonormal} if vectors are mutually orthogonal and each has unit norm. A square matrix $ \mathbf{Q} $ is \textbf{orthogonal} if $ \mathbf{Q}^\top \mathbf{Q} = \mathbf{Q}\mathbf{Q}^\top = \mathbf{I} $, which implies $ \mathbf{Q}^{-1} = \mathbf{Q}^\top $ and that $ \|\mathbf{Q}\mathbf{x}\|_2 = \|\mathbf{x}\|_2 $ for all $ \mathbf{x} $.
 
-\textbf{Sparse Matrices}\quad Sparse matrices (which are \textit{very} common in scientific applications!) are matrices for which most elements are zero. They are stored in a way that only the non-zero elements are explicitly represented (in MATLAB, this is never automatically done for you---you must use the \verb|sparse| function yourself to convert from dense to sparse format). Commonly, we must multiply a sparse matrix with a dense vector, which means that the result is the dot product of each sparse row of the matrix with the dense vector. This requires significantly fewer operations than a full matrix-vector multiplication (since we do not need to actually multiply anything with zero).
 
-\textbf{Symmetric Matrices}\quad
-Symmetric matrices are matrices that are equal to their own transpose: $ \mathbf{A} = \mathbf{A}^\top $. For a symmetric matrix $ \mathbf{A} \in \mathbb{R}^{N\times N} $, a natural question to ask is: can we halve the work in $\mathbf{y}=\mathbf{A}\mathbf{x}$ by only touching one triangle?  You \emph{can} store just one triangle (saving about half the memory), but you \emph{cannot} cut the arithmetic in half. To see why, write out the updates if you traverse only the upper triangle, and you'll find that the number of operations needed still comes out to $O(N^2)$. Where symmetry really shines is in factorizations/solves.
-    
-
-\subsection{Numerical Solution of Linear Systems}
-Linear systems arise in many scientific and engineering applications (even in seemingly nonlinear cases, we can Taylor expand to a locally linear system), so we should develop tools to numerically solve them. The general form of a linear system is
-\begin{equation}
-    \mathbf{A}\mathbf{x} = \mathbf{b}
-    \label{eq:linear-system}
-\end{equation}
-where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for a given $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
-
-\subsubsection{Existence and Uniqueness of Solutions}
-We next formalize when a linear system has a solution and when that solution is unique. When needed, we denote by $\mathbf{A}_i^c$ the $i$-th column and by $\mathbf{A}_i^r$ the $i$-th row.
 
 \subsubsubsection{The four fundamental subspaces}
+We next formalize when a linear system has a solution and when that solution is unique. When needed, we denote by $\mathbf{A}_i^c$ the $i$-th column and by $\mathbf{A}_i^r$ the $i$-th row.
 For a matrix $\mathbf{A}\in\mathbb{R}^{N\times M}$ there are four canonical subspaces:
 \begin{enumerate}
     \item \textbf{Column space (range):} $\displaystyle \mathcal{R}(\mathbf{A})=\operatorname{span}\{\mathbf{A}_1^c,\dots,\mathbf{A}_M^c\}\subseteq\mathbb{R}^N$
@@ -756,91 +943,6 @@ Now, we return to the problem of finding the solution of \autoref{eq:linear-syst
     \mathbf{x} = \mathbf{A}^{-1}\mathbf{b}
 \end{equation*}
 However, in practice, computing $ \mathbf{A}^{-1} $ directly is generally avoided for several important reasons: (1) computational cost, (2) numerical stability, and (3) memory requirements. For these reasons, numerical methods focus on solving linear systems without explicitly computing the inverse of $ \mathbf{A} $. There are two primary classes of numerical methods for solving linear systems: \textbf{direct methods} and \textbf{iterative methods}. Each has its own advantages and is suitable for different types of problems.
-
-\subsubsection{Condition Number}
-Before looking at specific direct and iterative methods, we introduce the notion of the \textbf{condition number} of a matrix $\mathbf{A}$, denoted $\kappa(\mathbf{A})$, which helps us understand the sensitivity of a linear system to perturbations and numerical errors. We hope that for our linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, small perturbations in $\mathbf{b}$ will lead to small changes in $\mathbf{x}$. Such a system is said to be well-conditioned. However, if small perturbations in $\mathbf{b}$ lead to large changes in $\mathbf{x}$, the system is said to be ill-conditioned. The meaning of ``small'' and ``large'' changes depending on the context (e.g., it could be relative or absolute). The condition number quantifies this sensitivity.
-
-To define the condition number, we consider a linear system $ \mathbf{A}\mathbf{x} = \mathbf{b} $ with an exact solution $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $. If we add a small perturbation (error) $\delta\mathbf{b}$ to $\mathbf{b}$, then the solution vector $\mathbf{x}$ will also change by some amount $\delta\mathbf{x}$ (which we think of as the error in $\mathbf{x}$ since the original perturbation is assumed to represent an error) so that the linear system remains satisfied:
-\begin{equation*}
-    \mathbf{A}\left(\mathbf{x} + \delta\mathbf{x}\right) = \mathbf{b} + \delta\mathbf{b}
-    \implies 
-    \delta\mathbf{x} = \mathbf{A}^{-1}\delta\mathbf{b}
-\end{equation*}
-Taking the $p$-norm of both sides, we have
-\begin{equation*}
-    \|\delta\mathbf{x}\|_p = \|\mathbf{A}^{-1}\delta\mathbf{b}\|_p \leq \|\mathbf{A}^{-1}\|_p \|\delta\mathbf{b}\|_p
-\end{equation*}
-where the inequality follows from the submultiplicative property of matrix norms. We also have $\|\mathbf{b}\|_p = \|\mathbf{A}\mathbf{x}\|_p \le \|\mathbf{A}\|_p \, \|\mathbf{x}\|_p$, hence $\|\mathbf{x}\|_p \ge \|\mathbf{b}\|_p/\|\mathbf{A}\|_p$. Dividing the two inequalities, we arrive at an expression for the relative error in the solution:
-\begin{equation*}
-    \frac{\|\delta\mathbf{x}\|_p}{\|\mathbf{x}\|_p} \leq \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \frac{\|\delta\mathbf{b}\|_p}{\|\mathbf{b}\|_p}
-\end{equation*}
-This motivates the definition of the condition number of $\mathbf{A}$ as
-\begin{equation*}
-    \kappa_p(\mathbf{A}) = \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p
-\end{equation*}
-where we add a subscript $p$ on $\kappa$ to denote the norm used and to emphasize that its value depends on the choice of norm (but the qualitative behavior is the same across norms). If $\mathbf{A}$ is singular, $\kappa_p(\mathbf{A}) = \infty$. We note that clearly $\kappa_p(\mathbf{A}) \geq 1$ since $\|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \geq \|\mathbf{A} \mathbf{A}^{-1}\|_p = \|\mathbf{I}\|_p = 1$. Moreover, a matrix with a large condition number (an ``ill-conditioned'' matrix) indicates that the linear system is more sensitive to perturbations and numerical errors, while a matrix with a small condition number (a ``well-conditioned'' matrix) indicates greater numerical robustness. As a practical rule of thumb for backward-stable solvers (e.g., Gaussian elimination with partial pivoting), the number of correct digits $\approx$ (working-precision digits) $-\log_{10}\kappa(\mathbf{A})$, and the relative forward error is typically $O(\kappa(\mathbf{A})\,\varepsilon_{\mathrm{mach}})$. A small residual $\|\mathbf{r}\| = \|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|$ does not guarantee a small error when $\kappa(\mathbf{A})$ is large; roughly,
-\[ \frac{\|\hat{\mathbf{x}}-\mathbf{x}\|}{\|\mathbf{x}\|} \lesssim \kappa(\mathbf{A})\,\frac{\|\mathbf{r}\|}{\|\mathbf{b}\|}. \]
-
-Let's take a look at the condition number for the 2-norm specifically. Here, the condition number is
-\begin{equation*}
-    \kappa_2(\mathbf{A}) = \|\mathbf{A}\|_2 \|\mathbf{A}^{-1}\|_2 = \frac{\sigma_{\text{max}}(\mathbf{A})}{\sigma_{\text{min}}(\mathbf{A})}
-\end{equation*}
-where $\sigma_{\text{max}}(\mathbf{A})$ and $\sigma_{\text{min}}(\mathbf{A})$ are the largest and smallest singular values of $\mathbf{A}$, respectively. For $\mathbf{A} \succ 0$,\footnote{If $\mathbf{A}$ is normal ($\mathbf{A}\mathbf{A}^* = \mathbf{A}^*\mathbf{A}$) over $\mathbb{C}$, then $\sigma_i(\mathbf{A}) = |\lambda_i(\mathbf{A})|$ and $\kappa_2(\mathbf{A}) = \max_i |\lambda_i(\mathbf{A})|/\min_i |\lambda_i(\mathbf{A})|$.} this is equivalent to
-\begin{equation*}
-    \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})}
-\end{equation*}
-where $\lambda_{\text{max}}(\mathbf{A})$ and $\lambda_{\text{min}}(\mathbf{A})$ are the largest and smallest eigenvalues of $\mathbf{A}$, respectively.
-
-\textbf{Preconditioning}\quad When solving linear systems numerically, we often encounter ill-conditioned matrices. One way to mitigate the effects of ill-conditioning is through \textbf{preconditioning}. Preconditioning transforms $ \mathbf{A}\mathbf{x} = \mathbf{b} $ into a system with more favorable spectral properties. Common forms are left $(\mathbf{P}^{-1}\mathbf{A})\mathbf{x} = \mathbf{P}^{-1}\mathbf{b}$, right $\ \mathbf{A}(\mathbf{P}^{-1}\mathbf{y}) = \mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1}\mathbf{y}$, and symmetric $\ \mathbf{P}^{-1/2}\mathbf{A}\mathbf{P}^{-1/2}\mathbf{z} = \mathbf{P}^{-1/2}\mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1/2}\mathbf{z}$. Examples include Jacobi (diagonal), incomplete LU/Cholesky (ILU/IC), and algebraic multigrid (AMG). The goal is to cluster eigenvalues and reduce the effective condition number to accelerate and stabilize iterative methods.
-
-Even simpler than preconditioning is \textbf{scaling} (often called equilibration), which rescales rows and/or columns to reduce element-wise dynamic range and improve pivoting. A common heuristic is to equalize row/column $\infty$-norms. This helps numerics and pivoting but does not magically fix ill-conditioning rooted in the model; think nondimensionalization and consistent units (ChemE context: Pa vs bar, mol vs kmol).
-
-\begin{exampleBox}
-    \textbf{Example:} Consider the matrix
-    \begin{equation*}
-        \mathbf{A} = \begin{bmatrix}
-        10^{14} & 0 \\
-        0 & 10^{-9}
-        \end{bmatrix}
-    \end{equation*}
-    The condition number of this matrix with respect to the 2-norm is
-    \begin{equation*}
-        \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})} = \frac{10^{14}}{10^{-9}} = 10^{23}
-    \end{equation*}
-    which means that $\mathbf{A}$ is severely ill-conditioned. Such a high condition number implies that even tiny perturbations in $\mathbf{b}$ can lead to enormous errors in the computed solution $\mathbf{x}$.
-
-    To mitigate this issue, we can apply scaling by rescaling the rows of $\mathbf{A}$ to reduce the condition number. Specifically, we divide each row by the maximum absolute value in that row. For matrix $\mathbf{A}$, the scaling factors for the rows are $10^{14}$ and $10^{-9}$, respectively. We define a diagonal scaling matrix $\mathbf{D}$ as
-    \begin{equation*}
-    \mathbf{D} = \begin{bmatrix}
-    10^{-14} & 0 \\
-    0 & 10^{9}
-    \end{bmatrix}
-    \end{equation*}
-    Applying the scaling, we obtain the scaled matrix $\mathbf{A}_{\text{scaled}}$:
-    \begin{equation*}
-    \mathbf{A}_{\text{scaled}} = \mathbf{D} \mathbf{A} = \begin{bmatrix}
-    10^{-14} & 0 \\
-    0 & 10^{9}
-    \end{bmatrix} \begin{bmatrix}
-    10^{14} & 0 \\
-    0 & 10^{-9}
-    \end{bmatrix} = \begin{bmatrix}
-    1 & 0 \\
-    0 & 1
-    \end{bmatrix}
-    \end{equation*}
-    The left-scaling forms the equivalent system $\mathbf{D}\mathbf{A}\mathbf{x} = \mathbf{D}\mathbf{b}$ (same solution $\mathbf{x}$). Here, because $\mathbf{A}$ is diagonal, $\mathbf{D}\mathbf{A} = \mathbf{I}$. In general, equilibration reduces dynamic range and can reduce $\kappa$, but need not drive it to 1.
-
-    The condition number of the scaled matrix is now
-    \begin{equation*}
-        \kappa_2(\mathbf{A}_{\text{scaled}}) = \frac{\lambda_{\text{max}}(\mathbf{A}_{\text{scaled}})}{\lambda_{\text{min}}(\mathbf{A}_{\text{scaled}})} = \frac{1}{1} = 1
-    \end{equation*}
-    which means that $\mathbf{A}_{\text{scaled}}$ is perfectly conditioned. This dramatic reduction shows how scaling can improve numerical behavior in favorable cases (in this case, $\mathbf{A}$ is diagonal, so $\mathbf{D} = \mathbf{A}^{-1}$ is an exact preconditioner, hence the perfect condition number). In general, scaling is often helpful for stability and pivoting, but it does not eliminate all ill-conditioning.
-\end{exampleBox}
-
-\begin{warningBox}
-    \textbf{Warning:} Preconditioning/scaling improves the matrix the algorithm sees (e.g., reduces $\kappa(P^{-1}A)$), which speeds and stabilizes iterations, but it \emph{doesn't change the intrinsic sensitivity} of the original mapping $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$ to perturbations in $b$. So it helps the solver's numerics, not the problem's conditioning.
-\end{warningBox}
 
 
 \subsection{Direct Methods}
