@@ -1,0 +1,29 @@
+name: Rolling PDF Release
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build PDF
+        run: |
+          make build
+
+      - name: Publish rolling release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: rolling
+          name: Latest PDF (rolling)
+          body: "Auto-updated from ${{ github.ref }} @ ${{ github.sha }}"
+          artifacts: "main.pdf"
+          allowUpdates: true
+          removeArtifacts: true
+          makeLatest: true
+          token: ${{ secrets.GITHUB_TOKEN }}
