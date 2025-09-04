@@ -1,20 +1,39 @@
 \section{Linear Algebra (Lectures 1-6)}
-We will first review some of the main results of linear algebra that will be useful for 10.34. Then, we will move on to some of the applications of linear algebra to numerical methods, and how to numerically solve linear systems. Feel free to skip directly to \autoref{sec:complexity-of-matrix-and-vector-operations} if you are comfortable with the basics of linear algebra.
+We will first review some of the main results of linear algebra that will be useful for 10.34. Then, we will move on to some of the applications of linear algebra to numerical methods, and how to numerically solve linear systems. Feel free to skip directly to \Cref{sec:complexity-of-matrix-and-vector-operations} if you are comfortable with the basics of linear algebra.
 
-\subsection{Scalars and Fields}
-\textbf{Scalars} are elements of a field, such as the real numbers $ \mathbb{R} $ or complex numbers $ \mathbb{C} $. The field $ \mathbb{C} $ is an extension of $ \mathbb{R} $ using the imaginary unit $ i $, defined by $ i^2 = -1 $.
+\subsection{Scalars}
+\textbf{Scalars} are single numbers, which can be used to represent quantities, like mass, temperature, or time. In linear algebra, we typically work with scalars from a \textbf{field}, which is a set equipped with two operations (addition and multiplication). Commonly used field---the set of scalars--- include real numbers $ \mathbb{R} $ and complex numbers $ \mathbb{C} $.
 
-Any complex number $ z \in \mathbb{C} $ can be written as
+The set of real numbers, commonly denoted by $ \mathbb{R} $, includes all rational and irrational numbers.
+That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, and irrational numbers like $ \pi $ and $ \sqrt{2} $.
+
+% The field $ \mathbb{C} $ is an extension of $ \mathbb{R} $ using the imaginary unit $ i $, defined by $ i^2 = -1 $.
+
+\paragraph*{Complex Numbers}
+Complex numbers are the numbers that involves imaginary number.
+Imaginary numbers can be constructed by using $i=\sqrt{-1}$ as a building block.
+Whether this number actually exists or not is not important, but what’s important is we can \emph{conceptually define this number}, and with this definition, we can derive so many \emph{useful properties}.
+
+Complex numbers are obtained by combining real numbers and imaginary numbers.
+Conversely, any element in the set of complex number $\mathbb{C}$ can be expressed as the combination of real numbers and imaginary numbers, as follows:
 \begin{equation*}
     z = a + b i, \quad a, b \in \mathbb{R}
 \end{equation*}
-where $ a = \operatorname{Re}(z) $ and $ b = \operatorname{Im}(z) $. The \textbf{complex conjugate} of $ z $ is
+We also often use the notation $ \operatorname{Re}(z) = a $ and $ \operatorname{Im}(z) = b $ to denote the real and imaginary parts of the complex number $ z $, respectively.
+
+The \textbf{complex conjugate} of $ z $ is denoted by $\overline{z}$ and is defined as:
 \begin{equation*}
-    \overline{z} = a - b i
+  \overline{z} := a - b i
 \end{equation*}
+For real values, we have absolute values that represent the magnitude of the real number.
+For complex numbers, we can also define a similar notion of magnitude by using the complex conjugate defined above.
 The \textbf{magnitude} (or modulus) of $ z $ is
 \begin{equation*}
-    |z| = \sqrt{a^2 + b^2} = \sqrt{z \overline{z}}
+  |z| := \sqrt{z \overline{z}}
+\end{equation*}
+The magnitude of a complex number $ z = a + bi $ can be conveniently computed as follows:
+\begin{equation*}
+  |z| = \sqrt{a^2 + b^2}.
 \end{equation*}
 
 \begin{exampleBox}
@@ -31,7 +50,7 @@ We can visualize complex numbers as points in the complex plane, with the real p
 \end{figure}
 
 \subsection{Vectors and Vector Spaces}
-A \textbf{vector} is an ordered list of scalars; it has magnitude and direction. In $ n $-dimensional space, a vector $ \mathbf{v} $ over the field $ \mathbb{R} $ or $ \mathbb{C} $ is written as
+A \textbf{vector} is a tuple---an ordered list---of scalars; it has magnitude and direction. In $ n $-dimensional space, a vector $ \mathbf{v} $ over the field $ \mathbb{R} $ or $ \mathbb{C} $ is written as
 \begin{equation*}
     \mathbf{v} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
 \end{equation*}
