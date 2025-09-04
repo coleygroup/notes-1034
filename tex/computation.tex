@@ -5,6 +5,11 @@ Most computer problem solving is done approximately (numerically) and not analyt
     \epsilon_{\text{abs}} &= |x_{\text{exact}} - x_{\text{approx}}| \quad \text{(absolute error)} \\
     \epsilon_{\text{rel}} &= \frac{|x_{\text{exact}} - x_{\text{approx}}|}{|x_{\text{exact}}|} \quad \text{(relative error)}
 \end{align*}
+Absolute error is the difference between the exact and approximate values, while relative error is the absolute error divided by the exact value's magnitude.
+Relative error is often more useful as it is scale-independent, whereas absolute error can be more relevant when the exact value is near zero.
+In practice, both are considered to gain a comprehensive understanding of numerical error, particularly in convergence criteria for iterative algorithms.
+
+
 
 \textbf{Finite-Precision Arithmetic}\quad One major source of numerical error comes from the fact that numbers are represented with ``floating point'' or ``finite precision.'' In other words, we can only represent a finite number of digits in a computer. The most common floating-point formats are single-precision (float32) and double-precision (float64), which represent numbers with 32 and 64 bits, respectively (\autoref{fig:floating-point}). The number of bits determines the precision of the number. For example, float32 has 23 explicitly stored bits of precision, which is roughly equivalent to 7 decimal digits. Meanwhile, float64 has 52 explicitly stored bits of precision, which is roughly equivalent to 16 decimal digits. The precise details of how numbers are represented in floating-point format are not important for this course, but it is important to understand that there is a tradeoff between precision and storage.
 
@@ -115,3 +120,8 @@ This definition means that for sufficiently large values of $N$, the function $f
 The above example shows how algorithms with lower computational complexity dramatically reduce computation time, especially for large $N$. The difference between $O(N^3)$ and $O(N^2)$ algorithms (and more generally, any two algorithms with different associated time complexities) can be the difference between a project being feasible or not.
 
 Finally, we briefly mention the concept of \textbf{space complexity}, which measures the amount of memory an algorithm requires relative to the size of its input. Space complexity is also expressed using big O notation, but we will not discuss it further in this course. However, it is important to remember that memory usage can be just as important as time complexity, especially when working with large datasets or on memory-constrained devices.
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:
