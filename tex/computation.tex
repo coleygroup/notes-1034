@@ -180,7 +180,7 @@ This series is remarkable because each term adds approximately eight additional 
 \end{figure}
 
 \subsection{Computational Complexity}
-As suggested earlier when discussing numerical error, we need to understand not just how to solve a problem, but also how efficiently it can be solved as the problem size increases. This efficiency is quantified using the concept of \textbf{computational complexity}. Specifically, we focus on \textbf{time complexity}, which measures the number of elementary operations an algorithm requires relative to the size of its input (the size of the input is typically denoted by $N$).
+As suggested earlier when discussing numerical error, we need to understand not just how to solve a problem, but also how efficiently it can be solved as the problem size increases. This efficiency is quantified using the concept of \textbf{computational complexity}. Specifically, we focus on \textbf{time complexity}, which measures the number of elementary operations (e.g., $+$, $-$, $*$, $/$, etc.) an algorithm requires relative to the size of its input (the size of the input is typically denoted by $N$).
 
 To express computational complexity, we generally use \textbf{big-O notation}. This mathematical notation describes an upper bound on the growth rate of a function so that we can focus on the most significant factors that affect an algorithm's performance as the input size becomes large. Mathematically, we say that a function $f(N)$ is $O(g(N))$ if there exist positive constants $c$ and $N_0$ such that
 \begin{equation*}
@@ -223,6 +223,9 @@ This definition means that for sufficiently large values of $N$, the function $f
 The above example shows how algorithms with lower computational complexity dramatically reduce computation time, especially for large $N$. The difference between $O(N^3)$ and $O(N^2)$ algorithms (and more generally, any two algorithms with different associated time complexities) can be the difference between a project being feasible or not.
 
 Finally, we briefly mention the concept of \textbf{space complexity}, which measures the amount of memory an algorithm requires relative to the size of its input. Space complexity is also expressed using big O notation, but we will not discuss it further in this course. However, it is important to remember that memory usage can be just as important as time complexity, especially when working with large datasets or on memory-constrained devices.
+In this course, our primary emphasis will be on time complexity when analyzing algorithms.
+Unless we explicitly mention space complexity, all discussions regarding complexity will pertain to time complexity.
+
 
 %%% Local Variables:
 %%% mode: LaTeX
