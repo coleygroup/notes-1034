@@ -21,7 +21,19 @@ jobs:
         with:
           tag: rolling
           name: Latest PDF (rolling)
-          body: "Auto-updated from ${{ github.ref }} @ ${{ github.sha }}"
+          body: |
+            # Release Notes
+            The latest lecture note pdf file was generated on ${{ github.event.head_commit.timestamp }} in commit ${{ github.event.head_commit.id }} Please download the `main.pdf` artifact below.
+
+            ## About
+            This lecture note is created by Matthew Cox while he was taking 10.34 in Fall 2024. 
+            
+            ## Disclaimer
+            - Please note that this lecture note is *unofficial* and is not fully reviewed or endorsed by the course instructors. Editing and polishing of this lecture note is work in progress, and the note may contain errors or minor inconsistencies. Please use it with caution.
+            - The note will be updated throughout the semester, and the latest version will be available in this release. Please check back regularly for updates.
+
+            ## How to Contribute
+            Please feel free to open issues or submit pull requests to help improve the quality of this lecture note. Your contributions are greatly appreciated!
           artifacts: "main.pdf"
           allowUpdates: true
           removeArtifacts: true
