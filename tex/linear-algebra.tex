@@ -77,11 +77,12 @@ We can visualize complex numbers as points in the complex plane, with the real p
 \subsection{Vectors and Vector Spaces}
 A \textbf{vector} is a tuple---an ordered list---of scalars; it has magnitude and direction. In $ n $-dimensional space, a vector $ \mathbf{v} $ over the field $ \mathbb{R} $ or $ \mathbb{C} $ is written as
 \begin{equation*}
-    \mathbf{v} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
+    \mathbf{v} = (v_1, v_2, \ldots, v_n) = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
 \end{equation*}
-It is also common to write this as $\mathbf{v} = (v_1, v_2, \ldots, v_n)$.
-% SS: TODO: symbol is not consistent with the lecture notes. I like lowercase $n$ better, but for now, we should try to make the symbols consistent to reduce the confusion.
+It is common to write vectors either as tuples (arranged horizontally with comma separators) or as column vectors. We will use both notations interchangeably.
+% SS: TODO: symbol (dimension for vector) is not consistent with the lecture notes. I like lowercase $n$ better, but for now, we should try to make the symbols consistent to reduce the confusion.
 
+The set of $n$-dimensional vectors over the field $ \mathbb{R} $ is denoted by $ \mathbb{R}^n $, and the set of $n$-dimensional vectors over the field $ \mathbb{C} $ is denoted by $ \mathbb{C}^n $.
 The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ (or $ \mathbb{C}^n $).
 Later in \Cref{sec:vector-space}, we will see that $\mathbb{R}^n$ and $\mathbb{C}^n$ form vector spaces, and several useful properties can be derived from the nature of vector spaces.
 
