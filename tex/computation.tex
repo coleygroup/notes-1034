@@ -11,8 +11,27 @@ In practice, both are considered to gain a comprehensive understanding of numeri
 
 
 
-\textbf{Finite-Precision Arithmetic}\quad One major source of numerical error comes from the fact that numbers are represented with ``floating point'' or ``finite precision.'' In other words, we can only represent a finite number of digits in a computer. The most common floating-point formats are single-precision (float32) and double-precision (float64), which represent numbers with 32 and 64 bits, respectively (\autoref{fig:floating-point}). The number of bits determines the precision of the number. For example, float32 has 23 explicitly stored bits of precision, which is roughly equivalent to 7 decimal digits. Meanwhile, float64 has 52 explicitly stored bits of precision, which is roughly equivalent to 16 decimal digits. The precise details of how numbers are represented in floating-point format are not important for this course, but it is important to understand that there is a tradeoff between precision and storage.
+\textbf{Finite-Precision Arithmetic}\quad
+Why do numerical errors occur in the first place? At the basic level, all real numbers are represented as \emph{floating-point numbers}. Modern computers operate using binary memory, which can represent ones and zeros. Due to the finite nature of computer memory, we can only represent real numbers \emph{approximately}. This finite, binary representation of real numbers is referred to as floating-point representation. 
+% One major source of numerical error comes from the fact that numbers are represented with ``floating point'' or ``finite precision.''
+% One direct implication of this is that we can only represent a finite number of digits in a computer.
+In the floating point representation, a number is represented by three components: a sign bit $s$, an exponent $e$, and a significand $m$:
+\begin{align*}
+\text{value} = (-1)^s \times m \times 2^e.
+\end{align*}
+Since these values must be stored in computer memory, we represent the sign, exponent, and significand in binary format. For example, the number $\pi$ can be represented as:
+\begin{align*}
+  \pi = 3.141592... = 1.1001001000011111101101010... \times 2^1.
+\end{align*}
+If you compare this to scientific notation:
+\begin{align*}
+  \text{value} = \pm d \times 10^n \tag{scientific notation}
+\end{align*}
+you will notice many similarities; however, in floating-point format, everything is expressed in ones and zeros.
 
+
+There are various types of floating-point formats, determined by the number of bits allocated for the sign, exponent, and significand.
+The most common floating-point formats are single-precision (float32) and double-precision (float64), which represent numbers with 32 and 64 bits, respectively (\autoref{fig:floating-point}).
 \begin{figure}[!h]
   \centering
   \begin{tikzpicture}[scale=.8]
@@ -55,21 +74,41 @@ In practice, both are considered to gain a comprehensive understanding of numeri
   \label{fig:floating-point}
 \end{figure}
 
-\textbf{IEEE-754 Bit Layout}\quad We consider this briefly for concreteness' sake; the IEEE-754 standard is a very common format for representing floating-point numbers in computer hardware. For a floating-point number in this format, bits are divided into sign ($s$), exponent ($e$), and fraction/significand ($f$). For normal numbers (i.e., not zero, NaN, infinity, or subnormal),
-\begin{equation*}
-x = (-1)^s \times (1.f)_2 \times 2^{e-\text{bias}}
-\end{equation*}
-where the notation $(1.f)_2$ means the binary representation of the fraction $f$ with a leading 1 (implicit).In float32, $s=1$ bit, $e=8$ bits (bias $127$), and $f=23$ bits. In float64, $s=1$, $e=11$ bits (bias $1023$), and $f=52$ bits. The bit indices for float32 are $31$ (sign) $\mid$ $30\text{--}23$ (exponent) $\mid$ $22\text{--}0$ (fraction) (\autoref{fig:floating-point}). As an example (float32),
-\begin{equation*}
-\underbrace{0}_{s} \underbrace{01111100}_{e} \underbrace{01000000000000000000000}_{f}
-\implies 
-(-1)^0 \times (1.01)_2 \times 2^{-3} = 1 \times 1.25 \times \frac{1}{8}= 0.15625
-\end{equation*}
+
+The number of bits determines the precision of the number.
+For example, float32 has 23 explicitly stored bits of precision, which is roughly equivalent to 7 decimal digits.
+Meanwhile, float64 has 52 explicitly stored bits of precision, which is roughly equivalent to 16 decimal digits.
+% The precise details of how numbers are represented in floating-point format are not important for this course, but it is important to understand that there is a tradeoff between precision and storage.
+
+
+
+
+% SS: commented out this part as this is not directly discussed within the lecture.
+% \textbf{IEEE-754 Bit Layout}\quad We consider this briefly for concreteness' sake; the IEEE-754 standard is a very common format for representing floating-point numbers in computer hardware. For a floating-point number in this format, bits are divided into sign ($s$), exponent ($e$), and fraction/significand ($f$). For normal numbers (i.e., not zero, NaN, infinity, or subnormal),
+% \begin{equation*}
+% x = (-1)^s \times (1.f)_2 \times 2^{e-\text{bias}}
+% \end{equation*}
+% where the notation $(1.f)_2$ means the binary representation of the fraction $f$ with a leading 1 (implicit).In float32, $s=1$ bit, $e=8$ bits (bias $127$), and $f=23$ bits. In float64, $s=1$, $e=11$ bits (bias $1023$), and $f=52$ bits. The bit indices for float32 are $31$ (sign) $\mid$ $30\text{--}23$ (exponent) $\mid$ $22\text{--}0$ (fraction) (\autoref{fig:floating-point}). As an example (float32),
+% \begin{equation*}
+% \underbrace{0}_{s} \underbrace{01111100}_{e} \underbrace{01000000000000000000000}_{f}
+% \implies 
+% (-1)^0 \times (1.01)_2 \times 2^{-3} = 1 \times 1.25 \times \frac{1}{8}= 0.15625
+% \end{equation*}
+
 Binary expansions of most real numbers are non-terminating and must be truncated, e.g.,
 \[ \pi = 1.10010010000011111101101010\ldots \times 2^{1} \]
 so the significand is truncated, introducing representation error.
 
-\textbf{Precision and Hardware}\quad There is a practical tradeoff between accuracy and speed/memory. On most CPUs, double precision (float64) is the default and well optimized (e.g., MATLAB uses float64 by default). Many GPUs deliver highest throughput with float32 or even float16; low-precision arithmetic is common in machine learning. Choose the lowest precision that maintains the needed accuracy, and be mindful of mixed-precision casts when moving data between CPU and GPU. (In 10.34, this is not a significant consideration, but it is important to be aware of this fact.)
+\textbf{Precision and Hardware}\quad
+There exists a practical trade-off between accuracy and speed/memory usage.
+Higher precision demands increased memory for storage and more time for arithmetic operations.
+The optimal point of this trade-off is context and hardware-dependent.
+For many engineering and scientific applications, float64 is the right choice, as it provides sufficient precision for most calculations.
+Classically, these computation tasks were performed on CPUs.
+On most CPUs, double precision (float64) is the default and well optimized (e.g., MATLAB uses float64 by default).
+However, in machine learning workflows, float32 is often the default, as it often provides sufficient precision and more benefits come from reduced memory usage and increased speed.
+Many GPUs deliver highest throughput with float32 or even float16 (sometimes used in mix).
+% Choose the lowest precision that maintains the needed accuracy, and be mindful of mixed-precision casts when moving data between CPU and GPU. (In 10.34, this is not a significant consideration, but it is important to be aware of this fact.)
 
 \textbf{Round-off and Machine Epsilon}\quad One specific type of numerical error arising from finite precision is round-off error. Every time an arithmetic operation is performed, the result must be rounded to the nearest representable number. Machine epsilon ($\epsilon_{\text{mach}}$) is an upper bound on the relative error due to rounding:
 \begin{equation*}
