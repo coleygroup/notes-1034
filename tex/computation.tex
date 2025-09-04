@@ -14,10 +14,45 @@ In practice, both are considered to gain a comprehensive understanding of numeri
 \textbf{Finite-Precision Arithmetic}\quad One major source of numerical error comes from the fact that numbers are represented with ``floating point'' or ``finite precision.'' In other words, we can only represent a finite number of digits in a computer. The most common floating-point formats are single-precision (float32) and double-precision (float64), which represent numbers with 32 and 64 bits, respectively (\autoref{fig:floating-point}). The number of bits determines the precision of the number. For example, float32 has 23 explicitly stored bits of precision, which is roughly equivalent to 7 decimal digits. Meanwhile, float64 has 52 explicitly stored bits of precision, which is roughly equivalent to 16 decimal digits. The precise details of how numbers are represented in floating-point format are not important for this course, but it is important to understand that there is a tradeoff between precision and storage.
 
 \begin{figure}[!h]
-    \centering
-    \includegraphics[width=.7\textwidth]{figs/computation/floating-point.pdf}
-    \caption{Floating-point representation of numbers.}
-    \label{fig:floating-point}
+  \centering
+  \begin{tikzpicture}[scale=.8]
+    \node[anchor=south east] at (-.5, 0) {float32:};
+    \draw[thick,fill=blue!10!white] (0, 0) rectangle ++ (.5, .5);
+    \foreach \x in {1, ..., 8} {
+      \draw[thick,fill=green!10!white] (\x/2, 0) rectangle ++ (.5, .5);
+    }
+    \foreach \x in {9, ..., 31} {
+      \draw[thick,fill=red!10!white] (\x/2, 0) rectangle ++ (.5, .5);
+    }
+    \node at (0.25, 1.5) {sign};
+    \node[align=center] at (2.5, 1.5) {exponent\\(8 bits)};
+    \node[align=center] at (10.5, 1.5) {significand\\(23 bits)};
+    
+    \draw [blue!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (0,0.5) --  (.5,.5);
+    \draw [green!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (.5,0.5) --  (4.5,.5);
+    \draw [red!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (4.5,0.5) --  (16,.5);
+  \end{tikzpicture}
+  
+  \begin{tikzpicture}[scale=.8]
+    \node[anchor=south east] at (-.5, 0) {float64:};
+    \draw[thick,fill=blue!10!white] (0, 0) rectangle ++ (.25, .5);
+    \foreach \x in {1, ..., 11} {
+      \draw[thick,fill=green!10!white] (\x/4, 0) rectangle ++ (.25, .5);
+    }
+    \foreach \x in {12, ..., 63} {
+      \draw[thick,fill=red!10!white] (\x/4, 0) rectangle ++ (.25, .5);
+    }
+    \node at (0.25, 1.5) {sign};
+    \node[align=center] at (1.75, 1.5) {exponent\\(11 bits)};
+    \node[align=center] at (9.5, 1.5) {significand\\(52 bits)};
+    
+    \draw [blue!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (0,0.5) --  (.5,.5);
+    \draw [green!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (.5,0.5) --  (3,.5);
+    \draw [red!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (3,.5) --  (16,.5);
+  \end{tikzpicture}
+  % \includegraphics[width=.7\textwidth]{figs/computation/floating-point.pdf}
+  \caption{Floating-point representation of numbers.}
+  \label{fig:floating-point}
 \end{figure}
 
 \textbf{IEEE-754 Bit Layout}\quad We consider this briefly for concreteness' sake; the IEEE-754 standard is a very common format for representing floating-point numbers in computer hardware. For a floating-point number in this format, bits are divided into sign ($s$), exponent ($e$), and fraction/significand ($f$). For normal numbers (i.e., not zero, NaN, infinity, or subnormal),
