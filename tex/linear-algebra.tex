@@ -43,9 +43,34 @@ The magnitude of a complex number $ z = a + bi $ can be conveniently computed as
 We can visualize complex numbers as points in the complex plane, with the real part on the horizontal axis and the imaginary part on the vertical axis (\autoref{fig:complex-plane}).
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.25\textwidth]{figs/linear-algebra/complex-plane.pdf}
-    \caption{The complex plane.}
+  \centering
+  \begin{tikzpicture}[scale=.5]
+
+    % Draw axes
+    \draw[->] (-1, 0) -- (5, 0) node[right] {Re};
+    \draw[->] (0, -1) -- (0, 5) node[above] {Im};
+
+    % Define complex number
+    \def\a{3}       % Real part
+    \def\b{4}       % Imaginary part
+
+    % Plot the complex number
+    \draw[fill=blue] (\a, \b) circle[radius=3pt] node[above right] {$z = a + b i$};
+    \node at (0, 4) [left] {$b$};
+    \node at (3, 0) [below] {$a$};
+
+    % Draw the vertical line to the real axis
+    \draw[dashed] (\a, 0) -- (\a, \b);
+    \draw[dashed] (0, \b) -- (\a, \b);
+
+    % Draw the magnitude
+    \draw[->, thick, red] (0, 0) -- (\a, \b) node[midway, left] {$|z|$};
+
+    % Origin
+    \draw[fill=black] (0, 0) circle[radius=2pt] node[below right] {0};
+    
+  \end{tikzpicture}
+  \caption{The complex plane.}
     \label{fig:complex-plane}
 \end{figure}
 
@@ -54,7 +79,11 @@ A \textbf{vector} is a tuple---an ordered list---of scalars; it has magnitude an
 \begin{equation*}
     \mathbf{v} = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
 \end{equation*}
-It is also common to write this as $\mathbf{v} = (v_1, v_2, \ldots, v_n)$. The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ or $ \mathbb{C}^n $, equipped with two operations: vector addition and scalar multiplication.
+It is also common to write this as $\mathbf{v} = (v_1, v_2, \ldots, v_n)$.
+% SS: TODO: symbol is not consistent with the lecture notes. I like lowercase $n$ better, but for now, we should try to make the symbols consistent to reduce the confusion.
+
+The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ (or $ \mathbb{C}^n $).
+Later in \Cref{sec:vector-space}, we will see that $\mathbb{R}^n$ and $\mathbb{C}^n$ form vector spaces, and several useful properties can be derived from the nature of vector spaces.
 
 \subsubsection{Vector Addition}
 Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), their sum is defined component-wise:
@@ -118,7 +147,7 @@ The unit vectors form a basis for $ \mathbb{R}^n $, meaning any vector $ \mathbf
     \textbf{Example}: In $ \mathbb{R}^3 $, the unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
 \end{exampleBox}
 
-\subsubsection{Properties of Vector Spaces}
+\subsubsection{Properties of Vector Spaces}\label{sec:vector-space}
 For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c, d \in \mathbb{R} $, the following hold:
 \begin{enumerate}
     \item $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $ (commutativity)
