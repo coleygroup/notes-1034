@@ -20,7 +20,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: rolling
-          name: Latest PDF (rolling)
+          name: Lecture Notes for MIT Course 10.34: Numerical Methods in Chemical Engineering (rolling release)
           body: |
             # Release Notes
             The latest lecture note pdf file was generated on ${{ github.event.head_commit.timestamp }} in commit ${{ github.event.head_commit.id }} Please download the `main.pdf` artifact below.
