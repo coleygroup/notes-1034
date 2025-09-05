@@ -1,5 +1,5 @@
-\section{Computational Preliminaries}
-\subsection{Numerical Error}
+\chapter{Introduction to Numerical Methods}
+\section{Numerical Error}
 Most computer problem solving is done approximately (numerically) and not analytically/symbolically, either because no analytic solution exists or because the analytic solution is too complex to compute. Consequently, \textbf{numerical error} is introduced into our calculations. Mathematically, we can define numerical error as absolute or relative error:
 \begin{align*}
     \epsilon_{\text{abs}} &= |x_{\text{exact}} - x_{\text{approx}}| \quad \text{(absolute error)} \\
@@ -179,7 +179,7 @@ This series is remarkable because each term adds approximately eight additional 
     \label{fig:pi-approximation}
 \end{figure}
 
-\subsection{Computational Complexity}
+\section{Computational Complexity}
 As suggested earlier when discussing numerical error, we need to understand not just how to solve a problem, but also how efficiently it can be solved as the problem size increases. This efficiency is quantified using the concept of \textbf{computational complexity}. Specifically, we focus on \textbf{time complexity}, which measures the number of elementary operations (e.g., $+$, $-$, $*$, $/$, etc.) an algorithm requires relative to the size of its input (the size of the input is typically denoted by $N$).
 
 To express computational complexity, we generally use \textbf{big-O notation}. This mathematical notation describes an upper bound on the growth rate of a function so that we can focus on the most significant factors that affect an algorithm's performance as the input size becomes large. Mathematically, we say that a function $f(N)$ is $O(g(N))$ if there exist positive constants $c$ and $N_0$ such that

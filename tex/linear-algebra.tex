@@ -1,6 +1,7 @@
-\section{Linear Algebra (Lectures 1-6)}
+\chapter{Linear Algebra}
 We will first review some of the main results of linear algebra that will be useful for 10.34. Then, we will move on to some of the applications of linear algebra to numerical methods, and how to numerically solve linear systems. Feel free to skip directly to \Cref{sec:complexity-of-matrix-and-vector-operations} if you are comfortable with the basics of linear algebra.
 
+\section{Scalars, Vectors, and Matrices}
 \subsection{Scalars}
 \textbf{Scalars} are single numbers, which can be used to represent quantities, like mass, temperature, or time. In linear algebra, we typically work with scalars from a \textbf{field}, which is a set equipped with two operations (addition and multiplication). Commonly used field---the set of scalars--- include real numbers $ \mathbb{R} $ and complex numbers $ \mathbb{C} $.
 
@@ -9,7 +10,7 @@ That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, a
 
 % The field $ \mathbb{C} $ is an extension of $ \mathbb{R} $ using the imaginary unit $ i $, defined by $ i^2 = -1 $.
 
-\paragraph*{Complex Numbers}
+\subsubsection*{Complex Numbers}
 Complex numbers are the numbers that involves imaginary number.
 Imaginary numbers can be constructed by using $i=\sqrt{-1}$ as a building block.
 Whether this number actually exists or not is not important, but what’s important is we can \emph{conceptually define this number}, and with this definition, we can derive so many \emph{useful properties}.
@@ -74,7 +75,7 @@ We can visualize complex numbers as points in the complex plane, with the real p
     \label{fig:complex-plane}
 \end{figure}
 
-\subsection{Vectors and Vector Spaces}
+\subsection{Vectors}
 A \textbf{vector} is a tuple---an ordered list---of scalars; it has magnitude and direction. In $ n $-dimensional space, a vector $ \mathbf{v} $ over the field $ \mathbb{R} $ or $ \mathbb{C} $ is written as
 \begin{equation*}
     \mathbf{v} = (v_1, v_2, \ldots, v_n) = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
@@ -86,7 +87,8 @@ The set of $n$-dimensional vectors over the field $ \mathbb{R} $ is denoted by $
 The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ (or $ \mathbb{C}^n $).
 Later in \Cref{sec:vector-space}, we will see that $\mathbb{R}^n$ and $\mathbb{C}^n$ form vector spaces, and several useful properties can be derived from the nature of vector spaces.
 
-\subsubsection{Vector Addition and Scalar Multiplication}
+\subsubsection*{Vector Operations}
+\paragraph*{Vector Addition and Scalar Multiplication}
 Two basic arithmetic operations can be defined over the vector space: \emph{addition} and \emph{scalar multiplication}.
 Vector addition is defined for a pair of vectors with the same dimension.
 Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), their addition is defined as follows:
@@ -110,7 +112,7 @@ Arrays have incompatible sizes for this operation.
 \end{verbatim}
 \end{warningBox}
 
-% \subsubsection{Scalar Multiplication}
+\paragraph*{Scalar Multiplication}
 Scalar multiplication is defined for a vector and a scalar.
 In particular, for a scalar $ c \in \mathbb{R} $ (or $ \mathbb{C} $) and a vector $ \mathbf{v}\in\mathbb{R}^{n} $ (or $\mathbb{C}^n$), the scalar multiplication is defined as follows:
 \begin{equation*}
@@ -171,14 +173,16 @@ The notation $ \mathbf{A} \in \mathbb{R}^{m \times n} $ indicates the dimensions
 Additionally, we can think of vectors as matrices with a single column---that is, as $ n \times 1 $ matrices.
 This perspective allows us to treat vectors and matrices in a unified manner.
 
-\subsubsection{Matrix Addition and Scalar Multiplication}
+\subsubsection{Matrix Operations}
+
+\paragraph*{Matrix Addition and Scalar Multiplication}
 Like vectors, matrices can be added and scaled entry-wise:
 \begin{itemize}
     \item \textbf{Addition}: $ (\mathbf{A} + \mathbf{B})_{ij} = a_{ij} + b_{ij} $
     \item \textbf{Scalar Multiplication}: $ (c\mathbf{A})_{ij} = c \cdot a_{ij} $
 \end{itemize}
 
-\subsubsection{Dot Product}
+\paragraph*{Dot Product}
 The \textbf{dot product} (inner product) of vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ is
 \begin{equation*}
     \mathbf{u}\cdot\mathbf{v} = \mathbf{u}^\top \mathbf{v} = \sum_{i=1}^n u_i v_i
@@ -200,7 +204,7 @@ The dot product satisfies the following properties:
     \item $ \mathbf{u} \cdot \mathbf{u} \geq 0 $ and $ \mathbf{u} \cdot \mathbf{u} = 0 $ if and only if $ \mathbf{u} = \mathbf{0} $ (positive definiteness)
 \end{itemize}
 
-\subsubsection{Matrix-Vector Products}
+\paragraph*{Matrix-Vector Products}
 The product of an $m\times n$ matrix $ \mathbf{A} \in\mathbb{R}^{m\times n}$ and an $n$-dimensional vector $ \mathbf{x} $ is an $m$-dimensional vector $\mathbf{b}\in \mathbb{R}^m $:
 \begin{equation*}
   b_i = \sum_{j=1}^n a_{ij} x_j.
@@ -225,7 +229,7 @@ The number of columns in $ \mathbf{A} $ must equal the number of elements in $ \
 \end{exampleBox}
 
 
-\subsubsection{Matrix Multiplication}
+\paragraph*{Matrix Multiplication}
 The product of an $ m \times n $ matrix $ \mathbf{A}\in\mathbb{R}^{m\times n} $ and an $ n \times p $ matrix $ \mathbf{B} \in\mathbb{R}^{n\times p}$ is an $ m \times p $ matrix $ \mathbf{C} \in\mathbb{R}^{m\times p}$:
 \begin{equation*}
   c_{ij} = \sum_{k=1}^n a_{ik} b_{kj}.
@@ -256,7 +260,7 @@ The product of two matrices, $ \mathbf{A}\mathbf{B} $, represents the compositio
 % SS: revisit this later. Probably we want to bring this up later.
 % A matrix-vector product $ \mathbf{A}\mathbf{x} $ can be viewed as applying a linear transformation to the vector $ \mathbf{x} $. The matrix $ \mathbf{A} $ acts as an operator that maps the vector $ \mathbf{x} $ to a new vector, potentially rotating, scaling, or shearing it in the process. Equivalently, the resulting vector is a linear combination of the columns of $ \mathbf{A} $, with the components of $ \mathbf{x} $ serving as the weights.
 
-\subsubsection{Outer Product}
+\paragraph*{Outer Product}
 The \textbf{outer product} of vectors $ \mathbf{u} \in \mathbb{R}^m $ and $ \mathbf{v} \in \mathbb{R}^n $ is an $ m \times n $ matrix:
 \begin{equation*}
     \mathbf{u}\otimes\mathbf{v} = \mathbf{u} \mathbf{v}^\top = \begin{bmatrix} u_1 v_1 & u_1 v_2 & \ldots & u_1 v_n \\ u_2 v_1 & u_2 v_2 & \ldots & u_2 v_n \\ \vdots & \vdots & \ddots & \vdots \\ u_m v_1 & u_m v_2 & \ldots & u_m v_n \end{bmatrix}
@@ -272,7 +276,7 @@ If $\mathbf{u} \neq \mathbf{0}$ and $\mathbf{v} \neq \mathbf{0}$, then $\mathbf{
 
 To emphasize, the outer product constructs a matrix from the product of two vectors, while the inner product (dot product) constructs a scalar from the product of two vectors.
 
-\subsubsection{Transpose of a Matrix}
+\paragraph*{Transpose of a Matrix}
 The \textbf{transpose} of $ \mathbf{A} $, denoted $ \mathbf{A}^\top $, is obtained by swapping rows with columns:
 \begin{equation*}
   (\mathbf{A}^\top)_{ij} = a_{ji}.
@@ -300,23 +304,7 @@ In addition, the transpose of a product reverses order: $(\mathbf{A}\mathbf{B})^
     \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $, $ \mathbf{A}^\top = \begin{bmatrix}1 & 3\\2 & 4\end{bmatrix} $
 \end{exampleBox}
 
-\subsubsection{Special Matrices}
-\begin{itemize}
-    \item \textbf{Zero Matrix}: All entries are zero; acts as additive identity ($ \mathbf{A} + \mathbf{0} = \mathbf{A} $).
-    \begin{equation*}
-        \mathbf{0} = \begin{bmatrix}0 & 0 & \ldots & 0\\0 & 0 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 0\end{bmatrix}
-    \end{equation*}
-    \item \textbf{Identity Matrix} $ \mathbf{I} $: Square matrix with ones on the diagonal and zeros elsewhere; acts as multiplicative identity ($ \mathbf{A}\mathbf{I} = \mathbf{I}\mathbf{A} = \mathbf{A} $).
-    \begin{equation*}
-        \mathbf{I} = \begin{bmatrix}1 & 0 & \ldots & 0\\0 & 1 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 1\end{bmatrix}
-    \end{equation*}
-    \item \textbf{Symmetric Matrix}: $ \mathbf{A} = \mathbf{A}^\top $.
-    \item \textbf{Positive Semi-Definite Matrix}: Symmetric and satisfies $ \mathbf{x}^\top \mathbf{A} \mathbf{x} \geq 0 $ for all $ \mathbf{x} \neq \mathbf{0} $. This is denoted $ \mathbf{A} \succeq 0 $. Also common is the notion of a positive definite matrix, which requires strict positivity ($ \mathbf{x}^\top \mathbf{A} \mathbf{x} > 0 $ for all $ \mathbf{x} \neq \mathbf{0} $, denoted $ \mathbf{A} \succ 0 $).
-    \item \textbf{Diagonal Matrix}: All off-diagonal entries are zero.
-    \item \textbf{Triangular Matrix}: All entries above or below the main diagonal are zero.
-\end{itemize}
-
-\subsubsection{Trace of a Matrix}
+\paragraph*{Trace of a Matrix}
 For a square matrix $ \mathbf{A} $, the \textbf{trace} is the sum of its diagonal elements:
 \begin{equation*}
     \operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n a_{ii}
@@ -343,6 +331,23 @@ As a generalization of the last property mentioned above, we note that the trace
 \begin{exampleBox}
     \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}2 & -1\\4 & 3\end{bmatrix} $, $ \operatorname{tr}(\mathbf{A}) = 2 + 3 = 5 $.
 \end{exampleBox}
+
+\subsubsection{Special Matrices}
+\begin{itemize}
+    \item \textbf{Zero Matrix}: All entries are zero; acts as additive identity ($ \mathbf{A} + \mathbf{0} = \mathbf{A} $).
+    \begin{equation*}
+        \mathbf{0} = \begin{bmatrix}0 & 0 & \ldots & 0\\0 & 0 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 0\end{bmatrix}
+    \end{equation*}
+    \item \textbf{Identity Matrix} $ \mathbf{I} $: Square matrix with ones on the diagonal and zeros elsewhere; acts as multiplicative identity ($ \mathbf{A}\mathbf{I} = \mathbf{I}\mathbf{A} = \mathbf{A} $).
+    \begin{equation*}
+        \mathbf{I} = \begin{bmatrix}1 & 0 & \ldots & 0\\0 & 1 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 1\end{bmatrix}
+    \end{equation*}
+    \item \textbf{Symmetric Matrix}: $ \mathbf{A} = \mathbf{A}^\top $.
+    \item \textbf{Positive Semi-Definite Matrix}: Symmetric and satisfies $ \mathbf{x}^\top \mathbf{A} \mathbf{x} \geq 0 $ for all $ \mathbf{x} \neq \mathbf{0} $. This is denoted $ \mathbf{A} \succeq 0 $. Also common is the notion of a positive definite matrix, which requires strict positivity ($ \mathbf{x}^\top \mathbf{A} \mathbf{x} > 0 $ for all $ \mathbf{x} \neq \mathbf{0} $, denoted $ \mathbf{A} \succ 0 $).
+    \item \textbf{Diagonal Matrix}: All off-diagonal entries are zero.
+    \item \textbf{Triangular Matrix}: All entries above or below the main diagonal are zero.
+\end{itemize}
+
 
 \subsubsection{Computational Complexity of Matrix and Vector Operations}
 \label{sec:complexity-of-matrix-and-vector-operations}
@@ -397,7 +402,7 @@ For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are 
 It is worth mentioning (this is not necessary to know for 10.34) that, in reality, the computational complexity of matrix-matrix multiplication is not exactly cubic. A lot of research has been done to optimize matrix-matrix multiplication due to its extreme importance in the field of optimization and machine learning. For square $N\times N$ matrices, the fastest known algorithms run in $O(N^{\omega})$ time, where, as of 2024, the record is $\omega < 2.371339$ (this upper bound is from \href{https://arxiv.org/abs/2404.16349}{this paper}). Very roughly, these bounds come from the Coppersmith-Winograd line of ideas: view matrix multiply as a tensor and look for low-rank decompositions. The recent twist is to allow more asymmetry between the three dimensions (don't force two to behave identically); similar tricks help with rectangular cases, too. But these bounds are galactic algorithms, meaning the constants (for big O) are huge, so real code sticks to near-cubic methods with blocking, cache-friendly layouts, vectorization, and parallelism. Strassen's method ($O(N^{\log_2 7})\!\approx O(N^{2.8074})$) sometimes shows up for very large $N$, but most production matrix multiplication is effectively $O(N^3)$, so you should stick with $O(N^3)$ as a rule of thumb.
 
 
-\paragraph*{Optimizing Computations in Complex Expressions}
+\subsubsection*{Optimizing Computations in Complex Expressions}
 When working with expressions involving multiple matrix and vector operations, the order in which you perform these operations can greatly affect the computational cost. By strategically choosing the sequence of calculations, you can minimize the number of required operations and optimize performance.
 
 Matrix multiplication is associative but generally not commutative; matrix addition is both associative and commutative. The dot product is commutative, and scalars commute with everything. Some structured matrices (e.g., diagonal) commute with each other, but in general do \emph{not} assume $ \mathbf{A}\mathbf{B}=\mathbf{B}\mathbf{A} $. These properties allow some flexibility in how calculations are grouped and ordered.
@@ -442,9 +447,9 @@ This requires two matrix-matrix multiplications and one matrix-vector multiplica
 Symmetric matrices are matrices that are equal to their own transpose: $ \mathbf{A} = \mathbf{A}^\top $. For a symmetric matrix $ \mathbf{A} \in \mathbb{R}^{N\times N} $, a natural question to ask is: can we halve the work in $\mathbf{y}=\mathbf{A}\mathbf{x}$ by only touching one triangle?  You \emph{can} store just one triangle (saving about half the memory), but you \emph{cannot} cut the arithmetic in half. To see why, write out the updates if you traverse only the upper triangle, and you'll find that the number of operations needed still comes out to $O(N^2)$. Where symmetry really shines is in factorizations/solves.
 
 
-\subsection{Vector and Matrix Norms}
+\section{Vector and Matrix Norms}
 
-\subsubsection{Norms of Vectors}
+\subsection{Norms of Vectors}
 A \textbf{norm} is a function that assigns a non-negative length or size to vectors. The most common norms are:
 \begin{itemize}
     \item \textbf{1-Norm}:
@@ -495,10 +500,10 @@ We note that the 1-norm, 2-norm, and infinity norm are special cases of the p-no
     \end{align*}
 \end{exampleBox}
 
-\subsubsection{Norms of Matrices}
+\subsection{Norms of Matrices}
 Matrix norms extend the concept of vector norms to matrices, providing a measure of the ``size'' or ``magnitude'' of a matrix. Just as vector norms quantify the length of vectors, matrix norms help assess various properties of matrices, such as their behavior under linear transformations, stability in numerical computations, and convergence in iterative methods.
 
-\paragraph{Induced Matrix Norms}
+\subsubsection{Induced Matrix Norms}
 One fundamental way to define a matrix norm is through an \textbf{induced (operator) norm}, which is derived from a vector norm. Given a vector norm $ \|\cdot\| $ on $ \mathbb{R}^n $ or $ \mathbb{C}^n $, the induced matrix norm for a matrix $ \mathbf{A} \in \mathbb{R}^{m \times n} $ is defined as
 \begin{equation*}
     \|\mathbf{A}\| = \max_{\mathbf{x} \neq \mathbf{0}} \frac{\|\mathbf{A}\mathbf{x}\|}{\|\mathbf{x}\|}
@@ -515,7 +520,7 @@ Induced norms satisfy the following properties:
 \end{itemize}
 The submultiplicative property is a very important property of induced/operator norms! This property allows us to bound the norm of a product of matrices by the product of their norms and will be very useful in the analysis of iterative methods.
 
-\paragraph{Common Matrix Norms}
+\subsubsection{Common Matrix Norms}
 Several matrix norms are commonly used. Below, we take a look at a few of these norms and their interpretations. The first three are induced norms derived from vector norms (and in particular $p$-norms), while the last norm is a matrix-specific norm.
 \begin{itemize}
     \item \textbf{1-Norm (Maximum Column Sum)}:
@@ -543,14 +548,14 @@ Several matrix norms are commonly used. Below, we take a look at a few of these 
     Again, this is NOT an induced norm. The Frobenius norm is very similar to the Euclidean norm (which is defined for vectors). It measures the ``overall size'' of the matrix by taking the square root of the sum of the squares of all its entries. This norm is particularly useful in applications where the collective magnitude of all matrix elements is of interest, such as in least squares problems and matrix approximations.
 \end{itemize}
 
-\paragraph{Relationships Between Matrix Norms}
+\subsubsection{Relationships Between Matrix Norms}
 For any matrix $ \mathbf{A} $ of size $ m \times n $ and rank $ r $, the following inequalities hold:
 \begin{align*}
     \|\mathbf{A}\|_2 &\leq \|\mathbf{A}\|_F \leq \sqrt{r}\,\|\mathbf{A}\|_2, \\
     \|\mathbf{A}\|_2 &\leq \sqrt{\|\mathbf{A}\|_1 \, \|\mathbf{A}\|_\infty}.
 \end{align*}
 
-\subsection{Numerical Solution of Linear Systems}
+\section{Introduction to Systems of Linear Equations}
 Linear systems arise in many scientific and engineering applications (even in seemingly nonlinear cases, we can Taylor expand to a locally linear system), so we should develop tools to numerically solve them. The general form of a linear system is
 \begin{equation}
     \mathbf{A}\mathbf{x} = \mathbf{b}
@@ -559,7 +564,7 @@ Linear systems arise in many scientific and engineering applications (even in se
 where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for a given $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
 
 
-\subsubsection{Condition Number}
+\subsection{Condition Number}
 Before looking at specific direct and iterative methods, we introduce the notion of the \textbf{condition number} of a matrix $\mathbf{A}$, denoted $\kappa(\mathbf{A})$, which helps us understand the sensitivity of a linear system to perturbations and numerical errors. We hope that for our linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, small perturbations in $\mathbf{b}$ will lead to small changes in $\mathbf{x}$. Such a system is said to be well-conditioned. However, if small perturbations in $\mathbf{b}$ lead to large changes in $\mathbf{x}$, the system is said to be ill-conditioned. The meaning of ``small'' and ``large'' changes depending on the context (e.g., it could be relative or absolute). The condition number quantifies this sensitivity.
 
 To define the condition number, we consider a linear system $ \mathbf{A}\mathbf{x} = \mathbf{b} $ with an exact solution $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $. If we add a small perturbation (error) $\delta\mathbf{b}$ to $\mathbf{b}$, then the solution vector $\mathbf{x}$ will also change by some amount $\delta\mathbf{x}$ (which we think of as the error in $\mathbf{x}$ since the original perturbation is assumed to represent an error) so that the linear system remains satisfied:
@@ -646,8 +651,8 @@ Even simpler than preconditioning is \textbf{scaling} (often called equilibratio
 
 
 
-\subsection{Invertibility and Determinants}
-\subsubsection{Determinant}
+\section{Invertibility and Determinants}
+\subsection{Determinant}
 For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation. This is why a matrix is \textbf{invertible if and only if its determinant is non-zero}.
 
 The determinant has several important properties, including $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $, the multiplicative property $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $, and the fact that for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $.
@@ -663,7 +668,7 @@ For a $3\times 3$ matrix, one common method is cofactor expansion along the firs
 The determinant of a general $n \times n$ matrix can be defined recursively via Laplace expansion, which expresses it as a signed sum of the entries of any chosen row or column times the determinants of their $(n-1) \times (n-1)$ minors. This recursion reduces ultimately to the $2 \times 2$ case. However, in practice, Laplace expansion is only used for small matrices; large determinants are almost always computed using Gaussian elimination or LU decomposition instead.
 
 
-\subsubsection{Inverse of a Matrix}
+\subsection{Inverse of a Matrix}
 Conceptually, the inverse of a matrix, denoted $ \mathbf{A}^{-1} $, is an operator that reverses the linear transformation performed by the original matrix $ \mathbf{A} $. If $ \mathbf{A} $ transforms a vector $ \mathbf{x} $ into $ \mathbf{y} $ (i.e., $ \mathbf{y} = \mathbf{A}\mathbf{x} $), then its inverse $ \mathbf{A}^{-1} $ transforms $ \mathbf{y} $ back to the original vector $ \mathbf{x} $ (i.e., $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{y} $).
 
 Formally, a square matrix $ \mathbf{A} $ is \textbf{invertible} (or \textbf{non-singular}) if there exists a matrix $ \mathbf{A}^{-1} $ such that:
@@ -684,91 +689,10 @@ While the $2 \times 2$ formula is simple, computing the inverse for a general $n
 
 
 
-\subsection{Eigenvalues and Eigenvectors}
-A linear transformation, represented by a matrix $\mathbf{A}$, acts on vectors, typically changing their direction. However, for many square matrices, there exist special non-zero vectors called \textbf{eigenvectors} whose direction is unchanged by the transformation. When multiplied by the matrix, these vectors are simply scaled: stretched, shrunk, and/or flipped.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{figs/linear-algebra/eigenvalue_equation.pdf}
-    \caption{Visualization of the eigenvalue equation $ \mathbf{A}\mathbf{v} = \lambda \mathbf{v} $, where $\mathbf{v} = (v_1, v_2)$.}
-    \label{fig:eigenvalue-equation}
-\end{figure}
+\section{Existence and Uniqueness of Solutions}
 
-Formally, for a matrix $\mathbf{A} \in \mathbb{R}^{n\times n}$, a non-zero vector $\mathbf{v}$ is an eigenvector if it satisfies the equation:
-$$ \mathbf{A}\mathbf{v} = \lambda \mathbf{v} $$
-The scalar $\lambda$ is the corresponding \textbf{eigenvalue}, which represents the scaling factor. An $n \times n$ matrix has at most $n$ distinct eigenvalues.
-
-\begin{warningBox}
-    \textbf{Warning:} An eigenvector is not unique. If $\mathbf{v}$ is an eigenvector, then so is any scalar multiple $c\mathbf{v}$ for $c \neq 0$. They both correspond to the same eigenvalue and define the same invariant direction.
-\end{warningBox}
-
-The concept is very important for understanding iterative methods. For example, look at the Jacobi iteration error propagation (which we will encounter shortly), $e_{t+1} = \mathbf{S}e_t$, which implies $e_t = \mathbf{S}^t e_0$. Eigenvalues and eigenvectors tell us what happens to a vector when it's multiplied by the same matrix repeatedly.
-
-\subsubsection{Finding Eigenvalues and Eigenvectors}
-
-To find eigenvalues, we rearrange the defining equation:
-$$ \mathbf{A}\mathbf{v} - \lambda \mathbf{v} = 0 \implies (\mathbf{A} - \lambda \mathbf{I})\mathbf{v} = 0 $$
-For this equation to have a non-trivial solution for $\mathbf{v}$ (i.e., $\mathbf{v} \neq 0$), the matrix $(\mathbf{A} - \lambda \mathbf{I})$ must be singular. This means its determinant must be zero.
-$$ \det(\mathbf{A} - \lambda \mathbf{I}) = 0 $$
-This equation defines the \textbf{characteristic polynomial} of $\mathbf{A}$, an $n$-degree polynomial in $\lambda$. Its $n$ roots (which may be real or complex and are counted with algebraic multiplicity) are the eigenvalues of $\mathbf{A}$.
-
-Solving the characteristic polynomial is practical for small, textbook examples. However, this method is generally ill-conditioned and not recommended for numerical work with larger matrices; robust iterative algorithms (e.g., QR/Schur) are used in practice.
-
-Once an eigenvalue $\lambda_i$ is found, the corresponding eigenvector(s) $\mathbf{v}_i$ are found by solving the linear system $(\mathbf{A} - \lambda_i \mathbf{I})\mathbf{v}_i = 0$, which is equivalent to finding the null space of $(\mathbf{A} - \lambda_i \mathbf{I})$.
-
-\begin{exampleBox}
-    \textbf{Example (finding eigenvalues and eigenvectors):}
-    Let $\mathbf{A} = \begin{bmatrix} -2 & 1 \\ 1 & -2 \end{bmatrix}$.
-
-    \textbf{1. Find Eigenvalues:}
-    Solve $\det(\mathbf{A} - \lambda \mathbf{I}) = 0$:
-    $$ \det \begin{bmatrix} -2-\lambda & 1 \\ 1 & -2-\lambda \end{bmatrix} = (-2-\lambda)^2 - 1 = \lambda^2 + 4\lambda + 3 = 0 $$
-    Factoring gives $(\lambda+3)(\lambda+1)=0$. The eigenvalues are $\lambda_1 = -3$ and $\lambda_2 = -1$.
-
-    \textbf{2. Find Eigenvectors:}
-    For $\lambda_1 = -3$, we solve $(\mathbf{A} - (-3)\mathbf{I})\mathbf{v}_1 = 0$:
-    $$ \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies v_1 + v_2 = 0 $$
-    An eigenvector is $\mathbf{v}_1 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$.
-
-    For $\lambda_2 = -1$, we solve $(\mathbf{A} - (-1)\mathbf{I})\mathbf{v}_2 = 0$:
-    $$ \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies -v_1 + v_2 = 0 $$
-    An eigenvector is $\mathbf{v}_2 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$.
-\end{exampleBox}
-
-\subsubsection{Multiplicity and Diagonalizability}
-
-The number of times an eigenvalue appears as a root of the characteristic polynomial is its \textbf{algebraic multiplicity}. The number of linearly independent eigenvectors for that eigenvalue is its \textbf{geometric multiplicity}. For any eigenvalue, $1 \le \text{geometric multiplicity} \le \text{algebraic multiplicity}$. A matrix is called \textbf{defective} if for some eigenvalue its geometric multiplicity is less than its algebraic multiplicity; equivalently, it does not have \(n\) linearly independent eigenvectors. A matrix with a ``complete set'' of eigenvectors (geometric = algebraic multiplicity for all eigenvalues) is \textbf{diagonalizable}.
-
-\subsubsection{Eigendecomposition}
-If an $n \times n$ matrix $\mathbf{A}$ is diagonalizable, it has $n$ linearly independent eigenvectors $\{\mathbf{v}_1, \dots, \mathbf{v}_n\}$. We can bundle these into a matrix $\mathbf{W} = [\mathbf{v}_1 | \dots | \mathbf{v}_n]$ and the corresponding eigenvalues into a diagonal matrix $\mathbf{\Lambda}$. The eigenvalue equation for all eigenvectors can be written compactly as:
-$$ \mathbf{A}\mathbf{W} = \mathbf{W}\mathbf{\Lambda} $$
-This leads to the \textbf{eigendecomposition} of $\mathbf{A}$:
-$$ \mathbf{A} = \mathbf{W} \mathbf{\Lambda} \mathbf{W}^{-1} \quad \text{and} \quad \mathbf{\Lambda} = \mathbf{W}^{-1} \mathbf{A} \mathbf{W} $$
-This decomposition reveals the fundamental behavior of $\mathbf{A}$ as a simple scaling along the eigenvector axes.
-
-\begin{theoremBox}
-    \textbf{Properties and Special Cases} \\
-    For a matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ with eigenvalues $\lambda_1, \dots, \lambda_n$:
-    \begin{itemize}
-        \item The determinant is the product of its eigenvalues: $\det(\mathbf{A}) = \prod_{i=1}^n \lambda_i$.
-        \item The trace is the sum of its eigenvalues: $\operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n \lambda_i$.
-        \item The eigenvalues of a triangular matrix are its diagonal entries.
-    \end{itemize}
-    If $\mathbf{A}$ is a real symmetric matrix ($\mathbf{A} = \mathbf{A}^T$):
-    \begin{itemize}
-        \item It is always diagonalizable and has a complete set of orthonormal eigenvectors.
-        \item All its eigenvalues are real.
-        \item Its eigendecomposition is $\mathbf{A} = \mathbf{W} \mathbf{\Lambda} \mathbf{W}^T$, where $\mathbf{W}$ is an orthogonal matrix ($\mathbf{W}^{-1} = \mathbf{W}^T$).
-        \item If $\mathbf{A}$ is positive definite, all its eigenvalues are positive ($\lambda_i > 0$).
-    \end{itemize}
-\end{theoremBox}
-
-
-
-\subsection{Existence and Uniqueness of Solutions}
-
-\subsubsection{Vector Spaces and Subspaces}
-\paragraph{Linear Combinations and Span} % SS: probably we should explain this later, after introducing the vector space.
+\subsection{Linear Combinations and Span} % SS: probably we should explain this later, after introducing the vector space.
 A \textbf{linear combination} of vectors $ \mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k $ is an expression of the form:
 \begin{equation*}
     \mathbf{w} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k
@@ -782,7 +706,7 @@ where $ c_1, c_2, \ldots, c_k $ are scalars. The set of all possible linear comb
     \textbf{Example}: Consider vectors $ \mathbf{v}_1 = \begin{bmatrix}1 \\ 0\end{bmatrix} $ and $ \mathbf{v}_2 = \begin{bmatrix}0 \\ 1\end{bmatrix} $ in $ \mathbb{R}^2 $. Their span is the entire $ \mathbb{R}^2 $ plane since any vector $ \mathbf{w} = \begin{bmatrix}w_1 \\ w_2\end{bmatrix} $ can be written as $ w_1 \mathbf{v}_1 + w_2 \mathbf{v}_2 $
 \end{exampleBox}
 
-\paragraph{Linear Independence and Basis}
+\subsection{Linear Independence and Basis}
 Vectors $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ are \textbf{linearly independent} if the only solution to
 \begin{equation*}
     c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k = \mathbf{0}
@@ -791,14 +715,14 @@ is $ c_1 = c_2 = \ldots = c_k = 0 $.
 
 A set of vectors that is linearly independent and spans the vector space is called a \textbf{basis}. The number of vectors in a basis equals the \textbf{dimension} of the space.
 
-% \subsubsection{The Zero Vector}
+% \subsection{The Zero Vector}
 % The \textbf{zero vector} $ \mathbf{0} $ in $ \mathbb{R}^n $ is:
 % \begin{equation*}
 %     \mathbf{0} = \begin{bmatrix}0 \\ 0 \\ \vdots \\ 0\end{bmatrix}
 % \end{equation*}
 % It acts as the additive identity: $ \mathbf{v} + \mathbf{0} = \mathbf{v} $.
 
-\paragraph{The Unit Vectors}
+\subsection{The Unit Vectors}
 The \textbf{unit vectors} in $ \mathbb{R}^n $ are:
 \begin{equation*}
     \mathbf{e}_i = \begin{bmatrix}0 \\ \vdots \\ 1 \\ \vdots \\ 0\end{bmatrix}, \quad \text{where } (\mathbf{e}_{i})_j = \begin{cases} 1 & \text{if } i = j \\ 0 & \text{otherwise} \end{cases}
@@ -808,7 +732,7 @@ The unit vectors form a basis for $ \mathbb{R}^n $, meaning any vector $ \mathbf
     \textbf{Example}: In $ \mathbb{R}^3 $, the unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
 \end{exampleBox}
 
-\paragraph{Properties of Vector Spaces}\label{sec:vector-space}
+\subsection{Properties of Vector Spaces}\label{sec:vector-space}
 For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c, d \in \mathbb{R} $, the following hold:
 \begin{enumerate}
     \item $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $ (commutativity)
@@ -821,12 +745,12 @@ For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c,
     \item $ 1\mathbf{v} = \mathbf{v} $ (multiplicative identity)
 \end{enumerate}
 
-\paragraph{Orthogonality}
+\subsection{Orthogonality}
 Vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ are \textbf{orthogonal} if $ \mathbf{u}^\top \mathbf{v} = 0 $. A set of vectors is \textbf{orthonormal} if vectors are mutually orthogonal and each has unit norm. A square matrix $ \mathbf{Q} $ is \textbf{orthogonal} if $ \mathbf{Q}^\top \mathbf{Q} = \mathbf{Q}\mathbf{Q}^\top = \mathbf{I} $, which implies $ \mathbf{Q}^{-1} = \mathbf{Q}^\top $ and that $ \|\mathbf{Q}\mathbf{x}\|_2 = \|\mathbf{x}\|_2 $ for all $ \mathbf{x} $.
 
 
 
-\subsubsubsection{The four fundamental subspaces}
+\subsection{The four fundamental subspaces}
 We next formalize when a linear system has a solution and when that solution is unique. When needed, we denote by $\mathbf{A}_i^c$ the $i$-th column and by $\mathbf{A}_i^r$ the $i$-th row.
 For a matrix $\mathbf{A}\in\mathbb{R}^{N\times M}$ there are four canonical subspaces:
 \begin{enumerate}
@@ -890,7 +814,7 @@ We can also look at things geometrically. The column space is a subspace (a line
 The column space is $\mathcal{R}(\mathbf{A})=\operatorname{span}\{(1,0,0)^{\top}\}$, a $1$-dimensional line in $\mathbb{R}^3$. Thus $\mathbf{b}_1$ lies on that line, so solutions exist (e.g., $x_1=1$ and $x_2,x_3$ arbitrary). The vector $\mathbf{b}_2$ lies off the line, so no solution exists.
 \end{exampleBox}
 
-\paragraph{Consistency via the left null space (Fredholm alternative)}
+\subsection{Consistency via the left null space (Fredholm alternative)}
 The system $\mathbf{A}\mathbf{x}=\mathbf{b}$ is solvable if and only if $\mathbf{b}\perp \mathcal{N}(\mathbf{A}^{\top})$; equivalently, $\mathbf{b}\in\mathcal{R}(\mathbf{A})$. In practice this gives a test: if $\{\mathbf{y}_1,\dots,\mathbf{y}_k\}$ is a basis of $\mathcal{N}(\mathbf{A}^{\top})$, then $\mathbf{A}\mathbf{x}=\mathbf{b}$ is consistent precisely when $\mathbf{y}_j^{\top}\mathbf{b}=0$ for all $j$.
 
 \begin{theoremBox}
@@ -911,7 +835,7 @@ The system $\mathbf{A}\mathbf{x}=\mathbf{b}$ is solvable if and only if $\mathbf
 The columns are $\mathbf{c}_1=(1,1,1,0)^{\top}$ and $\mathbf{c}_2=(0,0,0,1)^{\top}$, which are linearly independent. Hence $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$ and any consistent system has a unique solution. Concretely, a right-hand side $\mathbf{b}=(b_1,b_2,b_3,b_4)^{\top}$ is in $\mathcal{R}(\mathbf{A})$ iff $b_1=b_2=b_3$; when this holds, the unique solution is $x_1=b_1$ and $x_2=b_4$.
 \end{exampleBox}
 
-\paragraph{Rank and nullity} The rank and nullity of $\mathbf{A}\in\mathbb{R}^{N\times M}$ are
+\subsection{Rank and nullity} The rank and nullity of $\mathbf{A}\in\mathbb{R}^{N\times M}$ are
 \[
 \operatorname{rank}(\mathbf{A})=\dim\mathcal{R}(\mathbf{A}),
 \qquad
@@ -928,7 +852,7 @@ For every $\mathbf{A}\in\mathbb{R}^{N\times M}$,
 \end{theoremBox}
 An immediate consequence of the rank-nullity theorem is that if $M>N$ (more variables than equations), then $\operatorname{rank}(\mathbf{A})\le N$ so $\operatorname{nullity}(\mathbf{A})\ge M-N>0$. Thus, whenever a solution exists, it cannot be unique. Conversely, if $N>M$ (more equations than variables), uniqueness (when consistent) is possible exactly when $\mathbf{A}$ has full column rank $M$, but solvability for \emph{every} $\mathbf{b}\in\mathbb{R}^N$ is impossible since that would require rank $N>M$.
 
-\paragraph{Square case and invertibility} When $\mathbf{A}\in\mathbb{R}^{N\times N}$, the following are equivalent for a square system:
+\subsection{Square case and invertibility} When $\mathbf{A}\in\mathbb{R}^{N\times N}$, the following are equivalent for a square system:
 \begin{itemize}
     \item for every $\mathbf{b}\in\mathbb{R}^N$ there exists a \emph{unique} solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$
     \item $\mathbf{A}$ is invertible
@@ -945,12 +869,12 @@ Now, we return to the problem of finding the solution of \autoref{eq:linear-syst
 However, in practice, computing $ \mathbf{A}^{-1} $ directly is generally avoided for several important reasons: (1) computational cost, (2) numerical stability, and (3) memory requirements. For these reasons, numerical methods focus on solving linear systems without explicitly computing the inverse of $ \mathbf{A} $. There are two primary classes of numerical methods for solving linear systems: \textbf{direct methods} and \textbf{iterative methods}. Each has its own advantages and is suitable for different types of problems.
 
 
-\subsection{Direct Methods}
+\section{Numerical Solution of Linear Systems: Direct Methods}
 Direct methods are named for their ability to (given no round-off errors) determine the exact solution to a linear system within a finite number of steps. In practical applications, however, finite precision limits these methods to producing only approximate solutions.
 
 Direct methods take advantage of the fact that we can easily solve the system \autoref{eq:linear-system} when $ \mathbf{A} $ is upper triangular by using back substitution. Direct methods typically involve some variant of Gaussian elimination, which is a systematic procedure for transforming the coefficient matrix $ \mathbf{A} $ into an upper triangular form in order to be able to solve the system by back substitution. 
 
-\subsubsection{Back Substitution}
+\subsection{Back Substitution}
 Back substitution is a method for solving linear systems of equations that are in upper triangular form. The idea is to start with the last equation and solve for the last unknown, then use that result to solve for the second-to-last unknown, and so on (working backwards, hence the name). In mathematical terms, this is expressed as
 \begin{equation*}
     x_i = \frac{1}{a_{ii}} \left( b_i - \sum_{j=i+1}^{n} a_{ij} x_j \right) \quad \text{for } i = n, n-1, \dots, 1
@@ -983,7 +907,7 @@ where $ a_{ij} $ are the elements of the upper triangular matrix $ \mathbf{A} \i
     \end{align*}
 \end{exampleBox}
 
-\subsubsection{Gaussian Elimination}
+\subsection{Gaussian Elimination}
 We've seen how easy it is to solve a linear system when the coefficient matrix is upper triangular, so how can we get $\mathbf{A}$ into this form? One way is via Gaussian elimination. This involves a series of elementary row operations (interchanging rows, multiplying a row by a scalar, and adding a multiple of one row to another) to eliminate the elements below the diagonal. The key linear algebraic fact that makes this possible is that elementary row operations do not change the solution to the linear system.
 
 In general, the Gaussian elimination process begins by selecting the first pivot element $ a_{11} $ in the first row. If $ a_{11} $ is zero, a row swap is performed with a lower row that has a non-zero entry in the first column to avoid division by zero. Once the pivot is established, elementary row operations are applied to eliminate all entries below $ a_{11} $ in the first column. Specifically, for each row $ k > 1 $, the operation $ \text{Row}_k \leftarrow \text{Row}_k - \lambda_{k1} \cdot \text{Row}_1 $ is performed, where the multiplier $ \lambda_{k1} = a_{k1}/a_{11} $.
@@ -1103,10 +1027,91 @@ multiplications and subtractions (each). This results in an overall computationa
 
 Therefore, the overall computational complexity of solving a linear system with $n$ equations and $n$ unknowns using Gaussian elimination and back substitution is $ O(n^3) $. This is a very important result to keep in mind when working with large linear systems, as the computational cost grows cubically with the size of the system.
 
-\subsection{Iterative Methods}
+
+\section{Eigenvalues and Eigenvectors}
+A linear transformation, represented by a matrix $\mathbf{A}$, acts on vectors, typically changing their direction. However, for many square matrices, there exist special non-zero vectors called \textbf{eigenvectors} whose direction is unchanged by the transformation. When multiplied by the matrix, these vectors are simply scaled: stretched, shrunk, and/or flipped.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/linear-algebra/eigenvalue_equation.pdf}
+    \caption{Visualization of the eigenvalue equation $ \mathbf{A}\mathbf{v} = \lambda \mathbf{v} $, where $\mathbf{v} = (v_1, v_2)$.}
+    \label{fig:eigenvalue-equation}
+\end{figure}
+
+Formally, for a matrix $\mathbf{A} \in \mathbb{R}^{n\times n}$, a non-zero vector $\mathbf{v}$ is an eigenvector if it satisfies the equation:
+$$ \mathbf{A}\mathbf{v} = \lambda \mathbf{v} $$
+The scalar $\lambda$ is the corresponding \textbf{eigenvalue}, which represents the scaling factor. An $n \times n$ matrix has at most $n$ distinct eigenvalues.
+
+\begin{warningBox}
+    \textbf{Warning:} An eigenvector is not unique. If $\mathbf{v}$ is an eigenvector, then so is any scalar multiple $c\mathbf{v}$ for $c \neq 0$. They both correspond to the same eigenvalue and define the same invariant direction.
+\end{warningBox}
+
+The concept is very important for understanding iterative methods. For example, look at the Jacobi iteration error propagation (which we will encounter shortly), $e_{t+1} = \mathbf{S}e_t$, which implies $e_t = \mathbf{S}^t e_0$. Eigenvalues and eigenvectors tell us what happens to a vector when it's multiplied by the same matrix repeatedly.
+
+\subsection{Finding Eigenvalues and Eigenvectors}
+
+To find eigenvalues, we rearrange the defining equation:
+$$ \mathbf{A}\mathbf{v} - \lambda \mathbf{v} = 0 \implies (\mathbf{A} - \lambda \mathbf{I})\mathbf{v} = 0 $$
+For this equation to have a non-trivial solution for $\mathbf{v}$ (i.e., $\mathbf{v} \neq 0$), the matrix $(\mathbf{A} - \lambda \mathbf{I})$ must be singular. This means its determinant must be zero.
+$$ \det(\mathbf{A} - \lambda \mathbf{I}) = 0 $$
+This equation defines the \textbf{characteristic polynomial} of $\mathbf{A}$, an $n$-degree polynomial in $\lambda$. Its $n$ roots (which may be real or complex and are counted with algebraic multiplicity) are the eigenvalues of $\mathbf{A}$.
+
+Solving the characteristic polynomial is practical for small, textbook examples. However, this method is generally ill-conditioned and not recommended for numerical work with larger matrices; robust iterative algorithms (e.g., QR/Schur) are used in practice.
+
+Once an eigenvalue $\lambda_i$ is found, the corresponding eigenvector(s) $\mathbf{v}_i$ are found by solving the linear system $(\mathbf{A} - \lambda_i \mathbf{I})\mathbf{v}_i = 0$, which is equivalent to finding the null space of $(\mathbf{A} - \lambda_i \mathbf{I})$.
+
+\begin{exampleBox}
+    \textbf{Example (finding eigenvalues and eigenvectors):}
+    Let $\mathbf{A} = \begin{bmatrix} -2 & 1 \\ 1 & -2 \end{bmatrix}$.
+
+    \textbf{1. Find Eigenvalues:}
+    Solve $\det(\mathbf{A} - \lambda \mathbf{I}) = 0$:
+    $$ \det \begin{bmatrix} -2-\lambda & 1 \\ 1 & -2-\lambda \end{bmatrix} = (-2-\lambda)^2 - 1 = \lambda^2 + 4\lambda + 3 = 0 $$
+    Factoring gives $(\lambda+3)(\lambda+1)=0$. The eigenvalues are $\lambda_1 = -3$ and $\lambda_2 = -1$.
+
+    \textbf{2. Find Eigenvectors:}
+    For $\lambda_1 = -3$, we solve $(\mathbf{A} - (-3)\mathbf{I})\mathbf{v}_1 = 0$:
+    $$ \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies v_1 + v_2 = 0 $$
+    An eigenvector is $\mathbf{v}_1 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$.
+
+    For $\lambda_2 = -1$, we solve $(\mathbf{A} - (-1)\mathbf{I})\mathbf{v}_2 = 0$:
+    $$ \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies -v_1 + v_2 = 0 $$
+    An eigenvector is $\mathbf{v}_2 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$.
+\end{exampleBox}
+
+\subsection{Multiplicity and Diagonalizability}
+
+The number of times an eigenvalue appears as a root of the characteristic polynomial is its \textbf{algebraic multiplicity}. The number of linearly independent eigenvectors for that eigenvalue is its \textbf{geometric multiplicity}. For any eigenvalue, $1 \le \text{geometric multiplicity} \le \text{algebraic multiplicity}$. A matrix is called \textbf{defective} if for some eigenvalue its geometric multiplicity is less than its algebraic multiplicity; equivalently, it does not have \(n\) linearly independent eigenvectors. A matrix with a ``complete set'' of eigenvectors (geometric = algebraic multiplicity for all eigenvalues) is \textbf{diagonalizable}.
+
+\subsection{Eigendecomposition}
+If an $n \times n$ matrix $\mathbf{A}$ is diagonalizable, it has $n$ linearly independent eigenvectors $\{\mathbf{v}_1, \dots, \mathbf{v}_n\}$. We can bundle these into a matrix $\mathbf{W} = [\mathbf{v}_1 | \dots | \mathbf{v}_n]$ and the corresponding eigenvalues into a diagonal matrix $\mathbf{\Lambda}$. The eigenvalue equation for all eigenvectors can be written compactly as:
+$$ \mathbf{A}\mathbf{W} = \mathbf{W}\mathbf{\Lambda} $$
+This leads to the \textbf{eigendecomposition} of $\mathbf{A}$:
+$$ \mathbf{A} = \mathbf{W} \mathbf{\Lambda} \mathbf{W}^{-1} \quad \text{and} \quad \mathbf{\Lambda} = \mathbf{W}^{-1} \mathbf{A} \mathbf{W} $$
+This decomposition reveals the fundamental behavior of $\mathbf{A}$ as a simple scaling along the eigenvector axes.
+
+\begin{theoremBox}
+    \textbf{Properties and Special Cases} \\
+    For a matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ with eigenvalues $\lambda_1, \dots, \lambda_n$:
+    \begin{itemize}
+        \item The determinant is the product of its eigenvalues: $\det(\mathbf{A}) = \prod_{i=1}^n \lambda_i$.
+        \item The trace is the sum of its eigenvalues: $\operatorname{tr}(\mathbf{A}) = \sum_{i=1}^n \lambda_i$.
+        \item The eigenvalues of a triangular matrix are its diagonal entries.
+    \end{itemize}
+    If $\mathbf{A}$ is a real symmetric matrix ($\mathbf{A} = \mathbf{A}^T$):
+    \begin{itemize}
+        \item It is always diagonalizable and has a complete set of orthonormal eigenvectors.
+        \item All its eigenvalues are real.
+        \item Its eigendecomposition is $\mathbf{A} = \mathbf{W} \mathbf{\Lambda} \mathbf{W}^T$, where $\mathbf{W}$ is an orthogonal matrix ($\mathbf{W}^{-1} = \mathbf{W}^T$).
+        \item If $\mathbf{A}$ is positive definite, all its eigenvalues are positive ($\lambda_i > 0$).
+    \end{itemize}
+\end{theoremBox}
+
+
+\section{Numerical Solution of Linear Systems: Iterative Methods}
 Iterative methods attempt to solve linear systems ($\mathbf{A}\mathbf{x} = \mathbf{b}$) by generating a sequence of improving approximate solutions. They do not require Gaussian elimination and generally scale better for large systems. However, even with infinite precision, iterative methods can only obtain an approximate solution in a finite number of steps\footnote{Actually, some iterative methods, like CG on SPD, are finite-termination in exact arithmetic, but we aren't going to cover that in this course.}. We cover Jacobi and Gauss-Seidel iteration, two of the most common iterative methods, in this course. But one more extremely popular method deserves at least a mention: the conjugate gradient method.\footnote{A good resource for this is Prof. Jonathan Shewchuk's guide \textit{An Introduction to the Conjugate Gradient Method Without the Agonizing Pain}.\autocite{shewchuk1994}}
 
-\subsubsection{Jacobi Iteration}
+\subsection{Jacobi Iteration}
 Jacobi iteration is an iterative method for solving linear systems. Let's build some intuition for this method before giving the matrix form of the update formula. Suppose we have the linear system
 \begin{align*}
     a_{11}x_1 + a_{12}x_2 + \dots + a_{1n} & = b_1 \\
@@ -1147,7 +1152,7 @@ This is mathematically equivalent to the formulation we have presented here; don
 
 \textbf{Computational Complexity}\quad Each iteration of the Jacobi method involves diagonal matrix inversion, matrix-vector multiplications, and vector updates. Specifically, computing $\mathbf{R}\mathbf{x}^{(i)}$ requires $O(n^2)$ operations for an $n \times n$ matrix $\mathbf{A}$, and the subsequent vector operations also scale quadratically. Inverting a diagonal matrix is trivial and requires only $n$ divisions. Therefore, the computational complexity of each Jacobi iteration is $O(n^2)$.
 
-\subsubsection{Convergence of Jacobi Iteration}
+\subsection{Convergence of Jacobi Iteration}
 We have seen that we can generate a sequence of improving approximations $\{\mathbf{x}^{(i)}\}$ to the solution of a linear system using the Jacobi method. But how do we know that this sequence converges at all, and if it converges, that it converges to the true solution $\mathbf{x}^\star$? Convergence is not generally guaranteed for iterative methods, let alone convergence to the true solution.
 
 \textbf{Convergence to the Correct Solution}\quad We claim that if the Jacobi sequence $\{\mathbf{x}^{(i)}\}$ converges, it indeed converges to the correct solution. To see this, we take the limit on both sides of the iterative equation:
@@ -1208,7 +1213,7 @@ Here, $\alpha$ is referred to as the \textbf{rate of convergence}. To achieve a 
 \end{equation*}
 A smaller $\alpha$ indicates faster convergence. However, the Jacobi method can be relatively slow compared to other iterative methods like Gauss-Seidel or successive over-relaxation (SOR, not covered in this course), especially when $\alpha$ is close to 1.
 
-\subsubsection{Gauss-Seidel Iteration}
+\subsection{Gauss-Seidel Iteration}
 Gauss-Seidel iteration is another iterative method for solving linear systems, similar to the Jacobi method but often exhibiting faster convergence. Like Jacobi iteration, it builds a sequence of approximations to the solution, but it uses the most recently updated values within each iteration to enhance convergence speed.
 
 Consider the same linear system as before:
@@ -1248,7 +1253,7 @@ This formulation allows for sequential updates of the solution vector, utilizing
 
 \textbf{Computational Complexity}\quad Each Gauss-Seidel iteration involves solving a lower triangular system due to the $\mathbf{L} + \mathbf{D}$ term. Luckily, we can do this with forward substitution with $O(n^2)$ operations, so the computational complexity remains similar to Jacobi. That is, it is $O(n^2)$ operations per iteration for an $n \times n$ matrix $\mathbf{A}$.
 
-\subsubsection{Convergence of Gauss-Seidel Iteration}
+\subsection{Convergence of Gauss-Seidel Iteration}
 As with the Jacobi method, the convergence of Gauss-Seidel iteration is not universally guaranteed. However, under certain conditions, convergence can be assured, and when it does converge, it does so to the correct solution.
 
 \textbf{Convergence to the Correct Solution}\quad Assuming the Gauss-Seidel sequence $\{\mathbf{x}^{(k)}\}$ converges to a limit $\mathbf{x}^\star$, we can take the limit on both sides of the iterative equation:
@@ -1292,7 +1297,7 @@ Since $\alpha < 1$ for convergent systems, a smaller $\alpha$ results in faster 
 
 In practice, Gauss-Seidel is preferred over Jacobi when faster convergence is desired and when the system structure permits sequential updates without significant computational overhead. For large-scale systems where parallel computation is essential, Jacobi may still be advantageous despite its slower convergence rate.
 
-\subsubsection{Condition Number and Convergence Rate}
+\subsection{Condition Number and Convergence Rate}
 To understand the impact of the condition number on the convergence rate of iterative methods, we consider the Richardson method, an iterative method defined by the update rule
 \begin{equation*}
     \mathbf{x}^{(i+1)} = \mathbf{x}^{(i)} + \omega (\mathbf{b} - \mathbf{A}\mathbf{x}^{(i)})
