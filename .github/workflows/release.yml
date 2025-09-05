@@ -15,6 +15,7 @@ jobs:
       - name: Build PDF
         run: |
           make build
+          mv main.pdf 1034_Lecture_Notes.pdf
 
       - name: Publish rolling release
         uses: ncipollo/release-action@v1
@@ -23,7 +24,7 @@ jobs:
           name: "Lecture Notes for MIT Course 10.34: Numerical Methods in Chemical Engineering (rolling release)"
           body: |
             # Release Notes
-            The latest lecture note pdf file was generated on ${{ github.event.head_commit.timestamp }} in commit ${{ github.event.head_commit.id }} Please download the `main.pdf` artifact below.
+            The latest lecture note pdf file was generated on ${{ github.event.head_commit.timestamp }} in commit ${{ github.event.head_commit.id }} Please download the `1034_Lecture_Notes.pdf` artifact below.
 
             ## About
             This lecture note is created by Matthew Cox while he was taking 10.34 in Fall 2024. 
@@ -34,7 +35,7 @@ jobs:
 
             ## How to Contribute
             Please feel free to open issues or submit pull requests to help improve the quality of this lecture note. Your contributions are greatly appreciated!
-          artifacts: "main.pdf"
+          artifacts: "1034_Lecture_Notes.pdf"
           allowUpdates: true
           removeArtifacts: true
           makeLatest: true
