@@ -31,7 +31,6 @@
 \usepackage{parskip}
 \usepackage{verbatim}
 \usepackage{csquotes}
-\usepackage{tikz}
 \usepackage{fancyhdr}
 \usepackage{cancel}
 \usepackage{enumitem}
@@ -108,4 +107,18 @@
 \numberwithin{table}{section}
 \numberwithin{equation}{section}
 
+% TikZ stuff, can clean this up later -- sorry for the clutter
+\usepackage{tikz}
+\usepackage{pgfplots}
 \usetikzlibrary{decorations.pathreplacing,calligraphy}
+\usetikzlibrary{arrows.meta,calc,shapes.misc, positioning, shapes}
+\usetikzlibrary{intersections,shapes.geometric,shapes.symbols}
+\usetikzlibrary{arrows.meta,calc,shapes.symbols, shapes}
+\tikzset{
+  axis/.style={thick,-{Latex}},
+  curve/.style={very thick},
+  newton/.style={blue!80!black,very thick,-{Latex[length=3mm]}}
+}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
