@@ -1,5 +1,5 @@
 \chapter{Systems of Nonlinear Equations}
-Many problems in chemical engineering require solving systems of nonlinear equations. Nonlinear systems can exhibit interesting and sometimes surprising behavior. They may have no solutions, a unique solution, or multiple solutions. This section will explore methods for finding these solutions and understanding when they exist.
+Many problems in chemical engineering require solving systems of nonlinear equations. Nonlinear systems can exhibit interesting and sometimes surprising behavior. As we will see, a system of nonlinear equations may have no solutions, a single unique solution, a finite number of solutions, or an infinite number of solutions; we will not have the same guarantees as we saw for systems of linear equations. This section will explore methods for finding these solutions and understanding when they exist.
 
 \section{Introduction to Nonlinear Systems}
 
@@ -7,7 +7,7 @@ We are interested in solving systems of the form:
 \begin{equation}
 \mathbf{f}(\mathbf{x}) = \mathbf{0}
 \end{equation}
-where $\mathbf{x} \in \mathbb{R}^N$ is our vector of unknowns and $\mathbf{f}: \mathbb{R}^N \rightarrow \mathbb{R}^N$ is a vector-valued function. The solutions $\mathbf{x}^*$ that satisfy $\mathbf{f}(\mathbf{x}^*) = \mathbf{0}$ are called the \textit{roots} of $\mathbf{f}$. Linear equations can be written in this framework as $\mathbf{f}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$.
+where $\mathbf{x} \in \mathbb{R}^N$ is our vector of unknowns and $\mathbf{f}: \mathbb{R}^N \rightarrow \mathbb{R}^N$ is a vector-valued function. The solutions $\mathbf{x}^*$ that satisfy $\mathbf{f}(\mathbf{x}^*) = \mathbf{0}$ are called the \textit{roots} of $\mathbf{f}$. Linear equations can be written in this framework as $\mathbf{f}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$. 
 
 Common examples of nonlinear systems of equations in chemical engineering include: (1) equations of state, (2) steady-state energy balances, and (3) steady-state mass balances with nonlinear reaction rates.
 
@@ -25,19 +25,47 @@ f(\hat{v}; \hat{P}, \hat{T}) = \left(\hat{P} + \frac{3}{\hat{v}^2}\right)\left(\
 
 % \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.8\textwidth]{figs/nle/vdw_eos.pdf}
+\includegraphics[width=0.6\textwidth]{figs/nle/vdw_eos.pdf}
 \end{center}
 % \caption{Solutions to the van der Waals equation at different temperatures. The number of real roots depends on the thermodynamic conditions.}
 % \end{figure}
 
-Depending on the values of $\hat{P}$ and $\hat{T}$, this equation can have 1 or 3 real solutions for the molar volume, corresponding to different phases of matter. In the plot above, we see that for a given reduced temperature $\hat{T} = 0.9$ (blue line) and reduced pressure $\hat{P} = \hat{P}_0$, there are three real solutions for the molar volume (only two of which are physically stable---the middle one leads to phase separation, as you will learn in 10.40). Meanwhile, for a given reduced temperature $\hat{T} = 1.1$ (red line), there is only one real solution.
+Depending on the values of $\hat{P}$ and $\hat{T}$, this equation can have 1 or 3 real solutions for the molar volume, corresponding to different phases of matter. In the plot above, we see that for a given reduced temperature $\hat{T} = 0.9$ (blue line) and reduced pressure $\hat{P} = \hat{P}_0$, there are three real solutions for the molar volume (only two of which are physically stable---the middle one leads to phase separation, as you will learn in 10.40). Meanwhile, for the higher reduced temperature $\hat{T} = 1.1$ (red line), there is only one real solution to $\hat v$ that will satisfy the original system of equations for any given value of $\hat{P}$. % TODO: update plot to show a specific intersection with \hat P_0
 \end{exampleBox}
     
-For linear systems, we have a clean criterion: the rank test tells us exactly when solutions exist and how many there are. Nonlinear systems are different. There is no universal test that applies across all problems. Instead, the number of solutions depends on the specific structure of the system, and this global picture can shift as parameters vary (as illustrated, for example, by the van der Waals equation example above). This means that without additional structure or assumptions, we cannot know in advance if a nonlinear system has no solutions, exactly one solution, or multiple solutions. The numerical methods/techniques we choose to solve systems of nonlinear equations must be robust to this uncertainty.
+For linear systems $\mathbf{Ax=b}$, we have a clean criterion: the rank of $\mathbf{A}$ tells us exactly when solutions exist and how many there are. Nonlinear systems are different. There is no universal test that applies across all problems. Instead, the number of solutions depends on the specific structure of the system, and this global picture can shift as parameters vary (as illustrated, for example, by the van der Waals equation example above). Only in special cases do we have similar guarantees; for example, an $N$\textsuperscript{th} order polynomial has at most $N$ distinct roots. Without additional structure or assumptions, we cannot know in advance if a nonlinear system $\mathbf{f(x)=0}$ has no solutions, exactly one solution, or multiple solutions. The numerical methods/techniques we choose to solve systems of nonlinear equations must be robust to this uncertainty.
 
-\section{Local Uniqueness and the Jacobian}
+\section{The Jacobian}
 
-Before we look into solution methods, we need to understand when solutions exist and when they are unique. The concept of local uniqueness helps us with this.
+Throughout this section of the course and beyond, when working with vector-valued functions, we will make extensive use of the \textbf{Jacobian matrix}. This is one way to refer to the first derivative of a vector-valued function.
+
+\begin{definitionBox}
+\textbf{Definition: Jacobian Matrix.}
+For a function $\mathbf{f}: \mathbb{R}^M \rightarrow \mathbb{R}^N$, the Jacobian matrix $\mathbf{J}(\mathbf{x})$ is
+{\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+\mathbf{J}(\mathbf{x}) = \begin{bmatrix}
+\frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_M} \\
+\frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_M} \\
+\vdots & \vdots & \ddots & \vdots \\
+\frac{\partial f_N}{\partial x_1} & \frac{\partial f_N}{\partial x_2} & \cdots & \frac{\partial f_N}{\partial x_M}
+\end{bmatrix} = \nabla_{\mathbf{x}}\mathbf{f}(\mathbf{x}) = \nabla\mathbf{f}(\mathbf{x}) \in \mathbb{R}^{N \times M}
+\end{equation}
+}
+Note that in this section of the course, we typically deal with the case that $N=M$.
+\end{definitionBox}
+We'll prefer to use the notation $\mathbf{J}$ for the Jacobian matrix just to avoid confusion with the gradient of a scalar function. There are actually very deep connections between the Jacobian, the gradient, the Hessian, etc. If you're interested, you should take \href{https://github.com/mitmath/matrixcalc}{this IAP course on matrix calculus (18.063)}. For the purposes of 10.34, we do not need to worry about these deeper connections--we will talk about some of the connections once we introduce concepts in optimization later. However, it is important to be very familiar with the mechanics of computing the Jacobian and its structure/properties.
+
+The Jacobian describes how the function $\mathbf{f}$ changes with respect to all its variables. More specifically, each column in the Jacobian describes the partial derivative of the vector-valued function with respect to a single input variable. It plays the same role for vector functions that the derivative plays for scalar functions. As such, we can think about it as the linear map that best approximates how $\mathbf f$ changes at a point $\mathbf x_0$: for any small increment $\Delta \mathbf x$, assuming that $\mathbf f$ is twice differentiable, we have
+\begin{equation}
+\label{eq:jacobian_approx}
+\mathbf f(\mathbf x_0 + \Delta \mathbf x) = \mathbf f(\mathbf x_0) + \mathbf{J}(\mathbf x_0) \Delta \mathbf x  + O(\|\Delta \mathbf x\|_2^2)
+\end{equation}
+\autoref{eq:jacobian_approx} represents a Taylor expansion of the function $\mathbf f$ around $\mathbf x_0$, which we will elaborate on later in \autoref{sec:sne_linearization_taylor}. The higher-order terms involving the second, third, etc. derivatives of the function are omitted and replaced with the expression $O(\|\Delta \mathbf x\|_2^2)$ that defines how the truncation error scales with the magnitude of our increment $\Delta \mathbf x$. We expect the truncated linear approximation to be increasingly accurate as $\|\Delta \mathbf x\|_2 \to 0$. 
+
+\section{Local Uniqueness}
+
+Before we look into numerical methods to help us find solutions to nonlinear equations, we can first consider analyzing a hypothetical solution $\mathbf{x^*}$ assuming that $\mathbf{f(x^*)=0}$, i.e., that it is indeed a solution to our original system of equations. The concept of local uniqueness is an important aspect of a solution.
 
 \begin{definitionBox}
 \textbf{Definition: Local Uniqueness.}
@@ -45,41 +73,14 @@ A solution $\mathbf{x}^*$ is \textbf{locally unique} if there exists a ball of f
 \begin{equation}
 \|\mathbf{x} - \mathbf{x}^*\| < r \quad \text{and} \quad \mathbf{f}(\mathbf{x}) = \mathbf{0} \implies \mathbf{x} = \mathbf{x}^*
 \end{equation}
-
-\begin{center}
-\includegraphics[width=0.6\textwidth]{figs/nle/local_uniqueness.pdf}
-% \caption{Illustration of local uniqueness in 2D. Star: A locally unique solution where the curves intersect transversely. Dashed circle: A potentially non-unique solution where the curves are tangent.}
-\end{center}
 \end{definitionBox}  
 
-The tool for determining local uniqueness is the \textbf{Jacobian matrix}, which generalizes the derivative to vector-valued functions.
 
-\begin{definitionBox}
-\textbf{Definition: Jacobian Matrix.}
-For a function $\mathbf{f}: \mathbb{R}^N \rightarrow \mathbb{R}^N$, the Jacobian matrix $\mathbf{J}(\mathbf{x})$ is
-{\renewcommand{\arraystretch}{1.5}
-\begin{equation}
-\mathbf{J}(\mathbf{x}) = \begin{bmatrix}
-\frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_N} \\
-\frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_N} \\
-\vdots & \vdots & \ddots & \vdots \\
-\frac{\partial f_N}{\partial x_1} & \frac{\partial f_N}{\partial x_2} & \cdots & \frac{\partial f_N}{\partial x_N}
-\end{bmatrix} = \nabla_{\mathbf{x}}\mathbf{f}(\mathbf{x}) = \nabla\mathbf{f}(\mathbf{x})
-\end{equation}
-}
-\end{definitionBox}
-We'll prefer to use the notation $\mathbf{J}$ for the Jacobian matrix just to avoid confusion with the gradient of a scalar function. There are actually very deep connections between the Jacobian, the gradient, the Hessian, etc. If you're interested, you should take \href{https://github.com/mitmath/matrixcalc}{this IAP course on matrix calculus (18.063)}. But for the purposes of 10.34, don't worry too much about this---just focus on the mechanics of computing the Jacobian and its structure/properties.
+It turns out that evaluating the Jacobian at a solution $\mathbf x^*$ allows us to easily determine local uniqueness.
 
-The Jacobian describes how the function $\mathbf{f}$ changes with respect to all its variables. It plays the same role for vector functions that the derivative plays for scalar functions. As such, we can think about it as the linear map that best approximates how $\mathbf f$ changes at a point: for any small increment $\Delta \mathbf x$, assuming that $\mathbf f$ is twice differentiable, we have
-\begin{equation}
-\mathbf f(\mathbf x_0 + \Delta \mathbf x) - \mathbf f(\mathbf x_0)
-= \mathbf{J}(\mathbf x_0) \Delta \mathbf x  + O(\|\Delta \mathbf x\|_2^2)
-\label{eq:jacobian_approx}
-\end{equation}
-We expect this to be accurate as $\|\Delta \mathbf x\|_2 \to 0$. The Jacobian allows us to easily determine local uniqueness.
 \begin{theoremBox}
     \textbf{Inverse Function Theorem}
-    Let $\mathbf{f}:\mathbb{R}^n \to \mathbb{R}^n$ be differentiable on an open neighborhood of $\mathbf{x}^*$, and suppose that its Jacobian $\mathbf{J}(\mathbf{x})$ varies continuously with $\mathbf{x}$ near $\mathbf{x}^*$ (i.e., $\mathbf{f}$ has a continuous derivative in a neighborhood of $\mathbf{x}^*$). If $\mathbf{f}(\mathbf{x}^*)=\mathbf{0}$ and $\det \mathbf{J}(\mathbf{x}^*)\neq 0$, then $\mathbf{x}^*$ is the unique solution of $\mathbf{f}(\mathbf{x})=\mathbf{0}$ in the neighborhood of $\mathbf{x}^*$ (i.e., the solution is locally unique).
+    Let $\mathbf{f}:\mathbb{R}^N \to \mathbb{R}^N$ be differentiable on an open neighborhood of $\mathbf{x}^*$, and suppose that its Jacobian $\mathbf{J}(\mathbf{x})$ varies continuously with $\mathbf{x}$ near $\mathbf{x}^*$ (i.e., $\mathbf{f}$ has a continuous derivative in a neighborhood of $\mathbf{x}^*$). If $\mathbf{f}(\mathbf{x}^*)=\mathbf{0}$ and $\det \mathbf{J}(\mathbf{x}^*)\neq 0$, then $\mathbf{x}^*$ is the unique solution of $\mathbf{f}(\mathbf{x})=\mathbf{0}$ in the neighborhood of $\mathbf{x}^*$ (i.e., the solution is locally unique).
 \end{theoremBox}
 
 This theorem generalizes the inverse function theorem from single-variable calculus to higher dimensions. There are two main ideas to highlight. First, the conditions it gives are sufficient to guarantee local uniqueness of a solution:
@@ -88,6 +89,13 @@ This theorem generalizes the inverse function theorem from single-variable calcu
 \item the Jacobian at that root must be nonsingular.
 \end{enumerate}
 Second, and equally important, we must be careful about what happens when the Jacobian is singular. A singular Jacobian does \emph{not} automatically mean the solution is not locally unique. In this case, uniqueness may or may not hold; it depends on the specific function and the particular root.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figs/nle/local_uniqueness.pdf}
+\caption{Application of the inverse function theorem 2D. The red and blue lines indicate the values of $x_1$ and $x_2$ for which two components of a vector-valued function, $f_1$ and $f_2$ respectively, are zero. Intersections of these curves define the roots of the function. Where the curves are tangent to each other indicates that their gradients with respect to $x_1$ and $x_2$ will be parallel, and hence the rows of the Jacobian will be linearly dependent, rendering it singular. Star: A solution where the curves intersect transversely; the Jacobian is clearly nonsingular, and therefore the solution is guaranteed to be locally unique. Dashed circle: A solution where the curves are tangent; the Jacobian is singular, and therefore the solution is \emph{potentially} non-unique. }
+\end{center}
+\end{figure}
 
 A good way to see this is to compare with the single-variable setting. There, the analogous\footnote{Okay, this is not really ``analogous'' so much as it is the exact same condition. If this imprecision in language bothers you, you should definitely take 18.063 over IAP!} condition is that the derivative at the root should be nonzero. If the derivative vanishes, the situation is ambiguous: for instance, $f(x) = x^3$ has a unique root at $x=0$ even though $f'(0) = 0$, whereas $f(x) = 0$ has infinitely many roots (all $x$) and uniqueness clearly fails in a local sense at $x=0$. The multivariable case mirrors this: a nonsingular Jacobian guarantees local uniqueness, but a singular one leaves the question open.
 
@@ -98,6 +106,8 @@ A good way to see this is to compare with the single-variable setting. There, th
     $$
     Here, $x=0$ is \textit{the only} solution of $f(x)=0$ in any neighborhood of 0, yet $f'(0)=0$.  So you can have a unique root even though the Jacobian vanishes at that root.
 \end{warningBox}
+
+
 
 % \begin{exampleBox}
 % \textbf{Example: Computing a Jacobian}
@@ -176,39 +186,40 @@ There's a deep connection between nonlinear systems and the linear systems we st
 \begin{equation}
 \mathbf{J}(\mathbf{x}) = \mathbf{A}
 \end{equation}
-(To see this, it's easiest to use the notion of the Jacobian given by \autoref{eq:jacobian_approx}. We can read off the derivative of $\mathbf f$ by looking at how $\mathbf f$ changes under a small increment, and in this case it's simply $\mathbf A$.)
+(To see this, it's easiest to use the notion of the Jacobian given by \autoref{eq:jacobian_approx}. We can read off the derivative of $\mathbf f$ by looking at how $\mathbf f$ changes under a small increment, and in this case it's simply $\mathbf A$. The \href{https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf}{Matrix Cookbook} is a terrific resource for more complex identities than this.)
 
-The condition for local uniqueness, $\det \mathbf{J}(\mathbf{x}) \neq 0$, becomes $\det \mathbf{A} \neq 0$, which is exactly the condition for $\mathbf{A}$ to be invertible! So, our theory of nonlinear equations naturally extends our understanding of linear systems.
+The condition for local uniqueness, $\det \mathbf{J}(\mathbf{x}) \neq 0$, becomes $\det \mathbf{A} \neq 0$, which is exactly the condition for $\mathbf{A}$ to be invertible! For systems of linear equations, we know that if $\mathbf{Ax=b}$ has a solution $\mathbf x^*$, that solution is guaranteed to be (locally) unique if $\mathbf{A}$ is nonsingular. So, our theory of nonlinear equations naturally extends our understanding of linear systems.
 
 \section{Linearization via Taylor Expansions}
+\label{sec:sne_linearization_taylor}
 A Taylor expansion of a sufficiently smooth (this is usually a safe assumption in 10.34) vector-valued function 
 \(\mathbf f\colon\mathbb R^N\to\mathbb R^N\) about the point \(\mathbf x\) shows that, for any small increment \(\Delta\mathbf x\in\mathbb R^N\),
-\[
+\begin{equation}
 \mathbf f(\mathbf x + \Delta\mathbf x) = \mathbf f(\mathbf x) +\mathbf{J}(\mathbf x) \Delta\mathbf x +O\bigl(\|\Delta\mathbf x\|_2^2\bigr)
-\]
+\end{equation}
 where the Jacobian \(\mathbf{J}(\mathbf x)\) is exactly the matrix of first-order partial derivatives defined earlier.  In one dimension, this reduces to the familiar result that
-\[
+\begin{equation}
 f(x+\Delta x)=f(x)+f'(x)\Delta x+ O(\Delta x^2)
-\]
+\end{equation}
 again making it clear that \(\mathbf{J}(\mathbf x)\) plays the role of the derivative in higher dimensions.
 
 \subsection{Local Uniqueness via Taylor Expansions}
-To see how this yields local uniqueness of a root, suppose \(\mathbf x^*\) satisfies \(\mathbf f(\mathbf x^*)=0\).  A Taylor expansion about \(\mathbf x^*\) gives
-\[
+To see how this yields local uniqueness of a root, suppose \(\mathbf x^*\) satisfies \(\mathbf f(\mathbf x^*)= \mathbf 0\).  A Taylor expansion about \(\mathbf x^*\) gives
+\begin{equation}
 \mathbf f(\mathbf x)
 =\cancelto{\mathbf0}{\mathbf f(\mathbf x^*)}
 +\mathbf J(\mathbf x^*)\bigl(\mathbf x-\mathbf x^*\bigr)
 + O\bigl(\|\mathbf x-\mathbf x^*\|^2\bigr)
 =\mathbf J(\mathbf x^*) \Delta\mathbf x
 +\underbrace{O\bigl(\|\Delta\mathbf x\|^2\bigr)}_{\mathbf{R}(\Delta\mathbf x)}
-\]
+\end{equation}
 where \(\Delta\mathbf x=\mathbf x-\mathbf x^*\).  Here, the remainder term \(\mathbf{R}(\Delta\mathbf x) \triangleq O(\|\Delta\mathbf x\|^2)\) denotes an error that vanishes faster than \(\|\Delta\mathbf x\|\) as \(\mathbf x\to\mathbf x^*\), so for sufficiently small \(\Delta\mathbf x\) the linear part dominates.
 
-If \(\det \mathbf J(\mathbf x^*)\neq 0\), the matrix \(\mathbf J(\mathbf x^*)\) is invertible and its null-space consists only of the zero vector.  Now suppose, for the sake of contradiction, that there were a distinct root \(\mathbf x=\mathbf x^*+\Delta\mathbf x\) with \(0<\|\Delta\mathbf x\|\ll1\).  The Taylor expansion must vanish, so
-\[
+If \(\det \mathbf J(\mathbf x^*)\neq 0\), the matrix \(\mathbf J(\mathbf x^*)\) is invertible and its null-space consists only of the zero vector.  We can prove the inverse function theorem using a proof by contradiction. Suppose that there were a distinct root \(\mathbf x=\mathbf x^*+\Delta\mathbf x\) with \(0<\|\Delta\mathbf x\|\ll1\). If this is a root, then \(\mathbf f(\mathbf x^*+\Delta\mathbf x) = \mathbf 0\) by definition. Therefore, % TODO: This mini proof can probably be simplified to match what is discussed in lecture
+\begin{equation}
 \mathbf{0} = \mathbf J(\mathbf x^*) \Delta\mathbf x + \mathbf{R}(\Delta\mathbf x) \implies
 \mathbf J(\mathbf x^*) \Delta\mathbf x = - \mathbf{R}(\Delta\mathbf x)
-\]
+\end{equation}
 Since \(\mathbf J(\mathbf x^*)\) is invertible, we can solve for \(\Delta\mathbf x\):
 \[
 \Delta\mathbf x = - \mathbf J(\mathbf x^*)^{-1} \mathbf{R}(\Delta\mathbf x)
