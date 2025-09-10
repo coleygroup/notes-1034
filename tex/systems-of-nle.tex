@@ -293,25 +293,25 @@ If this sequence converges, i.e., $\vect{x}_k \to \vect{x}^*$ as $k \to \infty$,
 Thus, the limit, if it exists, is indeed a fixed point of $\vect{g}$ and, by construction, a solution to $\vect{f}(\vect{x}) = \vect{0}$.
 
 \subsection{Stopping Criteria}
-In practice, iterative methods cannot run indefinitely. We need criteria to decide when an iterate $\vect{x}_k$ is ``close enough'' to the true solution $\vect{x}^*$ to stop the process. Since $\vect{x}^*$ is generally unknown, these criteria are based on observable quantities. Two common stopping criteria are as follows:
+In practice, iterative methods cannot run indefinitely. We need criteria to decide when an iterate $\vect{x}_k$ is ``close enough'' to the true solution $\vect{x}^*$ to stop the process. Given finite machine precision, it is not reasonable to expect that we can (and often not possible to) perfectly achieve $\mathbf f = \mathbf 0$. Since $\vect{x}^*$ is generally unknown -- it's what we are trying to find, after all -- these criteria are based on observable quantities. Two common stopping criteria are as follows:
 
 \begin{enumerate}
     \item \textbf{Function Norm (Residual) Test}\footnote{We call this a residual test because in this case, the residual is by definition $\vect{R}_{k+1} = \vect{f}(\vect{x}_{k+1}) - \vect{0} = \vect{f}(\vect{x}_{k+1})$}: This criterion checks if the function value $\vect{f}(\vect{x}_{k+1})$ is close to zero.
     \begin{equation}
         \|\vect{f}(\vect{x}_{k+1})\|_p \le \varepsilon_f
     \end{equation}
-    Here, $\|\cdot\|_p$ denotes a chosen vector $p$-norm (e.g., $p=1, 2, \infty$), and $\varepsilon_f > 0$ is a prescribed absolute tolerance for the residual. A small residual means that $\vect{x}_{k+1}$ nearly satisfies the system of equations.
+    Here, $\|\cdot\|_p$ denotes a chosen vector $p$-norm (e.g., $p=1, 2, \infty$), and $\varepsilon_f > 0$ is a prescribed absolute tolerance for the residual. A small residual means that $\vect{x}_{k+1}$ nearly satisfies the system of equations. 
 
     \item \textbf{Step Size (Iterate Difference) Test}: This criterion checks if the change between successive iterates is small.
     \begin{equation}
         \|\vect{x}_{k+1} - \vect{x}_k\|_p \le \varepsilon_R \|\vect{x}_{k+1}\|_p + \varepsilon_A
     \end{equation}
-    Here, $\varepsilon_R \ge 0$ is a relative tolerance and $\varepsilon_A \ge 0$ is an absolute tolerance. This test helps detect when the iteration is no longer making significant progress. The relative tolerance $\varepsilon_R \|\vect{x}_{k+1}\|_p$ is useful when the magnitude of $\vect{x}_{k+1}$ is large, while the absolute tolerance $\varepsilon_A$ is important when $\vect{x}_{k+1}$ is close to zero.
+    Here, $\varepsilon_R \ge 0$ is a relative tolerance and $\varepsilon_A \ge 0$ is an absolute tolerance. The relative tolerance $\varepsilon_R \|\vect{x}_{k+1}\|_p$ is useful when the magnitude of $\vect{x}_{k+1}$ is large, while the absolute tolerance $\varepsilon_A$ is important when $\vect{x}_{k+1}$ is close to zero. A small difference between successive values of $\mathbf x$ means that $\mathbf x_{k+1}$ nearly satisfies the definition of a fixed point in the iterative map.
 \end{enumerate}
-Often, a combination of these tests (or others, like a maximum iteration count or detection of NaNs/infs) is used.
+Often, a combination of these tests (or others, like a maximum iteration count or detection of NaNs/infs) is used. (When implementing an iterative algorithm from scratch, it is always a good idea to impose a maximum iteration count and raise an error or warning if it is exceeded.)
 
 \subsubsection{Failure Modes of Stopping Criteria}
-While standard, these stopping criteria are far from foolproof and can sometimes indicate convergence prematurely or fail to indicate convergence when it occurs slowly.
+While standard, and often the best possible choices given information available to the algorithm, these stopping criteria are far from foolproof and can sometimes indicate convergence prematurely or incorrectly, or fail to indicate convergence when it occurs slowly.
 
 \textbf{Residual Test Failure:}
 A small residual $\|\vect{f}(\vect{x}_k)\|$ does not always imply that $\vect{x}_k$ is close to $\vect{x}^*$. If the function $\vect{f}$ is very ``flat'' near the root (i.e., its Jacobian is ill-conditioned or nearly singular), then many points $\vect{x}$ far from $\vect{x}^*$ can have small function values. Geometrically, $\vect{x}_k$ might be on a nearly level set of $\vect{f}$ close to zero, but this level set could be wide.
@@ -321,6 +321,7 @@ A small residual $\|\vect{f}(\vect{x}_k)\|$ does not always imply that $\vect{x}
     \includegraphics[width=0.5\textwidth]{figs/nle/residual_test_failure.pdf}
     \caption{Failure of the residual test: A small residual $\|\vect{f}(\vect{x}_k)\| \le \varepsilon_f$ may occur even if $\vect{x}_k$ is far from the true root $\vect{x}^*$, especially if $\vect{f}$ is flat near $\vect{x}^*$.}
 \end{figure}
+% TODO: Consider drawing another failure where we have a function like f(x) = x^2 + 0.01, where we have an absolute tolerance that is set too high so we mistakenly think we are near a solution
 
 
 \textbf{Step-Size Test Failure:}
@@ -332,14 +333,14 @@ A small step size $\|\vect{x}_{k+1} - \vect{x}_k\|$ only means that the iteratio
     \caption{Failure of the step-size test: Successive iterates $\vect{x}_k$ and $\vect{x}_{k+1}$ may be very close, indicating stalled progress, even if they are far from the true root $\vect{x}^*$.}
 \end{figure}
 
-It is generally advisable to use a combination of these criteria and to have some understanding of the problem's characteristics.
+It is generally advisable to use a combination of these criteria and to have some understanding of the problem's characteristics such as the expected magnitudes of $\| \mathbf f(\mathbf x) \|$, $\| \mathbf x \|$, and the gradient.
 
 \subsection{Convergence Analysis}
-The speed at which an iterative method $\vect{x}_{k+1} = \vect{g}(\vect{x}_k)$ converges to a root $\vect{x}^*$ is an important characteristic. Let $\vect{e}_k = \vect{x}_k - \vect{x}^*$ be the error at iteration $k$. The iteration is said to converge with order $q \ge 1$ if there exists a constant $C$ (called the asymptotic error constant) with $0<C<\infty$ such that
+The speed at which an iterative method $\vect{x}_{k+1} = \vect{g}(\vect{x}_k)$ converges to a root $\vect{x}^*$ is an important characteristic of that method. Let $\vect{e}_k = \vect{x}_k - \vect{x}^*$ be the error at iteration $k$. The iteration is said to converge with order $q \ge 1$ if there exists a constant $C$ (called the asymptotic error constant) with $0<C<\infty$ such that
 \begin{equation}
     \lim_{k\to\infty} \frac{\|\vect{e}_{k+1}\|_p}{\|\vect{e}_k\|_p^{\,q}} = C
 \end{equation}
-We can take a look at some common convergence orders. \textbf{Linear convergence} occurs if $q=1$ and $0<C<1$. The error is reduced by a roughly constant factor at each step. The number of correct significant digits increases linearly with $k$; more precisely, digits gained per step $\approx -\log_{10} C$. For example, if $C \approx 0.1$, about one new correct digit is gained per iteration. Classical stationary methods like Jacobi and Gauss-Seidel for linear systems exhibit linear convergence under standard assumptions (e.g., when the iteration matrix has spectral radius $<1$).
+We can take a look at some common convergence orders. \textbf{Linear convergence} occurs if $q=1$ and $0<C<1$. The error is reduced by a roughly constant factor at each step when close to the root. The number of correct significant digits increases linearly with $k$; more precisely, digits gained per step $\approx -\log_{10} C$. For example, if $C \approx 0.1$, about one new correct digit is gained per iteration. Classical stationary methods like Jacobi and Gauss-Seidel for linear systems exhibit linear convergence under standard assumptions (e.g., when the iteration matrix has spectral radius $<1$).
 
 \textbf{Superlinear convergence} occurs if $q>1$. Equivalently, we can characterize it by
 \begin{equation}
@@ -347,24 +348,25 @@ We can take a look at some common convergence orders. \textbf{Linear convergence
 \end{equation}
 which corresponds informally to the $q=1$ case with $C=0$ (noting this lies outside the $0<C<\infty$ definition above). This is faster than linear.
 
-\textbf{Quadratic convergence} occurs if $q=2$. The number of correct significant digits roughly doubles at each iteration, leading to very rapid convergence once the iterates are close to the root.
+\textbf{Quadratic convergence} is a specific case within superlinear convergence when $q=2$. The number of correct significant digits roughly doubles at each iteration, leading to very rapid convergence once the iterates are close to the root.
 
-In finite dimensions, the choice of $p$-norm does not affect the order $q$ (all norms are equivalent), though the constant $C$ may change.
+There are two important notes to add to the discussion of convergence analysis. First, in finite dimensions, the choice of $p$-norm does not affect the order $q$ (all norms are equivalent), though the constant $C$ may change. Second, the phrase ``close to the root'' was used very intentionally when describing convergence behavior above. Convergence analysis is an examination of the algorithm's ability to get arbitrarily close to a root $\mathbf x^*$ that we assume to exist. The typical strategy for deriving convergence rates that we will see in \autoref{sec:newtons_method_convergence} relies on the ability to treat higher-order terms of a Taylor expansion as dominated by lower-order terms. 
 
 
 
 \subsection{The Newton-Raphson Method}
 The Newton-Raphson method, often just called Newton's method, is one of the most powerful and widely used iterative algorithms for finding roots of nonlinear equations. Its strength lies in its typically fast convergence rate when the initial guess is sufficiently close to the root.
 
-Newton's method can be viewed as a specific instance of fixed-point iteration. As we will see, the iteration function $\vect{g}(\vect{x})$ is chosen based on a linear approximation of $\vect{f}(\vect{x})$ at the current iterate. Specifically, if we consider the general fixed-point construction $\vect{g}(\vect{x}) = \vect{x} + \mat{A}(\vect{x})\vect{f}(\vect{x})$, Newton's method makes the choice $\mat{A}(\vect{x}_k) = -[\mat{J}(\vect{x}_k)]^{-1}$, where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix of $\vect{f}$ evaluated at $\vect{x}_k$. This leads to the iteration:
+Newton's method can be viewed as a specific instance of fixed-point iteration. As we will see, the iteration function $\vect{g}(\vect{x})$ is chosen based on a linear approximation of $\vect{f}(\vect{x})$ at the current iterate $\mathbf x_k$. Specifically, if we consider the general fixed-point construction $\vect{g}(\vect{x}) = \vect{x} + \mat{A}(\vect{x})\vect{f}(\vect{x})$, Newton's method makes the choice $\mat{A}(\vect{x}_k) = -[\mat{J}(\vect{x}_k)]^{-1}$, where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix of $\vect{f}$ evaluated at $\vect{x}_k$. This leads to the iteration:
 \begin{equation}
     \vect{x}_{k+1} = \vect{x}_k - [\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
 \end{equation}
 We can understand where this comes from quite easily by considering a first-order Taylor expansion of $\vect{f}(\vect{x})$ around the current iterate $\vect{x}_k$. For an increment $\Delta\vect{x} = \vect{x} - \vect{x}_k$, we have the expansion
 \begin{equation}
     \vect{f}(\vect{x}_k + \Delta\vect{x}) \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \Delta\vect{x}
+    \label{eq:linearized_newton}
 \end{equation}
-where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix (with elements $J_{ij}(\vect{x}_k) = \tfrac{\partial f_i}{\partial x_j}(\vect{x}_k)$ as always). Newton's method tries to find the next iterate $\vect{x}_{k+1}$ such that the linear model predicts $\vect{f}(\vect{x}_{k+1}) = \vect{0}$. Let $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$, where $\vect{d}_k$ is the step/correction/displacement. Substituting this into the linearized equation, we get
+where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix (with elements $J_{ij}(\vect{x}_k) = \tfrac{\partial f_i}{\partial x_j}(\vect{x}_k)$ as always). Newton's method proposes that the next iterate $\vect{x}_{k+1}$ should satisfy $\vect{f}(\vect{x}_{k+1}) = \vect{0}$ under this assumption of linearity. Let $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$, where $\vect{d}_k$ is the step/correction/displacement. Substituting this into the linearized equation \ref{eq:linearized_newton}, we get
 \begin{equation}
     \vect{0} \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \vect{d}_k
 \end{equation}
@@ -372,24 +374,32 @@ This can be rearranged into a system of linear equations for the unknown step $\
 \begin{equation}
     \mat{J}(\vect{x}_k) \vect{d}_k = -\vect{f}(\vect{x}_k)
 \end{equation}
-Assuming the Jacobian $\mat{J}(\vect{x}_k)$ is non-singular, we can solve for $\vect{d}_k$:
+Assuming the Jacobian $\mat{J}(\vect{x}_k)$ is non-singular, we can write an analytical expression for $\vect{d}_k$ using the matrix inverse:
 \begin{equation}
     \vect{d}_k = -[\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
 \end{equation}
 The next iterate is then found by updating the current one:
 \begin{equation}
+	\label{eq:newton_update}
     \vect{x}_{k+1} = \vect{x}_k + \vect{d}_k = \vect{x}_k - [\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
 \end{equation}
-Each step of Newton's method thus involves:
+The update formula \autoref{eq:newton_update} fully defines the iterative map used by Newton-Raphson. 
+
+\begin{warningBox}
+    \textbf{Warning}: It might look like each iteration of Newton's method requires us to invert the Jacobian matrix! However, we very rarely compute the inverse $[\mat{J}(\vect{x}_k)]^{-1}$ explicitly. Instead, the linear system for $\vect{d}_k$ is solved numerically (using, for example, the techniques discussed in \autoref{sec:num_sol_linear_direct} and \autoref{sec:num_sol_linear_iterative}) for better efficiency. Advanced solvers may also take advantage of sparsity in the Jacobian, if known, to reduce computational cost.
+\end{warningBox}
+
+In summary, each step of Newton's method involves:
 \begin{enumerate}
     \item Evaluating the function $\vect{f}(\vect{x}_k)$ and the Jacobian matrix $\mat{J}(\vect{x}_k)$ at the current iterate $\vect{x}_k$.
     \item Solving the linear system $\mat{J}(\vect{x}_k)\vect{d}_k = -\vect{f}(\vect{x}_k)$ for the step $\vect{d}_k$.
     \item Updating the iterate: $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$.
 \end{enumerate}
-We very rarely compute the inverse $[\mat{J}(\vect{x}_k)]^{-1}$ explicitly. Instead, the linear system for $\vect{d}_k$ is solved numerically (using, for example, the techniques discussed earlier) for better efficiency.
+To apply this method in practice requires defining an initial guess $\mathbf x_0$ as well as convergence criteria.
+
 
 \textbf{Scalar Case (1D Newton's Method):}
-For a single scalar function $f(x)$ (where $f:\mathbb{R}\to\mathbb{R}$), the derivation simplifies considerably. The Jacobian matrix $\mat{J}(x_k)$ becomes the scalar first derivative $f'(x_k)$. The Taylor expansion is
+For a single scalar function $f(x)$ (where $f:\mathbb{R}\to\mathbb{R}$), the derivation simplifies considerably. The Jacobian matrix $\mat{J}(\mathbf x_k)$ from the N-dimensional case becomes the scalar first derivative $f'(x_k)$. The Taylor expansion is
 \begin{equation}
     f(x) \approx f(x_k) + f'(x_k)(x - x_k)
 \end{equation}
@@ -470,6 +480,9 @@ This should be quite familiar from previous calculus courses. Geometrically, $x_
     \caption{Visual depiction of Newton's method for a scalar function $f(x)$.}
     \label{fig:newton_1d}
 \end{figure}
+
+It is worth taking a step back and reminding oneself why a numerical method needs to make this kind of assumption of linearity. When we look at the 1D example in \autoref{fig:newton_1d}, it is easy to think that there must be a better strategy. Recall that we have no made assumptions about the structure of $\mathbf f(\mathbf x)$ and that the algorithm only has the ability to call this function for different values of $\mathbf x$ in search of roots. At each iteration, Newton's method relies on a ``local'' analysis of the function value and its Jacobian to decide where it should look search next. But why not also consider the second derivative? Or third derivative? Computing or estimating these can come at great computational cost, and we know that as we get closer to a root and take smaller and smaller steps, the linear term will dominate; however, algorithms using derivatives past the first derivative do exist.
+
 
 The Newton-Raphson algorithm for systems is summarized below using both the discussed stopping criteria simultaneously.
 
@@ -555,6 +568,7 @@ The iteration rapidly converges to one of the intersection points, approximately
 \end{exampleBox}
 
 \subsection{Convergence of Newton's Method}
+\label{sec:newtons_method_convergence}
 One of the primary reasons for Newton's method's popularity is its typically \textbf{quadratic convergence rate}, provided certain conditions are met.
 
 % MC: I'm sorry this diverges from the slides a bit, this is the proof I had in my notes
@@ -652,14 +666,15 @@ We visualize some of these failure modes in \autoref{fig:failure-modes}.
     \label{fig:failure-modes}
 \end{figure}
     
-\subsubsection{Basins of Attraction:}
+\subsubsection{Basins of Attraction}
 \label{par:basins-of-attraction}
-Given a nonlinear system \(\vect{f}(\vect{x})=\vect{0}\), Newton's method updates
-\[
-\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k,\qquad
-\mat{J}(\vect{x}_k)\,\vect{d}_k=-\vect{f}(\vect{x}_k)
-\]
-where \(\mat{J}\) is the Jacobian. The \emph{basin of attraction} of a root \(\vect{x}^*\) is the set of initial guesses \(\vect{x}_0\) for which the iterates converge to \(\vect{x}^*\). When multiple roots exist, these basins can have complicated shapes; points near the boundaries of different basins often exhibit slow or erratic convergence because the local linearization (through \(\mat{J}\)) is nearly singular or unstable there.
+%Given a nonlinear system \(\vect{f}(\vect{x})=\vect{0}\), Newton's method updates
+%\[
+%\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k,\qquad
+%\mat{J}(\vect{x}_k)\,\vect{d}_k=-\vect{f}(\vect{x}_k)
+%\]
+%where \(\mat{J}\) is the Jacobian. 
+The \emph{basin of attraction} of a root \(\vect{x}^*\) is the set of initial guesses \(\vect{x}_0\) for which the iterates converge to \(\vect{x}^*\). When multiple roots exist, these basins can have complicated shapes; points near the boundaries of different basins often exhibit slow or erratic convergence because the local linearization (through \(\mat{J}\)) is nearly singular or unstable there.
 
 \begin{exampleBox}
     \noindent\textbf{Example: Two Circles:}
@@ -750,11 +765,12 @@ z_{k+1}=z_k-\frac{f(z_k)}{f'(z_k)}=z_k-\frac{z_k^3-1}{3z_k^2}=\frac{2z_k^3+1}{3z
 \end{equation}
 has three attracting fixed points (the cube roots of unity). Each fixed point has its own basin of attraction, but the boundaries between these three basins are fractal and highly sensitive: tiny changes in the initial guess can send the iterates to a different root.
 
-% TODO: add fractal basin boundary figure (if desired?)
+% TODO: add fractal basin boundary figure
 
-\textbf{Practical note.} Near singular/ill-conditioned regions, methods such as damping/line search, trust-region steps, or continuation strategies can dramatically improve robustness, and plotting \(\det\mat{J}\) (or its condition number) alongside iteration counts is a helpful diagnostic when exploring basins of attraction.
+\textbf{Practical note.} Near singular/ill-conditioned regions, methods such as damping/line search, trust-region steps, or continuation strategies can dramatically improve robustness, and plotting \(\det\mat{J}\) (or its condition number) alongside iteration counts is a helpful diagnostic when exploring basins of attraction. These are discussed later in this chapter.
 
 \subsection{Approximating the Jacobian: Quasi-Newton Methods}
+\label{sec:quasi-newton_methods}
 A significant computational cost in Newton's method comes from evaluating the Jacobian matrix and solving the associated linear system at each iteration. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone, and its evaluation can be expensive. This motivates quasi-Newton methods, which approximate \(\mat{J}\) or its inverse, often by low-rank updates built from secant information. The price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
 
 \subsubsection{1D Finite Differences} 
