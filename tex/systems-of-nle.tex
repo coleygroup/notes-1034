@@ -15,13 +15,13 @@ Common examples of nonlinear systems of equations in chemical engineering includ
 \textbf{Example: van der Waals Equation of State}
 
 Consider finding the molar volume $\hat{v}$ for a given reduced pressure $\hat{P}$ and reduced temperature $\hat{T}$ using the van der Waals equation:
-\begin{equation}
+\[
 \left(\hat{P} + \frac{3}{\hat{v}^2}\right)\left(\hat{v} - \frac{1}{3}\right) = \frac{8}{3}\hat{T}
-\end{equation}
+\]
 This can be rewritten as finding roots of
-\begin{equation}
+\[
 f(\hat{v}; \hat{P}, \hat{T}) = \left(\hat{P} + \frac{3}{\hat{v}^2}\right)\left(\hat{v} - \frac{1}{3}\right) - \frac{8}{3}\hat{T} = 0
-\end{equation}
+\]
 
 % \begin{figure}[h]
 \begin{center}
@@ -221,22 +221,22 @@ If \(\det \mathbf J(\mathbf x^*)\neq 0\), the matrix \(\mathbf J(\mathbf x^*)\) 
 \mathbf J(\mathbf x^*) \Delta\mathbf x = - \mathbf{R}(\Delta\mathbf x)
 \end{equation}
 Since \(\mathbf J(\mathbf x^*)\) is invertible, we can solve for \(\Delta\mathbf x\):
-\[
+\begin{equation}
 \Delta\mathbf x = - \mathbf J(\mathbf x^*)^{-1} \mathbf{R}(\Delta\mathbf x)
-\]
+\end{equation}
 Now, taking norms on both sides, we have
-\[
+\begin{equation}
 \|\Delta\mathbf x\|
 =\bigl\|\mathbf J(\mathbf x^*)^{-1}\mathbf{R}(\Delta\mathbf x)\bigr\|
 \le \bigl\|\mathbf J(\mathbf x^*)^{-1}\bigr\|\bigl\|\mathbf{R}(\Delta\mathbf x)\bigr\|
-\]
+\end{equation}
 By the definition of $\mathbf R$, there exists $C>0$ with
 $\|\mathbf R(\Delta\mathbf x)\|\le C\|\Delta\mathbf x\|^2$ for small $\|\Delta\mathbf x\|$.
 Hence
-\[
+\begin{equation}
 \|\Delta\mathbf x\|
 \le \|\mathbf J(\mathbf x^*)^{-1}\|\,C\,\|\Delta\mathbf x\|^2
-\]
+\end{equation}
 If $0<\|\Delta\mathbf x\|<(\|\mathbf J(\mathbf x^*)^{-1}\|\,C)^{-1}$, then dividing by $\|\Delta\mathbf x\|$ yields $1\le \|\mathbf J(\mathbf x^*)^{-1}\|\,C\,\|\Delta\mathbf x\|<1$, a contradiction. Therefore, $\Delta\mathbf x=0$ is the only possibility in a sufficiently small neighborhood, which completes the argument that no other root can lie nearby.
 
 \begin{exampleBox}
@@ -263,28 +263,33 @@ neighborhood, visually confirming the local uniqueness result.
 
 \section{Iterative Methods for Solving Nonlinear Equations}
 
-We are concerned with finding solutions $\vect{x}^* \in \mathbb{R}^n$ to a system of $n$ nonlinear equations $\vect{f}(\vect{x}) = \vect{0}$, where $\vect{f}: \mathbb{R}^n \to \mathbb{R}^n$:
-\[
-    \vect{f}(\vect{x}^*) = \begin{bmatrix} f_1(x_1^*, x_2^*, \dots, x_n^*) \\ f_2(x_1^*, x_2^*, \dots, x_n^*) \\ \vdots \\ f_n(x_1^*, x_2^*, \dots, x_n^*) \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix} = \vect{0}
-\]
-Unlike linear systems, most nonlinear systems do not admit a closed-form solution. Therefore, we typically resort to iterative methods. An iterative method generates a sequence of approximate solutions $\{\vect{x}_k\}$ starting from an initial guess $\vect{x}_0$ with the aim that this sequence converges to a true solution $\vect{x}^*$, i.e., $\lim_{k\to\infty} \vect{x}_k = \vect{x}^*$.
+We are concerned with finding solutions $\vect{x}^* \in \mathbb{R}^N$ to a system of $n$ nonlinear equations $\vect{f}(\vect{x}) = \vect{0}$, where $\vect{f}: \mathbb{R}^N \to \mathbb{R}^N$:
+\begin{equation}
+    \vect{f}(\vect{x}^*) = \begin{bmatrix} f_1(x_1^*, x_2^*, \dots, x_N^*) \\ f_2(x_1^*, x_2^*, \dots, x_N^*) \\ \vdots \\ f_N(x_1^*, x_2^*, \dots, x_N^*) \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix} = \vect{0}
+\end{equation}
+Unlike linear systems, most nonlinear systems do not admit a closed-form solution. Therefore, we almost always resort to iterative methods. An iterative method generates a sequence of approximate solutions $\{\vect{x}_k\}$ starting from an initial guess $\vect{x}_0$ with the aim that this sequence converges to a true solution $\vect{x}^*$, i.e., $\lim_{k\to\infty} \vect{x}_k = \vect{x}^*$. 
 
 Many iterative methods make use of  \textbf{fixed-point iteration}. The idea is to transform the original root-finding problem $\vect{f}(\vect{x}) = \vect{0}$ into an equivalent fixed-point problem of the form
-\[
+\begin{equation}
     \vect{x} = \vect{g}(\vect{x})
-\]
-A solution $\vect{x}^*$ to this equation is called a fixed point of the function $\vect{g}$ because applying $\vect{g}$ to $\vect{x}^*$ yields $\vect{x}^*$ itself: $\vect{x}^* = \vect{g}(\vect{x}^*)$. The key is to construct $\vect{g}(\vect{x})$ such that a fixed point of $\vect{g}$ is also a root of $\vect{f}$. There are many ways to define such a $\vect{g}(\vect{x})$. A common family of transformations is
-\[
+    \label{eq:fixed_point_iteration}
+\end{equation}
+$\vect{g}$ serves as a map from any provided value of $\mathbf x$ to an updated value. Given an initial value $\mathbf x_0$, we feed it into the function to get $\mathbf x_1 = \mathbf g(\mathbf x_0)$, then again to get $\mathbf x_2 = \mathbf g(\mathbf x_1)$, and so on.
+
+Depending on the definition of $\mathbf g$, there may be special values of $\mathbf x$ that remain unchanged by $\mathbf g$ and, therefore, correspond to solutions to the fixed-point problem \autoref{eq:fixed_point_iteration}. More formally, a solution $\vect{x}^*$ to this equation is called a fixed point of the function $\vect{g}$ if applying $\vect{g}$ to $\vect{x}^*$ yields $\vect{x}^*$ itself: $\vect{x}^* = \vect{g}(\vect{x}^*)$. 
+
+The key idea is to construct $\vect{g}(\vect{x})$ such that any fixed point of $\vect{g}$ is also a root of $\vect{f}$. When we can ensure this is the case, identifying solutions to $\mathbf f(\mathbf x) = \mathbf 0$ becomes equivalent to finding these fixed points. There are many ways to define such a $\vect{g}(\vect{x})$. A common family of transformations is
+\begin{equation}
     \vect{g}(\vect{x}) = \vect{x} + \mat{A}(\vect{x})\vect{f}(\vect{x})
-\]
+\end{equation}
 where $\mat{A}(\vect{x})$ is a suitably chosen matrix (which could be constant, or depend on $\vect{x}$ as suggested by the notation). If $\vect{x}^* = \vect{g}(\vect{x}^*)$, then $\vect{x}^* = \vect{x}^* + \mat{A}(\vect{x}^*)\vect{f}(\vect{x}^*)$, which implies $\mat{A}(\vect{x}^*)\vect{f}(\vect{x}^*) = \vect{0}$. If $\mat{A}(\vect{x}^*)$ is non-singular, then this ensures $\vect{f}(\vect{x}^*) = \vect{0}$. Once the problem is in fixed-point form, the iteration proceeds as
-\[
+\begin{equation}
     \vect{x}_{k+1} = \vect{g}(\vect{x}_k), \quad k = 0, 1, 2, \dots
-\]
+\end{equation}
 If this sequence converges, i.e., $\vect{x}_k \to \vect{x}^*$ as $k \to \infty$, and if $\vect{g}$ is continuous in a neighborhood of $\vect{x}^*$, then taking the limit on both sides gives
-\[ 
+\begin{equation} 
 \lim_{k\to\infty} \vect{x}_{k+1} = \lim_{k\to\infty} \vect{g}(\vect{x}_k) \implies \vect{x}^* = \vect{g}(\vect{x}^*) 
-\]
+\end{equation}
 Thus, the limit, if it exists, is indeed a fixed point of $\vect{g}$ and, by construction, a solution to $\vect{f}(\vect{x}) = \vect{0}$.
 
 \subsection{Stopping Criteria}
@@ -292,15 +297,15 @@ In practice, iterative methods cannot run indefinitely. We need criteria to deci
 
 \begin{enumerate}
     \item \textbf{Function Norm (Residual) Test}\footnote{We call this a residual test because in this case, the residual is by definition $\vect{R}_{k+1} = \vect{f}(\vect{x}_{k+1}) - \vect{0} = \vect{f}(\vect{x}_{k+1})$}: This criterion checks if the function value $\vect{f}(\vect{x}_{k+1})$ is close to zero.
-    \[
+    \begin{equation}
         \|\vect{f}(\vect{x}_{k+1})\|_p \le \varepsilon_f
-    \]
+    \end{equation}
     Here, $\|\cdot\|_p$ denotes a chosen vector $p$-norm (e.g., $p=1, 2, \infty$), and $\varepsilon_f > 0$ is a prescribed absolute tolerance for the residual. A small residual means that $\vect{x}_{k+1}$ nearly satisfies the system of equations.
 
     \item \textbf{Step Size (Iterate Difference) Test}: This criterion checks if the change between successive iterates is small.
-    \[
+    \begin{equation}
         \|\vect{x}_{k+1} - \vect{x}_k\|_p \le \varepsilon_R \|\vect{x}_{k+1}\|_p + \varepsilon_A
-    \]
+    \end{equation}
     Here, $\varepsilon_R \ge 0$ is a relative tolerance and $\varepsilon_A \ge 0$ is an absolute tolerance. This test helps detect when the iteration is no longer making significant progress. The relative tolerance $\varepsilon_R \|\vect{x}_{k+1}\|_p$ is useful when the magnitude of $\vect{x}_{k+1}$ is large, while the absolute tolerance $\varepsilon_A$ is important when $\vect{x}_{k+1}$ is close to zero.
 \end{enumerate}
 Often, a combination of these tests (or others, like a maximum iteration count or detection of NaNs/infs) is used.
@@ -331,15 +336,15 @@ It is generally advisable to use a combination of these criteria and to have som
 
 \subsection{Convergence Analysis}
 The speed at which an iterative method $\vect{x}_{k+1} = \vect{g}(\vect{x}_k)$ converges to a root $\vect{x}^*$ is an important characteristic. Let $\vect{e}_k = \vect{x}_k - \vect{x}^*$ be the error at iteration $k$. The iteration is said to converge with order $q \ge 1$ if there exists a constant $C$ (called the asymptotic error constant) with $0<C<\infty$ such that
-\[
+\begin{equation}
     \lim_{k\to\infty} \frac{\|\vect{e}_{k+1}\|_p}{\|\vect{e}_k\|_p^{\,q}} = C
-\]
+\end{equation}
 We can take a look at some common convergence orders. \textbf{Linear convergence} occurs if $q=1$ and $0<C<1$. The error is reduced by a roughly constant factor at each step. The number of correct significant digits increases linearly with $k$; more precisely, digits gained per step $\approx -\log_{10} C$. For example, if $C \approx 0.1$, about one new correct digit is gained per iteration. Classical stationary methods like Jacobi and Gauss-Seidel for linear systems exhibit linear convergence under standard assumptions (e.g., when the iteration matrix has spectral radius $<1$).
 
 \textbf{Superlinear convergence} occurs if $q>1$. Equivalently, we can characterize it by
-\[
+\begin{equation}
   \lim_{k\to\infty}\frac{\|\vect{e}_{k+1}\|_p}{\|\vect{e}_k\|_p}=0
-\]
+\end{equation}
 which corresponds informally to the $q=1$ case with $C=0$ (noting this lies outside the $0<C<\infty$ definition above). This is faster than linear.
 
 \textbf{Quadratic convergence} occurs if $q=2$. The number of correct significant digits roughly doubles at each iteration, leading to very rapid convergence once the iterates are close to the root.
@@ -352,29 +357,29 @@ In finite dimensions, the choice of $p$-norm does not affect the order $q$ (all 
 The Newton-Raphson method, often just called Newton's method, is one of the most powerful and widely used iterative algorithms for finding roots of nonlinear equations. Its strength lies in its typically fast convergence rate when the initial guess is sufficiently close to the root.
 
 Newton's method can be viewed as a specific instance of fixed-point iteration. As we will see, the iteration function $\vect{g}(\vect{x})$ is chosen based on a linear approximation of $\vect{f}(\vect{x})$ at the current iterate. Specifically, if we consider the general fixed-point construction $\vect{g}(\vect{x}) = \vect{x} + \mat{A}(\vect{x})\vect{f}(\vect{x})$, Newton's method makes the choice $\mat{A}(\vect{x}_k) = -[\mat{J}(\vect{x}_k)]^{-1}$, where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix of $\vect{f}$ evaluated at $\vect{x}_k$. This leads to the iteration:
-\[
+\begin{equation}
     \vect{x}_{k+1} = \vect{x}_k - [\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
-\]
+\end{equation}
 We can understand where this comes from quite easily by considering a first-order Taylor expansion of $\vect{f}(\vect{x})$ around the current iterate $\vect{x}_k$. For an increment $\Delta\vect{x} = \vect{x} - \vect{x}_k$, we have the expansion
-\[
+\begin{equation}
     \vect{f}(\vect{x}_k + \Delta\vect{x}) \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \Delta\vect{x}
-\]
+\end{equation}
 where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix (with elements $J_{ij}(\vect{x}_k) = \tfrac{\partial f_i}{\partial x_j}(\vect{x}_k)$ as always). Newton's method tries to find the next iterate $\vect{x}_{k+1}$ such that the linear model predicts $\vect{f}(\vect{x}_{k+1}) = \vect{0}$. Let $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$, where $\vect{d}_k$ is the step/correction/displacement. Substituting this into the linearized equation, we get
-\[
+\begin{equation}
     \vect{0} \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \vect{d}_k
-\]
+\end{equation}
 This can be rearranged into a system of linear equations for the unknown step $\vect{d}_k$:
-\[
+\begin{equation}
     \mat{J}(\vect{x}_k) \vect{d}_k = -\vect{f}(\vect{x}_k)
-\]
+\end{equation}
 Assuming the Jacobian $\mat{J}(\vect{x}_k)$ is non-singular, we can solve for $\vect{d}_k$:
-\[
+\begin{equation}
     \vect{d}_k = -[\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
-\]
+\end{equation}
 The next iterate is then found by updating the current one:
-\[
+\begin{equation}
     \vect{x}_{k+1} = \vect{x}_k + \vect{d}_k = \vect{x}_k - [\mat{J}(\vect{x}_k)]^{-1} \vect{f}(\vect{x}_k)
-\]
+\end{equation}
 Each step of Newton's method thus involves:
 \begin{enumerate}
     \item Evaluating the function $\vect{f}(\vect{x}_k)$ and the Jacobian matrix $\mat{J}(\vect{x}_k)$ at the current iterate $\vect{x}_k$.
@@ -385,23 +390,23 @@ We very rarely compute the inverse $[\mat{J}(\vect{x}_k)]^{-1}$ explicitly. Inst
 
 \textbf{Scalar Case (1D Newton's Method):}
 For a single scalar function $f(x)$ (where $f:\mathbb{R}\to\mathbb{R}$), the derivation simplifies considerably. The Jacobian matrix $\mat{J}(x_k)$ becomes the scalar first derivative $f'(x_k)$. The Taylor expansion is
-\[
+\begin{equation}
     f(x) \approx f(x_k) + f'(x_k)(x - x_k)
-\]
+\end{equation}
 We want to find $x_{k+1}$ such that this linear approximation is zero:
-\[
+\begin{equation}
     0 = f(x_k) + f'(x_k)(x_{k+1} - x_k)
-\]
+\end{equation}
 Solving for $x_{k+1}$, assuming $f'(x_k) \neq 0$,
-\[
+\begin{equation}
     f'(x_k)(x_{k+1} - x_k) = -f(x_k)
-\]
-\[
+\end{equation}
+\begin{equation}
     x_{k+1} - x_k = -\frac{f(x_k)}{f'(x_k)}
-\]
-\[
+\end{equation}
+\begin{equation}
     x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}
-\]
+\end{equation}
 This should be quite familiar from previous calculus courses. Geometrically, $x_{k+1}$ is the point where the tangent line to the graph of $f(x)$ at $x_k$ intersects the x-axis (\autoref{fig:newton_1d}).
 
 \begin{figure}[H]
@@ -556,34 +561,34 @@ One of the primary reasons for Newton's method's popularity is its typically \te
 % i found it clearer than the slides at the time I was a student
 \textbf{1D Proof of Quadratic Convergence:}
 Let's analyze the convergence for the scalar case 
-\[
+\begin{equation}
 x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)}
-\]
+\end{equation}
  assuming $f'(x^*) \neq 0$. The error at iteration $k+1$ is $e_{k+1} = x_{k+1} - x^*$. This means that
-\[
+\begin{equation}
     e_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} - x^* = (x_k - x^*) - \frac{f(x_k)}{f'(x_k)} = e_k - \frac{f(x_k)}{f'(x_k)}
     = \frac{e_k f'(x_k) - f(x_k)}{f'(x_k)}
-\]
+\end{equation}
 Now, we consider the Taylor expansion of $f(x^*)$ around $x_k$:
-\[
+\begin{equation}
     f(x^*) = 0 = f(x_k) + f'(x_k)(x^* - x_k) + \frac{1}{2}f''(\xi_k)(x^* - x_k)^2
-\]
+\end{equation}
 for some $\xi_k$ between $x_k$ and $x^*$ (this is coming from the Lagrange-remainder form of Taylor's theorem). Rearranging this and noting $x^* - x_k = -e_k$, we get
-\[
+\begin{equation}
     -f(x_k) = f'(x_k)(-e_k) + \frac{1}{2}f''(\xi_k)(-e_k)^2
     \implies
     e_k f'(x_k) - f(x_k) = \frac{1}{2}f''(\xi_k)e_k^2
-\]
+\end{equation}
 Substituting this back into the expression for $e_{k+1}$, we get
-\[
+\begin{equation}
     e_{k+1} = \frac{\frac{1}{2}f''(\xi_k)e_k^2}{f'(x_k)} = \frac{f''(\xi_k)}{2f'(x_k)} e_k^2
     \implies
     |e_{k+1}| = \left| \frac{f''(\xi_k)}{2f'(x_k)} \right| |e_k|^2
-\]
+\end{equation}
 As $x_k \to x^*$, $\xi_k \to x^*$. Thus, if $f'(x^*) \neq 0$,
-\[
+\begin{equation}
     \lim_{k\to\infty} \frac{|e_{k+1}|}{|e_k|^2} = \left| \frac{f''(x^*)}{2f'(x^*)} \right|
-\]
+\end{equation}
 So we have quadratic convergence for the 1D case provided that $f$ is twice continuously differentiable in a neighborhood of $x^*$, $f'(x^*) \neq 0$, and $x_0$ is sufficiently close to $x^*$.
 
 \textbf{General Case (Multivariate):}
@@ -740,9 +745,9 @@ where \(\mat{J}\) is the Jacobian. The \emph{basin of attraction} of a root \(\v
 \end{exampleBox}
 
 For some problems, the basin boundaries are not smooth curves but intricate fractals. A well-known example is solving \(f(z)=z^3-1=0\) in the complex plane. Newton's map
-\[
+\begin{equation}
 z_{k+1}=z_k-\frac{f(z_k)}{f'(z_k)}=z_k-\frac{z_k^3-1}{3z_k^2}=\frac{2z_k^3+1}{3z_k^2}
-\]
+\end{equation}
 has three attracting fixed points (the cube roots of unity). Each fixed point has its own basin of attraction, but the boundaries between these three basins are fractal and highly sensitive: tiny changes in the initial guess can send the iterates to a different root.
 
 % TODO: add fractal basin boundary figure (if desired?)
@@ -813,16 +818,16 @@ while for the centered difference a common choice is
 
 \subsubsection{ND Finite Differences (Approximating \texorpdfstring{$\mat{J}$}{J})}
 For $\vect{f}:\mathbb{R}^n\!\to\!\mathbb{R}^n$ with components $f_i$, the Jacobian entries $J_{ij}(\vect{x})=\partial f_i/\partial x_j$ can be approximated by finite differences. A column-wise forward difference forms the $j$th column of $\mat{J}(\vect{x})$ by
-\[
+\begin{equation}
   \mat{J}(\vect{x})\vect{e}_j
   \approx
   \frac{\vect{f}(\vect{x}+\epsilon_j \vect{e}_j)-\vect{f}(\vect{x})}{\epsilon_j},
   \qquad j=1,\ldots,n,
-\]
+\end{equation}
 where $\vect{e}_j$ is the $j$th standard basis vector and $\epsilon_j$ is a componentwise step. A scale-aware and numerically stable choice is
-\[
+\begin{equation}
   \epsilon_j \approx \sqrt{\epsilon_M}\,\max\!\bigl(1,|x_j|\bigr),
-\]
+\end{equation}
 Constructing the full $n\times n$ Jacobian this way requires one evaluation of $\vect{f}(\vect{x})$ (usually already available from the current residual) and then one additional evaluation per column for a total of about $n$ extra function evaluations. Using centered differences improves accuracy but roughly doubles this columnwise cost to $2n$. When $\mat{J}$ is sparse, we can use techniques to group independent columns and cut the number of function evaluations substantially.
 
 When we use a finite-difference Jacobian inside Newton's method, we expect linear or superlinear rates (it depends a bit on the details of the choice of Newton step).
@@ -860,7 +865,7 @@ When we use a finite-difference Jacobian inside Newton's method, we expect linea
 
 \subsubsection{Broyden's Method (and other quasi-Newton updates)}
 Rather than rebuilding a fresh finite-difference Jacobian at every iteration, we can instead update an approximation using secant information. Broyden's method maintains $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ and enforces the latest secant equation with a minimal-rank correction:
-\[
+\begin{equation}
   \mat{B}_{k+1}
   =
   \mat{B}_k
@@ -871,13 +876,13 @@ Rather than rebuilding a fresh finite-difference Jacobian at every iteration, we
   \vect{s}_k = \vect{x}_{k+1}-\vect{x}_k,
   \quad
   \vect{y}_k = \vect{f}(\vect{x}_{k+1})-\vect{f}(\vect{x}_k)
-\]
+\end{equation}
 At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$. An initial $\mat{B}_0$ can be obtained from a finite-difference Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. We will revisit quasi-Newton methods in more detail in the optimization chapter.
 
 
 \section{Continuation and Homotopy Methods}
 
-Finding a good initial guess for Newton's method can be difficult, especially when a problem has multiple solutions. Where do starting points come from? And how can we be confident we've found \emph{all} the solutions?\footnote{``All solutions'' is generally unattainable without structure. For arbitrary nonlinear systems, it is impossible to decide or enumerate all solutions from finite samples alone.}
+Finding a good initial guess for Newton's method can be difficult, especially when a problem has multiple solutions. Where do starting points come from? And how can we be confident we've found \emph{all} the solutions?\footnote{``All solutions'' is generally unattainable without structure. For arbitrary nonlinear systems, it is impossible to decide or enumerate all solutions from finite samples alone.}  % TODO: Emphasize
 
 This section introduces a powerful family of techniques for systematically exploring a problem's solution landscape. The core idea is simple: instead of solving one hard problem, we solve a sequence of related, easier ones. This general strategy is called continuation. A homotopy provides a general recipe for creating that sequence of problems. Together, they allow us to trace entire families of solutions as parameters change, generate excellent initial guesses for root-finders, and discover when new solutions appear or disappear at special points called bifurcations.
 
@@ -895,15 +900,15 @@ We then ``walk'' from $\lambda_0$ to $\lambda_\star$ in small steps, using the p
 % MC: can delete or comment this out, found it helpful when I was taking the course though
 \textbf{Optional note.}\quad
 We can show why small $\Delta\lambda$ $\Rightarrow$ small $\Delta x$ more formally (beyond just the intuition) by using the implicit function theorem. If $F(x_\star,\lambda_\star)=0$ and $\partial F/\partial x\neq 0$ at $(x_\star,\lambda_\star)$, the implicit function theorem gives a differentiable $x(\lambda)$ with $F(x(\lambda),\lambda)=0$ near $\lambda_\star$. Differentiating,
-\[
+\begin{equation}
 \frac{\partial F}{\partial x}\cdot x' + \frac{\partial F}{\partial \lambda} = 0 \implies x'(\lambda) = -\frac{\partial F/\partial \lambda}{\partial F/\partial x}.
-\]
+\end{equation}
 For a small step $\Delta\lambda$,
-\[
+\begin{equation}
 \Delta x := x(\lambda+\Delta\lambda)-x(\lambda)
 = x'(\lambda)\,\Delta\lambda + O(\Delta\lambda^2)
 = -\frac{\partial F/\partial \lambda}{\partial F/\partial x}\,\Delta\lambda + O(\Delta\lambda^2).
-\]
+\end{equation}
 Thus, $|\Delta x|$ is proportional to $|\Delta\lambda|$ as long as $\partial F/\partial x$ stays away from $0$, so the solution at $\lambda_k$ is an $O(\Delta\lambda)$-accurate initial guess for $\lambda_{k+1}$. We can derive a similar result for the multivariable case.
 
 \textbf{Practical tips.}\quad You should choose $\Delta\lambda$ adaptively: increase it when Newton converges in a few iterations, and decrease it when convergence slows or fails. To discover multiple solution branches, start continuation from different initial seeds (from symmetry, asymptotics, or physical limits) and trace each branch to the target $\lambda_\star$. Also, as we will discuss in more detail later (and as suggested in the optional note above), it is important to monitor points where $\partial F/\partial x=0$ (or in general, points where the Jacobian is singular), as these can cause problems with parameter continuation.
@@ -1094,20 +1099,20 @@ Because our goal is to drive \(\lVert \mathbf{f}(\mathbf{x})\rVert_p \to 0\), we
 \begin{definitionBox}
     \textbf{Definition: Damped Newton Method.}
     The damped Newton method is given by the update rule
-    \[
+    \begin{equation}
     \mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),\qquad 0<\alpha\le 1
-    \]
+    \end{equation}
     Here, $\alpha$ is the damping parameter that controls the step size by reducing it.
 \end{definitionBox}
 
 \textbf{1D intuition and the ``right'' amount of damping.} In one dimension, the damped Newton method is
-\[
+\begin{equation}
 x_{i+1}=x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}
-\]
+\end{equation}
 Ideally, we would pick the \(\alpha\) that minimizes the size of the residual after the step,
-\[
+\begin{equation}
 \alpha^\star = \argmin_{\alpha\in(0,1]}\; \left| f\!\left(x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}\right) \right|
-\]
+\end{equation}
 With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshooting.
 
 \begin{figure}[h]
@@ -1117,11 +1122,11 @@ With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshootin
 \end{figure}
 
 \textbf{Many dimensions: line search on the Newton direction.}\quad In \(n\) dimensions, this generalizes to
-\[
+\begin{equation}
 \mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),
 \qquad
 \alpha^\star=\arg\min_{0<\alpha\le 1}\;\bigl\|\mathbf{f}\bigl(\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\bigr)\bigr\|_p
-\]
+\end{equation}
 Computing \(\alpha^\star\) \emph{exactly} can be comparably hard and expensive as solving the original system, so we use an inexpensive \textbf{line search} that merely ensures the residual decreases. An example algorithm that implements this is shown below.
 
 \begin{algorithm}[H]
