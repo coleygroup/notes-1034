@@ -770,11 +770,11 @@ has three attracting fixed points (the cube roots of unity). Each fixed point ha
 \textbf{Practical note.} Near singular/ill-conditioned regions, methods such as damping/line search, trust-region steps, or continuation strategies can dramatically improve robustness, and plotting \(\det\mat{J}\) (or its condition number) alongside iteration counts is a helpful diagnostic when exploring basins of attraction. These are discussed later in this chapter.
 
 \subsection{Calculating the Jacobian} 
-A major challenge in the practical execution of Newton's method comes from its reliance on obtaining the Jacobian matrix at iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
+A major challenge in the practical execution of Newton's method comes from its reliance on the Jacobian matrix at iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
 
-Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$. We will first cover finite difference methods and later discuss automatic differentiation. % TODO: add new content on AD
+Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$.  % TODO: add new content on AD
 
-\subsubsection{1D Finite Differences} % TODO: consider pulling FD out of this quasi-Newton method and into a separate section 
+\subsubsection{1D Finite Differences} 
 When an analytical derivative is unavailable, one can approximate it with finite differences. With step size \(\epsilon>0\), the first derivative satisfies
 \begin{gather*}
   f'(x) \approx \frac{f(x+\epsilon)-f(x)}{\epsilon}
@@ -784,7 +784,7 @@ When an analytical derivative is unavailable, one can approximate it with finite
   f'(x) \approx \frac{f(x+\epsilon)-f(x-\epsilon)}{2\epsilon}
   \quad\text{(centered difference, truncation error }O(\epsilon^2)\text{).}
 \end{gather*}
-The centered formula is often preferred for accuracy, though it generally requires two additional function evaluations at \(x\pm\epsilon\) even if \(f(x)\) is already known. These difference schemes are visualized below. 
+The first two formulas should be intuitive based on the limit definition of the derivative. All three can be obtained, including their truncation error, as algebraic manipulations of truncated Taylor series. The centered difference formula is often preferred for accuracy, though it generally requires two additional function evaluations at \(x\pm\epsilon\) even if \(f(x)\) is already known. The tradeoff between computational cost and accuracy is one we continually face in this course. These difference schemes are visualized below. 
 
 \begin{center}
     \includegraphics[width=.5\textwidth]{figs/nle/difference_schemes.pdf}
@@ -833,74 +833,71 @@ while for the centered difference a common choice is
 \end{exampleBox}
 
 
-\subsubsection{ND Finite Differences (Approximating \texorpdfstring{$\mat{J}$}{J})}
-For $\vect{f}:\mathbb{R}^n\!\to\!\mathbb{R}^n$ with components $f_i$, the Jacobian entries $J_{ij}(\vect{x})=\partial f_i/\partial x_j$ can be approximated by finite differences. A column-wise forward difference forms the $j$th column of $\mat{J}(\vect{x})$ by
+\subsubsection{ND Finite Differences}
+For $\vect{f}:\mathbb{R}^N\!\to\!\mathbb{R}^N$ with components $f_i$, the Jacobian entries $J_{ij}(\vect{x})=\partial f_i/\partial x_j$ can be approximated by finite differences in a manner analogous to the 1D case. A column-wise forward difference forms the $j$th column of $\mat{J}(\vect{x})$ by
 \begin{equation}
   \mat{J}(\vect{x})\vect{e}_j
   \approx
   \frac{\vect{f}(\vect{x}+\epsilon_j \vect{e}_j)-\vect{f}(\vect{x})}{\epsilon_j},
-  \qquad j=1,\ldots,n,
+  \qquad j=1,\ldots,N,
 \end{equation}
-where $\vect{e}_j$ is the $j$th standard basis vector and $\epsilon_j$ is a componentwise step. A scale-aware and numerically stable choice is
+where $\vect{e}_j$ is the $j$th standard basis vector and $\epsilon_j$ is a componentwise step. That is, we only perturb the $j$\textsuperscript{th} index of $\mathbf{x}$ each time in order to isolate the impact of $x_j$ on the function outputs. A scale-aware and numerically stable choice, as above, is
 \begin{equation}
   \epsilon_j \approx \sqrt{\epsilon_M}\,\max\!\bigl(1,|x_j|\bigr),
 \end{equation}
-Constructing the full $n\times n$ Jacobian this way requires one evaluation of $\vect{f}(\vect{x})$ (usually already available from the current residual) and then one additional evaluation per column for a total of about $n$ extra function evaluations. Using centered differences improves accuracy but roughly doubles this columnwise cost to $2n$. When $\mat{J}$ is sparse, we can use techniques to group independent columns and cut the number of function evaluations substantially.
+Constructing the full $N\times N$ Jacobian this way requires one evaluation of $\vect{f}(\vect{x})$ and then one additional evaluation of $\mathbf f$ per column for a total of $N$ extra function evaluations. Using centered differences improves accuracy but roughly doubles this columnwise cost to $2N$. When $\mat{J}$ is sparse, advanced algorithms can use techniques to group independent columns and cut the number of function evaluations substantially.
 
-When we use a finite-difference Jacobian inside Newton's method, we expect linear or superlinear rates (it depends a bit on the details of the choice of Newton step).
+When we use a finite-difference Jacobian inside Newton's method, we expect worse convergence than the quadratic rate that Newton's method achieves with analytical precision. Whether we observe linear or superlinear rates close to quadratic depends on the error incurred by the finite difference approximation. 
 
-\begin{exampleBox}
+\begin{exampleBox} % TODO: use lstlisting for syntax highlighting and line numbering
     \textbf{Example (MATLAB):} Below is an example MATLAB implementation of using column-wise forward differences to approximate the Jacobian:
     \begin{verbatim}
-    function J = my_jacobian(x_current, Fhandle)
+    function J = my_jacobian(x, my_func)
     % Column-wise forward-difference Jacobian with scale-aware steps.
     % x_current : n-by-1 vector
     % Fhandle   : function handle returning n-by-1 vector F(x)
 
-        n = length(x_current);
+        n = length(x);
         J = zeros(n, n);
 
-        Fx = Fhandle(x_current);
+        Fx = my_func(x);
 
         epsM   = eps;             % machine epsilon, defining for clarity
         h_base = sqrt(epsM);      % heuristic step magnitude
 
         for j = 1:n               % loop over columns
-            x_pert = x_current;
+            x_pert = x;
             hj = h_base * max(1, abs(x_current(j)));
-            if hj == 0
-                hj = h_base;      % in case x_j is exactly zero
-            end
             x_pert(j) = x_pert(j) + hj;
 
-            F_pert = Fhandle(x_pert);
+            F_pert = my_func(x_pert);
             J(:, j) = (F_pert - Fx) / hj;
         end
     end
     \end{verbatim}
 \end{exampleBox}
 
-\subsection{Quasi-Newton Methods}
+\subsection{Quasi-Newton Methods} % TODO: others to introduce here for completeness?
 \label{sec:quasi-newton_methods}
 
-Quasi-Newton methods are a class of numerical algorithms that mimic Newton's method but use estimates of \(\mat{J}\) or its inverse. These estimates are qualitatively different from finite difference approximations to the Jacobian and are most often constructed and updated on-the-fly by low-rank updates using the values of $\mathbf f(\mathbf x)$ obtained as iterations proceed. While the computational cost per iteration is substantially reduced compared to finite difference approximations in terms of the number of function calls, the price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
+Quasi-Newton methods are a class of numerical algorithms that mimic Newton's method but use estimates of \(\mat{J}\) or its inverse. These estimates are qualitatively different from finite difference approximations to the Jacobian. They are most often constructed and updated on-the-fly by low-rank updates using the values of $\mathbf f(\mathbf x)$ obtained as iterations proceed. While the computational cost per iteration is substantially reduced compared to finite difference approximations in terms of the number of function calls, the price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
 
 
-\subsubsection{Broyden's Method (and other quasi-Newton updates)}
-Rather than rebuilding a fresh finite-difference Jacobian at every iteration, we can instead update an approximation using secant information. Broyden's method maintains $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ and enforces the latest secant equation with a minimal-rank correction:
+\subsubsection{Broyden's Method}
+Broyden's method maintains an estimate $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ and enforces the latest secant equation with a rank-1 correction:\footnote{Note that we call this a rank-1 correction because we are simply adding to $\mathbf B_k$ an outer product between two vectors. Any matrix constructed as an outer product between two vectors is rank one. }
 \begin{equation}
   \mat{B}_{k+1}
   =
   \mat{B}_k
   +
-  \frac{\bigl(\vect{y}_k - \mat{B}_k \vect{s}_k\bigr)\vect{s}_k^{\!T}}
+  \frac{\bigl(\vect{\Delta f}_k - \mat{B}_k \vect{s}_k\bigr)\vect{s}_k^{\!T}}
        {\vect{s}_k^{\!T}\vect{s}_k},
   \qquad
   \vect{s}_k = \vect{x}_{k+1}-\vect{x}_k,
   \quad
-  \vect{y}_k = \vect{f}(\vect{x}_{k+1})-\vect{f}(\vect{x}_k)
+  \vect{\Delta f}_k = \vect{f}(\vect{x}_{k+1})-\vect{f}(\vect{x}_k)
 \end{equation}
-At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$. An initial $\mat{B}_0$ can be obtained from a finite-difference Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. We will revisit quasi-Newton methods in more detail in the optimization chapter.
+At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$, exactly like Newton's method. An initial $\mat{B}_0$ can be obtained from a finite-difference approximation to the Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. We will revisit quasi-Newton methods in more detail in the optimization chapter.
 
 
 \section{Continuation and Homotopy Methods}
