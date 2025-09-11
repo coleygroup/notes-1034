@@ -769,11 +769,12 @@ has three attracting fixed points (the cube roots of unity). Each fixed point ha
 
 \textbf{Practical note.} Near singular/ill-conditioned regions, methods such as damping/line search, trust-region steps, or continuation strategies can dramatically improve robustness, and plotting \(\det\mat{J}\) (or its condition number) alongside iteration counts is a helpful diagnostic when exploring basins of attraction. These are discussed later in this chapter.
 
-\subsection{Approximating the Jacobian: Quasi-Newton Methods}
-\label{sec:quasi-newton_methods}
-A significant computational cost in Newton's method comes from evaluating the Jacobian matrix and solving the associated linear system at each iteration. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone, and its evaluation can be expensive. This motivates quasi-Newton methods, which approximate \(\mat{J}\) or its inverse, often by low-rank updates built from secant information. The price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
+\subsection{Calculating the Jacobian} 
+A major challenge in the practical execution of Newton's method comes from its reliance on obtaining the Jacobian matrix at iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
 
-\subsubsection{1D Finite Differences} 
+Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$. We will first cover finite difference methods and later discuss automatic differentiation. % TODO: add new content on AD
+
+\subsubsection{1D Finite Differences} % TODO: consider pulling FD out of this quasi-Newton method and into a separate section 
 When an analytical derivative is unavailable, one can approximate it with finite differences. With step size \(\epsilon>0\), the first derivative satisfies
 \begin{gather*}
   f'(x) \approx \frac{f(x+\epsilon)-f(x)}{\epsilon}
@@ -878,6 +879,12 @@ When we use a finite-difference Jacobian inside Newton's method, we expect linea
     end
     \end{verbatim}
 \end{exampleBox}
+
+\subsection{Quasi-Newton Methods}
+\label{sec:quasi-newton_methods}
+
+Quasi-Newton methods are a class of numerical algorithms that mimic Newton's method but use estimates of \(\mat{J}\) or its inverse. These estimates are qualitatively different from finite difference approximations to the Jacobian and are most often constructed and updated on-the-fly by low-rank updates using the values of $\mathbf f(\mathbf x)$ obtained as iterations proceed. While the computational cost per iteration is substantially reduced compared to finite difference approximations in terms of the number of function calls, the price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
+
 
 \subsubsection{Broyden's Method (and other quasi-Newton updates)}
 Rather than rebuilding a fresh finite-difference Jacobian at every iteration, we can instead update an approximation using secant information. Broyden's method maintains $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ and enforces the latest secant equation with a minimal-rank correction:
