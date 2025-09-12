@@ -619,6 +619,8 @@ The guarantee of quadratic convergence for Newton's method is \textit{local}, me
 
 
 \subsubsection{Failure Modes of Newton's Method}
+\label{sec:failure_modes_newton}
+
 Newton's method can fail or perform poorly under certain conditions:
 \begin{itemize}
     \item \textbf{Singular or Ill-conditioned Jacobian:} If $f'(x_k) \approx 0$ (in 1D) or $\mat{J}(\vect{x}_k)$ is singular or nearly singular, the step $\vect{d}_k$ can become excessively large, potentially causing the next iterate to overshoot the root wildly, or the linear system for $\vect{d}_k$ may not have a unique solution. This often occurs near local minima/maxima of $f(x)$ or in regions where components of $\vect{f}$ are insensitive to changes in some variables. This is the same failure mode as depicted in \autoref{fig:failure-modes}(a). In practice, damping/line-search or a trust-region variant (or using a pseudo-inverse when $\mat{J}(\vect{x}_k)$ is rank-deficient) mitigates these failures.
@@ -769,6 +771,91 @@ has three attracting fixed points (the cube roots of unity). Each fixed point ha
 
 \textbf{Practical note.} Near singular/ill-conditioned regions, methods such as damping/line search, trust-region steps, or continuation strategies can dramatically improve robustness, and plotting \(\det\mat{J}\) (or its condition number) alongside iteration counts is a helpful diagnostic when exploring basins of attraction. These are discussed later in this chapter.
 
+
+
+\subsection{Damped Newton's Method}
+
+Newton's method can be sensitive to the choice of initial guess, and in some cases, the iterates can behave erratically or diverge, especially when far from a root (as discussed in \autoref{sec:failure_modes_newton}). To enhance robustness, a common modification is to introduce damping (or a line search) to control the step size. This approach is known as the \textbf{damped Newton method} or \textbf{Newton-Raphson with damping}.
+
+Recall that Newton's method is based on a linear (first-order) approximation that is only locally accurate in a small neighborhood. We make two important observations:
+\begin{itemize}
+  \item The \emph{direction} of the Newton step, 
+  \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\), is typically good: if we took a sufficiently small step in this direction, the residual norm 
+  \(\lVert \mathbf{f}(\mathbf{x}_i+\alpha \mathbf{d}_i)\rVert_p\) 
+  would decrease.
+  \item The \emph{magnitude} of the step can be problematic: the size 
+  \(\lVert \mathbf{d}_i\rVert_p=\lVert \mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\rVert_p\) 
+  may be so large that the next iterate actually increases the residual (such that \( \lVert \mathbf{f}(\mathbf{x}_{i+1})\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p \)), which pushes us away from the solution instead of toward it.
+\end{itemize}
+Because our goal is to drive \(\lVert \mathbf{f}(\mathbf{x})\rVert_p \to 0\), we can correct this undesirable behavior by \emph{reducing the step size}. This leads to the damped Newton method:
+\begin{definitionBox}
+    \textbf{Definition: Damped Newton Method.}
+    The damped Newton method is given by the update rule
+    \begin{equation}
+    \mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),\qquad 0<\alpha\le 1
+    \end{equation}
+    Here, $\alpha$ is the damping parameter that controls the step size by reducing it.
+\end{definitionBox}
+
+\textbf{1D intuition and the ``right'' amount of damping.} In one dimension, the damped Newton method is
+\begin{equation}
+x_{i+1}=x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}
+\end{equation}
+Ideally, we would pick the \(\alpha\) that minimizes the size of the residual after the step,
+\begin{equation}
+\alpha^\star = \argmin_{\alpha\in(0,1]}\; \left| f\!\left(x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}\right) \right|
+\end{equation}
+With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshooting.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figs/nle/damped_newton_verification.pdf}
+    \caption{Damping in 1D prevents overshoot by shortening the Newton step along the same direction. We can see that here, $\alpha=1$ overshoots, while $\alpha=1/2$ and $\alpha=1/4$ do not.}
+\end{figure}
+
+In \(N\) dimensions, this generalizes to
+\begin{equation}
+\mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),
+\qquad
+\alpha^\star=\arg\min_{0<\alpha\le 1}\;\bigl\|\mathbf{f}\bigl(\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\bigr)\bigr\|_p
+\end{equation}
+Finding the optimal \(\alpha^\star\) can be just as hard (or harder) than solving the original system of nonlinear equations. As a more practical solution, we typically use an inexpensive backtracking \textbf{line search} that merely ensures the residual decreases. An example algorithm that implements this is shown below.
+
+\begin{algorithm}[H]
+\caption{Backtracking line search (damped Newton).}
+\begin{enumerate}
+\item Compute the Newton direction: \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\).
+\item Set \(\alpha\leftarrow 1\) (attempt the full Newton step).
+\item While \(\;\lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p:\)
+\begin{itemize}
+  \item Set \(\alpha \leftarrow \alpha/2\) \hfill (backtrack)
+\end{itemize}
+\item Accept the step: \(\mathbf{x}_{i+1}=\mathbf{x}_i+\alpha\mathbf{d}_i\).
+\end{enumerate}
+\end{algorithm}
+
+This strategy ensures that every iteration decreases \(\lVert \mathbf{f}\rVert_p\) and avoids catastrophic overshooting. We visualize an example of the backtracking line search in \autoref{fig:damped_newton_2d_backtracking}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{figs/nle/damped_newton_2d_backtracking.pdf}
+\caption{Backtracking line search for damped Newton on \(\mathbf{f}(x_1,x_2)=\big[x_1+x_2-1,\;x_1^2+x_2^2-1\big]\). Contours show level sets of \(\|\mathbf{f}(\mathbf{x})\|_2\), and dots trace the iterates from \(\mathbf{x}_0=(-2,-1.1)\). The full step (\(\alpha=1\)) is initially rejected; halving yields the first accepted step at \(\alpha=\tfrac{1}{8}\). Subsequent iterations accept \(\alpha=\tfrac12\) and then \(\alpha=1\) as the iterates approach a root, with the residual decreasing monotonically as guaranteed by the backtracking rule.}
+\label{fig:damped_newton_2d_backtracking}
+\end{figure}
+
+% We can use any vector norm \(\lVert\cdot\rVert_p\) here, but the choice \(p=2\) is a common default due to its convergence properties. Additionally, the test above uses a simple decrease condition that
+% \[
+% \lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p < \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p
+% \]
+% but it is very common to replace it with a Armijo condition for stronger convergence guarantees. We'll see more about this in the optimization section.
+
+\textbf{Convergence properties of damped Newton.}
+Once the iterates enter a small neighborhood of a root, the full Newton step ($\alpha=1$) is eventually accepted and quadratic convergence is recovered, provided that the Jacobian is nonsingular at the root. With backtracking, the method is globally convergent to a stationary point of $\tfrac12\|f\|_2^2$ (if we use the 2-norm). Thus, it may converge to a root or to a nonroot stationary point (local minimum or saddle point) of the residual norm.
+
+Looking ahead, other tweaks (trust regions, inexact Newton, etc.) can further improve reliability and are closely connected to optimization methods. We will revisit them in that context.
+
+
+
 \subsection{Calculating the Jacobian} 
 A major challenge in the practical execution of Newton's method comes from its reliance on the Jacobian matrix at iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
 
@@ -899,6 +986,7 @@ Broyden's method maintains an estimate $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ a
   \vect{\Delta f}_k = \vect{f}(\vect{x}_{k+1})-\vect{f}(\vect{x}_k)
 \end{equation}
 At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$, exactly like Newton's method. An initial $\mat{B}_0$ can be obtained from a finite-difference approximation to the Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. We will revisit quasi-Newton methods in more detail in the optimization chapter.
+
 
 
 \section{Continuation and Homotopy Methods}
@@ -1154,95 +1242,8 @@ This is itself a nonlinear system that can be solved using Newton's method!
 \end{exampleBox}
 
 
-\section{Damped Newton-Raphson}
-% MC: I'm adding this context (not in the slides to make this less out of place -- still reads pretty weird though imo
-When setting up the augmented system of equations to locate bifurcation points, the problem can be ill-scaled or sensitive, which can make vanilla Newton's method unreliable. A simple and effective safeguard is to damp the Newton step.
+\section{Summary}
 
-% MC: I think this part is pretty hand-wavy in its current form
-To formalize this, let's refresh our memory on Newton's method. We wish to solve the nonlinear system 
-\[
-\mathbf{f}(\mathbf{x})=\mathbf{0}
-\]
-With vanilla Newton's method, the update rule is given by
-\[
-\mathbf{x}_{i+1}=\mathbf{x}_i-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)
-\]
-Under this update rule, the iterates can behave erratically when we are far from a root. Newton's method is based on a linear (first-order) approximation that is only locally accurate in a small neighborhood. We make two important observations:
-\begin{itemize}
-  \item The \emph{direction} of the Newton step, 
-  \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\), is typically good: if we took a sufficiently small step in this direction, the residual norm 
-  \(\lVert \mathbf{f}(\mathbf{x}_i+\alpha \mathbf{d}_i)\rVert_p\) 
-  would decrease.
-  \item The \emph{magnitude} of the step can be problematic: the size 
-  \(\lVert \mathbf{d}_i\rVert_p=\lVert \mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\rVert_p\) 
-  may be so large that the next iterate actually increases the residual (such that \( \lVert \mathbf{f}(\mathbf{x}_{i+1})\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p \)), which pushes us away from the solution instead of toward it.
-\end{itemize}
-Because our goal is to drive \(\lVert \mathbf{f}(\mathbf{x})\rVert_p \to 0\), we can correct this undesirable behavior by \emph{reducing the step size}. This leads to the damped Newton method:
-\begin{definitionBox}
-    \textbf{Definition: Damped Newton Method.}
-    The damped Newton method is given by the update rule
-    \begin{equation}
-    \mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),\qquad 0<\alpha\le 1
-    \end{equation}
-    Here, $\alpha$ is the damping parameter that controls the step size by reducing it.
-\end{definitionBox}
-
-\textbf{1D intuition and the ``right'' amount of damping.} In one dimension, the damped Newton method is
-\begin{equation}
-x_{i+1}=x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}
-\end{equation}
-Ideally, we would pick the \(\alpha\) that minimizes the size of the residual after the step,
-\begin{equation}
-\alpha^\star = \argmin_{\alpha\in(0,1]}\; \left| f\!\left(x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}\right) \right|
-\end{equation}
-With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshooting.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\textwidth]{figs/nle/damped_newton_verification.pdf}
-    \caption{Damping in 1D prevents overshoot by shortening the Newton step along the same direction. We can see that here, $\alpha=1$ overshoots, while $\alpha=1/2$ and $\alpha=1/4$ do not.}
-\end{figure}
-
-\textbf{Many dimensions: line search on the Newton direction.}\quad In \(n\) dimensions, this generalizes to
-\begin{equation}
-\mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),
-\qquad
-\alpha^\star=\arg\min_{0<\alpha\le 1}\;\bigl\|\mathbf{f}\bigl(\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\bigr)\bigr\|_p
-\end{equation}
-Computing \(\alpha^\star\) \emph{exactly} can be comparably hard and expensive as solving the original system, so we use an inexpensive \textbf{line search} that merely ensures the residual decreases. An example algorithm that implements this is shown below.
-
-\begin{algorithm}[H]
-\caption{Backtracking line search (damped Newton).}
-\begin{enumerate}
-\item Compute the Newton direction: \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\).
-\item Set \(\alpha\leftarrow 1\) (attempt the full Newton step).
-\item While \(\;\lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p:\)
-\begin{itemize}
-  \item Set \(\alpha \leftarrow \alpha/2\) \hfill (backtrack)
-\end{itemize}
-\item Accept the step: \(\mathbf{x}_{i+1}=\mathbf{x}_i+\alpha\mathbf{d}_i\).
-\end{enumerate}
-\end{algorithm}
-
-This strategy monotonically decreases \(\lVert \mathbf{f}\rVert_p\), which makes the method globally convergent: starting from any point, the sequence either converges to a root of \(\mathbf{f}\) or to a stationary point of the residual norm (a local minimum or a saddle point). We visualize this in \autoref{fig:damped_newton_2d_backtracking}.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.7\textwidth]{figs/nle/damped_newton_2d_backtracking.pdf}
-\caption{Backtracking line search for damped Newton on \(\mathbf{f}(x_1,x_2)=\big[x_1+x_2-1,\;x_1^2+x_2^2-1\big]\). Contours show level sets of \(\|\mathbf{f}(\mathbf{x})\|_2\), and dots trace the iterates from \(\mathbf{x}_0=(-2,-1.1)\). The full step (\(\alpha=1\)) is initially rejected; halving yields the first accepted step at \(\alpha=\tfrac{1}{8}\). Subsequent iterations accept \(\alpha=\tfrac12\) and then \(\alpha=1\) as the iterates approach a root, with the residual decreasing monotonically as guaranteed by the backtracking rule.}
-\label{fig:damped_newton_2d_backtracking}
-\end{figure}
-
-% We can use any vector norm \(\lVert\cdot\rVert_p\) here, but the choice \(p=2\) is a common default due to its convergence properties. Additionally, the test above uses a simple decrease condition that
-% \[
-% \lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p < \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p
-% \]
-% but it is very common to replace it with a Armijo condition for stronger convergence guarantees. We'll see more about this in the optimization section.
-
-\textbf{Convergence properties of damped Newton.}
-Once the iterates enter a small neighborhood of a nonsingular root, the full Newton step ($\alpha=1$) is eventually accepted and quadratic convergence is recovered. With backtracking, the method is globally convergent to a stationary point of $\tfrac12\|f\|_2^2$ (if we use the 2-norm). Thus, it may converge to a root or to a nonroot stationary point (local minimum or saddle point) of the residual norm.
-
-Looking ahead, other tweaks (trust regions, inexact Newton, etc.) can further improve reliability and are closely connected to optimization methods. We will revisit them in that context.
 
 % MC: could be useful to have a summary here along with notes for practical considerations
 
