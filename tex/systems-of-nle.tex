@@ -849,38 +849,39 @@ Constructing the full $N\times N$ Jacobian this way requires one evaluation of $
 
 When we use a finite-difference Jacobian inside Newton's method, we expect worse convergence than the quadratic rate that Newton's method achieves with analytical precision. Whether we observe linear or superlinear rates close to quadratic depends on the error incurred by the finite difference approximation. 
 
-\begin{exampleBox} % TODO: use lstlisting for syntax highlighting and line numbering
+\begin{exampleBox}
     \textbf{Example (MATLAB):} Below is an example MATLAB implementation of using column-wise forward differences to approximate the Jacobian:
-    \begin{verbatim}
-    function J = my_jacobian(x, my_func)
-    % Column-wise forward-difference Jacobian with scale-aware steps.
-    % x_current : n-by-1 vector
-    % Fhandle   : function handle returning n-by-1 vector F(x)
+    \begin{lstlisting}
+function J = my_jacobian(x, my_func)
+% Column-wise forward-difference Jacobian with scale-aware steps.
+% x       : n-by-1 vector
+% my_func : function handle returning n-by-1 vector f(x)
 
-        n = length(x);
-        J = zeros(n, n);
+    n = length(x);
+    J = zeros(n, n);
 
-        Fx = my_func(x);
+    Fx = my_func(x);
 
-        epsM   = eps;             % machine epsilon, defining for clarity
-        h_base = sqrt(epsM);      % heuristic step magnitude
+    epsM   = eps;             % machine epsilon, defining for clarity
+    h_base = sqrt(epsM);      % heuristic step magnitude
 
-        for j = 1:n               % loop over columns
-            x_pert = x;
-            hj = h_base * max(1, abs(x_current(j)));
-            x_pert(j) = x_pert(j) + hj;
+    for j = 1:n               % loop over columns
+        x_pert = x;
+        hj = h_base * max(1, abs(x(j)));
+        x_pert(j) = x_pert(j) + hj;
 
-            F_pert = my_func(x_pert);
-            J(:, j) = (F_pert - Fx) / hj;
-        end
+        F_pert = my_func(x_pert);
+        J(:, j) = (F_pert - Fx) / hj;
     end
-    \end{verbatim}
+end
+    \end{lstlisting}
 \end{exampleBox}
 
-\subsection{Quasi-Newton Methods} % TODO: others to introduce here for completeness?
+\subsection{Quasi-Newton Methods}
 \label{sec:quasi-newton_methods}
 
 Quasi-Newton methods are a class of numerical algorithms that mimic Newton's method but use estimates of \(\mat{J}\) or its inverse. These estimates are qualitatively different from finite difference approximations to the Jacobian. They are most often constructed and updated on-the-fly by low-rank updates using the values of $\mathbf f(\mathbf x)$ obtained as iterations proceed. While the computational cost per iteration is substantially reduced compared to finite difference approximations in terms of the number of function calls, the price typically paid is a reduction in the convergence rate from quadratic (for exact Newton under standard assumptions) to superlinear. Under poor conditions some schemes may be only linear, but under smoothness they often achieve superlinear behavior.
+
 
 
 \subsubsection{Broyden's Method}
