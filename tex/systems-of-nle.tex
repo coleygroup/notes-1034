@@ -903,13 +903,15 @@ At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\
 
 \section{Continuation and Homotopy Methods}
 
-Finding a good initial guess for Newton's method can be difficult, especially when a problem has multiple solutions. Where do starting points come from? And how can we be confident we've found \emph{all} the solutions?\footnote{``All solutions'' is generally unattainable without structure. For arbitrary nonlinear systems, it is impossible to decide or enumerate all solutions from finite samples alone.}  % TODO: Emphasize
+Finding a good initial guess for Newton's method can be difficult, especially when a problem has multiple solutions. Where do starting points come from? And how can we be confident we've found \emph{all} the solutions?\footnote{``All solutions'' is generally unattainable without structure. For arbitrary nonlinear systems, it is impossible to decide or enumerate all solutions from finite samples alone.}  
 
-This section introduces a powerful family of techniques for systematically exploring a problem's solution landscape. The core idea is simple: instead of solving one hard problem, we solve a sequence of related, easier ones. This general strategy is called continuation. A homotopy provides a general recipe for creating that sequence of problems. Together, they allow us to trace entire families of solutions as parameters change, generate excellent initial guesses for root-finders, and discover when new solutions appear or disappear at special points called bifurcations.
+A simple strategy for looking for multiple solutions is to try many random initial guesses and see what happens. This can work well for low-dimensional problems with a few solutions, but it becomes inefficient in high dimensions or when solutions are rare. More systematic approaches are thanksfully available.
+
+This section introduces a powerful family of techniques for systematically exploring a problem's solution landscape. The core idea is simple: instead of solving one hard problem, we solve a sequence of related, easier ones. This general strategy is called continuation. A homotopy provides a general recipe for creating that sequence of problems. Together, they allow us to trace entire families of solutions as parameters change, generate rational initial guesses for root-finders, and discover when new solutions appear or disappear at special points called bifurcations.
 
 \subsection{Continuation}
 
-Continuation turns a hard equation into a sequence of easy ones. Instead of attacking $f(x)=0$ head-on, we introduce a parameter $\lambda$ and consider a family $F(x,\lambda)=0$ so that:
+Continuation turns a hard equation into a sequence of easy ones. Instead of directly solving $f(x)=0$, we introduce a new parameter $\lambda \in \mathbb{R}$ and consider a family $F(x,\lambda)=0$ so that:
 
 \begin{enumerate}
 \item the target problem appears at some $\lambda=\lambda_\star$, and
@@ -918,6 +920,7 @@ Continuation turns a hard equation into a sequence of easy ones. Instead of atta
 
 We then ``walk'' from $\lambda_0$ to $\lambda_\star$ in small steps, using the previously computed solution as the initial guess at the next step. The intuition here is simple: the solution we just found at the previous $\lambda$ value is an excellent initial guess for the next $\lambda$. You can plug that guess into any root finder you already know. If the solver struggles at some step, just reduce the $\lambda$ step size and try again.
 
+\begin{comment}
 % MC: can delete or comment this out, found it helpful when I was taking the course though
 \textbf{Optional note.}\quad
 We can show why small $\Delta\lambda$ $\Rightarrow$ small $\Delta x$ more formally (beyond just the intuition) by using the implicit function theorem. If $F(x_\star,\lambda_\star)=0$ and $\partial F/\partial x\neq 0$ at $(x_\star,\lambda_\star)$, the implicit function theorem gives a differentiable $x(\lambda)$ with $F(x(\lambda),\lambda)=0$ near $\lambda_\star$. Differentiating,
@@ -932,9 +935,11 @@ For a small step $\Delta\lambda$,
 \end{equation}
 Thus, $|\Delta x|$ is proportional to $|\Delta\lambda|$ as long as $\partial F/\partial x$ stays away from $0$, so the solution at $\lambda_k$ is an $O(\Delta\lambda)$-accurate initial guess for $\lambda_{k+1}$. We can derive a similar result for the multivariable case.
 
-\textbf{Practical tips.}\quad You should choose $\Delta\lambda$ adaptively: increase it when Newton converges in a few iterations, and decrease it when convergence slows or fails. To discover multiple solution branches, start continuation from different initial seeds (from symmetry, asymptotics, or physical limits) and trace each branch to the target $\lambda_\star$. Also, as we will discuss in more detail later (and as suggested in the optional note above), it is important to monitor points where $\partial F/\partial x=0$ (or in general, points where the Jacobian is singular), as these can cause problems with parameter continuation.
 
-Common uses include sweeping Reynolds or P\'eclet numbers in transport problems, temperature/pressure in phase equilibria, or rate constants in reaction networks.
+\textbf{Practical tips.}\quad You should choose $\Delta\lambda$ adaptively: increase it when Newton converges in a few iterations, and decrease it when convergence slows or fails. To discover multiple solution branches, start continuation from different initial seeds (from symmetry, asymptotics, or physical limits) and trace each branch to the target $\lambda_\star$. Also, as we will discuss in more detail later (and as suggested in the optional note above), it is important to monitor points where $\partial F/\partial x=0$ (or in general, points where the Jacobian is singular), as these can cause problems with parameter continuation.
+\end{comment}
+
+Common uses include sweeping Reynolds or P\'eclet numbers in transport problems, temperature/pressure in phase equilibria, or rate constants in reaction networks. In fact, the multiphysics simulator COMSOL, which you will encounter later in the course, has a built-in continuation engine that you can use to explore solutions as different physical quantities vary.
 
 \begin{exampleBox}
     \textbf{Example: Continuation for $f(x)=x^3-2x+1$.}
@@ -947,16 +952,16 @@ Common uses include sweeping Reynolds or P\'eclet numbers in transport problems,
     
     At $\lambda=0$ there is an obvious root $x=-1$. We now sweep $\lambda$ from $0$ to $1$, carrying the last root forward as the next initial guess. In MATLAB-like pseudocode:
     
-    \begin{verbatim}
-    lambda = 0:0.01:1;
-    xguess = -1;                  % solves f_0(x) = x^3 + 1 = 0
-    
-    for i = 1:length(lambda)
-    f = @(x) x.^3 - 2*lambda(i).*x + 1;
+    \begin{lstlisting}
+lambdas = 0:0.01:1;
+xguess = -1;                       % solves f_0(x) = x^3 + 1 = 0
+
+for i = 1:length(lambdas)
+    f = @(x) x.^3 - 2*lambdas(i).*x + 1;
     x(i) = fzero(@(x) f(x), xguess);   % any 1D solver works
     xguess = x(i);                     % continuation: carry forward
-    end
-    \end{verbatim}
+end
+    \end{lstlisting}
     
     This produces a discrete approximation of the solution path $x(\lambda)$ and, in particular, a root for $\lambda=1$. If a step fails, reduce the increment in $\lambda$ near that region and try again. Below, we visualize the solution path.
 
@@ -964,23 +969,24 @@ Common uses include sweeping Reynolds or P\'eclet numbers in transport problems,
         \includegraphics[width=.5\textwidth]{figs/nle/simple_continuation.pdf}
     \end{center}
     
-    \emph{Optional extension (finding other roots).} The polynomial at $\lambda=1$ has three real roots. To trace other branches, rerun the same loop but start from a different seed. One practical trick is to start at a larger $\lambda$ (say $\lambda=10$) where the balances $x \approx 1/(2\lambda)$ or $x \approx \pm\sqrt{2\lambda}$ give three distinct initial guesses, then sweep $\lambda$ back down to $1$.
+    \emph{Optional extension (finding other roots).} The polynomial at $\lambda=1$ has three real roots. To trace other branches, rerun the same loop but start from a different initial value. One practical trick is to start at a larger $\lambda$ (say $\lambda=10$) where the balances $x \approx 1/(2\lambda)$ or $x \approx \pm\sqrt{2\lambda}$ give three distinct initial guesses, then sweep $\lambda$ back down to $1$.
 \end{exampleBox}
 
 \subsection{Homotopy Methods}
-Continuation works beautifully, but how do you choose the family of problems $F(x, \lambda)$? A \textbf{homotopy} provides a recipe for this. A homotopy continuously morphs a simple function into the target function. Given a hard system $\mathbf{f}(\mathbf{x}) = \mathbf{0}$, we pick a simple system $\mathbf{g}(\mathbf{x}) = \mathbf{0}$ that we know how to solve. We can then define the homotopy
+The basic premise of continuation should feel intuitive: take a harder problem and break it into a series of easier ones. After all, that premise also describes our approach to solving problems iteratively. But in practice, how do we choose the family of problems to solve $F(x, \lambda)$? A \textbf{homotopy} provides a recipe for this. In this context, a homotopy is a continuous deformation of one function into another. Given the original problem we want to solve, $\mathbf{f}(\mathbf{x}) = \mathbf{0}$, we construct a simple system $\mathbf{g}(\mathbf{x}) = \mathbf{0}$ that we know how to solve. We can then define the homotopy
 \begin{equation}
     \mathbf{h}(\mathbf{x}, \lambda) = \lambda\,\mathbf{f}(\mathbf{x}) + (1-\lambda)\,\mathbf{g}(\mathbf{x}).
 \end{equation}
-which smoothly interpolates between the two systems if we start at \(\lambda=0\) and traverse to \(\lambda=1\).\footnote{By convention, we traverse from \(\lambda=0\) (the start system) to \(\lambda=1\) (the target), but in continuation and bifurcation analysis we treat \(\lambda\) as a free real parameter; allowing \(\lambda\notin[0,1]\) is often necessary to locate turning points and get around folds.
-} At $\lambda=0$, we have the easy start system $\mathbf{g}(\mathbf{x}) = \mathbf{0}$, and at $\lambda=1$, we recover our target system $\mathbf{f}(\mathbf{x}) = \mathbf{0}$.
+which smoothly interpolates between the two systems if we start at \(\lambda=0\) and traverse to \(\lambda=1\). 
+At $\lambda=0$, we have the easy start system $\mathbf{g}(\mathbf{x}) = \mathbf{0}$, and at $\lambda=1$, we recover our target system $\mathbf{f}(\mathbf{x}) = \mathbf{0}$. 
+In continuation and bifurcation analysis, we treat \(\lambda\) as a free real parameter; allowing \(\lambda\notin[0,1]\) is often necessary to systematically track all solution branches, as we will see later. 
 
-The obvious question is how to choose $\mathbf{g}(\mathbf{x})$. The only thing we really need is that $\mathbf{g}(\mathbf{x})$ has known roots, so the choice is very flexible. Some common ones include the following:
+The next question is how to choose $\mathbf{g}(\mathbf{x})$. The only real requirement is that $\mathbf{g}(\mathbf{x})$ has known roots--or at least lets us make sensible initial guesses to find those roots--so the choice is very flexible. The simplest ones include the following:
 \begin{itemize}
     \item Fixed-point: $\mathbf{g}(\mathbf{x}) = \mathbf{x} - \mathbf{x}_0$, where $\mathbf{x}_0$ is a known starting point.
     \item Linear: $\mathbf{g}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$, where you can easily solve the linear system for the starting roots.
 \end{itemize}
-But really, we can choose any $\mathbf{g}(\mathbf{x})$ that has known roots. Again, the key is that $\mathbf{g}(\mathbf{x})$ is easy to solve for the roots. In physical systems, we often have some simplified model that we know how to solve, and we can use that to construct the homotopy.
+
 \begin{exampleBox}
     \textbf{Example: Fixed-point homotopy}
     We consider the target system
@@ -991,7 +997,7 @@ But really, we can choose any $\mathbf{g}(\mathbf{x})$ that has known roots. Aga
     y^2-1
     \end{bmatrix}=\mathbf 0
     \]
-    Obviously, we can analytically solve this simple system to find the roots, but we will use this as an example to illustrate the homotopy method. We choose a known point \((x_0,y_0)=(0.2,-0.5)\) and set
+    Obviously, we can analytically solve this simple system to find the roots, but we will use this as an example to illustrate the homotopy method. For the sake of illustration, let's choose an arbitrary known point \((x_0,y_0)=(0.2,-0.5)\) and set
     \[
     \mathbf g(x,y)=
     \begin{bmatrix}
@@ -1012,11 +1018,16 @@ But really, we can choose any $\mathbf{g}(\mathbf{x})$ that has known roots. Aga
     \end{bmatrix}
     =\mathbf 0,\qquad \lambda\in[0,1]
     \]
-    At \(\lambda=0\), the unique root is clearly \((x,y)=(x_0,y_0)\). Because the coordinates decouple, for \(u\in\{x,y\}\) we solve a scalar quadratic at each \(\lambda\):
+    At \(\lambda=0\), there is a single unique solution \((x,y)=(x_0,y_0)\) by construction. At each \(\lambda\) as we slowly increase from 0 to 1:
     \[
-    \lambda(u^2-1)+(1-\lambda)(u-u_0)=0
+    \lambda(x^2-1)+(1-\lambda)(x-x_0)=0
     \implies
-    \lambda u^2+(1-\lambda)u-\big[\lambda+(1-\lambda)u_0\big]=0.
+    \lambda x^2+(1-\lambda)x-\big[\lambda+(1-\lambda)x_0\big]=0.
+    \]
+    \[
+    \lambda(y^2-1)+(1-\lambda)(y-y_0)=0
+    \implies
+    \lambda y^2+(1-\lambda)y-\big[\lambda+(1-\lambda)y_0\big]=0.
     \]
     Following the root that satisfies \(u(0)=u_0\) traces a continuous path from \((x_0,y_0)\) to a solution of \(\mathbf f=\mathbf 0\).
     The figure shows the path in the \((x,y)\)-plane together with the lines \(x=\pm1\) and \(y=\pm1\).
@@ -1027,16 +1038,19 @@ But really, we can choose any $\mathbf{g}(\mathbf{x})$ that has known roots. Aga
 
 \end{exampleBox}
 
+
+For chemical engineering problems describing physical systems, we often have some simplified model that we know how to solve, and we can use that to construct the homotopy. We will see this soon in the context of the van der Waals equation of state.
+
 \section{Bifurcation Analysis}
 As the homotopy parameter $\lambda$ varies, the number of solutions of
 \[
 \mathbf{h}(\mathbf{x},\lambda)=\mathbf{0}
 \]
-can change. Sometimes this change happens discontinuously in the parameter: a solution branch folds back in $(\mathbf{x},\lambda)$-space so that, when viewed as a function of $\lambda$, a solution suddenly appears or disappears. Such events are called \textbf{turning points}. At a turning point, the Jacobian with respect to $\mathbf{x}$ becomes singular, and the usual implicit function theorem parameterization by $\lambda$ breaks down.
+can change. Sometimes this change happens discontinuously as we change $\lambda$: a solution branch folds back in $(\mathbf{x},\lambda)$-space so that, when viewed as a function of $\lambda$, a solution suddenly appears or disappears. Such events are called \textbf{turning points}. At a turning point, the Jacobian with respect to $\mathbf{x}$ becomes singular, and the usual implicit function theorem parameterization by $\lambda$ breaks down.
 
-In other situations, additional solutions appear continuously: a previously single branch smoothly sprouts extra branches (for example, a symmetric branch splitting into three). These are called \textbf{bifurcations} (in the convention of 10.34). They are likewise characterized by a singular Jacobian: the rank of $\mathbf{J}_h=\partial \mathbf{h}/\partial \mathbf{x}$ drops and new directions of solutions open up.
+In other situations, additional solutions appear continuously: a solution branch smoothly sprouts extra branches (for example, a symmetric branch splitting into three). These are called \textbf{bifurcations}. They are likewise characterized by a singular Jacobian: the rank of $\mathbf{J}_h=\partial \mathbf{h}/\partial \mathbf{x}$ drops and new directions of solutions open up.
 
-In both cases, the event occurs at $(\mathbf{x}^*,\lambda^*)$ where $\mathbf{h}(\mathbf{x}^*,\lambda^*)=\mathbf{0}$ and the Jacobian is singular. So we can make the following definition:
+We can localize \emph{where} such cases occur by identifying the points $(\mathbf{x}^*,\lambda^*)$ where $\mathbf{h}(\mathbf{x}^*,\lambda^*)=\mathbf{0}$ and the Jacobian is singular. So we can make the following definition:
 \begin{definitionBox}
     \textbf{Definition: Bifurcation Point.}\quad A point $(\mathbf{x}^*,\lambda^*)$ is a bifurcation point of a homotopy $\mathbf{h}(\mathbf{x},\lambda)=\mathbf{0}$ if
     \begin{enumerate}
@@ -1044,7 +1058,7 @@ In both cases, the event occurs at $(\mathbf{x}^*,\lambda^*)$ where $\mathbf{h}(
         \item $\det \mathbf{J}_h(\mathbf{x}^*,\lambda^*)=0$ \quad (the Jacobian $\mathbf{J}_h=\partial \mathbf{h}/\partial \mathbf{x}$ is singular)
     \end{enumerate}
 \end{definitionBox}
-Near such points, solution branches either turn around in $\lambda$ (turning point) or split/merge continuously (bifurcation). Practically, we can detect them by monitoring the smallest singular value of $\mathbf{J}_h$ along a continuation, and we can locate them by solving an augmented system that enforces $\mathbf{h}=0$ together with singularity of $\mathbf{J}_h$:
+Near such points, solution branches either turn around in $\lambda$ (turning point) or split/merge continuously (bifurcation). Practically, we can detect them by monitoring the smallest singular value of $\mathbf{J}_h$ along a continuation to determine when we might be close to a bifurcation point. We can then pinpoint them by solving an augmented system of equations that enforces $\mathbf{h}=0$ together with singularity of $\mathbf{J}_h$:
 \begin{equation}
     \begin{bmatrix}
     \mathbf{h}(\mathbf{x}^*,\lambda^*) \\
@@ -1055,11 +1069,11 @@ This is itself a nonlinear system that can be solved using Newton's method!
 
 \begin{exampleBox}
     \textbf{Example: van der Waals equation via homotopy}
-    Suppose we want to find the roots of the van der Waals equation of state for a given reduced pressure $\hat{P}$ and reduced temperature $\hat{T}$. The van der Waals equation is given in reduced form by
+    Suppose we want to calculate the molar volumes of all possible states given the van der Waals equation of state. As in the beginning of the chapter, we can pose this as finding the roots of a function $f(\hat v)$ at a given reduced pressure $\hat{P}$ and reduced temperature $\hat{T}$. The van der Waals equation is given in reduced form by
     \[
     f(\hat v)=\Bigl(\hat P+\frac{3}{\hat v^2}\Bigr)\Bigl(\hat v-\frac{1}{3}\Bigr)-\frac{8}{3}\hat T
     \]
-    A clever idea here is to start from a simple model with a known solution (ideal gas), then continuously deform to the more realistic model (van der Waals) and track the root(s). For \(\hat P=0.1\), \(\hat T=0.5\), the ideal gas law has a known solution for these parameters:
+    A physically-grounded homotopy could start from a simple model with a known solution (ideal gas), then continuously deform to the more realistic model (van der Waals) and track the root(s). For \(\hat P=0.1\), \(\hat T=0.5\), the ideal gas law has a known solution for these parameters:
     \[
     g(\hat v)=\hat P \hat v-\frac{8}{3}\hat T = 0
     \implies
@@ -1083,14 +1097,61 @@ This is itself a nonlinear system that can be solved using Newton's method!
     \qquad
     (\lambda^*_2,\hat v^*_2)\approx(1.692,\,6.764).
     \]
-    Note that \(\lambda_2^*>1\). This is common with linear homotopies. Turning points can lie outside the interval \([0,1]\) even if we ultimately aim to reach \(\lambda=1\). For $\lambda<\lambda_1^*$ there is a single positive root. As $\lambda$ passes through $\lambda_1^*$, two additional roots appear and persist continuously up to $\lambda_2^*$, after which only one root remains. These points are highlighted in the figure below.
+    For $\lambda<\lambda_1^*$ there is a single positive root. As $\lambda$ passes through $\lambda_1^*$, two additional roots appear and persist continuously up to $\lambda_2^*$, after which only one root remains. These points are highlighted in the figure below.
     \begin{center}
     \includegraphics[width=0.80\linewidth]{figs/nle/vdw_homotopy_branches.pdf}
     \end{center}
+    Note that \(\lambda_2^*>1\). This is possible (and common) with linear homotopies. Turning points can lie outside the interval \([0,1]\) even if the problem we actually want to solve corresponds to \(\lambda=1\). If $\lambda=0$ is the ideal gas law and $\lambda=1$ is the van der Waals equation of state, then what might $\lambda=2$ mean, physically? Fortunately, that is not something we need to worry about in the context of 10.34; we are simply using the homotopy as a mathematical tool. 
+
 \end{exampleBox}
 
 
 % TODO: add circle example from lecture slides
+\begin{exampleBox}
+    \textbf{Example: Circle intersection via homotopy}
+    Consider the problem of finding the intersection points of two circles in 2D. We can formulate this as solving the system of equations:
+    \[
+    \mathbf f(\mathbf x) = \begin{pmatrix} (x_1 + 3)^2 + (x_2 + 1)^2 - R^2 \\ (x_1 - 2)^2 + (x_2 - 2)^2 - R^2 \end{pmatrix}
+    \]
+    for two circles centered at (-3, -1) and (2, 2). As $R$ varies, the number of intersection points changes. For small $R$, there are no intersections; at a critical radius, the circles touch at one point (a bifurcation); and for larger $R$, there are two intersection points.
+
+    \begin{center}
+    \begin{tikzpicture}[>=latex, scale=0.8]
+        % Set up the axes
+        \draw[->] (-6,0) -- (6,0) node[right] {$x_1$};
+        \draw[->] (0,-4) -- (0,4) node[above] {$x_2$};
+
+        % Draw the two circles
+        \draw[blue] (2,2) circle (3);
+        \draw[red] (-3,-1) circle (3);
+        
+        % Add dashed lines for radius R=3 from the centers
+        \draw[blue,dashed] (2,2) -- (2-2.12,2-2.12) node[midway,above left] {$R$};
+        \draw[red,dashed] (-3,-1) -- (-3+2.12,-1+2.12) node[midway,above right] {$R$};
+        
+        % Mark the centers
+        \fill[blue] (2,2) circle (2pt) node[above right] {$(2,2)$};
+        \fill[red] (-3,-1) circle (2pt) node[below left] {$(-3,-1)$};
+        
+        % Mark intersection points with stars
+        \node[star,star points=5,star point ratio=2.25,draw=black,fill=white,inner sep=1.5pt] 
+            at (-0.864,1.101) {};
+        \node[star,star points=5,star point ratio=2.25,draw=black,fill=white,inner sep=1.5pt] 
+            at (0.018,-0.949) {};
+
+    \end{tikzpicture}
+    \end{center}   
+
+    The radius at which the circles \emph{just} start to touch is a bifurcation point from 0 to 2 solutions. We can find this point by solving the augmented system of three equations for $(x_1^*, x_2^*, R^*)$:
+    \[ 
+    \begin{pmatrix} \mathbf f(\mathbf x) \\ \det \mathbf{J}(\mathbf x) \end{pmatrix} = \begin{pmatrix}
+    (x_1 + 3)^2 + (x_2 + 1)^2 - R^2 \\ (x_1 - 2)^2 + (x_2 - 2)^2 - R^2 \\ \det \begin{pmatrix} 2 (x_1 + 3) & 2 ( x_2 + 1) \\ 2 (x_1 - 2) & 2 (x_2 - 2) \end{pmatrix}
+    \end{pmatrix} = \mathbf 0
+    \]
+
+
+
+\end{exampleBox}
 
 
 \section{Damped Newton-Raphson}
