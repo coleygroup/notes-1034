@@ -109,16 +109,19 @@
 
 % TikZ stuff, can clean this up later -- sorry for the clutter
 \usepackage{tikz}
-\usepackage{pgfplots}
 \usetikzlibrary{decorations.pathreplacing,calligraphy}
 \usetikzlibrary{arrows.meta,calc,shapes.misc, positioning, shapes}
 \usetikzlibrary{intersections,shapes.geometric,shapes.symbols}
-\usetikzlibrary{arrows.meta,calc,shapes.symbols, shapes}
+\usetikzlibrary{arrows.meta,calc,shapes.symbols, shapes, shapes.multipart}
 \tikzset{
   axis/.style={thick,-{Latex}},
   curve/.style={very thick},
   newton/.style={blue!80!black,very thick,-{Latex[length=3mm]}}
 }
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18, set layers=standard}
+\usepgfplotslibrary{fillbetween}
 
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
