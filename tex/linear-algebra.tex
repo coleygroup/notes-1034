@@ -653,7 +653,9 @@ Even simpler than preconditioning is \textbf{scaling} (often called equilibratio
 
 \section{Invertibility and Determinants}
 \subsection{Determinant}
-For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation. This is why a matrix is \textbf{invertible if and only if its determinant is non-zero}.
+For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation.
+This offers insight into the fact that a matrix is \textbf{invertible if and only if its determinant is non-zero}.
+
 
 The determinant has several important properties, including $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $, the multiplicative property $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $, and the fact that for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $.
 
@@ -870,6 +872,7 @@ However, in practice, computing $ \mathbf{A}^{-1} $ directly is generally avoide
 
 
 \section{Numerical Solution of Linear Systems: Direct Methods}
+\label{sec:num_sol_linear_direct}
 Direct methods are named for their ability to (given no round-off errors) determine the exact solution to a linear system within a finite number of steps. In practical applications, however, finite precision limits these methods to producing only approximate solutions.
 
 Direct methods take advantage of the fact that we can easily solve the system \autoref{eq:linear-system} when $ \mathbf{A} $ is upper triangular by using back substitution. Direct methods typically involve some variant of Gaussian elimination, which is a systematic procedure for transforming the coefficient matrix $ \mathbf{A} $ into an upper triangular form in order to be able to solve the system by back substitution. 
@@ -1109,6 +1112,7 @@ This decomposition reveals the fundamental behavior of $\mathbf{A}$ as a simple 
 
 
 \section{Numerical Solution of Linear Systems: Iterative Methods}
+\label{sec:num_sol_linear_iterative}
 Iterative methods attempt to solve linear systems ($\mathbf{A}\mathbf{x} = \mathbf{b}$) by generating a sequence of improving approximate solutions. They do not require Gaussian elimination and generally scale better for large systems. However, even with infinite precision, iterative methods can only obtain an approximate solution in a finite number of steps\footnote{Actually, some iterative methods, like CG on SPD, are finite-termination in exact arithmetic, but we aren't going to cover that in this course.}. We cover Jacobi and Gauss-Seidel iteration, two of the most common iterative methods, in this course. But one more extremely popular method deserves at least a mention: the conjugate gradient method.\footnote{A good resource for this is Prof. Jonathan Shewchuk's guide \textit{An Introduction to the Conjugate Gradient Method Without the Agonizing Pain}.\autocite{shewchuk1994}}
 
 \subsection{Jacobi Iteration}
