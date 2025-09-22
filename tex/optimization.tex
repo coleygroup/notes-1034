@@ -52,7 +52,7 @@ An optimization problem can be expressed in a standard form. For a minimization 
 \begin{equation}
     \min_{\mathbf{x} \in \mathcal{D}} f(\mathbf{x})
 \end{equation}
-Here, $f(\mathbf{x})$ is the \textbf{objective function} (also known as a cost, loss, or energy function) that we want to minimize. The vector $\mathbf{x}$ contains the \textbf{decision variables}. The set $\mathcal{D}$ is the \textbf{feasible set} or feasible region, which defines the space of permissible values for $\mathbf{x}$. We call a problem unconstrained when there are no explicit constraints on $\mathbf{x}$ beyond the natural domain of $f$ (often $\mathbb{R}^N$, but not always, like in the case of $f(x) = \log(x)$, where the domain is $(0,\infty)$). If $\mathcal{D}$ is a proper subset of the domain of $f$ (e.g., defined by equalities or inequalities, like $1 \le x \le 2$), the problem is \textbf{constrained}. It is worth noting that maximizing an objective function is equivalent to minimizing its negative; that is, $\max f(\mathbf{x}) = \min\left( -f(\mathbf{x}) \right)$.
+Here, $f(\mathbf{x})$ is the \textbf{objective function} (also known as a cost, loss, or energy function) that we want to minimize. The vector $\mathbf{x}$ contains the \textbf{decision variables}. The set $\mathcal{D}$ is the \textbf{feasible set} or feasible region, which defines the space of permissible values for $\mathbf{x}$. We call a problem unconstrained when there are no explicit constraints on $\mathbf{x}$ beyond the natural domain of $f$ (often $\mathbb{R}^N$, but not always, like in the case of $f(x) = \log(x)$, where the domain is $(0,\infty)$). If $\mathcal{D}$ is a proper subset of the domain of $f$ (e.g., defined by equalities or inequalities, like $1 \le x \le 2$), the problem is \textbf{constrained}. It is worth noting that maximizing an objective function is equivalent to minimizing its negative; that is, $\max f(\mathbf{x}) = \min\left( -f(\mathbf{x}) \right)$. Thus, in this chapter, we will focus on minimization problems without loss of generality.
 
 \begin{figure}[H]
     \centering
@@ -119,7 +119,7 @@ Here, $f(\mathbf{x})$ is the \textbf{objective function} (also known as a cost, 
     \label{fig:unconstrained-vs-constrained}
 \end{figure}
 
-For example, one can describe the feasible region as $\mathcal{D} = \{\, \mathbf{x} \in \mathbb{R}^N : c(\mathbf{x}) \ge 0 \,\}$. A key difference from solving systems of nonlinear equations is that we retain \emph{degrees of freedom} to improve the objective value. In other words, once the feasibility conditions are met, there are still directions in which the decision variables can move while remaining valid. These free directions are what allow us to keep adjusting $\mathbf{x}$ to reduce (or increase) the objective, whereas in equation solving the goal is only to satisfy all conditions, leaving no flexibility once a solution is found.
+For example, one can describe the feasible region as $\mathcal{D} = \{\, \mathbf{x} \in \mathbb{R}^N : c(\mathbf{x}) \ge 0 \,\}$. A key difference from solving systems of nonlinear equations is that we retain \emph{degrees of freedom} to improve the objective value. In other words, once the feasibility conditions are met, there are still directions in which the decision variables can move while maintaining feasibility. These free directions are what allow us to keep adjusting $\mathbf{x}$ to reduce (or increase) the objective, whereas in equation solving the goal is only to satisfy all conditions, leaving no flexibility once a solution is found.
 
 \begin{exampleBox}
     \textbf{Example: Minimizing a quadratic function.}
@@ -184,8 +184,8 @@ For example, one can describe the feasible region as $\mathcal{D} = \{\, \mathbf
             \addplot[smooth, thick, domain=-3:1.2, samples=200] {(x+1)^2};
         
             % Interval boundaries
-            \addplot[densely dashed] coordinates {(0,0) (0,4)};
-            \addplot[densely dashed] coordinates {(1,0) (1,4)};
+            \addplot[mark=none] coordinates {(0,-.5) (0,4)};
+            \addplot[mark=none] coordinates {(1,-.5) (1,4)};
             \node[below] at (axis cs:0,0) {$0$};
             \node[below] at (axis cs:1,0) {$1$};
         
@@ -201,9 +201,74 @@ For example, one can describe the feasible region as $\mathcal{D} = \{\, \mathbf
 \end{exampleBox}
 
 
+\subsection{Classification of Optimization Problems}
+Numerical algorithms for optimization are designed to exploit problem structure. It is helpful to classify a problem along three axes: the nature of the decision variables, the presence of constraints, and the properties of the objective and constraints. Variables may be continuous, taking values in $\mathbb{R}^N$; discrete, restricted to $\mathbb{Z}^N$ (integers); or mixed, combining continuous components with integer ones. The feasible set $\mathcal{D}$ may span all of $\mathbb{R}^N$ (unconstrained) or be a proper subset defined by equalities and inequalities (constrained). Finally, curvature matters: when $f$ is convex and $\mathcal{D}$ is convex, every local minimum is global, while nonconvex problems may admit many local minima. These distinctions give rise to standard classes. Linear programming features linear objectives and linear constraints. Nonlinear programming allows nonlinearities with continuous variables. Mixed-integer linear programming adds integrality to linear models. Mixed-integer nonlinear programming combines integrality with nonlinearity. Recognizing where your problem lies in this landscape guides the algorithmic choices that follow.
+
+\begin{exampleBox}
+    \textbf{Example: Computational Chemistry Planning.}
+    We plan a binding free-energy campaign using two calculation types:
+    \begin{itemize}
+      \item \textbf{Resources available:} 200 GPU-hours, 800 CPU-hours, 2 TB storage.
+      \item \textbf{MD production (per ns):} uses 2 GPU-hours and 5 GB; yields 0.8 information points.
+      \item \textbf{QM/MM snapshot (per calc):} uses 20 CPU-hours and 10 GB; yields 5 points.
+    \end{itemize}
+    Let $x_1 \in \mathbb{R}_{\ge 0}$ denote MD nanoseconds and $x_2 \in \mathbb{Z}_{\ge 0}$ the number of QM/MM snapshots. 
+    The objective is to maximize total information gain subject to resource limits:
+    \[
+    \begin{aligned}
+    \max_{x_1,\,x_2}\quad & 0.8x_1 + 5x_2\\[2pt]
+    \text{s.t.}\quad 
+      & 2x_1 \le 200 \quad &&\text{(GPU-hours)}\\
+      & 20x_2 \le 800 \quad &&\text{(CPU-hours)}\\
+      & 5x_1 + 10x_2 \le 2000 \quad &&\text{(Storage, GB)}\\
+      & x_1 \ge 0,\;\; x_2 \in \mathbb{Z}_{\ge 0}
+    \end{aligned}
+    \]
+    This is a mixed-integer linear program because the objective and constraints are linear, with $x_2$ constrained to be integer.
+    \emph{Continuous relaxation:} replacing $x_2 \in \mathbb{Z}_{\ge 0}$ by $x_2 \ge 0$ gives a linear program that can provide an upper bound and sometimes coincides with the MILP optimum. We will see this relaxation idea again in \Cref{sec:branch-and-bound} when we discuss branch-and-bound methods.
+\end{exampleBox}
+
+
+\subsection{Local vs. Global Solutions}
+The goal of an optimization algorithm is to find a solution, but the notion of solution varies. A point $x^*$ is a \textbf{feasible solution} if $x^* \in \mathcal{D}$. A point $x^*$ is a \textbf{local solution} if it is feasible and there exists $\epsilon>0$ such that $f(x^*) \le f(x)$ for all $x \in \mathcal{D} \cap B_{\epsilon}(x^*)$, where $B_\epsilon(x^*) := \{x : \|x-x^*\|_2 < \epsilon\}$ denotes the ball of radius $\epsilon$ around $x^*$ (\autoref{fig:local-solution}). It is a \textbf{global solution} if the inequality holds for every feasible $x \in \mathcal{D}$. Finding global solutions can be difficult in practice, especially for nonconvex problems that feature many local minima (right side of \autoref{fig:convex-nonconvex}). For convex problems, as discussed, any local solution is also global. For general nonconvex problems, most algorithms are designed only to find a local solution.
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=1.2]
+    
+      % Feasible region D (polygon)
+      \filldraw[thick,fill=white] 
+        (-2,0) -- (-1,1.5) -- (1,2) -- (2,1) -- (1,-0.5) -- cycle;
+      \node at (0,0.8) {$\mathcal{D}$};
+    
+      % Local solution x*
+      \fill (2,1) circle (2pt) node[below right] {\textbf{$x^*$}};
+    
+      % Epsilon ball around x*
+      \draw[dashed] (2,1) circle (0.5);
+      
+      % Intersection of ball with D (shade blue)
+      \begin{scope}
+        \clip (-2,0) -- (-1,1.5) -- (1,2) -- (2,1) -- (1,-0.5) -- cycle;
+        \fill[blue,opacity=0.7] (2,1) circle (0.5);
+      \end{scope}
+    
+      % Label B_epsilon
+      \node at (2.8,1.5) {$B_{\epsilon}$};
+      \draw[->] (2.6,1.4) -- (2.35,1.25);
+    
+    \end{tikzpicture}
+    \caption{A local solution $x^*$ lies in the feasible set $\mathcal{D}$. Within the neighborhood $B_\epsilon(x^*)$, $f(x^*) \le f(x)$ for all feasible $x$.}
+    \label{fig:local-solution}
+\end{figure}
+
+Existence and uniqueness are not guaranteed. For example, $\min_{x \in \mathbb{R}} (-x)$ has no minimizer (the objective is unbounded below), whereas $\min_{x \in \mathbb{R}} (0\cdot x)$ has infinitely many minimizers.
+
 \subsection{Convexity}
 \label{sec:convexity}
-Before proceeding with our discussion of optimization, we need to define the concept of \textbf{convexity}. Convexity is one of the most important properties in optimization because it guarantees that any local minimum is also a global minimum. Understanding convexity helps us recognize when optimization problems can be solved reliably and efficiently.
+Before proceeding with our discussion of optimization, we need to define the concept of \textbf{convexity}. Convexity is one of the most important properties in optimization.
+If the objective function and constraints are convex, it is guaranteed that any local minimum is also a global minimum.
+Thus, if we know that a problem is convex, we can use local optimization methods with confidence that they will find a globally optimal solution.
 
 \textbf{Convex Sets:}
 A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $x_1,x_2 \in \mathcal{D}$ and $t\in[0,1]$, the point $t x_1 + (1-t) x_2$ also lies in $\mathcal{D}$. Geometrically, this means that the straight line segment connecting any two points in $\mathcal{D}$ lies entirely within $\mathcal{D}$.
@@ -351,69 +416,6 @@ For twice-differentiable functions, convexity can be checked via curvature: in o
 \begin{warningBox}
     \textbf{Warning}: Many chemical engineering optimization problems are nonconvex due to nonlinear thermodynamics, reaction kinetics, and phase behavior. While this makes global optimization challenging, understanding convex relaxations and convex approximations can still be valuable for developing good starting points and bounds for nonconvex solvers.
 \end{warningBox}
-
-\subsection{Classification of Optimization Problems}
-Numerical algorithms for optimization are designed to exploit problem structure. It is helpful to classify a problem along three axes: the nature of the decision variables, the presence of constraints, and the properties of the objective and constraints. Variables may be continuous, taking values in $\mathbb{R}^N$; discrete, restricted to $\mathbb{Z}^N$ (integers); or mixed, combining continuous components with integer ones. The feasible set $\mathcal{D}$ may span all of $\mathbb{R}^N$ (unconstrained) or be a proper subset defined by equalities and inequalities (constrained). Finally, curvature matters: when $f$ is convex and $\mathcal{D}$ is convex, every local minimum is global, while nonconvex problems may admit many local minima. These distinctions give rise to standard classes. Linear programming features linear objectives and linear constraints. Nonlinear programming allows nonlinearities with continuous variables. Mixed-integer linear programming adds integrality to linear models. Mixed-integer nonlinear programming combines integrality with nonlinearity. Recognizing where your problem lies in this landscape guides the algorithmic choices that follow.
-
-\begin{exampleBox}
-    \textbf{Example: Computational Chemistry Planning.}
-    We plan a binding free-energy campaign using two calculation types:
-    \begin{itemize}
-      \item \textbf{Resources available:} 200 GPU-hours, 800 CPU-hours, 2 TB storage.
-      \item \textbf{MD production (per ns):} uses 2 GPU-hours and 5 GB; yields 0.8 information points.
-      \item \textbf{QM/MM snapshot (per calc):} uses 20 CPU-hours and 10 GB; yields 5 points.
-    \end{itemize}
-    Let $x_1 \in \mathbb{R}_{\ge 0}$ denote MD nanoseconds and $x_2 \in \mathbb{Z}_{\ge 0}$ the number of QM/MM snapshots. 
-    The objective is to maximize total information gain subject to resource limits:
-    \[
-    \begin{aligned}
-    \max_{x_1,\,x_2}\quad & 0.8x_1 + 5x_2\\[2pt]
-    \text{s.t.}\quad 
-      & 2x_1 \le 200 \quad &&\text{(GPU-hours)}\\
-      & 20x_2 \le 800 \quad &&\text{(CPU-hours)}\\
-      & 5x_1 + 10x_2 \le 2000 \quad &&\text{(Storage, GB)}\\
-      & x_1 \ge 0,\;\; x_2 \in \mathbb{Z}_{\ge 0}
-    \end{aligned}
-    \]
-    This is a mixed-integer linear program because the objective and constraints are linear, with $x_2$ constrained to be integer.
-    \emph{Continuous relaxation:} replacing $x_2 \in \mathbb{Z}_{\ge 0}$ by $x_2 \ge 0$ gives a linear program that can provide an upper bound and sometimes coincides with the MILP optimum. We will see this relaxation idea again in \Cref{sec:branch-and-bound} when we discuss branch-and-bound methods.
-\end{exampleBox}
-
-
-\subsection{Local vs. Global Solutions}
-The goal of an optimization algorithm is to find a solution, but the notion of solution varies. A point $x^*$ is a \textbf{feasible solution} if $x^* \in \mathcal{D}$. A point $x^*$ is a \textbf{local solution} if it is feasible and there exists $\epsilon>0$ such that $f(x^*) \le f(x)$ for all $x \in \mathcal{D} \cap B_{\epsilon}(x^*)$, where $B_\epsilon(x^*) := \{x : \|x-x^*\|_2 < \epsilon\}$ denotes the ball of radius $\epsilon$ around $x^*$ (\autoref{fig:local-solution}). It is a \textbf{global solution} if the inequality holds for every feasible $x \in \mathcal{D}$. Finding global solutions can be difficult in practice, especially for nonconvex problems that feature many local minima (right side of \autoref{fig:convex-nonconvex}). For convex problems, as discussed, any local solution is also global. For general nonconvex problems, most algorithms are designed only to find a local solution.
-
-\begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[scale=1.2]
-    
-      % Feasible region D (polygon)
-      \filldraw[thick,fill=white] 
-        (-2,0) -- (-1,1.5) -- (1,2) -- (2,1) -- (1,-0.5) -- cycle;
-      \node at (0,0.8) {$\mathcal{D}$};
-    
-      % Local solution x*
-      \fill (2,1) circle (2pt) node[below right] {\textbf{$x^*$}};
-    
-      % Epsilon ball around x*
-      \draw[dashed] (2,1) circle (0.5);
-      
-      % Intersection of ball with D (shade blue)
-      \begin{scope}
-        \clip (-2,0) -- (-1,1.5) -- (1,2) -- (2,1) -- (1,-0.5) -- cycle;
-        \fill[blue,opacity=0.7] (2,1) circle (0.5);
-      \end{scope}
-    
-      % Label B_epsilon
-      \node at (2.8,1.5) {$B_{\epsilon}$};
-      \draw[->] (2.6,1.4) -- (2.35,1.25);
-    
-    \end{tikzpicture}
-    \caption{A local solution $x^*$ lies in the feasible set $\mathcal{D}$. Within the neighborhood $B_\epsilon(x^*)$, $f(x^*) \le f(x)$ for all feasible $x$.}
-    \label{fig:local-solution}
-\end{figure}
-
-Existence and uniqueness are not guaranteed. For example, $\min_{x \in \mathbb{R}} (-x)$ has no minimizer (the objective is unbounded below), whereas $\min_{x \in \mathbb{R}} (0\cdot x)$ has infinitely many minimizers.
 
 \subsection{Optimality Conditions for Unconstrained Problems}
 To find a local minimum, we need a way to identify one mathematically. We consider the unconstrained optimization problem for a function $f: \mathbb{R}^N \to \mathbb{R}$:
