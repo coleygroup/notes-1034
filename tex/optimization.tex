@@ -426,7 +426,7 @@ For twice-differentiable functions, convexity can be checked via curvature: in o
     \textbf{Warning}: Many chemical engineering optimization problems are nonconvex due to nonlinear thermodynamics, reaction kinetics, and phase behavior. While this makes global optimization challenging, understanding convex relaxations and convex approximations can still be valuable for developing good starting points and bounds for global optimization solvers.
 \end{warningBox}
 
-\subsection{Optimality Conditions for Unconstrained Problems}
+\section{Optimality Conditions for Unconstrained Problems}
 To find a local minimum, we need a way to identify one mathematically. We consider the unconstrained optimization problem for a function $f: \mathbb{R}^N \to \mathbb{R}$:
 \begin{equation}
     \min_{\mathbf{x} \in \mathbb{R}^N} f(\mathbf{x})
@@ -581,7 +581,7 @@ there exists a direction with negative curvature. Along that direction, the seco
 then the quadratic term is positive in every direction and dominates the remainder term, so nearby points have strictly larger objective value.
 \end{itemize}
 
-\section{Iterative Descent Methods}
+\section{Algorithms for Unconstrained Optimization}
 Most numerical methods for unconstrained optimization are iterative. They start from an initial guess, $x_0$, and generate a sequence of points $\{x_k\}$ that converge to a local minimum. Indeed, we saw this before when we discussed fixed-point iterations for solving systems of linear equations (Jacobi and Gauss-Seidel iterations) and root-finding (Newton's method). The general form of such an iteration is
 \begin{equation}
     \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{d}_k
