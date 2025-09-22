@@ -329,12 +329,15 @@ In a manner similar to nonlinear equations, existence and uniqueness are not gua
 
 \subsection{Convexity}
 \label{sec:convexity}
-Before proceeding with our discussion of optimization, we need to define the concept of \textbf{convexity}. Convexity is one of the most important properties in optimization.
+Before proceeding with our discussion of optimization, we need to define the concept of \textbf{convexity}.
+Convexity plays an important role in optimization because of the following key property:
 If the objective function and constraints are convex, it is guaranteed that any local minimum is also a global minimum.
 Thus, if we know that a problem is convex, we can use local optimization methods with confidence that they will find a globally optimal solution.
 
+There are two related concepts: convex sets and convex functions.
+
 \textbf{Convex Sets:}
-A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $x_1,x_2 \in \mathcal{D}$ and $t\in[0,1]$, the point $t x_1 + (1-t) x_2$ also lies in $\mathcal{D}$. Geometrically, this means that the straight line segment connecting any two points in $\mathcal{D}$ lies entirely within $\mathcal{D}$.
+A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $\mathbf{x}_1,\mathbf{x}_2 \in \mathcal{D}$ and $t\in[0,1]$, the point $t \mathbf{x}_1 + (1-t) \mathbf{x}_2$ also lies in $\mathcal{D}$. Geometrically, this means that the straight line segment connecting any two points in $\mathcal{D}$ lies entirely within $\mathcal{D}$.
 
 \begin{center}
 \begin{tikzpicture}[line cap=round,line join=round, >=stealth]
@@ -349,8 +352,8 @@ A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $x_1,x_2 \in \ma
     
       % segment and endpoints
       \draw[very thick] (0.7,-0.6) -- (2.6,0.6);
-      \fill (0.7,-0.6) circle (2pt) node[left=4pt] {$x$};
-      \fill (2.6,0.6)  circle (2pt) node[right=4pt] {$y$};
+      \fill (0.7,-0.6) circle (2pt) node[left=4pt] {$\mathbf{x}$};
+      \fill (2.6,0.6)  circle (2pt) node[right=4pt] {$\mathbf{y}$};
     
       \node[font=\small] at (1.5,-1.6) {convex};
     \end{scope}
@@ -374,8 +377,8 @@ A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $x_1,x_2 \in \ma
       % \draw[line width=2.0pt, red] (1.25,-0.15) -- (1.85,0.15);
     
       % endpoints
-      \fill (1.2,-0.6) circle (2pt) node[left=4pt] {$x$};
-      \fill (2.0,0.8)  circle (2pt) node[above=4pt] {$y$};
+      \fill (1.2,-0.6) circle (2pt) node[left=4pt] {$\mathbf{x}$};
+      \fill (2.0,0.8)  circle (2pt) node[above=4pt] {$\mathbf{y}$};
     
       \node[font=\small] at (1.7,-1.6) {nonconvex};
     \end{scope}
@@ -384,12 +387,14 @@ A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $x_1,x_2 \in \ma
 \end{center}
 
 \textbf{Convex Functions:}
-A function $f: \mathbb{R}^N \to \mathbb{R}$ is convex\footnote{We call a function \emph{strictly} convex if it is convex and the inequality \autoref{eq:convexity} is strict for all $x_1 \neq x_2$ and $\lambda \in (0,1)$.} if for any two points $x_1, x_2$ in its domain and any $\lambda \in [0,1]$:
+A function $f: \mathbb{R}^N \to \mathbb{R}$ is conve if for any two points $\mathbf{x}_1, \mathbf{x}_2$ in its domain and any $\lambda \in [0,1]$:
 \begin{equation}
-    f(\lambda x_1 + (1-\lambda) x_2) \leq \lambda f(x_1) + (1-\lambda) f(x_2)
-    \label{eq:convexity}
+  f(\lambda \mathbf{x}_1 + (1-\lambda) \mathbf{x}_2) \leq \lambda f(\mathbf{x}_1) + (1-\lambda) f(\mathbf{x}_2)
+  \label{eq:convexity}
 \end{equation}
-This means that the function value at any point on the line segment between $x_1$ and $x_2$ is less than or equal to the linear interpolation of the function values at the endpoints. Geometrically, this means that a function is convex if, when you draw a line segment between any two points on the function's graph, the line segment lies above or on the function. For a univariate function, this means the function ``curves upward'' like a bowl. For a multivariate function, this means that the function lies above the tangent plane at any point.
+Similarlyk, we call a function \emph{strictly} convex if it is convex and the inequality \autoref{eq:convexity} is strict for all $\mathbf{x}_1 \neq \mathbf{x}_2$ and $\lambda \in (0,1)$.
+
+The definitions above indicate that the function value at any point on the line segment between $\mathbf{x}_1$ and $\mathbf{x}_2$ is less than or equal to the linear interpolation of the function values at the endpoints. Geometrically, this means that a function is convex if, when you draw a line segment between any two points on the function's graph, the line segment lies above or on the function. For a univariate function, this means the function ``curves upward'' like a bowl. For a multivariate smooth function, this means that the function lies above the tangent plane at any point.
 
 
 \textbf{Second-Order Characterization:}
@@ -418,7 +423,7 @@ For twice-differentiable functions, convexity can be checked via curvature: in o
 \textbf{Why Convexity Matters:} Convexity confers powerful guarantees. Any local minimum is global, and many gradient-based algorithms have global convergence guarantees under standard conditions (e.g., continuous gradients and appropriate step sizes). Even when the underlying problem is nonconvex, convex relaxations and approximations are valuable for initialization, bounding, and analysis. Without convexity, finding a global solution is often NP-hard. In this case, specialized global optimization algorithms are then required.
 
 \begin{warningBox}
-    \textbf{Warning}: Many chemical engineering optimization problems are nonconvex due to nonlinear thermodynamics, reaction kinetics, and phase behavior. While this makes global optimization challenging, understanding convex relaxations and convex approximations can still be valuable for developing good starting points and bounds for nonconvex solvers.
+    \textbf{Warning}: Many chemical engineering optimization problems are nonconvex due to nonlinear thermodynamics, reaction kinetics, and phase behavior. While this makes global optimization challenging, understanding convex relaxations and convex approximations can still be valuable for developing good starting points and bounds for global optimization solvers.
 \end{warningBox}
 
 \subsection{Optimality Conditions for Unconstrained Problems}
@@ -429,7 +434,7 @@ To find a local minimum, we need a way to identify one mathematically. We consid
 If the objective function $f(\mathbf{x})$ is twice continuously differentiable, we have a set of optimality conditions based on the gradient and Hessian of the function. A point $\mathbf{x}^*$ that satisfies $\nabla f(\mathbf{x}^*) = 0$ is known as a \textbf{stationary point}.
 
 \begin{definitionBox}
-\textbf{First-Order Necessary Condition (FONC)}
+\textbf{First-Order Necessary Condition}
 If $\mathbf{x}^*$ is a local minimum, then its gradient must be the zero vector:
 \begin{equation}
     \nabla f(\mathbf{x}^*) = 0
@@ -437,7 +442,7 @@ If $\mathbf{x}^*$ is a local minimum, then its gradient must be the zero vector:
 \end{definitionBox}
 
 \begin{definitionBox}
-\textbf{Second-Order Necessary Condition (SONC)}
+\textbf{Second-Order Necessary Condition}
 If $\mathbf{x}^*$ is a local minimum, then its Hessian matrix must be positive semi-definite:
 \begin{equation}
     \nabla^2 f(\mathbf{x}^*) \succeq 0
@@ -445,7 +450,7 @@ If $\mathbf{x}^*$ is a local minimum, then its Hessian matrix must be positive s
 \end{definitionBox}
 
 \begin{definitionBox}
-\textbf{Second-Order Sufficient Condition (SOSC)}
+\textbf{Second-Order Sufficient Condition}
 If a point $\mathbf{x}^*$ satisfies both $\nabla f(\mathbf{x}^*) = 0$ and its Hessian matrix is positive definite, then $\mathbf{x}^*$ is a strict local minimum:
 \begin{equation}
     \nabla f(\mathbf{x}^*) = 0 \quad \text{and} \quad \nabla^2 f(\mathbf{x}^*) \succ 0 \implies \mathbf{x}^* \text{ is a strict local minimum}
@@ -506,7 +511,7 @@ f(\mathbf{x}^* + \epsilon \mathbf{d})
 where the condition on the remainder $r(\epsilon,\mathbf{d})$ is that for every $\eta>0$ there exists $\bar{\epsilon}>0$ such that 
 $\bigl|r(\epsilon,\mathbf{d})\bigr|\le \eta \epsilon^2$ whenever $0<\epsilon\le \bar{\epsilon}$ and $\|\mathbf{d}\|_2=1$.
 
-\subsubsection{\texorpdfstring{First-Order Necessity (FONC)\textsuperscript{*}}{First-Order Necessity (FONC)}}
+\subsubsection{\texorpdfstring{First-Order Necessity\textsuperscript{*}}{First-Order Necessity}}
 \emph{Claim.} If $\mathbf{x}^*$ is a local minimizer of $f$, then $\nabla f(\mathbf{x}^*)=\mathbf{0}$.
 
 \emph{Proof.}
@@ -519,11 +524,11 @@ f(\mathbf{x}^* + \epsilon \mathbf{d})
 For sufficiently small $\epsilon>0$, the negative linear term $\epsilon \nabla f(\mathbf{x}^*)^\top \mathbf{d}$ dominates the $O(\epsilon^2)$ terms, hence
 $f(\mathbf{x}^*+\epsilon \mathbf{d}) < f(\mathbf{x}^*)$, contradicting local minimality. Therefore, $\nabla f(\mathbf{x}^*)=\mathbf{0}$.
 
-\subsubsection{\texorpdfstring{Second-Order Necessity (SONC)\textsuperscript{*}}{Second-Order Necessity (SONC)}}
+\subsubsection{\texorpdfstring{Second-Order Necessity\textsuperscript{*}}{Second-Order Necessity}}
 \emph{Claim.} If $\mathbf{x}^*$ is a local minimizer of $f$, then $\nabla^2 f(\mathbf{x}^*) \succeq \mathbf{0}$.
 
 \emph{Proof.}
-By the FONC just established, $\nabla f(\mathbf{x}^*)=\mathbf{0}$. Thus, the linear term in \autoref{eq:taylor} vanishes and we have, for any unit direction $\mathbf{d}$,
+By the first order conditions, $\nabla f(\mathbf{x}^*)=\mathbf{0}$. Thus, the linear term in \autoref{eq:taylor} vanishes and we have, for any unit direction $\mathbf{d}$,
 \begin{equation}
 f(\mathbf{x}^* + \epsilon \mathbf{d})
 = f(\mathbf{x}^*) + \frac{1}{2}\epsilon^2 \mathbf{d}^\top \nabla^2 f(\mathbf{x}^*) \mathbf{d} + r(\epsilon,\mathbf{d})
@@ -542,7 +547,7 @@ f(\mathbf{x}^* + \epsilon \mathbf{d})
 \end{equation}
 contradicting local minimality. Hence, $\nabla^2 f(\mathbf{x}^*) \succeq \mathbf{0}$.
 
-\subsubsection{\texorpdfstring{Second-Order Sufficiency (SOSC)\textsuperscript{*}}{Second-Order Sufficiency (SOSC)}}
+\subsubsection{\texorpdfstring{Second-Order Sufficiency\textsuperscript{*}}{Second-Order Sufficiency}}
 \emph{Claim.} If $\nabla f(\mathbf{x}^*)=\mathbf{0}$ and $\nabla^2 f(\mathbf{x}^*) \succ \mathbf{0}$, then $\mathbf{x}^*$ is a \emph{strict} local minimizer.
 
 \emph{Proof.}
