@@ -5,27 +5,29 @@ Optimization pervades chemical engineering. Engineers use it to estimate reactio
 In any optimization problem, we define the variables that can be changed, specify the objective we want to achieve, and then search for the conditions that yield the best performance, either a maximum or a minimum. This chapter introduces the foundations of optimization and the numerical methods used to solve these problems.
 
 \section{Preliminaries: Gradients, Hessians, and Taylor Expansions}
-Let's refresh our memory on some important concepts from calculus that will be used throughout this chapter. For a differentiable $f: \mathbb{R}^N \to \mathbb{R}$ and $\mathbf{x} = (x_1,\dots,x_N)^\top$, the gradient evaluated at $\mathbf{x}^*$ is
+\paragraph*{Gradients and Hessians}
+Let's refresh our memory on some important concepts from calculus that will be used throughout this chapter. For a differentiable $f: \mathbb{R}^N \to \mathbb{R}$ and $\mathbf{x} = (x_1,\dots,x_N)^\top$, the gradient evaluated at $\mathbf{x}$ is
 \begin{equation}
     \renewcommand{\arraystretch}{1.5}
-    \nabla f(\mathbf{x}^*) = \begin{bmatrix}
-        \frac{\partial f}{\partial x_1}(\mathbf{x}^*) \\
-        \frac{\partial f}{\partial x_2}(\mathbf{x}^*) \\
+    \nabla f(\mathbf{x}) = \begin{bmatrix}
+        \frac{\partial f}{\partial x_1}(\mathbf{x}) \\
+        \frac{\partial f}{\partial x_2}(\mathbf{x}) \\
         \vdots \\
-        \frac{\partial f}{\partial x_N}(\mathbf{x}^*)
+        \frac{\partial f}{\partial x_N}(\mathbf{x})
     \end{bmatrix}
     \end{equation}
-The Hessian evaluated at $\mathbf{x}^*$ is
+The Hessian evaluated at $\mathbf{x}$ is
 \begin{equation}
     \renewcommand{\arraystretch}{1.5}
-    \nabla^2 f(\mathbf{x}^*) = \begin{bmatrix}
-        \frac{\partial^2 f}{\partial x_1\partial x_1}(\mathbf{x}^*) & \cdots & \frac{\partial^2 f}{\partial x_1\partial x_N}(\mathbf{x}^*) \\
+    \nabla^2 f(\mathbf{x}) = \begin{bmatrix}
+        \frac{\partial^2 f}{\partial x_1\partial x_1}(\mathbf{x}) & \cdots & \frac{\partial^2 f}{\partial x_1\partial x_N}(\mathbf{x}) \\
         \vdots & \ddots & \vdots \\
-        \frac{\partial^2 f}{\partial x_N\partial x_1}(\mathbf{x}^*) & \cdots & \frac{\partial^2 f}{\partial x_N\partial x_N}(\mathbf{x}^*)
+        \frac{\partial^2 f}{\partial x_N\partial x_1}(\mathbf{x}) & \cdots & \frac{\partial^2 f}{\partial x_N\partial x_N}(\mathbf{x})
     \end{bmatrix}
 \end{equation}
-If all mixed partial derivatives are continuous in a neighborhood of $\mathbf{x}$, then $\nabla^2 f(\mathbf{x})$ is symmetric.
+For smooth functions, $\frac{\partial^2}{\partial x_i\partial x_j}f (\mathbf{x}) = \frac{\partial^2}{\partial x_j\partial x_i}f(\mathbf{x})$, and thus, $\nabla^2 f(\mathbf{x})$ is symmetric. Hessian can be viewed as a Jacobian of the gradient, i.e., $\nabla^2 f(\mathbf{x}) = \nabla(\nabla f(\mathbf{x}))$. 
 
+\paragraph*{Taylor Expansions}
 For univariate $f: \mathbb{R} \to \mathbb{R}$, if $f$ has a continuous second derivative in a neighborhood of $x^*$, a first-order Taylor expansion at $x^*$ is
 \begin{equation}
     f(x) = f(x^*) + f'(x^*)(x-x^*) + O(|x-x^*|^2)
