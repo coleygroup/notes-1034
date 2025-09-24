@@ -605,6 +605,41 @@ As $x_k \to x^*$, $\xi_k \to x^*$. Thus, if $f'(x^*) \neq 0$,
 \end{equation}
 So we have quadratic convergence for the 1D case provided that $f$ is twice continuously differentiable in a neighborhood of $x^*$, $f'(x^*) \neq 0$, and $x_0$ is sufficiently close to $x^*$.
 
+\textbf{Singular case (1D):} When $f^\prime(x^*) = 0$, the convergence order typically degrades to being linear. Proving this in the most general case is challenging, as there are different reasons why this occurs. Instead, consider the specific case where $f(x)$ has a root of multiplicity $m \ge 2$ at $x^*$. This means that $f(x)$ can be factored as
+\begin{equation}
+    f(x) = (x - x^*)^m g(x)
+\end{equation}
+where $g(x)$ is a function such that $g(x^*) \neq 0$. The derivative is
+\begin{equation}
+    f'(x) = m(x - x^*)^{m-1} g(x) + (x - x^*)^m g'(x)
+\end{equation}
+At $x = x^*$, we have $f'(x^*) = 0$ since the first term vanishes and the second term also vanishes because of the $(x - x^*)^m$ factor. Now, applying Newton's method:
+\begin{equation}
+    x_{k+1} = x_k - \frac{f(x_k)}{f'(x_k)} = x_k - \frac{(x_k - x^*)^m g(x_k)}{m(x_k - x^*)^{m-1} g(x_k) + (x_k - x^*)^m g'(x_k)}
+\end{equation}
+Assuming $x_k$ is close to $x^*$, we can approximate $g(x_k) \approx g(x^*)$ and $g'(x_k) \approx g'(x^*)$. This gives
+\begin{equation}
+    x_{k+1} \approx x_k - \frac{(x_k - x^*)^m g(x^*)}{m(x_k - x^*)^{m-1} g(x^*) + (x_k - x^*)^m g'(x^*)}
+\end{equation}
+Factoring out $(x_k - x^*)^{m-1}$ from the denominator:
+\begin{equation}
+    x_{k+1} \approx x_k - \frac{(x_k - x^*)^m g(x^*)}{(x_k - x^*)^{m-1} \left( m g(x^*) + (x_k - x^*) g'(x^*) \right)}
+\end{equation}
+Simplifying, we get
+\begin{equation}
+    x_{k+1} \approx x_k - \frac{(x_k - x^*) g(x^*)}{m g(x^*) + (x_k - x^*) g'(x^*)}
+\end{equation}
+As $x_k \to x^*$, the term $(x_k - x^*) g'(x^*)$ becomes negligible compared to $m g(x^*)$. Thus, we have
+\begin{equation}
+    x_{k+1} \approx x_k - \frac{(x_k - x^*) g(x^*)}{m g(x^*)} = x_k - \frac{x_k - x^*}{m} = x_k \left(1 - \frac{1}{m}\right) + \frac{x^*}{m}
+\end{equation}
+This shows that the error $e_k = x_k - x^*$ evolves as
+\begin{equation}
+    e_{k+1} \approx \left(1 - \frac{1}{m}\right) e_k
+\end{equation}
+This indicates linear convergence with a convergence factor of $1 - \frac{1}{m}$. Therefore, when $f'(x^*) = 0$ and the root has multiplicity $m \ge 2$, Newton's method converges linearly rather than quadratically.
+
+
 \textbf{General Case (Multivariate):}
 For systems of equations, Newton's method converges quadratically to $\vect{x}^*$ if:
 \begin{enumerate}
