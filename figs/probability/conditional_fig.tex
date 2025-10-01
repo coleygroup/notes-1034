@@ -1,0 +1,92 @@
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+
+% -------- Parameters you can tweak --------
+\def\muOne{0.0}
+\def\muTwo{0.0}
+\def\sigmaOne{1.0}
+\def\sigmaTwo{1.2}
+\def\rho{0.6}
+\def\xSlice{0.7}
+
+% -------- Math helpers: PDFs --------
+% Bivariate normal pdf: bivnorm(x,y, mu1,mu2, s1,s2, rho)
+\pgfmathdeclarefunction{bivnorm}{7}{%
+  \pgfmathparse{%
+    (1/(2*pi*sqrt((#5*#5)*(#6*#6)*(1-#7*#7)))) *
+    exp(-0.5/(1-#7*#7) * ( ((#1-#3)^2)/(#5*#5)
+      - 2*#7*(#1-#3)*(#2-#4)/(#5*#6)
+      + ((#2-#4)^2)/(#6*#6) ))
+  }%
+}
+
+% Univariate normal pdf: normpdf(x, mean, sd)
+\pgfmathdeclarefunction{normpdf}{3}{%
+  \pgfmathparse{ (1/(sqrt(2*pi)*#3)) * exp(-0.5*((#1-#2)/#3)^2) }%
+}
+
+% -------- Conditional parameters X2 | X1 = xSlice --------
+\pgfmathsetmacro{\condmean}{\muTwo + \rho*(\sigmaTwo/\sigmaOne)*(\xSlice-\muOne)}
+\pgfmathsetmacro{\condsd}{\sigmaTwo*sqrt(1 - \rho*\rho)}
+\pgfmathsetmacro{\condmax}{1/(sqrt(2*pi)*\condsd)} % peak of the conditional curve
+
+\begin{document}
+\begin{tikzpicture}
+  \begin{groupplot}[
+    group style={group size=2 by 1, horizontal sep=18mm},
+    every axis/.style={font=\small}
+  ]
+
+  % -------- LEFT: 3D "mountain" with vertical slice --------
+  \nextgroupplot[
+    view={70}{35},
+    width=10.5cm, height=8.2cm,
+    xlabel={$x_1$}, ylabel={$x_2$}, zlabel={$p_{\mathsf{x}_1,\mathsf{x}_2}(x_1,x_2)$},
+    % title={Joint PDF with slice at $x_1=\xSlice$},
+    domain=-3:3, y domain=-3.5:3.5,
+    samples=30, samples y=30,
+    zmax=0.17,
+    colormap/viridis,
+  ]
+  % Surface
+  \addplot3 [surf, shader=interp, opacity=0.85]
+    {bivnorm(x,y, \muOne,\muTwo, \sigmaOne,\sigmaTwo, \rho)};
+
+  % Slice curve at x1 = xSlice (thick 3D line)
+  \addplot3[red,
+    domain=-3.5:3.5, samples=100, line width=3pt,
+    unbounded coords=discard,
+    restrict z to domain=0.001:1, % Only plot where z > 0.001
+    ] ({\xSlice},{x},{bivnorm(\xSlice,x, \muOne,\muTwo, \sigmaOne,\sigmaTwo, \rho)});
+
+  % A short vertical tick at the front to highlight the slice location
+%   \addplot3+[domain=0:0, samples=2, thick, red]
+%     coordinates {(\xSlice,-3.5,0) (\xSlice,-3.5,0.2)};
+
+  % -------- RIGHT: conditional pdf p(x2 | x1 = xSlice) --------
+  \nextgroupplot[
+    width=10cm, height=8.2cm,
+    xlabel={$x_2$},
+    ylabel={$p_{\mathsf{x}_2\mid \mathsf{x}_1}(x_2 \mid x_1=\xSlice)$},
+    % title={$p_{X_2\mid X_1}(x_2 \mid x_1=\xSlice)$},
+    xmin=-3.5, xmax=3.5,
+    ymin=0, ymax={\condmax*1.1},
+    domain=-3.5:3.5, samples=100,
+    grid=both,
+  ]
+  % Conditional curve
+    % \addplot+[very thick, red] {normpdf(x, \condmean, \condsd)};
+    \addplot[very thick, red] {normpdf(x, \condmean, \condsd)};
+
+  % Mean and ±1 SD guides
+  % \addplot+[domain=0:0, dashed] coordinates {(\condmean,0) (\condmean,\condmax)};
+  % \addplot+[domain=0:0, dotted]  coordinates {(\condmean+\condsd,0) (\condmean+\condsd,\condmax*0.9)};
+  % \addplot+[domain=0:0, dotted]  coordinates {(\condmean-\condsd,0) (\condmean-\condsd,\condmax*0.9)};
+
+%   \node[anchor=south] at (axis cs:\condmean,\condmax) {\scriptsize mean};
+
+  \end{groupplot}
+\end{tikzpicture}
+\end{document}
