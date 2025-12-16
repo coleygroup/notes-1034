@@ -1,0 +1,947 @@
+\chapter{Numerical Solution of Partial Differential Equations}
+
+So far, our work on differential equations has focused on \textit{ordinary} differential equations, where the unknown function depends on a single independent variable (usually time, $t$, or a single spatial coordinate, $x$). However, many physical phenomena involve quantities that vary in both space and time, or across multiple spatial dimensions simultaneously. To model these systems, we must turn to \textit{partial} differential equations (PDEs). Mathematically, the distinction comes from the dimensionality of the domain. An ODE involves an unknown function $c$ and its derivatives with respect to a single variable. For a time-dependent problem over the interval $[t_0, t_f]$, the general form is
+\begin{equation}
+    f\left(t; c, \frac{dc}{dt}, \frac{d^2c}{dt^2}, \dots \right) = 0 \quad \forall t \in [t_0, t_f]
+\end{equation}
+A PDE, by contrast, involves an unknown function $c(x_1, \dots, x_n)$ depending on multiple independent variables and relates its partial derivatives. For a general domain $\Omega$, the equation takes the form
+\begin{equation}
+    f\left(x_1, \dots, x_n; c, \frac{\partial c}{\partial x_1}, \dots, \frac{\partial^2 c}{\partial x_1^2}, \dots \right) = 0 \quad \forall (x_1, \dots, x_n) \in \Omega
+\end{equation}
+PDEs are typically formulated as BVPs (much like the ODE-BVP case). We require the PDE to hold within the interior of the domain $\Omega$, and we must specify conditions on the boundary $\partial \Omega$ to close the system. For example, a Dirichlet boundary condition prescribes the value of the function on the boundary:
+\begin{equation}
+    c(x_1, \dots, x_n) = 0 \quad \forall (x_1, \dots, x_n) \in \partial \Omega
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[line cap=round, line join=round, scale=0.95]
+
+        % smooth boundary + fill + one small arrow on the boundary
+        \path[
+          fill=black!10,
+          draw=blue,
+          very thick,
+          use Hobby shortcut,
+          closed=true,
+        ]
+        (4.2,0.2)
+        .. (3.6,2.0)
+        .. (1.0,2.9)
+        .. (-1.8,2.4)
+        .. (-2.6,1.6)
+        .. (-2.7,1.1)
+        .. (-3.8,1.1)
+        .. (-4.2,0.0)
+        .. (-3.6,-1.8)
+        .. (-0.5,-2.8)
+        .. (2.4,-2.4)
+        .. (3.9,-1.1);
+
+        % labels
+        \node at (0.2,0.0) {$\Omega$};
+        \node[blue] at (4.55,1.35) {$\partial\Omega$};
+
+        % PDE written on the domain
+        \node[align=center] at (0.2,1.25) {\large
+          $\displaystyle \partial_t u - \nabla\!\cdot\!\bigl(\kappa\nabla u\bigr)=f$
+          \\
+          $\text{in }\Omega\times(0,T)$
+        };
+
+        % BC callout
+        \node[anchor=west, align=left, blue] (bc) at (5.0,-0.3)
+          {BC: $u=g \quad \text{on }\partial\Omega\times(0,T)$};
+        \draw[->,blue,thick]
+          (bc) .. controls (4.2,-0.2) and (4.175,0.2) .. (4.15,0.6);
+
+        % IC callout
+        \node[anchor=north, align=left] (ic) at (0,-3.25)
+          {IC: $u(\mathbf{x},0)=u_0(\mathbf{x}) \quad \text{for }\mathbf{x}\in\Omega$};
+        \draw[->,black,thick]
+          (ic.north) .. controls (-0.2,-2.8) and (-0.8,-2.3) .. (-1.2,-1.8);
+
+    \end{tikzpicture}
+    \caption{A generic PDE domain $\Omega$ with boundary $\partial \Omega$, a sample PDE, and sample BC/IC.}
+    \label{fig:pde_domain}
+\end{figure}
+
+Why do we need this higher complexity? We live in a three-dimensional world, and engineering systems like plug flow reactors or heat exchangers have spatial structure that cannot always be lumped into a single point. Furthermore, we are often interested in transient behaviors, or how a system evolves from a non-steady state. While ODEs can handle time evolution (IVPs) or spatial equilibrium (BVPs), PDEs allow us to handle both simultaneously.
+
+Solving these equations is a significant challenge. Unlike ODEs, where existence and uniqueness theorems are often straightforward (e.g., Lipschitz continuity for IVPs), characterizing the solution of a PDE is generally far from trivial. Analytical solutions exist only for a small number of simple instances. In most practical engineering scenarios involving nonlinearity or irregular domains, analytical solutions are impossible to find. Therefore, we focus on numerically solving classes of PDEs using methods like the finite difference method, finite element method, finite volume method, and some others.
+
+\section{Classification of PDEs}
+
+Before choosing a numerical method, we must understand the mathematical character of the PDE. Just as conic sections in geometry are classified into ellipses, parabolas, and hyperbolas based on their algebraic form, second-order linear PDEs are classified into three categories: elliptic, parabolic, and hyperbolic. This classification dictates the physical behavior of the solution and the stability and suitability of numerical schemes.
+
+We focus on linear, second-order PDEs in two independent variables (say, $x$ and $y$). The general form is
+\begin{equation}
+    A \frac{\partial^2 c}{\partial x^2} + B \frac{\partial^2 c}{\partial x \partial y} + C \frac{\partial^2 c}{\partial y^2} + D \frac{\partial c}{\partial x} + E \frac{\partial c}{\partial y} + F(x, y) = 0
+\end{equation}
+The classification is determined solely by the coefficients of the highest-order derivatives ($A$, $B$, and $C$) via the discriminant $\Delta = B^2 - 4AC$. (Please be aware that many references write the mixed term as $2B \frac{\partial^2 c}{\partial x \partial y}$; in this case, the discriminant becomes $B^2 - AC$.)
+
+\subsection{Elliptic PDEs}
+
+If the discriminant is negative ($B^2 - 4AC < 0$), the PDE is elliptic. The prototypical example is Laplace's equation, which describes steady-state diffusion or potential fields. In 2D, this is written as
+\begin{equation}
+    \frac{\partial^2 c}{\partial x^2} + \frac{\partial^2 c}{\partial y^2} = 0
+\end{equation}
+Here, $A=1$, $C=1$, and $B=0$, so $B^2 - 4AC = -4 < 0$.
+
+Physically, elliptic PDEs represent equilibrium or steady-state problems. Information in these systems propagates instantly and globally; a disturbance at any point in the domain $\Omega$ or on the boundary $\partial \Omega$ affects the solution everywhere immediately. Consequently, all points in the domain are strongly coupled. These problems are strictly boundary value problems, usually defined on a closed spatial domain like $[0, 1] \times [0, 1]$.
+
+Consider the steady-state concentration profile in a square domain with fixed concentrations on the edges. The formulation might look like this:
+\begin{equation}
+    \frac{\partial^2 c}{\partial x^2} + \frac{\partial^2 c}{\partial y^2} = 0 \quad \forall (x,y) \in [0, 1] \times [0, 1]
+\end{equation}
+Subject to boundary conditions:
+\begin{equation}
+    \begin{aligned}
+        c(x, 0) &= 1, & c(x, 1) &= 0 \quad \forall x \in [0, 1] \\
+        c(0, y) &= 1, & c(1, y) &= 0 \quad \forall y \in [0, 1]
+    \end{aligned}
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{figs/pde/elliptic.pdf}
+    \caption{Solution to an elliptic PDE (Laplace's equation). The solution is smooth and determined by the global equilibrium of boundary values.}
+    \label{fig:elliptic_example}
+\end{figure}
+
+\subsection{Parabolic PDEs}
+
+If the discriminant is zero ($B^2 - 4AC = 0$), the PDE is parabolic. The classic example is the 1D diffusion (or heat) equation, which describes time-dependent transient diffusion:
+\begin{equation}
+    \frac{\partial c}{\partial t} = D \frac{\partial^2 c}{\partial x^2}
+\end{equation}
+Rearranging this to match the general form (treating $t$ as the coordinate $y$), we have $D \frac{\partial^2 c}{\partial x^2} - \frac{\partial c}{\partial t} = 0$. Here $A=D$, while $B=0$ and $C=0$ (since there is no second derivative in time). Thus, $B^2 - 4AC = 0$.
+
+Parabolic PDEs describe evolutionary processes that smooth out distributions over time. They are a mix of an IVP (in time) and a BVP (in space). An important physical feature is that disturbances have immediate nonzero influence everywhere for any $t>0$ (infinite propagation speed) but with decaying amplitude over distance. Solutions spread over a characteristic length scale $\ell(t) \sim \sqrt{Dt}$.
+
+A standard problem setup for a domain $(t, x) \in [0, \infty) \times (-\infty, \infty)$ is
+\begin{equation}
+    \begin{aligned}
+        \frac{\partial c}{\partial t} &= D \frac{\partial^2 c}{\partial x^2} \\
+        c(t, \pm \infty) &= 0 \quad \forall t \in [0, \infty) \\
+        c(0, x) &= \delta(x) \quad \forall x \in (-\infty, \infty)
+    \end{aligned}
+\end{equation}
+where $\delta(x)$ is the Dirac delta function, representing an initial point source that spreads out as a Gaussian distribution over time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figs/pde/parabolic.pdf}
+    \caption{Solution to a parabolic PDE (diffusion equation). An initial spike spreads and decays over time, scaling with $\sqrt{Dt}$.}
+    \label{fig:parabolic_example}
+\end{figure}
+
+\subsection{Hyperbolic PDEs}
+
+If the discriminant is positive ($B^2 - 4AC > 0$), the PDE is hyperbolic. While the second-order wave equation $\frac{\partial^2 c}{\partial t^2} = u^2 \frac{\partial^2 c}{\partial x^2}$ is the standard mathematical example, in transport phenomena we often encounter first-order hyperbolic equations, such as the 1D advection equation:
+\begin{equation}
+    \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0 \quad \forall (t, x) \in [0, \infty) \times (-\infty, \infty)
+    \label{eq:advection}
+\end{equation}
+with initial condition $c(0, x) = \bar{c}(x)$. Although the advection equation is first-order (hyperbolic in the characteristics sense), differentiating it appropriately implies the second-order wave equation, which is hyperbolic under the discriminant criterion. From \autoref{eq:advection}, we differentiate in $t$ to get
+    \begin{equation}
+    \frac{\partial^2 c}{\partial t^2} + u \frac{\partial^2 c}{\partial t \partial x} = 0
+\end{equation}
+and differentiate in $x$ to get
+\begin{equation}
+    \frac{\partial^2 c}{\partial x \partial t} + u \frac{\partial^2 c}{\partial x^2} = 0 \implies \frac{\partial^2 c}{\partial x \partial t} = -u \frac{\partial^2 c}{\partial x^2}
+\end{equation}
+Substituting the second into the first, we get
+\begin{equation}
+    \frac{\partial^2 c}{\partial t^2} - u^2 \frac{\partial^2 c}{\partial x^2} = 0
+\end{equation}
+For this equation, $A=-u^2$, $B=0$, $C=1$, so $B^2-4AC = 4u^2 > 0$.
+
+Hyperbolic PDEs model wave-like propagation or pure advection. Unlike parabolic equations, they do not smooth out discontinuities; sharp fronts in the initial condition can persist indefinitely. Boundary data is communicated at a finite wave speed $u$. The general solution for the advection equation is a traveling wave:
+\begin{equation}
+    c(x, t) = c(x - ut, 0)
+\end{equation}
+This simply translates the initial profile to the right with velocity $u$ without changing its shape. This assumes $u>0$ so $x=0$ is an inflow boundary; if $u<0$, the inflow boundary is at the right end instead.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figs/pde/hyperbolic.pdf}
+    \caption{Solution to a hyperbolic PDE (advection equation). The initial profile translates at speed $u$ without changing shape.}
+    \label{fig:hyperbolic_example}
+\end{figure}
+
+\begin{exampleBox}
+    \textbf{Physical Intuition: The Transport Limits}
+    We can unify these classifications by considering the concentration $c(x,t)$ in a 1D channel with fluid velocity $u$ and diffusivity $D$. The governing time-dependent advection-diffusion equation is
+    \begin{equation}
+        \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = D \frac{\partial^2 c}{\partial x^2}
+    \end{equation}
+    By taking limits of the physical parameters, we recover the three fundamental PDE types. In the limit of a stagnant fluid ($u \approx 0$) where the system evolves over time, the advection term vanishes, leaving the \textbf{parabolic} heat equation ($\partial_t c = D \partial_{xx} c$) which smoothes distributions diffusively. Conversely, if diffusion is negligible compared to flow ($D \approx 0$), the second-order term drops out and we get the \textbf{hyperbolic} advection equation ($\partial_t c + u \partial_x c = 0$) where profiles translate without distortion. finally, if the system reaches a steady state ($\partial_t c = 0$) dominated by diffusion, we obtain the \textbf{elliptic} 1D Laplace equation ($\partial_{xx} c = 0$). This context is vital because numerical schemes are often specialized; a method designed for the smooth solutions of parabolic diffusion may fail for the sharp fronts of hyperbolic advection. The limits are shown schematically in \autoref{fig:transport_limits} and also summarized in \autoref{tab:pde-classification}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{figs/pde/transport_limits.pdf}
+        \caption{Regimes of the time-dependent advection-diffusion equation. The P\'{e}clet number ($\text{Pe} = uL/D$) determines the balance between parabolic (diffusive) and hyperbolic (advective) behaviors.}
+        \label{fig:transport_limits}
+    \end{figure}
+\end{exampleBox}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Classification of second-order PDEs by discriminant, with representative model equations and typical physical interpretations.}
+    \label{tab:pde-classification}
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Type} & \textbf{Elliptic} & \textbf{Parabolic} & \textbf{Hyperbolic} \\
+        \midrule
+        Discriminant
+        & $B^{2}-4AC<0$
+        & $B^{2}-4AC=0$
+        & $B^{2}-4AC>0$ \\
+        \addlinespace
+        Example
+        & $\dfrac{\partial^{2}c}{\partial x^{2}}+\dfrac{\partial^{2}c}{\partial y^{2}}=0$
+        & $\dfrac{\partial c}{\partial t}=D\,\dfrac{\partial^{2}c}{\partial x^{2}}$
+        & $\dfrac{\partial^{2}c}{\partial t^{2}}=u^{2}\,\dfrac{\partial^{2}c}{\partial x^{2}}$ \\
+        \addlinespace
+        Physics
+        & \begin{tabular}[c]{@{}c@{}}Steady-state\\diffusion\end{tabular}
+        & \begin{tabular}[c]{@{}c@{}}Transient\\diffusion\end{tabular}
+        & \begin{tabular}[c]{@{}c@{}}Transient\\advection\end{tabular} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Spatial Discretization (Elliptic Examples)}
+\subsection{The Finite Difference Method}
+
+To illustrate the numerical solution of elliptic partial differential equations, we consider the two-dimensional Laplace equation with Dirichlet boundary conditions. This problem seeks the steady-state distribution of a quantity $c(x,y)$ (such as concentration or temperature) within a unit square domain. The mathematical formulation of this problem is
+\begin{equation}
+    \frac{\partial^2 c}{\partial x^2} + \frac{\partial^2 c}{\partial y^2} = 0 \qquad \forall(x, y) \in [0, 1] \times [0, 1]
+\end{equation}
+subject to the boundary conditions
+\begin{equation}
+    \begin{aligned}
+        c(x, 0) = 1, \quad c(x, 1) = 0 & \qquad \forall x \in [0, 1] \\
+        c(0, y) = 0, \quad c(1, y) = 0 & \qquad \forall y \in [0, 1]
+    \end{aligned}
+\end{equation}
+Our goal is to transform this continuous PDE into a system of linear equations that can be solved numerically with the methods we have previously developed. To do this, we will use the finite difference method, now applied to PDEs instead of ODEs (the idea is the same---we just have to discretize in more than one dimension simultaneously).
+
+\subsubsection{Discretization and the 5-Point Stencil}
+
+We begin by constructing a mesh over the domain. We define discrete nodes $(i, j)$ corresponding to spatial coordinates $(x_i, y_j) = (i\Delta, j\Delta)$, where $\Delta = 1/(N+1)$ is the grid spacing (here $N$ denotes the number of \textit{interior} points per dimension). For every interior node, we approximate the second partial derivatives using the second-order accurate central finite difference formula. The discrete Laplacian at node $(i,j)$ becomes:
+\begin{equation}
+    \frac{c_{i-1,j} - 2c_{i,j} + c_{i+1,j}}{\Delta^2} + \frac{c_{i,j-1} - 2c_{i,j} + c_{i,j+1}}{\Delta^2} = 0
+\end{equation}
+Multiplying through by $\Delta^2$ allows us to write the equation in terms of the coefficients of the node and its immediate neighbors. This results in the standard 5-point stencil equation:
+\begin{equation}
+    c_{i-1,j} + c_{i+1,j} + c_{i,j-1} + c_{i,j+1} - 4c_{i,j} = 0
+\end{equation}
+This algebraic equation must hold for every interior node in the mesh.
+
+\begin{figure}[H]
+    \centering
+    % TODO: switch to native tex figure. just stealing screenshot from slides for now
+    \includegraphics[width=0.45\textwidth]{figs/pde/fdm_stencil_diagram.png}
+    \caption{The 5-point stencil for the 2D Laplace equation. The value at the central node $(i,j)$ is coupled to its four nearest neighbors.}
+    \label{fig:five_point_stencil}
+\end{figure}
+
+The boundary nodes are treated separately. For Dirichlet boundary conditions, the values are fixed directly by the problem statement. For example, nodes at the bottom boundary satisfy $c_{i,0} = 1$, while the other boundaries are set to $0$. There is a technical ambiguity at the corners (e.g., node $(0,0)$ belongs to two boundaries), but for the interior 5-point stencil they never enter the interior equations, so it doesn't matter.\footnote{For consistency in plots, we set each corner to match one adjacent edge (or an average).}
+
+\subsubsection{Handling Neumann Boundary Conditions}
+
+If the problem instead involves a Neumann boundary condition, such as a specified flux at a wall, we must approximate the derivative at the boundary. Consider the condition:
+\begin{equation}
+    \left. \frac{\partial c}{\partial x} \right|_{x=0} = 0 \qquad \forall y \in [0, 1]
+\end{equation}
+There are two primary methods to implement this. The first is to use a first-order forward difference approximation at the boundary node $(0,j)$:
+\begin{equation}
+    \frac{c_{1,j} - c_{0,j}}{\Delta} = 0 \implies c_{0,j} = c_{1,j}
+\end{equation}
+While simple, this is only first-order accurate, which may degrade the global accuracy of the solution. A more robust alternative is to introduce ``ghost points'' at $i = -1$ (the name comes from the fact that they are not part of the physical domain, see \autoref{fig:ghost_point}). We apply the central difference approximation at the boundary $i=0$:
+\begin{equation}
+    \frac{c_{1,j} - c_{-1,j}}{2\Delta} = 0 \implies c_{-1,j} = c_{1,j}
+\end{equation}
+We then write the standard PDE stencil for the boundary node $(0,j)$ involving this ghost point:
+\begin{equation}
+    c_{-1,j} + c_{1,j} + c_{0,j-1} + c_{0,j+1} - 4c_{0,j} = 0
+\end{equation}
+Substituting the ghost point relation $c_{-1,j} = c_{1,j}$ into the stencil eliminates the unknown ghost variable, and we get a specialized equation for the boundary nodes:
+\begin{equation}
+    2c_{1,j} + c_{0,j-1} + c_{0,j+1} - 4c_{0,j} = 0
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    % TODO: switch to native tex figure. just stealing screenshot from slides for now
+    \includegraphics[width=0.45\textwidth]{figs/pde/fdm_ghost_point.png}
+    \caption{An illustration of using ghost points to enforce Neumann boundary conditions.}
+    \label{fig:ghost_point}
+\end{figure}
+
+\subsubsection{The System of Linear Equations}
+
+To solve the collection of discrete equations simultaneously, we must organize them into the matrix form $\mathbf{Ac} = \mathbf{b}$. This requires flattening the 2D grid indexing $(i,j)$ into a single 1D index $q$. A common strategy is lexicographic ordering, where we number nodes row by row. The resulting vector $\mathbf{c}$ contains all the unknown nodal values:
+\begin{equation}
+    \mathbf{c} = (\dots, c_{q-1}, c_q, c_{q+1}, \dots)^\top
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    % TODO: switch to native tex figure. just stealing screenshot from slides for now
+    \includegraphics[width=0.45\textwidth]{figs/pde/lexicographic.png}
+    \caption{An illustration of lexicographic ordering of the nodes to flatten the matrix into a vector.}
+    \label{fig:lexicographic}
+\end{figure}
+
+
+The matrix $\mathbf{A}$ contains the linear relationships defined by the finite difference stencils. For the standard second-order Laplacian, most rows of $\mathbf{A}$ will contain exactly five non-zero entries (corresponding to the node and its four neighbors). A typical row looks like:
+\begin{equation}
+    \begin{bmatrix}
+        \cdots & 1 & \cdots & 1 & -4 & 1 & \cdots & 1 & \cdots
+    \end{bmatrix}
+\end{equation}
+Consequently, $\mathbf{A}$ is a highly sparse matrix: it has $M^2$ total entries (where $M=N^2$ is the number of unknowns) but only $O(M)$ nonzeros ($\approx 5M$ for the 5-point stencil). The right-hand side vector $\mathbf{b}$ contains terms arising from the boundary conditions and any source terms in the PDE. Note that even if the PDE is homogeneous (Laplace equation), non-zero boundary conditions will result in a non-zero $\mathbf{b}$.
+
+\begin{equation}
+\underbrace{
+\left(
+\begin{array}{ccccccccccc}
+\ddots &        &        &        &        &        &        &        &        &        & \\
+      & \ddots  &        &        &        &        &        &        &        &        & \\
+      &        & \ddots  &        &        &        &        &        &        &        & \\
+\cdots& 1      & \cdots & 1      & -4     & 1      & \cdots & 1      & \cdots &        & \\
+      &        &        &        &        & \ddots &        &        &        &        & \\
+      &        &        &        &        &        & \ddots &        &        &        & \\
+      &        &        &        &        &        &        & \ddots &        &        & \\
+\end{array}
+\right)
+}_{\mathbf{A}}
+\;
+\underbrace{
+\left(
+\begin{array}{c}
+\vdots\\
+c_{q-N}\\
+\vdots\\
+c_{q-1}\\
+c_{q}\\
+c_{q+1}\\
+\vdots\\
+c_{q+N}\\
+\vdots
+\end{array}
+\right)
+}_{\mathbf{c}}
+\;=\;
+\underbrace{
+\left(
+\begin{array}{c}
+\vdots\\
+0\\
+\vdots
+\end{array}
+\right)
+}_{\mathbf{b}}
+\end{equation}
+If we were to employ a higher-order finite difference approximation to improve accuracy (e.g., fourth-order), the stencil would extend further, involving more neighbors. For instance, a fourth-order approximation involves coefficients like $-1/12$ and $4/3$ extending two nodes away in each direction. This increases accuracy but also increases the number of non-zeros per row (making $\mathbf{A}$ denser) and complicates the boundary treatment.
+
+\subsubsection{Solving the Sparse System}
+
+For a grid of size $N \times N$, the matrix $\mathbf{A}$ has dimension $N^2 \times N^2$. As $N$ increases to reduce discretization error, the system size grows rapidly. As we know, direct solution approaches, such as Gaussian elimination (or LU/Cholesky factorization), generally have a complexity of $O(M^3)$ for a dense matrix of size $M$. Here $M=N^2$, making the cost prohibitive. Although sparse direct solvers scale better, iterative methods are often preferred for very large systems. Iterative methods (such as the Jacobi and Gauss-Seidel methods that we covered earlier in the course, and also a class of methods known as Krylov subspace methods) provide scalable solutions using sparse matrix-vector multiplication ($\mathbf{y} = \mathbf{Ac}$). This operation has complexity $O(M)$ when exploiting sparsity. These methods correct an initial guess over repeated iterations and are highly parallelizable. Furthermore, we do not even need to form the matrix $\mathbf{A}$ explicitly; only a function that computes the action of $\mathbf{A}$ on a vector is required.
+
+\paragraph*{\texorpdfstring{The Conjugate Gradient Method\textsuperscript{*}}{The Conjugate Gradient Method}}
+% MC: this probably could use a good deal of elaboration... there's really no way a typical student could read this and understand the method. not doing this elaboration now since it's an optional topic
+The conjugate gradient (CG) method is a Krylov subspace method designed specifically for systems where the matrix is symmetric and positive definite (SPD). To be clear, for our standard 5-point stencil that we used above, the matrix $\mathbf{A}$ has negative diagonal entries ($-4$) and is formally negative definite. However, the system is equivalent to $(-\mathbf{A})\mathbf{c} = (-\mathbf{b})$, where $(-\mathbf{A})$ is SPD. Thus, we apply CG to the negated system (or simply define the Laplacian with positive signs).\footnote{With pure Neumann BCs, the discrete Laplacian is singular; CG then needs modification or a constraint to remove the nullspace.} CG finds the solution in at most $M$ iterations (in exact arithmetic) by searching within the Krylov subspace:
+\begin{equation}
+    \mathcal{K}_M(\mathbf{A}, \mathbf{r}_0) = \text{span}(\{\mathbf{r}_0, \mathbf{A}\mathbf{r}_0, \dots, \mathbf{A}^{M-1}\mathbf{r}_0\})
+\end{equation}
+The method generates a sequence of search directions $\mathbf{p}_k$ that are ``A-conjugate'' (orthogonal with respect to the inner product defined by $\mathbf{A}$). The algorithm proceeds as follows: First, initialize the residual and search direction:
+\begin{equation}
+    \begin{aligned}
+        \mathbf{r}_0 &:= \mathbf{b} - \mathbf{A}\mathbf{x}_0 \\
+        \mathbf{p}_0 &:= \mathbf{r}_0
+    \end{aligned}
+\end{equation}
+Then, repeat the following steps until the residual $\mathbf{r}_{k+1}$ is sufficiently small:
+\begin{equation}
+    \begin{aligned}
+        \alpha_k &:= \frac{\mathbf{r}_k^T \mathbf{r}_k}{\mathbf{p}_k^T \mathbf{A} \mathbf{p}_k} \\
+        \mathbf{x}_{k+1} &:= \mathbf{x}_k + \alpha_k \mathbf{p}_k \\
+        \mathbf{r}_{k+1} &:= \mathbf{r}_k - \alpha_k \mathbf{A} \mathbf{p}_k \\
+        \beta_k &:= \frac{\mathbf{r}_{k+1}^T \mathbf{r}_{k+1}}{\mathbf{r}_k^T \mathbf{r}_k} \\
+        \mathbf{p}_{k+1} &:= \mathbf{r}_{k+1} + \beta_k \mathbf{p}_k
+    \end{aligned}
+\end{equation}
+The most expensive operation in each iteration is the matrix-vector product $\mathbf{A}\mathbf{p}_k$. CG can be implemented with fixed memory, as it does not require storing the full history of vectors. To improve convergence speed, especially for ill-conditioned systems, CG is often used with a preconditioner $\mathbf{P}^{-1}$, solving the equivalent system $\mathbf{P}^{-1}\mathbf{Ac} = \mathbf{P}^{-1}\mathbf{b}$.
+
+% TODO: add an examplebox showing solving elliptic PDE with FDM
+
+\subsection{The Finite Volume Method}
+
+Just as in the ODE case, we saw that FDM for PDEs approximates derivatives directly at grid points. However, we can also adapt FVM, which bakes in the physics of conservation laws directly in its construction, to solve PDEs. Instead of tracking values at nodal points, we focus on cells. We define the discrete unknown $c_{i,j}$ as the spatial average of the field variable (e.g., concentration) over a control volume (cell) spanning $[(i-1)\Delta, i\Delta] \times [(j-1)\Delta, j\Delta]$ (centered at $((i-1/2)\Delta, (j-1/2)\Delta)$):
+\begin{equation}
+    c_{i,j} = \frac{1}{\Delta^2} \int_{(i-1)\Delta}^{i\Delta} \int_{(j-1)\Delta}^{j\Delta} c(x,y) \, dy \, dx
+\end{equation}
+This shift in definition from ``value at a point'' to ``average over a volume'' is what makes FVM particularly suitable for problems where conservation of mass, momentum, or energy are very important. As you might imagine, then, as chemical engineers, we use FVM a lot.
+
+\subsubsection{Deriving the Conservation Law}
+
+To obtain the discrete equations, we integrate the governing PDE over the control volume. For the Laplace equation $\nabla^2 c = 0$, the integral form is
+\begin{equation}
+    \int_{(j-1)\Delta}^{j\Delta} \int_{(i-1)\Delta}^{i\Delta} \left( \frac{\partial^2 c}{\partial x^2} + \frac{\partial^2 c}{\partial y^2} \right) dy \, dx = 0
+\end{equation}
+Using the fundamental theorem of calculus (or the divergence theorem), we can convert the volume integral of the second derivatives into the sum of fluxes through the four faces of the cell. The integral separates into contributions from the $x$-fluxes (integrated along vertical faces) and $y$-fluxes (integrated along horizontal faces):
+\begin{equation}
+    \int_{(j-1)\Delta}^{j\Delta} \left[ \left.\frac{\partial c}{\partial x}\right|_{x=i\Delta} - \left.\frac{\partial c}{\partial x}\right|_{x=(i-1)\Delta} \right] dy + \int_{(i-1)\Delta}^{i\Delta} \left[ \left.\frac{\partial c}{\partial y}\right|_{y=j\Delta} - \left.\frac{\partial c}{\partial y}\right|_{y=(j-1)\Delta} \right] dx = 0
+\end{equation}
+We approximate the face-normal derivatives using differences between adjacent cell centers. For example, on the right face of cell $(i,j)$ (located at $x=i\Delta$), the normal derivative is
+\begin{equation}
+    \left.\frac{\partial c}{\partial x}\right|_{x=i\Delta}\approx \frac{c_{i+1,j}-c_{i,j}}{\Delta}
+\end{equation}
+Because each face integral has length $\Delta$, the right-face contribution to the \emph{integrated} balance is
+$\Delta\, (c_{i+1,j}-c_{i,j})/\Delta = c_{i+1,j}-c_{i,j}$, and similarly for the other faces. Dividing by the
+cell area $\Delta^2$ (equivalently, working with fluxes per unit area) yields the discrete flux-balance equation
+\begin{equation}
+    c_{i-1,j} + c_{i+1,j} + c_{i,j-1} + c_{i,j+1} - 4c_{i,j} = 0
+\end{equation}
+For interior cells, this result is algebraically identical to the 5-point stencil derived via finite differences, but the physical interpretation of balancing fluxes through cell faces is different (recall that we had this exact same sort of correspondence between FDM and FVM in the ODE case).
+
+\begin{figure}[H]
+    \centering
+    % TODO: change figure to be native, just stole from slides for now
+    \includegraphics[width=0.5\textwidth]{figs/pde/fvm_flux_balance.png}
+    \caption{FVM balances fluxes through the faces of a control volume. For the Laplace equation, the net flux through the four faces must sum to zero.}
+    \label{fig:fvm_flux}
+\end{figure}
+
+\subsubsection{Boundary Conditions in FVM}
+
+With FVM, we can explicitly model the flux at the boundary faces. Note that in this derivation we are effectively balancing derivatives; if defining physical flux $\mathbf{J}=-D\nabla c$, the signs in the balance equation would flip but the result is identical. Consider a Neumann boundary condition $\partial c / \partial x = 0$ on the left boundary. In the FVM framework, this implies that the flux through the left face of the boundary cell $(1,j)$ is exactly zero. The balance equation for this cell then involves only the fluxes through the top, bottom, and right faces:
+\begin{equation}
+    (c_{2,j} - c_{1,j}) + (c_{1,j+1} - c_{1,j}) - (c_{1,j} - c_{1,j-1}) = 0
+\end{equation}
+Simplifying this expression, we get
+\begin{equation}
+    c_{2,j} + c_{1,j-1} + c_{1,j+1} - 3c_{1,j} = 0
+\end{equation}
+
+For Dirichlet boundary conditions, such as $c=1$ at the left wall, the treatment is slightly different. The value is specified at the face itself, not at a node. The distance from the center of the boundary cell $(1,j)$ to the left face is only $\Delta/2$, not $\Delta$. Therefore, the gradient driving the flux through the left face is approximated as $(c_{1,j} - 1) / (\Delta/2)$. Including this steeper gradient in the flux balance gives
+\begin{equation}
+    c_{2,j} + c_{1,j-1} + c_{1,j+1} - 5c_{1,j} + 2 = 0
+\end{equation}
+Note the appearance of the factor 5 and the constant term 2 that result from the half-cell spacing approximation.
+
+% MC: I think we should have more examples like this in the PDE and ODE sections
+% however, they could be explained way better than this -- hopefully this one is not too confusing
+\begin{exampleBox}
+\textbf{Example: FVM for Steady Diffusion on a Square}
+    Consider steady diffusion in the unit square with no sources,
+    \begin{equation}
+        \nabla^2 c = 0 \qquad \text{for } (x,y)\in(0,1)\times(0,1),
+    \end{equation}
+    with Dirichlet conditions on the left and right walls and zero-flux (Neumann) on the top and bottom,
+    \begin{equation}
+        c(0,y)=1,\quad c(1,y)=0,\quad \frac{\partial c}{\partial y}(x,0)=0,\quad \frac{\partial c}{\partial y}(x,1)=0
+        \label{eq:pde_dirichlet}
+    \end{equation}
+    The exact solution is simply $c(x,y)=1-x$, so this is a clean test problem for the finite-volume construction above.
+
+    We discretize the domain into an $N\times N$ array of square control volumes of width $\Delta=1/N$ (here $N$ denotes the number of \textit{cells} per direction), and take the discrete unknown $c_{i,j}$ to be the cell-average (or, equivalently, the value at the cell center to second order). For interior cells, integrating $\nabla^2 c=0$ over the control volume and approximating face-normal gradients by adjacent cell-center differences gives us the standard flux-balance stencil
+    \begin{equation}
+        c_{i-1,j}+c_{i+1,j}+c_{i,j-1}+c_{i,j+1}-4c_{i,j}=0
+    \end{equation}
+    At boundaries, the only change is the face flux model. On the left wall $x=0$, the Dirichlet value is imposed at the boundary face a half-cell away, so the left-face gradient uses $\Delta/2$. For the cells adjacent to $x=0$ this produces
+    \begin{equation}
+        c_{2,j}+c_{1,j-1}+c_{1,j+1}-5c_{1,j}=-2
+    \end{equation}
+    where the right-hand side comes from the prescribed face value $c=1$. On the right wall $x=1$, the same half-cell geometry applies but the face value is $0$, giving
+    \begin{equation}
+        c_{N-1,j}+c_{N,j-1}+c_{N,j+1}-5c_{N,j}=0
+    \end{equation}
+    On the bottom and top walls, the Neumann condition $\partial c/\partial y=0$ means the corresponding face flux is exactly zero, so boundary-adjacent cells satisfy
+    \begin{equation}
+        c_{i-1,1}+c_{i+1,1}+c_{i,2}-3c_{i,1}=0,\qquad
+        c_{i-1,N}+c_{i+1,N}+c_{i,N-1}-3c_{i,N}=0
+    \end{equation}
+    and at the corners you apply both modifications simultaneously. For example, at the bottom-left corner cell $(1,1)$ (Dirichlet at $x=0$ and Neumann at $y=0$), the stencil becomes
+    \begin{equation}
+        c_{2,1}+c_{1,2}-4c_{1,1}=-2
+    \end{equation}
+    i.e., the diagonal is reduced by one due to the missing Neumann neighbor in $y$ and increased by one due to the
+    half-cell Dirichlet face in $x$. Assembling these equations for all $N^2$ cells gives a sparse linear system $\mathbf{A}\mathbf{c}=\mathbf{b}$. Indeed, by stacking the unknowns row-by-row,
+    \begin{equation}
+    \mathbf{c}=\big(c_{1,1},c_{2,1},\ldots,c_{N,1},\;c_{1,2},\ldots,c_{N,2},\;\ldots,\;c_{1,N},\ldots,c_{N,N}\big)^{\mathsf T}\in\mathbb{R}^{N^2}
+    \end{equation}
+    With this ordering, $\mathbf{A}\in\mathbb{R}^{N^2\times N^2}$ is block tridiagonal, though the diagonal blocks depend on $j$:
+    \begin{equation}
+    \mathbf{A}=\begin{bmatrix}
+    \mathbf{B}_1 & \mathbf{I} &   &   & 0\\
+    \mathbf{I} & \mathbf{B}_{\text{int}} & \mathbf{I} &   &  \\
+    & \ddots & \ddots & \ddots & \\
+    &   & \mathbf{I} & \mathbf{B}_{\text{int}} & \mathbf{I}\\
+    0 &   &   & \mathbf{I} & \mathbf{B}_N
+    \end{bmatrix},
+    \qquad
+    \mathbf{B}_{\text{int}}=\begin{bmatrix}
+    -5 & 1  &   &   & 0\\
+    1 & -4 & 1 &   &  \\
+    & \ddots & \ddots & \ddots & \\
+    &   & 1 & -4 & 1\\
+    0  &   &   & 1 & -5
+    \end{bmatrix}
+    \end{equation}
+    Here $\mathbf{B}_{\text{int}}$ corresponds to the interior rows ($j=2\dots N-1$) where the vertical stencil is standard. For the top and bottom rows ($j=1, N$), the diagonal blocks $\mathbf{B}_1, \mathbf{B}_N$ are modified to reflect the Neumann boundary conditions (e.g., $-3$ on the diagonals instead of $-4$, with corner adjustments). The $+1$ entries in $\mathbf{A}$'s off-diagonal blocks capture the coupling to $j\pm 1$. The right-hand side $\mathbf{b}$ is zero everywhere except in the equations adjacent to the left boundary $x=0$, where the Dirichlet value $c=1$ contributes $-2$ (one per leftmost cell in each row), consistent with
+    \begin{equation}
+    c_{2,j}+c_{1,j-1}+c_{1,j+1}-5c_{1,j}=-2
+    \end{equation}
+    (For the top and bottom Neumann walls, the corresponding rows use $-3$ on the diagonal and omit the missing neighbor, e.g.\ $c_{i-1,1}+c_{i+1,1}+c_{i,2}-3c_{i,1}=0$ for bottom-edge cells away from corners; at the two corners on that edge, the diagonal is $-4$ because the Dirichlet half-cell modification in $x$ is also present.) After solving this system with a linear solver, we get the solution shown in \autoref{fig:pde_fvm}. In this case, the solution is exact to almost machine precision (RMS error vs.\ the analytical solution is $1.58\cdot 10^{-16}$)
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/pde/fvm_pde_numerical.pdf}
+    \caption{Numerical solution to the square domain diffusion problem \autoref{eq:pde_dirichlet}.}
+    \label{fig:pde_fvm}
+    \end{figure}
+
+\end{exampleBox}
+
+
+\section{Method of Lines for Time-Dependent PDEs (Parabolic/Hyperbolic)}
+
+We now turn our attention to transient PDEs, such as parabolic (diffusion) or hyperbolic (advection) equations, which describe systems evolving in time. A canonical example is the 1-D diffusion-advection-reaction system:
+\begin{equation}
+    \frac{\partial c}{\partial t} = D \frac{\partial^2 c}{\partial x^2} - u \frac{\partial c}{\partial x} - kc
+\end{equation}
+subject to initial conditions $c(x,0) = \bar{c}(x)$ and boundary conditions, for instance $c(0,t)=1$ and $c(1,t)=0$. Solving this requires discretizing both the spatial domain $x$ and the time domain $t$. Simultaneous discretization can be complex due to numerical stability constraints, specifically the mismatch required between the spatial step $\Delta x$ and time step $\Delta t$, which we will explicitly address in the CFL section.
+
+\subsection{The Method of Lines}
+
+A good (and very simple!) strategy to handle these difficulties is the method of lines (MOL). The idea behind MOL is to decouple the spatial and temporal discretizations. We explicitly discretize the spatial derivatives using FDM (or FVM) while leaving the time derivative continuous. This transforms the single PDE into a large system of coupled ODEs.
+
+To be concrete, let's consider the pure advection equation $\frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0$. By applying a centered finite difference approximation to the spatial derivative on a grid $x_j = j\Delta x$, we obtain an ODE for the concentration at each node $j$:\footnote{With centered spatial advection, the semi-discrete operator has (typically) imaginary eigenvalues (nondissipative), so explicit time integrators still require a stability-limited step size, and solutions near sharp features can have dispersive oscillations unless upwinding/limiting is used.}
+\begin{equation}
+    \frac{dc_j(t)}{dt} + u \frac{c_{j+1}(t) - c_{j-1}(t)}{2\Delta x} = 0
+\end{equation}
+We can now use sophisticated ODE-IVP solvers to integrate this system in time. While adaptive solvers (like \texttt{ode45}) handle error control, they do not eliminate stability restrictions. For diffusive problems, the system becomes stiff, often requiring implicit solvers (like \texttt{ode15s}) to avoid prohibitively small time steps.
+
+\subsection{Implementation and Boundary Handling}
+
+For the full diffusion-advection-reaction equation, the semi-discrete ODE for an interior node $j$ becomes
+\begin{equation}
+    \frac{dc_j(t)}{dt} = D \frac{c_{j-1}(t) - 2c_j(t) + c_{j+1}(t)}{\Delta x^2} - u \frac{c_{j+1}(t) - c_{j-1}(t)}{2\Delta x} - k c_j(t)
+\end{equation}
+Handling boundary conditions with the MOL requires care. We have two main choices. The first is to treat the boundary conditions as algebraic equations coupled with the differential equations; this results in a system of differential-algebraic equations (DAEs), which we will discuss later on in the course. The second, and usually simpler approach, is to eliminate the boundary variables directly from the ODE system. For example, if we have a Dirichlet boundary condition $c_0(t) = 1$ at the left boundary, we do not write an ODE for node $0$. Instead, we substitute the value $1$ wherever $c_0(t)$ appears in the equation for the first interior node ($j=1$). The ODE for node $1$ becomes
+\begin{equation}
+    \frac{dc_1(t)}{dt} = D \frac{1 - 2c_1(t) + c_2(t)}{\Delta x^2} - u \frac{c_2(t) - 1}{2\Delta x} - k c_1(t)
+\end{equation}
+For the right boundary $c_N(t) = 0$, we similarly substitute $0$ into the equation for node $N-1$. If we index grid nodes as $j=0,1,\dots,N$ (so there are $N+1$ nodes and $\Delta x=1/N$), then imposing Dirichlet values at $j=0$ and $j=N$ eliminates those boundary unknowns and leaves a system of $N-1$ ODEs for $j=1,\dots,N-1$. When high accuracy is required near boundaries, we might also employ higher-order one-sided difference formulas for the spatial derivatives to maintain consistency with the interior scheme.
+
+\section{Finite Differences for Linear Advection: Upwinding}
+
+We now discuss the full FDM approach where we discretize over both space and time simultaneously rather than separating them as in MOL. Let us define our discrete approximation $c_i^j$ as the value of the concentration at time step $i$ and spatial node $j$:
+\begin{equation}
+    c_i^j = c(i\Delta t, j\Delta x)
+\end{equation}
+Consider the 1D advection equation:
+\begin{equation}
+    \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0
+\end{equation}
+A naive first attempt might be to use a forward FD scheme for the time derivative and a central FD scheme for the spatial derivative (\textbf{f}orward \textbf{t}ime, \textbf{c}entered \textbf{s}patial $\implies$ called ``FTCS''). Substituting these approximations into the PDE, we obtain
+\begin{equation}
+    \frac{c_{i+1}^j - c_i^j}{\Delta t} + u \frac{c_i^{j+1} - c_i^{j-1}}{2\Delta x} = 0
+\end{equation}
+If we implement this scheme and march forward in time, the solution has severe numerical issues. As shown in the simulation results (\autoref{fig:advection_instability}), we do not see a wave propagating forward cleanly; instead, the solution explodes with non-physical oscillations. In the FTCS combination, the centered spatial derivative together with forward Euler time stepping produces an amplification factor with $|G|>1$ (more on this later), hence instability. Intuitively, the stencil does not enforce upwind information flow, so without added dissipation the scheme cannot remain stable.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figs/pde/advection_ftcs_instability.pdf}
+    \caption{The naive forward-time central-space approximation for advection leads to numerical instability.}
+    \label{fig:advection_instability}
+\end{figure}
+
+To remedy this, we must choose a discretization that respects the physics of the flow. We replace the spatial derivative with a backward FD (also known as an ``upwind difference''), which uses information only from the current node and the upstream node. The scheme becomes:
+\begin{equation}
+    \frac{c_{i+1}^j - c_i^j}{\Delta t} + u \frac{c_i^j - c_i^{j-1}}{\Delta x} = 0
+\end{equation}
+With this upwind scheme, stability is restored, and the wave propagates in the correct direction. However, while stable, the accuracy is low. The scheme is numerically diffusive (dissipative). This means that it introduces artificial diffusion that smears sharp gradients and reduces peak amplitude over time (\autoref{fig:advection_upwind_diffusion}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figs/pde/advection_upwind_diffusion.pdf}
+    \caption{Forward-time upwind-space discretization for 1D advection. The upwind stencil restores stability and propagates the wave in the correct direction, but introduces numerical diffusion. The profile broadens and the peak amplitude decays over time compared to the exact (purely shifted) solution.}
+    \label{fig:advection_upwind_diffusion}
+\end{figure}
+
+\section{Stability of Time-Stepping Schemes: CFL and von Neumann Analysis}
+
+\subsection{The CFL Condition}
+
+The stability of explicit time-stepping schemes is governed by the Courant-Friedrichs-Lewy (CFL) condition. This condition is a statement about causality: the physical domain of dependence must be contained within the numerical domain of dependence.
+
+If we trace the characteristics of the advection equation back in time by $\Delta t$, the physical information comes from a location $u\Delta t$ upwind. Numerically, our grid only connects us to the neighbor at $\Delta x$ upwind. For the numerical scheme to capture the physics, the physical wave speed must not exceed the ``grid speed'' (make sure you take a minute to fully understand this before proceeding!). This leads to the requirement that
+\begin{equation}
+    \frac{u \Delta t}{\Delta x} \le 1
+\end{equation}
+For the correct upwind discretization, the condition is $0\le \alpha \le 1$ where $\alpha=u\Delta t/\Delta x$ after choosing the upwind stencil consistent with $\text{sign}(u)$. If we keep a fixed stencil regardless of flow direction, stability is lost. The quantity $\frac{u \Delta t}{\Delta x}$ is often called the CFL number. This result implies that the temporal discretization cannot be chosen independently of the spatial discretization; if we refine the grid ($\Delta x \to 0$), we must proportionally reduce the time step.
+
+\subsection{Von Neumann Stability Analysis}
+
+A more rigorous mathematical tool for determining the stability of linear finite difference schemes is von Neumann stability analysis.\footnote{Von Neumann analysis is exact for periodic/infinite domains; with boundaries, it still gives the correct interior stability constraint for these linear constant-coefficient schemes.} We assume that the solution (or equivalently, the error) can be decomposed into a Fourier series. We then examine how a single Fourier mode evolves over time. Let the solution be written as
+\begin{equation}
+    c(t,x) = \sum_k \epsilon_k(t) e^{\hat{i}kx}
+\end{equation}
+where $\hat{i} = \sqrt{-1}$ and $k$ is the wave number. Because the difference equations are linear, we can analyze the behavior of a single eigenmode $\epsilon_i e^{\hat{i} k j \Delta x}$ (where $\epsilon_i$ is the time-dependent amplitude at step $i$). We substitute this mode into our discretized equation to see if the amplitude $\epsilon_i$ grows or decays.
+
+\subsubsection{Hyperbolic Case: Advection}
+
+Let us apply this analysis to the upwind scheme derived earlier:
+\begin{equation}
+    \frac{c_{i+1}^j - c_i^j}{\Delta t} + u \frac{c_i^j - c_i^{j-1}}{\Delta x} = 0
+\end{equation}
+Substituting $c_i^j = \epsilon_i e^{\hat{i}k j \Delta x}$, we obtain
+\begin{equation}
+    \frac{\epsilon_{i+1} - \epsilon_i}{\Delta t} e^{\hat{i}k j \Delta x} + \frac{u}{\Delta x} \epsilon_i \left( e^{\hat{i}k j \Delta x} - e^{\hat{i}k (j-1) \Delta x} \right) = 0
+\end{equation}
+Dividing through by $e^{\hat{i}k j \Delta x}$ simplifies the expression to
+\begin{equation}
+    \frac{\epsilon_{i+1} - \epsilon_i}{\Delta t} + \frac{u}{\Delta x} \epsilon_i (1 - e^{-\hat{i}k \Delta x}) = 0
+\end{equation}
+Rearranging to solve for the amplification of the error from step $i$ to $i+1$,
+\begin{equation}
+    \epsilon_{i+1} = \epsilon_i - \frac{u \Delta t}{\Delta x} (1 - e^{-\hat{i}k \Delta x}) \epsilon_i
+\end{equation}
+\begin{equation}
+    \epsilon_{i+1} = \left[ 1 - \frac{u \Delta t}{\Delta x} (1 - e^{-\hat{i}k \Delta x}) \right] \epsilon_i
+\end{equation}
+For the method to be numerically stable, the magnitude of the amplification factor must be less than or equal to 1 for all wave numbers $k$:
+\begin{equation}
+    \left| 1 - \frac{u \Delta t}{\Delta x} (1 - e^{-\hat{i}k \Delta x}) \right| \le 1
+\end{equation}
+Defining $\alpha := \frac{u \Delta t}{\Delta x}$, we can visualize this condition in the complex plane. The term $1 - \alpha(1 - e^{-\hat{i}k \Delta x})$ traces a circle centered at $1-\alpha$ with radius $\alpha$. For this circle to remain within the unit circle (stability region), we must satisfy $\alpha \le 1$. This confirms that the von Neumann analysis recovers the same stability criterion as the CFL condition.
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[>=Latex,scale=3]
+
+        \def\as{0.7}  % alpha < 1  (stable upwind locus)
+        \def\al{1.3}  % alpha > 1  (unstable upwind locus)
+
+        \pgfmathsetmacro{\cs}{1-\as} % center (stable): 1-as
+        \pgfmathsetmacro{\cl}{1-\al} % center (unstable): 1-al
+
+        \foreach \x in {-1.5,-1.0,...,1.5}{
+        \foreach \y in {-1.0,-0.5,...,1.0}{
+            \fill[gray!20] (\x,\y) circle (0.35pt);
+        }
+        }
+
+        \draw[thick,->] (-1.75,0) -- (1.75,0) node[below right] {$\mathrm{Re}$};
+        \draw[thick,->] (0,-1.25) -- (0,1.25) node[above left] {$\mathrm{Im}$};
+
+        \draw[very thick,magenta] (0,0) circle (1);
+
+        \node[below] at (1.05,0) {$1$};
+        \draw[thick] (1,-.05) -- (1,.05);
+        \node[left]  at (0,1.) {$1$};
+        \draw[thick] (-0.05,1) -- (0.05,1);
+        \draw[very thick,blue] (\cs,0) circle (\as);
+        \draw[very thick,blue,dashed] (\cl,0) circle (\al);
+        \draw[decorate,decoration={brace,amplitude=4pt},thick]
+        (\cs,0) -- (1,0)
+        node[midway,above,yshift=4pt] {$\alpha$};
+        % draw tick at 1-alpha
+        \draw[thick] (\cs,-.05) -- (\cs,.05);
+        \node[below] at (\cs,0) {$1-\alpha$};
+
+        \node[magenta,align=left] (anal) at (1.05,1.05) {analytical\\(STABLE)};
+        \draw[magenta,thick,->] (anal.west) -- ($(0,0)+(65:1)$);
+
+        \node[blue,align=left] (st) at (1.65,-0.55) {upwind, $\alpha<1$\\(STABLE)};
+        \draw[blue,thick,->] (st.west) -- ($(\cs,0) + (-40:\as)$);
+
+        \node[blue,align=left] (un) at (-1.85,-1.25) {upwind, $\alpha>1$\\(UNSTABLE)};
+        \draw[blue,thick,->] (un.east) -- ($(\cl,0) + (-130:\al)$);
+
+    \end{tikzpicture}
+    \caption{Complex-plane visualization for von Neumann stability of the upwind advection scheme.
+    The analytical stability requirement is $|G|\le 1$ (magenta unit circle).
+    For $G(\theta)=1-\alpha\bigl(1-e^{-i\theta}\bigr)$ with $\theta=k\Delta x$, the upwind amplification factor traces a circle centered at $1-\alpha$ with radius $\alpha$ (blue).
+    This locus lies entirely within the unit circle when $0\le \alpha\le 1$ (stable) and extends outside it when $\alpha>1$ (unstable).}
+\end{figure}
+
+
+\paragraph*{Non-Upwind Discretization}
+In contrast, if we apply this analysis to the non-upwind discretization (forward in time, central in space, a.k.a.\ FTCS), which we suspected was unstable, we have
+\begin{equation}
+    \frac{c_{i+1}^j - c_i^j}{\Delta t}
+    + u\,\frac{c_i^{j+1}-c_i^{j-1}}{2\Delta x}=0
+    \label{eq:ftcs}
+\end{equation}
+Proceeding with the von Neumann analysis as usual, we substitute a single Fourier mode $c_i^j=\epsilon_i e^{\hat{i}kj\Delta x}$ so that
+\begin{equation}
+c_{i+1}^j=\epsilon_{i+1}e^{\hat{i}kj\Delta x},\qquad
+c_i^{j\pm 1}=\epsilon_i e^{\hat{i}k(j\pm 1)\Delta x}.
+\end{equation}
+Substituting into \autoref{eq:ftcs} gives
+\begin{equation}
+    \frac{\epsilon_{i+1}e^{\hat{i}kj\Delta x}-\epsilon_ie^{\hat{i}kj\Delta x}}{\Delta t}
+    +u\,\frac{\epsilon_i e^{\hat{i}k(j+1)\Delta x}-\epsilon_i e^{\hat{i}k(j-1)\Delta x}}{2\Delta x}=0
+\end{equation}
+Factoring out the common term $e^{\hat{i}kj\Delta x}$,
+\begin{equation}
+    \frac{\epsilon_{i+1}-\epsilon_i}{\Delta t}
+    +u\,\epsilon_i\frac{e^{\hat{i}k\Delta x}-e^{-\hat{i}k\Delta x}}{2\Delta x}=0
+    \label{eq:ftcs_factored}
+\end{equation}
+With the Courant number $\alpha := \frac{u\Delta t}{\Delta x}$, we can rewrite this as
+\begin{equation}
+    \epsilon_{i+1}-\epsilon_i
+    = -\alpha\,\epsilon_i\,\frac{e^{\hat{i}k\Delta x}-e^{-\hat{i}k\Delta x}}{2}
+    \label{eq:ftcs_step}
+\end{equation}
+Using Euler's identity,
+\begin{equation}
+    \frac{e^{\hat{i}\theta}-e^{-\hat{i}\theta}}{2}
+    = \hat{i}\sin\theta,
+    \qquad \theta:=k\Delta x
+\end{equation}
+\autoref{eq:ftcs_step} becomes
+\begin{equation}
+    \epsilon_{i+1}=\left[1-\alpha \hat{i}\sin(k\Delta x)\right]\epsilon_i
+    \label{eq:G_ftcs}
+\end{equation}
+Hence, the amplification factor is
+\begin{equation}
+    G(\theta)=1-\alpha \hat{i}\sin\theta
+\end{equation}
+Its magnitude is
+\begin{equation}
+    |G(\theta)|^2
+    =\left(1\right)^2+\left(\alpha\sin\theta\right)^2
+    =1+\alpha^2\sin^2\theta
+\end{equation}
+so
+\begin{equation}
+    |G(\theta)|=\sqrt{1+\alpha^2\sin^2\theta}
+    \label{eq:Gmag_ftcs}
+\end{equation}
+For any nonzero $\alpha$, there exist modes with $\sin\theta\neq 0$ (e.g.\ $\theta=\pi/2$), and then
+\begin{equation}
+    |G(\theta)|>1
+\end{equation}
+Therefore the FTCS discretization for linear advection is \emph{unconditionally unstable}: no choice of $\Delta t>0$ can make \autoref{eq:ftcs} von Neumann stable for all Fourier modes.
+
+
+\subsubsection{Parabolic Case: Diffusion}
+
+Now, we consider the parabolic diffusion equation $\frac{\partial c}{\partial t} = D \frac{\partial^2 c}{\partial x^2}$. We apply a forward difference in time and a central difference in space:
+\begin{equation}
+    \frac{c_{i+1}^j - c_i^j}{\Delta t} = D \frac{c_i^{j-1} - 2c_i^j + c_i^{j+1}}{\Delta x^2}
+\end{equation}
+Applying the von Neumann ansatz $c_i^j = \epsilon_i e^{\hat{i}k j \Delta x}$,
+\begin{equation}
+    (\epsilon_{i+1} - \epsilon_i) e^{\hat{i}k j \Delta x} = \frac{\Delta t D}{\Delta x^2} \epsilon_i \left( e^{\hat{i}k(j-1)\Delta x} - 2e^{\hat{i}k j \Delta x} + e^{\hat{i}k(j+1)\Delta x} \right)
+\end{equation}
+Dividing out the common exponential term and using Euler's formula $(e^{-\hat{i}kx} + e^{\hat{i}kx} = 2\cos(kx))$,
+\begin{equation}
+    \epsilon_{i+1} - \epsilon_i = \frac{\Delta t D}{\Delta x^2} \epsilon_i (2\cos(k\Delta x) - 2)
+\end{equation}
+Letting $\beta = \frac{\Delta t D}{\Delta x^2}$ and using the identity $\cos(\theta) - 1 = -2\sin^2(\theta/2)$, we can write the amplification relation as:
+\begin{equation}
+    \epsilon_{i+1} = [1 - 2\beta + 2\beta \cos(k\Delta x)] \epsilon_i
+\end{equation}
+For numerical stability, we require the bracketed term to lie between -1 and 1. The most restrictive condition comes from the lower bound, leading to
+\begin{equation}
+    \beta \le \frac{1}{2} \implies \frac{D \Delta t}{\Delta x^2} \le \frac{1}{2}
+\end{equation}
+This condition is a significant limitation of explicit methods for parabolic PDEs. If we wish to increase the spatial resolution by a factor of 10, the term $\Delta x^2$ in the denominator decreases by a factor of 100. To maintain stability ($\beta \le 0.5$), we must decrease the time step $\Delta t$ by a factor of 100. This makes forward-in-time, centered-in-space schemes numerically inefficient for high-resolution diffusion problems.
+
+\subsubsection{Implicit Methods for Parabolic Equations}
+
+To overcome the strict time-step restrictions of explicit methods, we can use implicit methods. Let's consider the backward-in-time, centered-in-space (backward Euler) scheme for diffusion:
+\begin{equation}
+    \frac{c_i^j - c_{i-1}^j}{\Delta t}
+    =
+    D \frac{c_i^{j-1} - 2c_i^j + c_i^{j+1}}{\Delta x^2}
+\end{equation}
+To perform von Neumann analysis, we assume a single Fourier mode
+\begin{equation}
+    c_i^j = \epsilon_i e^{\hat{i} k j \Delta x}
+\end{equation}
+which implies the shifted values
+\begin{equation}
+    c_{i-1}^j = \epsilon_{i-1} e^{\hat{i} k j \Delta x}
+\end{equation}
+\begin{equation}
+    c_i^{j\pm 1} = \epsilon_i e^{\hat{i} k (j\pm 1)\Delta x}
+\end{equation}
+Substituting into the scheme yields
+\begin{equation}
+    \frac{\epsilon_i e^{\hat{i} k j \Delta x} - \epsilon_{i-1} e^{\hat{i} k j \Delta x}}{\Delta t}
+    =
+    D \frac{\epsilon_i e^{\hat{i} k (j-1)\Delta x} - 2\epsilon_i e^{\hat{i} k j \Delta x} + \epsilon_i e^{\hat{i} k (j+1)\Delta x}}{\Delta x^2}
+\end{equation}
+Canceling the common factor $e^{\hat{i} k j \Delta x}$, we obtain
+\begin{equation}
+    \frac{\epsilon_i - \epsilon_{i-1}}{\Delta t}
+    =
+    D \frac{\epsilon_i \left(e^{-\hat{i} k \Delta x} - 2 + e^{\hat{i} k \Delta x}\right)}{\Delta x^2}
+\end{equation}
+Now, let $\theta := k\Delta x$ and use $e^{\hat{i}\theta}+e^{-\hat{i}\theta}=2\cos\theta$ to get
+\begin{equation}
+    \frac{\epsilon_i - \epsilon_{i-1}}{\Delta t}
+    =
+    D \frac{\epsilon_i \left(2\cos\theta - 2\right)}{\Delta x^2}
+\end{equation}
+Equivalently,
+\begin{equation}
+    \frac{\epsilon_i - \epsilon_{i-1}}{\Delta t}
+    =
+    -2D \frac{\epsilon_i \left(1-\cos\theta\right)}{\Delta x^2}
+\end{equation}
+Defining the diffusion number $r := \frac{D\Delta t}{\Delta x^2}$, we multiply by $\Delta t$ and rearrange to isolate $\epsilon_i$ in terms of $\epsilon_{i-1}$
+\begin{equation}
+    \epsilon_i - \epsilon_{i-1}
+    =
+    -2r \left(1-\cos\theta\right)\epsilon_i
+\end{equation}
+\begin{equation}
+    \left[1 + 2r\left(1-\cos\theta\right)\right]\epsilon_i
+    =
+    \epsilon_{i-1}
+\end{equation}
+Therefore, the amplification factor $G(\theta) := \epsilon_i/\epsilon_{i-1}$ is
+\begin{equation}
+    G(\theta)
+    =
+    \frac{1}{1 + 2r\left(1-\cos\theta\right)}
+\end{equation}
+Using the identity $1-\cos\theta = 2\sin^2(\theta/2)$ gives an equivalent form
+\begin{equation}
+    G(\theta)
+    =
+    \frac{1}{1 + 4r\sin^2\left(\theta/2\right)}
+\end{equation}
+Since $D \ge 0$ implies $r \ge 0$ and $1-\cos\theta \ge 0$ for all $\theta$, we have
+\begin{equation}
+    1 + 2r\left(1-\cos\theta\right) \ge 1
+\end{equation}
+Hence,
+\begin{equation}
+    0 < G(\theta) \le 1
+\end{equation}
+and in particular
+\begin{equation}
+    \left|G(\theta)\right| \le 1
+\end{equation}
+for all wave numbers $k$ and any choice of $\Delta t$. The $k=0$ mode satisfies $G=1$ (the constant solution is preserved), while all nonzero modes satisfy $G<1$ and are damped, so the scheme is unconditionally stable.
+
+\section{Method of Characteristics for First-Order Hyperbolic PDEs}
+
+We consider the 1-D advection equation again to introduce a very useful analytical and conceptual tool known as the method of characteristics. The problem is defined by
+\begin{equation}
+    \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0 \quad t \in [0, \infty), \, x \in (-\infty, \infty)
+\end{equation}
+subject to the given initial condition $c(x,0)$ for $x \in (-\infty, \infty)$.
+
+The main idea behind this method is that instead of attempting to solve the PDE over the entire space-time domain simultaneously, we can identify specific curves in the $x-t$ plane, called characteristic curves, along which the PDE simplifies into an ODE. Along these curves, the independent variables $t$ and $x$ are not independent but are instead parameterized by a single variable $s$ such that we track the solution $c(x,t) = c(s)$.
+
+We can find these parameterizations by differentiating the solution with respect to $s$. Applying the chain rule gives
+\begin{equation}
+    \frac{dc}{ds} = \frac{dt}{ds} \frac{\partial c}{\partial t} + \frac{dx}{ds} \frac{\partial c}{\partial x}
+\end{equation}
+Comparing this total derivative expression to our original PDE, $\frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0$, we can establish a correspondence between the terms. By matching the coefficients, we obtain a system of ODEs:
+\begin{equation}
+    \frac{dt}{ds} = 1, \quad \frac{dx}{ds} = u, \quad \frac{dc}{ds} = 0
+\end{equation}
+Solving the first two equations tells us the geometry of the characteristics. Since $\frac{dt}{ds} = 1$, we can effectively identify $s$ with $t$. Then, $\frac{dx}{dt} = u$ implies that the curves are lines given by $x = ut + x_0$. The third equation, $\frac{dc}{ds} = 0$, tells us that for all $(x,t)$ on such a curve, the solution value $c(x,t)$ remains constant. Therefore, any solution $c(x,t)$ can be obtained simply by tracing back along the characteristic line to the point where $t=0$. This produces the general solution for the infinite domain:
+\begin{equation}
+    c(x,t) = c(x - ut, 0)
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figs/pde/infinite_domain.pdf}
+    \caption{Characteristic curves in the $x-t$ plane for the 1-D advection equation. On an infinite domain, the solution $c(x,t)$ is constant along the lines $x - ut = \text{const}$. The value at any point $(x,t)$ is determined by tracing the characteristic back to the initial condition at $t=0$.}
+    \label{fig:infinite_characteristics}
+\end{figure}
+
+\subsection{Initial and Boundary Value Problems}
+
+The situation becomes slightly more involved when we consider a semi-infinite domain, which introduces a boundary condition. Let's consider the following initial and boundary value problem:
+\begin{equation}
+    \begin{cases}
+    \displaystyle \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = 0 & t \in [0, \infty), \, x \in [0, \infty) \\[6pt]
+    c(x,0) \text{ is given} & x \in [0, \infty) \\[6pt]
+    c(0,t) \text{ is given} & t \in [0, \infty)
+    \end{cases}
+\end{equation}
+The solution is again obtained by tracing back over the characteristic lines, but now the origin of the information depends on where we are in the $x-t$ plane.
+
+For points where $x \ge ut$, the characteristic line originates from the $x$-axis ($t=0$). Here, the solution depends on the initial condition $c(x-ut, 0)$. However, for points where $x < ut$, the characteristic line originates from the $t$-axis ($x=0$). In this region, the solution is determined by the boundary condition at the earlier time $t - x/u$. We can express this piecewise solution as
+\begin{equation}
+    c(x,t) = \begin{cases}
+    c(x - ut, 0), & x \ge ut \\
+    c(0, t - \frac{x}{u}), & x < ut
+    \end{cases}
+\end{equation}
+This explicitly demonstrates how information propagates from the boundaries into the domain.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figs/pde/semi_infinite_domain.pdf}
+    \caption{The domain of dependence for the semi-infinite problem. The characteristic line $x=ut$ divides the $x-t$ plane into two regions. In Region 1 ($x \ge ut$), the solution depends on the initial condition $c(x,0)$. In Region 2 ($x < ut$), the solution depends on the boundary condition $c(0,t)$.}
+    \label{fig:semi_infinite_wedge}
+\end{figure}
+
+\subsection{Second-Order Hyperbolic Equations}
+
+The method of characteristics is not limited to first-order equations; it can also be used for solving second-order hyperbolic equations, such as the wave equation:
+\begin{equation}
+    \frac{\partial^2 c}{\partial t^2} = u^2 \frac{\partial^2 c}{\partial x^2}
+\end{equation}
+To apply the method, we first transform the second-order PDE into a system of first-order PDEs. We introduce an auxiliary variable $d$ (here $d$ is an auxiliary field introduced so the second-order equation can be written as a symmetric first-order hyperbolic system) and write the system as
+\begin{equation}
+    \frac{\partial c}{\partial t} + u \frac{\partial d}{\partial x} = 0 \quad \text{and} \quad \frac{\partial d}{\partial t} + u \frac{\partial c}{\partial x} = 0
+\end{equation}
+Equivalently, we can write these coupled equations in matrix-vector form:
+\begin{equation}
+    \frac{\partial}{\partial t} \begin{bmatrix} c \\ d \end{bmatrix} + \begin{bmatrix} 0 & u \\ u & 0 \end{bmatrix} \frac{\partial}{\partial x} \begin{bmatrix} c \\ d \end{bmatrix} = 0
+\end{equation}
+To simplify the notation, let us define the vector of unknowns $\mathbf{c} := \begin{bmatrix} c \\ d \end{bmatrix}$ and the coefficient matrix $\mathbf{A} := \begin{bmatrix} 0 & u \\ u & 0 \end{bmatrix}$. The system then becomes
+\begin{equation}
+    \frac{\partial \mathbf{c}}{\partial t} + \mathbf{A} \frac{\partial \mathbf{c}}{\partial x} = \mathbf{0}
+\end{equation}
+We can decouple this system by performing an eigendecomposition of the matrix $\mathbf{A}$. We write $\mathbf{A} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^{-1}$, where $\mathbf{W}$ is the matrix of eigenvectors and $\mathbf{\Lambda}$ is the diagonal matrix of eigenvalues. Substituting this into our equation,
+\begin{equation}
+    \frac{\partial \mathbf{c}}{\partial t} + \mathbf{W}\mathbf{\Lambda}\mathbf{W}^{-1} \frac{\partial \mathbf{c}}{\partial x} = \mathbf{0}
+\end{equation}
+Multiplying the entire equation from the left by $\mathbf{W}^{-1}$ allows us to move the eigenvector matrix inside the derivatives (assuming constant coefficients):
+\begin{equation}
+    \frac{\partial \mathbf{W}^{-1}\mathbf{c}}{\partial t} + \mathbf{\Lambda} \frac{\partial \mathbf{W}^{-1}\mathbf{c}}{\partial x} = \mathbf{0}
+\end{equation}
+If we define a new set of transformed variables $\widetilde{\mathbf{c}} = \mathbf{W}^{-1}\mathbf{c}$, the system simplifies to
+\begin{equation}
+    \frac{\partial \widetilde{\mathbf{c}}}{\partial t} + \mathbf{\Lambda} \frac{\partial \widetilde{\mathbf{c}}}{\partial x} = \mathbf{0}
+\end{equation}
+Because $\mathbf{\Lambda}$ is diagonal, this vector equation is a set of uncoupled scalar equations. Each entry of the transformed system is simply
+\begin{equation}
+    \frac{\partial \widetilde{c}_k}{\partial t} + \lambda_k \frac{\partial \widetilde{c}_k}{\partial x} = 0
+\end{equation}
+which can be solved independently as a 1-D advection equation using the method of characteristics derived previously.
+
+\section{Summary of PDE Methods}
+% MC: this could be made a lot better / more technical, probably just by running this chapter through ChatGPT and telling
+% it to summarize this chapter
+It is easy for us as chemical engineers to picture how PDEs govern the flow of information through systems since we have the nice physical intuition of fluid/heat/mass transport that obeys these same classes of PDEs. We have to think about two questions when analyzing PDEs and the solution methods we will apply to them. First, how do we represent space? Second, how do we evolve or solve in time? 
+
+Elliptic problems are steady and globally coupled, so we discretize space with finite differences or finite volumes and solve the resulting sparse linear system with iterative solvers (e.g., preconditioned CG for SPD systems; GMRES for nonsymmetric cases) and sometimes multigrid methods for optimal scaling. Parabolic problems evolve in time and diffuse, so a method of lines view is natural. We discretize space first, then choose time stepping with stiffness in mind since explicit diffusion often forces very small $\Delta t$. Hyperbolic problems transport at finite speed, so stability and accuracy depend on respecting flow direction, which is why upwinding and CFL limits matter and why characteristics give the right intuition for which boundary and initial data actually affect a point.
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../main"
+%%% End:
