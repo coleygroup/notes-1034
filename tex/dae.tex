@@ -625,10 +625,158 @@ When using numerical software, consistent initialization is non-negotiable. For 
 \section{Exercises}
 
 \begin{exercise}
-Placeholder - work in progress 2
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    \dot{x}_1 = y_1 - y_2 \\
+    y_1 = 1 \\
+    y_2 = \mathrm{arctan}(x_1)
+    \end{cases}$
 \end{exercise}
 \begin{solution}
-Placeholder - work in progress 2
+\begin{itemize}
+    \item Differential states: $x_1$
+    \item Algebraic states: $y_1$, $y_2$
+    \item Index: 1
+    \item Implicit constraints: none
+    \item Initialization DoF: (2)(1) + 2 - 3 - 0 = 1
+    \item Consistent initialization example: $\{x_1(0)\}$
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    \dot{x}_1 = y_1 - y_2 \\
+    y_1 = 2y_2 \\
+    x_1 = 1 + \sin(t)
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x_1$
+    \item Algebraic states: $y_1$, $y_2$
+    \item Index: 2
+    \item Implicit constraints: $\dot{x}_1 = \cos(t)$
+    \item Initialization DoF: (2)(1) + 2 - 3 - 1 = 0
+    \item Consistent initialization example: all predetermined
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$ \displaystyle \begin{cases}
+    \dot{x}_1 = y_1 - y_2 \\
+    \dot{x}_2 = y_2 \\
+    x_1 = 1 + \sin(t) \\
+    y_2 = e^{x_1}
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x_1$, $x_2$
+    \item Algebraic states: $y_1$, $y_2$
+    \item Index: 2
+    \item Implicit constraints: $\dot{x}_1 = \cos(t)$
+    \item Initialization DoF: (2)(2) + 2 - 3 - 1 = 1
+    \item Consistent initialization example: $\{x_2(0)\}$
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+ $\displaystyle \begin{cases}
+    \dot{x} = v \\
+    \dot{v} = a \\
+    \dot{a} = \sin(t)
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x$, $v$, $a$
+    \item Algebraic states: none
+    \item Index: 0
+    \item Implicit constraints: none
+    \item Initialization DoF: (2)(3) + 0 - 3 - 0 = 3
+    \item Consistent initialization example: $\{x(0), v(0), a(0)\}$
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    a = -2x-3v \\
+    \dot{x} = v \\
+    \dot{v} = a
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x$, $v$
+    \item Algebraic states: $a$
+    \item Index: 1
+    \item Implicit constraints: none
+    \item Initialization DoF: (2)(2) + 1 - 3 - 0 = 2
+    \item Consistent initialization example: $\{x(0), v(0)\}$
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    v^2 + 2x = E \\
+    E = e^{-t} \\
+    \dot{x} = v \\
+    \dot{v} = a
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x$, $v$
+    \item Algebraic states: $a$, $E$
+    \item Index: 2
+    \item Implicit constraints: $2 v \dot v + 2 \dot x = - e ^{-t}$
+    \item Initialization DoF: (2)(2) + 2 - 4 - 1 = 1
+    \item Consistent initialization example: $\{ v(0) \}$
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    x = 5t^2 \\
+    \dot{x} = v \\
+    \dot{v} = a
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $x$, $v$
+    \item Algebraic states: $a$
+    \item Index: 3
+    \item Implicit constraints: $\begin{cases} \dot x = 10t \\ \dot v = 10 \end{cases}$
+    \item Initialization DoF: (2)(2) + 1 - 3 - 2 = 0
+    \item Consistent initialization example: all predetermined
+\end{itemize}
+\end{solution}
+\begin{exercise}
+Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
+
+$\displaystyle \begin{cases}
+    {u_1}^2 + {u_2}^2 = 1 \\
+    {\dot{u}_1}^2 + {\dot{u}_2}^2 = u_3 \\
+    5 u_2 + u_3 = 1
+    \end{cases}$
+\end{exercise}
+\begin{solution}
+\begin{itemize}
+    \item Differential states: $u_1$, $u_2$
+    \item Algebraic states: $u_3$
+    \item Index: 1
+    \item Implicit constraints: $2 u_1 \dot u_1 + 2 u_2 \dot u_2 = 0$
+    \item Initialization DoF: 2(2) + 1 - 3 - 1 = 1
+    \item Consistent initialization example: $\{u_2(0)\}$ (note: will need to specify the signs of $u_1(0)$ and $\dot u_1(0)$)
+\end{itemize}
 \end{solution}
 
 %%% Local Variables:
