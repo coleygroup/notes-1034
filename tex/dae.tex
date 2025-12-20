@@ -4,23 +4,26 @@ Engineering problems often contain combinations of differential and algebraic eq
 \begin{equation}
     \mathbf{f}(t, \mathbf{z}, \dot{\mathbf{z}}) = \mathbf{0}, \qquad \text{where } \dot{\mathbf{z}} := \frac{d\mathbf{z}}{dt}
 \end{equation}
-This looks similar to the implicit ODE formulations we have seen previously, but there is a difference in the nature of the Jacobian with respect to $\dot{\mathbf{z}}$. For implicit ODEs, the Jacobian $\partial \mathbf{f} / \partial \dot{\mathbf{z}}$ is assumed to be nonsingular (locally invertible), allowing us to solve for $\dot{\mathbf{z}}$. For DAEs, this Jacobian may be singular, preventing a direct solution for $\dot{\mathbf{z}}$ without also using algebraic constraints. We will explore these analytical properties here and discuss numerical solutions later. Solving them numerically is very similar to solving ODE-IVPs.
+This looks similar to the implicit ODE formulations we have seen previously, but there are key differences that we will explore in this chapter. %is a difference in the nature of the Jacobian with respect to $\dot{\mathbf{z}}$. For implicit ODEs, the Jacobian $\partial \mathbf{f} / \partial \dot{\mathbf{z}}$ is assumed to be nonsingular (locally invertible), allowing us to solve for $\dot{\mathbf{z}}$. For DAEs, this Jacobian may be singular, preventing a direct solution for $\dot{\mathbf{z}}$ without also using algebraic constraints. 
+We will explore analytical properties of DAEs first and discuss numerical solutions later. Solving them numerically is very similar to solving ODE-IVPs.
 
-\paragraph*{Motivation: Reaction Kinetics and Conservation}
+\paragraph*{Motivation: Reaction Kinetics and Mass Conservation}
 
-To see why DAEs naturally arise, let's consider the chemical reaction network $A \longrightarrow B \rightleftharpoons 2D$. If we model this using standard kinetics, we obtain a system of ODEs describing the rate of change for each species concentration:
+To see why DAEs naturally arise, let's consider the chemical reaction network $A \longrightarrow B \rightleftharpoons 2D$. If we model this using standard kinetics, we obtain a system of three ODEs describing the rate of change for each species concentration:
 \begin{align}
     \frac{dC_A}{dt} &= -k_1 C_A \\
     \frac{dC_B}{dt} &= k_1 C_A - k_2 C_B + k_3 C_D^2 \\
     \frac{dC_D}{dt} &= 2k_2 C_B - 2k_3 C_D^2
 \end{align}
-In this ODE system, the total mass is implicitly conserved by the kinetics, but numerical integration errors might cause the total mass to drift over time during a simulation.  Alternatively, we might formulate this as a DAE system. We keep the kinetic rate laws for $A$ and $B$, but we replace the differential equation for $D$ with an algebraic constraint enforcing the exact conservation of atomic species (mass balance). If $Q_2$ is a constant total mass invariant (i.e., $Q_2 = \text{const.}$), the system becomes
+In this ODE system, the total mass is implicitly conserved by the kinetics, but numerical integration errors might cause the total mass to drift over time during a simulation. Using any of the ODE-IVP solvers we have discussed, we might expect the truncation error at each timestep to be small, but know that these errors can accumulate over many timesteps as the simulation proceeds. Similarly, if we were to sum over our estimates of $C_A(t)$, $C_B(t)$, and $C_C(t)$ at different timepoints, we will observe this drift.
+
+As an alternative, we can formulate this as a DAE system. We keep the kinetic rate laws for species$A$ and $B$, but we replace the differential equation for $D$ with an algebraic constraint enforcing the exact conservation of atomic species (mass balance). If $Q_2$ is a constant total mass invariant (i.e., $Q_2 = \text{const.}$), the system becomes
 \begin{align}
     \frac{dC_A}{dt} &= -k_1 C_A \\
     \frac{dC_B}{dt} &= k_1 C_A - k_2 C_B + k_3 C_D^2 \\
-    Q_2 &= C_A + C_B + \frac{1}{2} C_D
+    Q_2 &= C_A + C_B + \frac{1}{2} C_D \label{eq:dae_alg_massbalance}
 \end{align}
-In this DAE formulation, the exact conservation of mass is enforced directly by the algebraic equation. This prevents the drift that might occur in the pure ODE system.
+In this DAE formulation, the exact conservation of mass is enforced directly by the algebraic equation. This prevents the drift that might occur in the pure ODE system (\autoref{fig:dae_reaction}). Analytically, both formulations describe the same physical system, but numerically, the DAE approach can achieve better conservation properties by enforcing the algebraic constraint \autoref{eq:dae_alg_massbalance} to hold at every time point.
 
 \begin{figure}[H]
     \centering
@@ -31,7 +34,7 @@ In this DAE formulation, the exact conservation of mass is enforced directly by 
 
 \section{Standard Forms of DAEs}
 
-We can categorize DAEs into three common forms. The first, as introduced above, is the \textbf{fully implicit form}:
+We represent DAEs in three common forms. The first, as introduced above, is the \textbf{fully implicit form}:
 \begin{equation}
     \mathbf{f}(t, \mathbf{z}, \dot{\mathbf{z}}) = \mathbf{0}
 \end{equation}
@@ -44,26 +47,31 @@ In many physical systems, the variables naturally separate into those that appea
     \end{aligned}
     \qquad \text{with } \mathbf{z}(t) = \begin{bmatrix} \mathbf{x}(t) \\ \mathbf{y}(t) \end{bmatrix}
 \end{equation}
-It is often convenient to write equations in this manner, as many physical balances naturally give us this structure. Interestingly, the semi-explicit form can be rewritten trivially in the third form, the \textbf{mass matrix form}, by introducing a singular mass matrix:
+It is often convenient to write equations in this manner, as many physical balances naturally give us this structure. Identifying which states are differential and which are algebraic is as simple as checking whether the time derivative of a variable appears in the governing equations.
+
+Interestingly, the semi-explicit form can be rewritten trivially in the third form, the \textbf{mass matrix form}, by introducing a singular mass matrix:
 \begin{equation}
-    \begin{bmatrix} \mathbf{I} & \mathbf{0} \\ \mathbf{0} & \mathbf{0} \end{bmatrix} \begin{bmatrix} \dot{\mathbf{x}} \\ \dot{\mathbf{y}} \end{bmatrix} = \begin{bmatrix} \mathbf{f}(t, \mathbf{x}, \mathbf{y}) \\ \mathbf{g}(t, \mathbf{x}, \mathbf{y}) \end{bmatrix}
+    \underbrace{\begin{bmatrix} \mathbf{I} & \mathbf{0} \\ \mathbf{0} & \mathbf{0} \end{bmatrix}}_{\text{mass matrix, }\mathbf{M}} \begin{bmatrix} \dot{\mathbf{x}} \\ \dot{\mathbf{y}} \end{bmatrix} = \begin{bmatrix} \mathbf{f}(t, \mathbf{x}, \mathbf{y}) \\ \mathbf{g}(t, \mathbf{x}, \mathbf{y}) \end{bmatrix}
 \end{equation}
 More generally, the mass matrix form is defined as
 \begin{equation}
     \mathbf{M}(t, \mathbf{z})\dot{\mathbf{z}} = \mathbf{f}(t, \mathbf{z})
+    \label{eq:dae_mass_matrix}
 \end{equation}
-Recall the standard ODE formulation $\dot{\mathbf{x}} = \mathbf{f}(t, \mathbf{x})$. If the matrix $\mathbf{M}$ is invertible, we can simply multiply by $\mathbf{M}^{-1}$ to rewrite the DAE as an ODE:
+
+\subsubsection{Connection to ODEs}
+Recall the standard ODE formulation $\dot{\mathbf{x}} = \mathbf{f}(t, \mathbf{x})$. If the mass matrix $\mathbf{M}$ is invertible, we can simply multiply \autoref{eq:dae_mass_matrix} by $\mathbf{M}^{-1}$ to arrive at an ODE system:
 \begin{equation}
     \dot{\mathbf{z}} = \mathbf{M}(t, \mathbf{z})^{-1}\mathbf{f}(t, \mathbf{z})
 \end{equation}
-However, in the context of DAEs, the matrix $\mathbf{M}$ is most often singular (as seen in the semi-explicit block matrix example above). Consequently, we cannot convert the system to an ODE just by inverting $\mathbf{M}$. 
+However, the noninvertibility of the mass matrix is what makes a DAE a DAE, and not an ODE. In the semi-explicit block matrix example above, it is clear that the mass matrix is singular. Consequently, we cannot convert the system to an ODE just by inverting $\mathbf{M}$. 
 
-Regarding numerical solutions, MATLAB's \texttt{ode15s} and \texttt{ode23t} solvers can handle DAEs in mass matrix form. Additionally, MATLAB's \texttt{ode15i} solver is designed to solve fully implicit forms provided the DAEs are of index 1 (a concept we will define shortly).
+Regarding numerical solutions, MATLAB's \texttt{ode15s} and \texttt{ode23t} solvers can handle DAEs in mass matrix form. MATLAB's \texttt{ode15i} solver is designed to solve fully implicit forms provided the DAEs are of index 1 (a concept we will define shortly).
 
+\subsubsection{Example DAE Systems}
 \paragraph*{Example: Fluctuating Tank Feed}
 
-Let us solidify these concepts with a concrete example of a fluctuating tank feed. Consider a stirred tank with an inlet concentration $c_1(t)$ and an outlet concentration $c_2(t)$. The volume $V$ and flow rate $Q$ are constant.
-
+Let us solidify these concepts with a concrete example of a fluctuating tank feed. Consider a stirred tank with an inlet concentration $c_1(t)$ and an outlet concentration $c_2(t)$. The volume $V$ and flow rate $Q$ are constant. The inlet concentration is specified by a forcing function $\gamma(t)$, which may represent a time-varying feed concentration. This system is illustrated in \autoref{fig:tank_dae}.
 \begin{figure}[H]
     \centering
     % sorry for the compression... will fix later
@@ -71,7 +79,6 @@ Let us solidify these concepts with a concrete example of a fluctuating tank fee
     \caption{A continuous stirred tank reactor with a fluctuating inlet concentration $c_1(t)$.}
     \label{fig:tank_dae}
 \end{figure}
-
 The governing equations for this system are the component balance for the tank and the forcing function for the inlet:
 \begin{align}
     \frac{dc_2}{dt} &= \frac{Q}{V}(c_1(t) - c_2(t)) \\
@@ -91,7 +98,7 @@ We can express this system in our standard DAE forms. In the fully implicit form
     \end{bmatrix} = \mathbf{0}
 \end{equation}
 
-Alternatively, we can write this in the mass matrix form, $\mathbf{M}(t, \mathbf{z})\dot{\mathbf{z}} = \mathbf{f}(t, \mathbf{z})$. To do so, we first define our state vector $\mathbf{c}$ containing both algebraic and differential variables:
+Alternatively, we can write this in the mass matrix form, $\mathbf{M}(t, \mathbf{z})\dot{\mathbf{z}} = \mathbf{f}(t, \mathbf{z})$. To do so, we first define our state vector $\mathbf{c}$ (equivalent to $\mathbf{z}$ in our typical notation) containing both algebraic and differential variables:
 \begin{equation}
     \mathbf{c}(t) = \begin{bmatrix} c_1(t) \\ c_2(t) \end{bmatrix}
 \end{equation}
@@ -116,7 +123,7 @@ Note the singularity of the mass matrix $\mathbf{M}$ on the left-hand side (spec
 
 \paragraph*{Example 2: Specified Tank Concentration}
 
-Let us reconsider the stirred tank reactor from the previous section (\autoref{fig:tank_dae}). In the first example, we specified the input concentration and solved for the output. Now, consider the inverse problem: we wish to specify the \textit{output} concentration profile $c_2(t) = \gamma(t)$ and determine the necessary input concentration $c_1(t)$ to achieve it. The governing equations are still the component balance and the constraint, but the constraint now applies to the outlet variable:
+Let us reconsider the stirred tank reactor from the previous section (\autoref{fig:tank_dae}). In the first example, we specified the \textit{input} concentration and solved for the output. Now, consider the inverse problem: we wish to specify the \textit{output} concentration profile $c_2(t) = \gamma(t)$ and determine the necessary input concentration $c_1(t)$ to achieve it. The governing equations are still the component balance and the constraint, but the constraint now applies to the outlet variable:
 \begin{align}
     \frac{dc_2}{dt} &= \frac{Q}{V}(c_1(t) - c_2(t)) \\
     c_2(t) &= \gamma(t)
@@ -128,7 +135,7 @@ Analytically, we can solve this by substituting the constraint directly into the
     c_1(t) &= \gamma(t) + \frac{V}{Q}\dot{\gamma}(t) \\
     c_2(t) &= \gamma(t)
 \end{align}
-There is a big difference here compared to the previous example. The solution for $c_1(t)$ depends on the \textit{derivative} of the forcing function $\dot{\gamma}(t)$. This dependence on derivatives is characteristic of higher-index DAEs, which we will define formally in a moment.
+There is a big difference here compared to the previous example. The solution for $c_1(t)$ now depends on the \textit{derivative} of the forcing function $\dot{\gamma}(t)$. This dependence on derivatives is characteristic of ``higher-index'' DAEs, which we will define formally in a moment.
 
 We can also write this system in our standard forms. The fully implicit form is
 \begin{equation}
@@ -156,13 +163,13 @@ Collecting these terms into matrix notation,
 \end{equation}
 As before, the second row of the mass matrix is zero because the second equation is purely algebraic ($0 = -c_2 + \gamma(t)$).
 
-\section{The Differential Index}
+\section{The Differential Index (or Differentiation Index)}
 
-The behavior we observed above, where the solution depends on the derivative of the input, leads us to the concept of the \textbf{differential index}. The index of a DAE is defined as the number of times the system must be differentiated to obtain a complete set of first-order ODEs for all states (both algebraic and differential). To understand this definition, we look at the procedure of differentiating the algebraic constraints until we can express the time derivative of every state variable, $\dot{\mathbf{z}}$, as a function of the states and inputs.
+The behavior we observed above, where the solution depends on the derivative of the input, leads us to the concept of the \textbf{differential index}. The index of a DAE is defined as the number of times the system must be differentiated to obtain a complete set of first-order ODEs for all states (both algebraic and differential). It can be thought of as a measure of how far the system is from being an ODE. As we have already hinted at, it will turn out that ``index 1'' DAEs are substantially more well-behaved than ``high-index'' DAEs. To understand this definition, we look at the procedure of differentiating the algebraic constraints until we can express the time derivative of every state variable, $\dot{\mathbf{z}}$, as a function of the states and inputs.
 
 \subsection{Index 1 vs.\ Index 2: The Tank Filling Problem}
 
-The formulation of the DAE matters significantly for the numerical properties of the system. To illustrate this, let us examine a mechanical tank filling problem (distinct from the chemical concentration problem above). We define two variables, the fluid volume in the tank $x_1(t)$ and the outlet flow rate $x_2(t)$. The inlet flow rate is $g_1(t)$.
+Let us examine a mechanical tank filling problem (\autoref{fig:tank-filling}); this is distinct from the chemical concentration problem above and lets us drop some extra constant terms. We define two variables, the fluid volume in the tank $x_1(t)$ and the outlet flow rate $x_2(t)$. The inlet flow rate is $g_1(t)$.
 
 \begin{figure}[h]
     \centering
