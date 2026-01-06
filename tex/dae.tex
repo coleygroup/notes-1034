@@ -286,7 +286,7 @@ Note the dependence on $\dot{g}_2(t)$. If the specified volume signal $g_2(t)$ i
 %     \label{fig:index_noise}
 % \end{figure}
 
-This high index is often a result of poor modeling choices. Physically, we cannot force the volume to be exactly $g_2(t)$ directly. A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
+This high index is often a result of poor modeling choices. Physically, how could we possibly force the volume to be \emph{exactly} $g_2(t)$ at all times. A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
 
 \subsection{Another Example: Calculation of Higher Indices}
 
@@ -296,13 +296,13 @@ We can apply this differentiation procedure to arbitrary systems to determine th
     (2) \quad & \dot{x}_3 = x_2 \\
     (3) \quad & x_3 = \gamma(t)
 \end{align}
-To find the index, we differentiate the algebraic constraint (3) repeatedly until we have expressions for $\dot{x}_1, \dot{x}_2, \text{and } \dot{x}_3$. Note that here $x_1$ is technically an algebraic variable (it lacks a derivative in the original equations), but we follow the convention of differentiating until $\dot{\mathbf{z}}$ is explicit for all components.
+To find the index, we differentiate the algebraic constraint (3) repeatedly until we have expressions for $\dot{x}_1, \dot{x}_2, \text{and } \dot{x}_3$. Note that here $x_1$ is an algebraic variable (it lacks a derivative in the original equations). We follow the convention of differentiating until the first derivative expressions are explicit for all state variables.
 
 \textbf{Differentiation 1:} Differentiate (3) to get $\dot{x}_3$:
 \begin{equation}
     (3') \quad \dot{x}_3 = \dot{\gamma}(t)
 \end{equation}
-Matching $(3')$ with (2), we find an algebraic relationship for $x_2$:
+Substituting $(3')$ into (2), we find an algebraic relationship for $x_2$:
 \begin{equation}
     x_2 = \dot{\gamma}(t)
 \end{equation}
@@ -311,7 +311,7 @@ Matching $(3')$ with (2), we find an algebraic relationship for $x_2$:
 \begin{equation}
     (2') \quad \dot{x}_2 = \ddot{\gamma}(t)
 \end{equation}
-Matching $(2')$ with (1), we find an algebraic relationship for $x_1$:
+Substituting $(2')$ into (1), we find an algebraic relationship for $x_1$:
 \begin{equation}
     x_1 = \ddot{\gamma}(t)
 \end{equation}
@@ -321,19 +321,20 @@ Matching $(2')$ with (1), we find an algebraic relationship for $x_1$:
     (1') \quad \dot{x}_1 = \dddot{\gamma}(t)
 \end{equation}
 
-Since we required 3 differentiations to obtain the differential equation for the final state $x_1$, this is an index 3 DAE. The complete set of underlying ODEs is:
+We required 3 differentiations to obtain the first order differential equation for the final state $x_1$; we conclude that this is an index 3 DAE. The complete set of underlying ODEs is:
 \begin{align}
     \dot{x}_1 &= \dddot{\gamma}(t) \\
     \dot{x}_2 &= \ddot{\gamma}(t) \\
     \dot{x}_3 &= \dot{\gamma}(t)
 \end{align}
-As with the index 2 tank example, solving this system numerically is difficult because it effectively requires calculating the third derivative of the forcing function $\gamma(t)$, which is extremely sensitive to numerical error. In general, index 1 DAEs are much more amenable to numerical solution than systems with index $>1$.
+As with the index 2 tank example, we should expect that solving this system numerically will be difficult. Accurately tracking the true solution requires matching the third derivative of the forcing function $\gamma(t)$, which is extremely sensitive to numerical error. In general, index 1 DAEs are much more amenable to numerical solution than systems with index $>1$.
+
 \begin{warningBox}
 \textbf{Warning:}
 In this course, the differential index is the number of times we must differentiate the DAE system until we can write \emph{explicit first-order ODEs for every component of the full state} $\mathbf{z}=[\mathbf{x};\mathbf{y}]$. This usually means differentiating the algebraic constraints until we can write explicit ODEs for every component of $\mathbf{z}$. Here are some notes to keep in mind:
 
 \begin{itemize}
-    \item Do not equate ``\# algebraic equations'' with index. A system can have many algebraic constraints and still be index 1, or have a single constraint and be index 2+.
+    \item Do not equate the number of algebraic equations with index. A system can have many algebraic constraints and still be index 1, or have a single constraint and be index 2+.
     \item Elimination can hide the index. If you substitute constraints to eliminate variables, you may get an ODE for $\mathbf{x}$ quickly, but under our definition you must still ask: how many differentiations are needed to determine $\dot{\mathbf{y}}$ (and hence $\dot{\mathbf{z}}$)?
     \item Watch for hidden consistency conditions. Differentiating constraints can introduce additional conditions that must hold at $t_0$ (e.g.\ involving $\dot{\gamma}(t_0)$, $\ddot{\gamma}(t_0)$). If initial conditions violate these, the model is not (classically) solvable without projection/re-initialization. We will see this in more detail later.
     \item Index is a structural property, not ``how hard it feels.''' Stiffness and fast/slow time scales affect numerics, but they are not the index. The index is about how many differentiations are required to make $\dot{\mathbf{z}}$ explicit.
@@ -342,28 +343,33 @@ In this course, the differential index is the number of times we must differenti
 
 \section{Distinguishing Index 1 from Higher Index Systems}
 
-We established earlier that index 1 DAEs are generally well-behaved and solvable with standard methods, while higher-index systems pose significant numerical challenges. But how do we determine the index of a given system without performing the repeated differentiation manually every time? We can do this by examining the Jacobian of the algebraic constraints. Let us revisit the standard semi-explicit form:
+We mentioned earlier that index 1 DAEs are generally well-behaved and solvable with standard methods, while higher-index systems pose significant numerical challenges. But how do we determine the index of a given system without performing the repeated differentiation manually every time? It turns out that there is a convenient shortcut that can distinguish index 1 from higher-index DAEs, although it does not provide the actual index in the latter case. 
+
+Let us revisit the standard semi-explicit form:
 \begin{align}
-    \dot{\mathbf{x}} &= \mathbf{f}(t, \mathbf{x}, \mathbf{y}) \\
-    \mathbf{0} &= \mathbf{g}(t, \mathbf{x}, \mathbf{y})
+    \dot{\mathbf{x}} &= \mathbf{f}(t, \mathbf{x}, \mathbf{y}) \label{eq:high-index-shortcut-f}\\
+    \mathbf{0} &= \mathbf{g}(t, \mathbf{x}, \mathbf{y}) \label{eq:high-index-shortcut-g}
 \end{align}
-Recall that $\mathbf{x}$ represents the differential states (those appearing with time derivatives) and $\mathbf{y}$ represents the algebraic states. To see if the system is index 1, we differentiate the algebraic equation $\mathbf{g} = \mathbf{0}$ with respect to time using the chain rule:
+Recall that $\mathbf{x}$ represents the differential states (those appearing with time derivatives) and $\mathbf{y}$ represents the algebraic states. We can differentiate \autoref{eq:high-index-shortcut-g} with respect to time using the chain rule:
 \begin{equation}
-    \mathbf{0} = \frac{\partial \mathbf{g}}{\partial t} + \frac{\partial \mathbf{g}}{\partial \mathbf{x}}\dot{\mathbf{x}} + \frac{\partial \mathbf{g}}{\partial \mathbf{y}}\dot{\mathbf{y}}
+    \mathbf{0} = \frac{\partial \mathbf{g}}{\partial t} + \frac{\partial \mathbf{g}}{\partial \mathbf{x}}\dot{\mathbf{x}} + \frac{\partial \mathbf{g}}{\partial \mathbf{y}}\dot{\mathbf{y}}.
 \end{equation}
-We can substitute the expression for $\dot{\mathbf{x}}$ from the first equation into this new relation:
+We know $\dot{\mathbf{x}}$ from \autoref{eq:high-index-shortcut-f}, and substitute it into this new relation:
 \begin{equation}
     \mathbf{0} = \frac{\partial \mathbf{g}}{\partial t} + \frac{\partial \mathbf{g}}{\partial \mathbf{x}}\mathbf{f}(t, \mathbf{x}, \mathbf{y}) + \frac{\partial \mathbf{g}}{\partial \mathbf{y}}\dot{\mathbf{y}}
+    \label{high-index-shortcut-expanded}
 \end{equation}
-Now, observe the term attached to $\dot{\mathbf{y}}$. If the Jacobian matrix $\frac{\partial \mathbf{g}}{\partial \mathbf{y}}$ is non-singular (invertible), we can rearrange this equation to solve explicitly for $\dot{\mathbf{y}}$:
+Now, observe the term attached to $\dot{\mathbf{y}}$. If the Jacobian matrix $\frac{\partial \mathbf{g}}{\partial \mathbf{y}}$ is non-singular (invertible), we can rearrange \autoref{high-index-shortcut-expanded} to isolate $\dot{\mathbf{y}}$ on the left-hand side:
 \begin{equation}
     \dot{\mathbf{y}} = -\left( \frac{\partial \mathbf{g}}{\partial \mathbf{y}} \right)^{-1} \left( \frac{\partial \mathbf{g}}{\partial t} + \frac{\partial \mathbf{g}}{\partial \mathbf{x}}\mathbf{f}(t, \mathbf{x}, \mathbf{y}) \right)
 \end{equation}
-If this inversion is possible, we have successfully derived a complete set of ODEs for both $\mathbf{x}$ and $\mathbf{y}$ with just one differentiation. Therefore, the condition for a DAE to be index 1 is that the Jacobian of the constraints with respect to the algebraic variables, $\frac{\partial \mathbf{g}}{\partial \mathbf{y}}$, is non-singular.
+If this inversion is possible, we have successfully derived a complete set of ODEs for both $\mathbf{x}$ and $\mathbf{y}$ with just one step of differentiation, i.e., this is an index 1 DAE. 
 
-\subsection{Example: Detecting Index > 1}
+Therefore, the condition for a DAE to be index 1 is that the Jacobian of the algebraic equations with respect to the algebraic variables, $\frac{\partial \mathbf{g}}{\partial \mathbf{y}}$, is non-singular.
 
-Let's apply this Jacobian test to the coupled system we analyzed previously:
+
+\begin{exampleBox}
+\textbf{Example:} Let's apply this Jacobian test to the coupled system we analyzed previously to determine if it is an index 1 or higher-index DAE:
 \begin{align}
     (1) \quad \dot{x}_2 &= x_1 \\
     (2) \quad \dot{x}_3 &= x_2 \\
@@ -376,6 +382,7 @@ Let us check the Jacobian of the constraint function $g = x_3 - \gamma(t)$ with 
     \frac{\partial g}{\partial x_1} = \frac{\partial}{\partial x_1}(x_3 - \gamma(t)) = 0
 \end{equation}
 The Jacobian is zero (a $1\times 1$ singular matrix). Because the Jacobian is singular, we cannot solve for $\dot{x}_1$ directly from the differentiated constraint. This confirms that the system is index > 1 (as we saw before, it is actually index 3).
+\end{exampleBox}
 
 % \section{Reducing the Index of a DAE}
 
@@ -402,12 +409,12 @@ The Jacobian is zero (a $1\times 1$ singular matrix). Because the Jacobian is si
 
 \section{Reducing the Index of a DAE}
 
-If we encounter a high-index problem, we are not necessarily stuck. In many/most regular DAEs encountered, we can apply an \textbf{index-reduction} procedure (usually involving differentiating some constraints and/or introducing auxiliary variables) to obtain a formulation that is low index and therefore compatible with standard DAE integrators. This should not be interpreted as a guarantee that every DAE can be transformed in a globally equivalent way. If the model is structurally singular, inconsistent, or poorly posed, index reduction may fail or may introduce additional consistency conditions that must be enforced.
+If we encounter a high-index problem, we are not necessarily stuck. In many/most regular DAEs encountered, we can apply an \textbf{index reduction} procedure (usually involving differentiating some constraints and/or introducing auxiliary variables) to obtain a formulation that is low index and therefore compatible with standard DAE integrators. This should not be interpreted as a guarantee that every DAE can be transformed in a globally equivalent way. If the model is structurally singular, inconsistent, or poorly posed, index reduction may fail or may introduce additional consistency conditions that must be enforced. In general, index reduction can produce an analytically equivalent system, but the numerical solution may differ.
 
 \paragraph*{Why do we care?}
 Most general-purpose DAE solvers are designed for index-1 systems. When given an index $>1$ formulation, they likely either (i) fail during initialization/Newton solves, (ii) exhibit severe order reduction, or (iii) attempt internal symbolic manipulations (e.g., differentiating constraints) to reduce the index. A practical way to recognize index $>1$ behavior is that the solution (or consistent initialization) depends on time derivatives of prescribed signals and/or on derivatives of algebraic constraints.
 
-\subsection{Auxiliary-Variable Index Reduction}
+\subsection{Method of Auxiliary Variables}
 
 A common index-reduction technique is the \textbf{method of auxiliary variables}. The idea is simple:
 
@@ -418,7 +425,7 @@ A common index-reduction technique is the \textbf{method of auxiliary variables}
     \item Add additional equations obtained by differentiating the appropriate algebraic constraint(s) until the enlarged system becomes index 1.
 \end{itemize}
 
-This procedure trades hidden derivative constraints (which cause high index) for explicit algebraic equations involving the new auxiliary variables. The resulting system may have more variables and more equations, but it should be much easier to initialize and integrate numerically.
+This procedure trades hidden derivative constraints (which cause high index) for explicit algebraic equations involving the new auxiliary variables. The resulting system will have more variables and more equations, but if done correctly, will be lower index and thus much easier to initialize and solve numerically.
 
 As an example, let's consider the system
 \begin{align}
@@ -426,16 +433,18 @@ As an example, let's consider the system
     (2)\quad & x_1 = e^{-t} \\
     (3)\quad & y_1 + y_2 = 1
 \end{align}
-Here, $x_1$ is constrained algebraically by (2), while (1) requires $\dot x_1$; this is a common signature of an index-$>1$ formulation. We differentiate the algebraic constraints once:
+Here, $x_1$ is constrained algebraically by (2), while (1) requires $\dot x_1$; this is a common signature of a high-index formulation. We differentiate the algebraic constraints once:
 \begin{align}
     (2')\quad & \dot x_1 = -e^{-t} \\
     (3')\quad & \dot y_1 + \dot y_2 = 0
 \end{align}
-Equation (2') is an implicit (hidden) constraint on the dynamics. Since $x_1=e^{-t}$ must hold for all $t$, its derivative must also hold, so $\dot x_1$ is not free. Combining (1) and (2') already forces
+Equation (2') is an implicit (hidden) constraint on the dynamics, which we will discuss in more detail in \autoref{sec:dae-initialization}. Since $x_1=e^{-t}$ must hold for all $t$, its derivative must also hold, so $\dot x_1$ is not free. Combining (1) and (2') already forces
 \begin{equation}
 y_1 - y_2 = -e^{-t}
 \end{equation}
-and further differentiations are required to obtain explicit ODEs for all variables. Indeed, this is an index-2 system. Now, we define an auxiliary variable
+and further differentiations are required to obtain explicit ODEs for all variables. Indeed, this is an index-2 system. 
+
+Now, we define an auxiliary variable
 \begin{equation}
     x_2 := \dot x_1
 \end{equation}
@@ -446,17 +455,17 @@ and replace $\dot x_1$ in (1) by $x_2$. Then, we make the hidden constraint expl
     (3)\quad & y_1 + y_2 = 1 \\
     (4)\quad & x_2 = -e^{-t}
 \end{align}
-This enlarged system is index 1. The constraints now determine $(x_1,x_2,y_1,y_2)$ directly at each time without requiring further differentiation.
+This enlarged system ends up being an all-algebraic index 1 system. (In general, we do not expect this to always happen.) The constraints now determine $(x_1,x_2,y_1,y_2)$ directly at each time without requiring further differentiation.
 
-Foreshadowing a later section (don't worry if this doesn't make sense right now), in this example, there are no degrees of freedom. At $t=t_0$, equation (2) fixes $x_1(t_0)=e^{-t_0}$, equation (4) fixes $x_2(t_0)=-e^{-t_0}$, and equations (1) and (3) then uniquely determine $(y_1(t_0),y_2(t_0))$:
+Foreshadowing \autoref{sec:dae-initialization}, we might also notice that at $t=t_0$, equation (2) fixes $x_1(t_0)=e^{-t_0}$, equation (4) fixes $x_2(t_0)=-e^{-t_0}$, and equations (1) and (3) then uniquely determine $(y_1(t_0),y_2(t_0))$:
 \begin{equation}
 y_1(t_0)=\frac{1+x_2(t_0)}{2},\qquad
 y_2(t_0)=\frac{1-x_2(t_0)}{2}
 \end{equation}
-So consistent initialization leaves $0$ DoF in this particular case.
+So the four equations in this DAE system leave us with $0$ degrees of freedom when initializing our state variables at $t=0$---all variables are fixed by the constraints.
 
-\paragraph*{Connecting Back to the Tank Example}
-Let us revisit the index-2 tank filling problem where the volume is specified:
+\begin{exampleBox}
+\textbf{Example:} Let's apply the method of auxiliary variables to the index-2 tank filling problem where the volume $x_1$ is specified:
 \begin{align}
     (1)\quad & \dot{x}_1 + x_2 = g_1(t) \\
     (2)\quad & x_1 = g_2(t)
@@ -471,76 +480,82 @@ and making the differentiated constraint explicit gives
     (2)\quad & x_1 = g_2(t) \\
     (3)\quad & x_3 = \dot g_2(t)
 \end{align}
-Again, we have reduced the index from 2 to 1 by introducing an auxiliary variable.
+We have reduced the index from 2 to 1 by introducing an auxiliary variable.
+\end{exampleBox}
 
-\paragraph*{Caution: drift and consistency.}
-Index reduction can introduce differentiated constraints such as $x_3=\dot g_2(t)$ (or, more generally, relations obtained by differentiating $\mathbf g(t,\mathbf x,\mathbf y)=\mathbf 0$). Two practical warnings: (1) Differentiated constraints impose extra requirements at $t_0$ (e.g., involving $\dot g_2(t_0)$, $\ddot g_2(t_0)$, etc.). If these are violated, the original model is not classically solvable without re-initialization/projection. (2) If we replace an original constraint by only its differentiated form(s) and do not re-enforce the original constraint (via projection or stabilization), numerical solutions may drift off the true constraint manifold. In the reformulations above, we retained the original constraints (e.g.\ $x_1=g_2(t)$), so those constraints cannot drift at the discrete solution points.
-
+\begin{warningBox}
+\textbf{Warning:} Index reduction can introduce differentiated constraints such as $x_3=\dot g_2(t)$ in the example above (or, more generally, relations obtained by differentiating $\mathbf g(t,\mathbf x,\mathbf y)=\mathbf 0$). Two practical warnings:
+\begin{enumerate}
+\item Differentiated constraints impose extra requirements at $t_0$ (e.g., involving $\dot g_2(t_0)$, $\ddot g_2(t_0)$, etc.). If these are violated, the original model is not classically solvable without re-initialization/projection. 
+\item If we replace an original constraint by only its differentiated form(s) and do not re-enforce the original constraint (via projection or stabilization), numerical solutions may drift off the true constraint manifold. In the reformulations above, we retained the original constraints (e.g., $x_1=g_2(t)$), so those constraints cannot drift at the discrete solution points.
+\end{enumerate}
+\end{warningBox}
 
 \section{Numerical Simulation of DAEs}
 
-We approach solving DAEs numerically in the same way as ODE-IVPs. We discretize time and estimate the solution at a finite set of times. However, the presence of algebraic constraints introduces stiffness issues.
+We approach solving DAEs numerically in the same way as ODE-IVPs: we discretize time and estimate the solution at a finite set of times, stepping $\Delta t$ by $\Delta t$. However, the presence of algebraic constraints resembles a highly stiff ODE and makes the use of implicit methods necessary.
 
-\subsection{Connection to Stiffness}
+\subsection{Connection to Stiffness in ODEs}
 
 We can think of a DAE as the limit of a very stiff ODE. Consider the system:
 \begin{align}
     \dot{\mathbf{x}} &= \mathbf{f}(t, \mathbf{x}, \mathbf{y}) \\
     \epsilon \dot{\mathbf{y}} &= \mathbf{g}(t, \mathbf{x}, \mathbf{y})
 \end{align}
-If we take the limit as $\epsilon \to 0$, we recover the DAE $\mathbf{0} = \mathbf{g}(t, \mathbf{x}, \mathbf{y})$. For a very small but non-zero $\epsilon$, the term $\dot{\mathbf{y}}$ would be very large, corresponding to extremely fast dynamics that must be resolved on arbitrarily short time scales. This is the definition of a stiff problem. Qualitatively, we can interpret a DAE as an ``infinitely stiff'' ODE. Consequently, explicit methods (like forward Euler) generally fail, and we must use implicit methods (stiff solvers).
+If we take the limit as $\epsilon \to 0$, we recover $\mathbf{0} = \mathbf{g}(t, \mathbf{x}, \mathbf{y})$ which is a DAE in semi-explicit form. For a very small but non-zero $\epsilon$, the term $\dot{\mathbf{y}}$ would be very large, corresponding to extremely fast dynamics that must be resolved on arbitrarily short time scales. This is the definition of a stiff problem. Qualitatively, we can interpret a DAE as an ``infinitely stiff'' ODE. Consequently, explicit methods (like forward Euler) generally fail, and we must use implicit methods (stiff solvers).
 
 \subsection{Failure of Forward Euler}
 
-If we try to use the forward Euler method on a semi-explicit DAE $\dot{\mathbf{x}} = \mathbf{f}(t, \mathbf{x}, \mathbf{y})$, we calculate the next step for the differential states as
+Consider trying to use the forward Euler method on a semi-explicit DAE $\dot{\mathbf{x}} = \mathbf{f}(t, \mathbf{x}, \mathbf{y})$. We calculate the next step for the differential states as
 \begin{equation}
     \mathbf{x}(t_{i+1}) = \mathbf{x}(t_i) + \Delta t \, \mathbf{f}(t_i, \mathbf{x}(t_i), \mathbf{y}(t_i))
 \end{equation}
 However, simply updating $\mathbf{x}$ does not guarantee that the new state $\mathbf{x}(t_{i+1})$ satisfies the algebraic constraint $\mathbf{0} = \mathbf{g}(t_{i+1}, \mathbf{x}(t_{i+1}), \mathbf{y}(t_{i+1}))$. The solution will drift off the constraint manifold. 
 
-Instead, the key issue is that an explicit update of $\mathbf{x}$ alone does not enforce the constraint manifold. A simple remedy (for index-1 systems) is an explicit--projection step: first compute $\mathbf{x}(t_{i+1})$ explicitly using forward Euler, and then determine $\mathbf{y}(t_{i+1})$ by solving the algebraic constraint at the new time,
+The key issue is that an explicit update of $\mathbf{x}$ alone does not enforce the algebraic constraints. A potential remedy for index-1 systems is an explicit--projection step: first compute $\mathbf{x}(t_{i+1})$ explicitly using forward Euler, and then determine $\mathbf{y}(t_{i+1})$ by solving the algebraic constraint at the new time,
 \begin{align}
 \mathbf{x}(t_{i+1}) &= \mathbf{x}(t_i) + \Delta t\,\mathbf{f}(t_i,\mathbf{x}(t_i),\mathbf{y}(t_i)),\\
 \mathbf{0} &= \mathbf{g}(t_{i+1},\mathbf{x}(t_{i+1}),\mathbf{y}(t_{i+1})).
 \end{align}
-This generally requires a (possibly nonlinear) solve for $\mathbf{y}(t_{i+1})$ only (assuming $\partial \mathbf{g}/\partial \mathbf{y}$ is nonsingular). Fully implicit methods go further by making $\mathbf{x}(t_{i+1})$ depend on $\mathbf{y}(t_{i+1})$ as well; in that case the step typically involves a coupled nonlinear solve for both sets of variables.
+This generally requires a (possibly nonlinear) solve for $\mathbf{y}(t_{i+1})$ only (assuming $\partial \mathbf{g}/\partial \mathbf{y}$ is nonsingular). This method also might lead to drift over many steps unless the projection is done very accurately. 
+
+Remember, the distinction between differential and algebraic states is \emph{not} that we use $\mathbf{f}$ to solve for the differential states and $\mathbf{g}$ for the algebraic ones; the algebraic states might not even appear in the algebraic equations for high-index DAEs! Solving for $\mathbf{y}(t_{i+1})$ will be ill-posed in that case.
+
+
+% Fully implicit methods go further by making $\mathbf{x}(t_{i+1})$ depend on $\mathbf{y}(t_{i+1})$ as well; in that case the step typically involves a coupled nonlinear solve for both sets of variables.
 
 \subsection{Backward Euler and Simulation Errors}
 
-To handle this coupling robustly, we typically use fully implicit methods like backward Euler. For a general DAE $\mathbf{f}(t, \mathbf{z}, \dot{\mathbf{z}}) = \mathbf{0}$, we approximate the derivative with a backward difference:
+To handle this coupling robustly, DAE solvers typically use fully implicit methods to solve for $\mathbf{x}(t_{i+1})$ and $\mathbf{y}(t_{i+1})$ simultaneously. Consider the simplest implicit method, backward Euler. For a general DAE $\mathbf{f}(t, \mathbf{z}, \dot{\mathbf{z}}) = \mathbf{0}$, we approximate the derivative with a backward difference:
 \begin{equation}
-    \mathbf{f}\left( t_{i+1}, \mathbf{z}(t_{i+1}), \frac{\mathbf{z}(t_{i+1}) - \mathbf{z}(t_i)}{\Delta t} \right) \approx \mathbf{0}
+    \mathbf{0} = \mathbf{f} \left( t_{i+1}, \mathbf{z}(t_{i+1}), \mathbf{\dot z}(t_{i+1}) \right)  \approx \mathbf{f}\left( t_{i+1}, \mathbf{z}(t_{i+1}), \frac{\mathbf{z}(t_{i+1}) - \mathbf{z}(t_i)}{\Delta t} \right)
 \end{equation}
 At each time step, this requires solving a system of nonlinear equations for $\mathbf{z}(t_{i+1})$. Generalized multistep methods, such as those used in MATLAB's \texttt{ode15s}, \texttt{ode23t}, and \texttt{ode15i}, are built on this principle.
 
-However, for higher-index systems, standard low-order methods can result in surprisingly poor accuracy. Let's return to our index 2 stirred tank system (specified output) to analyze the error scaling. The equations are
+For high-index DAEs,  low-order approximations like backward Euler can result in surprisingly poor accuracy. Let's return to our index 2 stirred tank system (specified output) to analyze the error scaling by hand. The equations are
 \begin{align}
-    \frac{dc_2}{dt} &= \frac{Q}{V}(c_1(t) - c_2(t)) \\
+    \frac{dc_2}{dt} &= \frac{Q}{V}(c_1(t) - c_2(t)) \label{eq:dae-errors-eq1}\\
     c_2(t) &= \gamma(t)
 \end{align}
-Using backward Euler, the discrete step for $c_2$ is simply the constraint $c_2(t_{i+1}) = \gamma(t_{i+1})$. We substitute the backward difference approximation for the derivative into the first equation to solve for the input $c_1$:
+Using backward Euler, the discrete step for $c_2$ is simply the constraint $c_2(t_{i+1}) = \gamma(t_{i+1})$. We substitute the backward difference approximation for the derivative, $\frac{dc_2}{dt}\big|_{t+1} = \frac{c_2(t_{i+1}) - c_2(t_i)}{\Delta t} + O(\Delta t)$, into \autoref{eq:dae-errors-eq1} to solve for the input $c_1$:
 \begin{equation}
     c_1(t_{i+1}) = c_2(t_{i+1}) + \frac{V}{Q} \left( \frac{c_2(t_{i+1}) - c_2(t_i)}{\Delta t} \right) + O(\Delta t)
 \end{equation}
-The term in parentheses is a first-order backward-difference approximation of $\dot c_2(t_{i+1})$. If $c_2$ were known \emph{exactly} at the grid points (e.g., if we can evaluate $\gamma(t_i)$ exactly and enforce $c_2(t_i)=\gamma(t_i)$ to solver tolerance), then this derivative approximation incurs an $O(\Delta t)$ truncation error, and the induced error in the algebraically computed input $c_1(t_{i+1})$ is correspondingly $O(\Delta t)$.
+If $c_2$ were known \emph{exactly} at the grid points (e.g., if we can evaluate $\gamma(t_i)$ exactly and enforce $c_2(t_i)=\gamma(t_i)$ to solver tolerance), then this derivative approximation incurs an $O(\Delta t)$ truncation error, and the resulting error in the estimate of $c_1(t_{i+1})$ is correspondingly $O(\Delta t)$. If we consider how this local truncation error (LTE) accumulates over multiple steps to produce a global truncation error (GTE), we find that the GTE scales as $O(1)$---it does not decrease as $\Delta t$ decreases. That is a severe problem! Even if we take very small time steps, the error in $c_1(t)$ is not guaranteed to ever improve.
 
-However, the situation becomes much worse in the typical index-2 setting where the constrained quantity is only satisfied \emph{approximately} at each step. Suppose the numerical values satisfy $\tilde c_2(t_i)=c_2(t_i)+e_i$ with $e_i=O(\Delta t)$ (for example due to nonlinear-solve tolerances or accumulated discretization effects). Then the difference quotient contains the amplified term
-\[
-\frac{\tilde c_2(t_{i+1})-\tilde c_2(t_i)}{\Delta t}
-=
-\frac{c_2(t_{i+1})-c_2(t_i)}{\Delta t} + \frac{e_{i+1}-e_i}{\Delta t},
-\]
-and $\frac{e_{i+1}-e_i}{\Delta t}=O(1)$ in general. Because $c_1$ depends \emph{directly} on this quotient, the error in the computed $c_1$ can therefore be $O(1)$ unless constraints are enforced very accurately and/or a higher-order discretization is used. This is a concrete manifestation of the well-known \emph{order reduction} that can occur for higher-index DAEs, especially in variables that behave like time derivatives of constrained quantities.
+
+To improve the error scaling, we can use a higher-order implicit method, such as Crank-Nicolson or the trapezoidal rule. Under that discretization scheme, the update for $c_2$ becomes
 \begin{equation}
     c_2(t_{i+1}) = c_2(t_i) + \frac{\Delta t}{2} \left[ \left.\frac{dc_2}{dt}\right|_{t_i} + \left.\frac{dc_2}{dt}\right|_{t_{i+1}} \right] + O(\Delta t^3)
 \end{equation}
-Solving for $c_1(t_{i+1})$ under this scheme, we get an expression where the error terms scale much more favorably:
+Solving for $c_1(t_{i+1})$, we now get an expression where the error terms scale more favorably:
 \begin{equation}
     c_1(t_{i+1}) = c_2(t_{i+1}) - c_1(t_i) + c_2(t_i) + \frac{2V}{Q\Delta t}(c_2(t_{i+1}) - c_2(t_i)) + O(\Delta t^2)
 \end{equation}
-With the trapezoidal update, the GTE scales as $O(\Delta t)$, which is much more reasonable and helps ensure convergence as the step size decreases.
+With an LTE of $O(\Delta t^2)$, the GTE scales as $O(\Delta t)$, which is much more reasonable and helps ensure convergence as the step size decreases.
 
 \section{Initialization of Differential-Algebraic Equations}
+\label{sec:dae-initialization}
 
 A challenge that distinguishes DAEs from ODEs is the problem of initialization. For a standard ODE system, finding a valid starting point is usually a matter of choice; for a DAE, it is a matter of consistency. Consider a generic system written in fully implicit form:
 \begin{equation}
@@ -548,7 +563,12 @@ A challenge that distinguishes DAEs from ODEs is the problem of initialization. 
 \end{equation}
 To start a numerical integrator at time $t_0$, we theoretically need to determine the values of both the state vector $\mathbf{x}(t_0)$ and its time derivative $\dot{\mathbf{x}}(t_0)$. If the system consists of $n$ equations with $n$ variables, there are a total of $2n$ unknowns involved in the initialization: the set $\{\mathbf{x}(t_0), \dot{\mathbf{x}}(t_0)\}$. Since we have $n$ equations, we nominally have $n$ degrees of freedom remaining.
 
-For an explicit ODE system where $\dot{\mathbf{x}} = \mathbf{h}(\mathbf{x}, t)$, this is straightforward. We arbitrarily choose/specify the initial state $\mathbf{x}(t_0)$, and the equations themselves immediately determine the derivative $\dot{\mathbf{x}}(t_0)$. However, DAEs include algebraic constraints that restrict the manifold on which the solution can exist. We cannot simply choose an arbitrary $\mathbf{x}(t_0)$ because it might violate the algebraic equations. Furthermore, DAEs often contain hidden or implicit constraints that restrict the derivatives as well. Generally, solving $\mathbf{f}=\mathbf{0}$ at $t_0$ provides $n$ constraints, so we must be careful to identify which of the $2n$ values can be freely specified.
+For an explicit ODE system where $\dot{\mathbf{x}} = \mathbf{h}(\mathbf{x}, t)$, this is straightforward. We specify the initial state $\mathbf{x}(t_0)$, and the equations themselves immediately determine the derivative $\dot{\mathbf{x}}(t_0)$. Our initial assumption might be that for a DAE in semi-explicit form, we similarly would specify the initial state $\mathbf{x}(t_0)$. However, we cannot simply choose an arbitrary $\mathbf{x}(t_0)$ because it might violate the algebraic equations. Algebraic constraints restrict the manifold on which the solution can exist. Furthermore, DAEs often contain hidden or \textbf{implicit constraints} that constrain values beyond the original set of governing equations. We must be careful to identify which of the initial values can actually be freely specified.
+
+
+\begin{definitionBox}
+\textbf{Definition (Implicit Constraint):} An \emph{implicit constraint} in a DAE is a relationship among the variables that is not explicitly stated in the original set of equations but emerges when differentiating algebraic constraints to reveal hidden dependencies. These constraints must be satisfied by the initial conditions to ensure consistency of the DAE solution. An index $k$ DAE contains \emph{at least} $k-1$ implicit constraints. As a heuristic, an index $k$ DAE will usually contain exactly $k-1$ implicit constraints, although exceptions exist.
+\end{definitionBox}
 
 \subsection{Consistent Initialization and Implicit Constraints}
 
@@ -559,25 +579,33 @@ To illustrate the complexity of consistent initialization, let us revisit the st
         c_2(t) &= \gamma(t)
     \end{aligned}
 \end{equation}
-We assume $\gamma(t)$ is sufficiently smooth near $t_0$ so that the required derivatives (e.g., $\dot\gamma(t_0)$) exist. At first glance, we might expect that only $c_2(t_0)$ needs to be specified or perhaps determined by the algebraic equation, while $c_1(t_0)$ is a free input variable. However, if we examine the discretized update equation (which a numerical solver would use to march forward), we see a dependency on the previous time step:
+We assume $\gamma(t)$ is sufficiently smooth near $t_0$ so that the required derivatives (e.g., $\dot\gamma(t_0)$) exist. If we examine the discretized update equation (which a numerical solver would use to march forward), we see a dependency on the previous time step:
 \begin{equation}
     c_1(t_{i+1}) = c_2(t_{i+1}) - c_1(t_i) + c_2(t_i) + \frac{2V}{Q\Delta t}(c_2(t_{i+1}) - c_2(t_i)) + O(\Delta t^2)
 \end{equation}
-To implement this numerical solution, we clearly need specific values for both $c_1(t_0)$ and $c_2(t_0)$ to initialize the loop. We cannot set these arbitrarily. We must obey the governing equations.
+To implement this numerical solution, we clearly need specific values for both $c_1(t_0)$ and $c_2(t_0)$ to initialize the loop. But can we set these arbitrarily?
 
-The algebraic equation explicitly fixes the second concentration:
+Clearly not. The algebraic equation explicitly constrains the second concentration:
 \begin{equation}
     c_2(t_0) = \gamma(t_0)
 \end{equation}
-However, because this constraint holds for all time ($c_2(t) = \gamma(t)$), its time derivative must also hold ($\dot{c}_2(t) = \dot{\gamma}(t)$). Substituting this hidden constraint into the differential equation reveals a constraint on $c_1$:
+Moreover, because this constraint holds for all time ($c_2(t) = \gamma(t)$), its time derivative must also hold ($\dot{c}_2(t) = \dot{\gamma}(t)$). Substituting this implicit constraint into the differential equation reveals a constraint on $c_1$:
 \begin{equation}
     \frac{dc_2}{dt} = \frac{d\gamma}{dt} = \frac{Q}{V}(c_1 - c_2) \implies c_1 = c_2 + \frac{V}{Q}\dot{\gamma} = \gamma + \frac{V}{Q}\dot{\gamma}
 \end{equation}
-Thus, $c_1(t_0)$ is not a degree of freedom; it is completely determined by the forcing function $\gamma(t)$ and its derivative. In this case, we actually have zero degrees of freedom. This aligns with the general heuristic that an index $k$ DAE implies at least $k-1$ implicit constraints.
+Thus, $c_1(t_0)$ cannot be freely specified either! It is completely determined by the forcing function $\gamma(t)$ and its derivative. In this DAE, we have zero degrees of freedom.
 
-Let us apply this logic to two practice examples to determine the degrees of freedom available for initialization.
+In general, we can summarize the process of determining consistent initialization as follows:
+\begin{enumerate}
+    \item Identify the total number of differential states ($n$) and algebraic states ($m$) in the DAE system. At $t_0$, a total of $2n+m$ values need to be specified: $\{ \mathbf{x}(t_0), \dot{\mathbf{x}}(t_0), \mathbf{y}(t_0) \}$. A well-posed DAE will typically have $n+m$ equations, leaving us with $n$ degrees of freedom before considering implicit constraints.
+    \item Determine the index of the DAE. For an index $k$ system, recognize that there are at least $k-1$ implicit constraints that must be uncovered by differentiating algebraic equations.
+    \item Differentiate the algebraic constraints as needed to reveal implicit constraints. As a tip, we can often find these constraints by examining the derivatives that arise during the identification of the DAE's index.
+    \item Now, with knowledge of implicit constraints, recalculate the degrees of freedom available for initialization. Analyze the full set of equations to determine which specific variables can be freely specified while satisfying all explicit and implicit constraints; even if we have $>0$ degrees of freedom to ``spend'', we must make sure we choose variables that are not already fixed by the constraints.
+\end{enumerate}
 
-\paragraph*{Index 1 DAE Example:} Consider the system:
+
+
+\begin{exampleBox} \textbf{Example Index 1 DAE Initialization:} Consider the system:
 \begin{equation}
     \begin{aligned}
         \dot{x}_1 + x_2 &= g_1(t) \\
@@ -588,9 +616,12 @@ We need to specify the set $\{\dot{x}_1(t_0), x_1(t_0), x_2(t_0)\}$, totaling 3 
 \begin{equation}
     \dot{x}_1(t_0) + x_2(t_0) = g_1(t_0) \quad \text{and} \quad x_2(t_0) = g_2(t_0)
 \end{equation}
-This leaves 1 degree of freedom (DoF). We must specify $x_1(t_0)$. Note that we can check for implicit constraints by differentiating the algebraic equation: $\dot{x}_2(t_0) = \dot{g}_2(t_0)$. However, neither of the original equations relies on $\dot{x}_2$, so this does not constrain our choices for $x_1$ or $\dot{x}_1$. Thus, $x_1(t_0)$ is the only value we can freely choose.
+This leaves 1 degree of freedom (DoF).  Note that we can check for implicit constraints by differentiating the algebraic equation: $\dot{x}_2(t_0) = \dot{g}_2(t_0)$. However, neither of the original equations relies on $\dot{x}_2$, so this does not constrain our choices for $x_1$ or $\dot{x}_1$. 
 
-\paragraph*{Index 3 DAE Example:} Now consider the familiar Index 3 system:
+Looking at the two original equations, we see that $x_2(t_0)$ and $\dot x_1(t_0)$ are already fully constrained. Thus, $x_1(t_0)$ is the only value we can freely choose with our one DoF.
+\end{exampleBox}
+
+\begin{exampleBox} \textbf{Example Index 3 DAE Initialization:}  Consider the now-familiar index 3 system:
 \begin{equation}
     \begin{aligned}
         (1) \quad \dot{x}_2 &= x_1 \\
@@ -598,15 +629,16 @@ This leaves 1 degree of freedom (DoF). We must specify $x_1(t_0)$. Note that we 
         (3) \quad x_3 &= \gamma(t)
     \end{aligned}
 \end{equation}
-Here, we must identify values for $\{\dot{x}_2, \dot{x}_3, x_2, x_3, x_1\}$ at $t_0$. To find the consistent initialization, we look at the derivatives generated while reducing the index. The algebraic constraint (3) immediately gives $x_3(t_0) = \gamma(t_0)$. Differentiating this once gives an implicit constraint on $x_2$:
+Here, we must identify values for $\{\dot{x}_2, \dot{x}_3, x_2, x_3, x_1\}$ at $t_0$. Because this is an index 3 problem, we know there are at least 2 implicit constraints. To find them, we look at the derivatives generated while obtaining the index, which are also the equations used when trying to reduce the index through the method of auxiliary variables. Differentiating the algebraic constraint (3) once gives an implicit constraint on $x_2$ when combined with (2):
 \begin{equation}
     \dot{x}_3 = \dot{\gamma}(t) \implies x_2(t_0) = \dot{\gamma}(t_0)
 \end{equation}
-Differentiating again gives an implicit constraint on $x_1$:
+Differentiating again and combining with (1) gives an implicit constraint on $x_1$:
 \begin{equation}
     \dot{x}_2 = \ddot{\gamma}(t) \implies x_1(t_0) = \ddot{\gamma}(t_0)
 \end{equation}
-Consequently, the values of $x_3(t_0)$, $x_2(t_0)$, and $x_1(t_0)$ are all fixed by the external forcing function $\gamma(t)$ and its derivatives. There are no degrees of freedom left for the user to specify, despite the appearance of multiple variables. We possess at least two implicit constraints corresponding to the repeated differentiation required to reduce the index.
+With five initial values to specify and three explicit equations, we start with $5 - 3 = 2$ degrees of freedom, which are then fully consumed by the two implicit constraints we uncovered. Consequently, the values of $x_3(t_0)$, $x_2(t_0)$, and $x_1(t_0)$ are all fixed by the external forcing function $\gamma(t)$ and its derivatives. There are no degrees of freedom left for us to specify, despite the appearance of multiple (differential) variables.
+\end{exampleBox}
 
 \paragraph*{Aside: Unusual Constraint Structures}
 
@@ -625,9 +657,16 @@ This system behaves as a DAE despite appearing to be a system of implicit ODEs.
 
 \paragraph*{Practical Comments on Solvers}
 
-When using numerical software, consistent initialization is non-negotiable. For example, MATLAB's \texttt{ode15i} (for fully implicit problems of the form $F(t,y,y')=0$) requires the user to provide both $y(t_0)$ and $y'(t_0)$, and these must satisfy $F(t_0,y(t_0),y'(t_0))=0$. If the supplied values are inconsistent, the nonlinear solve at the initial step can fail (e.g., due to lack of convergence or step-size reduction). MATLAB therefore provides \texttt{decic} to compute consistent initial conditions close to user-provided guesses; \texttt{decic} can itself fail to converge, in which case consistent values must be determined by additional analysis of the model.
+When using numerical software, consistent initialization is non-negotiable. For example, MATLAB's \texttt{ode15i} (for fully implicit problems of the form $F(t,y,y')=0$) requires the user to provide both $y(t_0)$ and $y'(t_0)$, and these must satisfy $F(t_0,y(t_0),y'(t_0))=0$. If the supplied values are inconsistent, the nonlinear solve at the initial step can fail (e.g., due to lack of convergence or step-size reduction). MATLAB therefore provides a helper function \texttt{decic} to compute consistent initial conditions close to user-provided guesses; \texttt{decic} can itself fail to converge, in which case consistent values must be determined by additional analysis of the model.
 
-\emph{(Please see slides for the index 2 example showing some of these methods in practice; uploading this book without that example for now.)}
+\emph{(Please see slides for the index 2 example showing some of these methods in practice; uploading this book without that example for now.)} % TODO: finish showing examples
+
+\section{Simulation of Mixed Continuous-Discrete Systems}
+Many real-world systems exhibit both continuous dynamics (described by DAEs) and discrete events (instantaneous changes in state or structure), such as when a valve becomes fully open or fully closed, a tank becomes full or runs dry, a safety interlock system kicks in, or the number of fluid phases changes in a tank. Discrete changes in the dynamic equations for the system can occur implicitly as well, and ignoring these changes can lead to incorrect results that arbitrarily deviate from reality. 
+
+If we know in advance when a discrete change is going to occur, such as a valve being opened, we can divide the full time interval of interest into sub-intervals where the system dynamics are continuous and solve each sub-interval separately, passing the final state of one interval as the initial condition for the next. Each of the sub-interval can be treated as a standard DAE simulation problem. 
+
+In many cases, discrete events occur when certain conditions are met, such as a tank reaching a certain level or pressure, or a temperature exceeding a threshold. In these cases, we need to monitor the system during simulation to detect when these events occur. A simulator for mixed discrete-continuous simulations will continually track all possible events that can occur during the numerical simulation and, once an event has been detected, will iterate the time to determine the precise $t^*$ at which the event has occurred. The simulator will then re-initialize the DAE system at $t^*$, applying any discrete changes to the system equations or states, and continue the simulation from that point onward.
 
 \section{Exercises}
 
