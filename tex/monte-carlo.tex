@@ -294,11 +294,11 @@ This value $x$ is our sample drawn from the distribution $p(x)$.
 
 Why does this work? The CDF $F(x)$ maps $x$-values to probabilities in $[0,1]$. Since it's monotonically increasing, its inverse $F^{-1}(u)$ exists and maps uniform probabilities from $[0,1]$ back to $x$-values. We can show this formally by checking the cumulative probability of our generated sample $x$:
 \begin{equation}
-    P(x \leq a) = P(F^{-1}(u) \leq a)
+    \Pr(x \leq a) = \Pr(F^{-1}(u) \leq a)
 \end{equation}
 Applying $F$ to both sides of the inequality (which preserves the relation since $F$ is increasing), we get
 \begin{equation}
-    P(u \leq F(a)) = F(a)
+    \Pr(u \leq F(a)) = F(a)
 \end{equation}
 The final equality holds because $u$ is uniform on $[0,1]$, so the probability of $u$ being less than some value $v$ is simply $v$. Since the resulting sample $x$ has the cumulative distribution $F(a)$, it must be distributed according to the original density $p(x)$.\footnote{This argument assumes $F$ is strictly increasing so that $F^{-1}$ is well-defined. For distributions with flat regions or discrete jumps, we define $F^{-1}(u)$ as the smallest $x$ with $F(x) \geq u$, which still works.}
 
@@ -470,13 +470,13 @@ Both the inverse transform method and rejection sampling are generally impractic
 \subsection{Markov Chains}
 A sequence of random variables $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3, \ldots, \mathbf{x}_M$ forms a Markov chain if the probability of each state depends only on the immediately preceding state. In general, the joint probability of a sequence factors as
 \begin{equation}
-    P(\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3, \ldots, \mathbf{x}_M) = P(\mathbf{x}_1) P(\mathbf{x}_2|\mathbf{x}_1) P(\mathbf{x}_3|\mathbf{x}_2, \mathbf{x}_1) \cdots P(\mathbf{x}_M|\mathbf{x}_{M-1}, \ldots, \mathbf{x}_2, \mathbf{x}_1)
+    \Pr(\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3, \ldots, \mathbf{x}_M) = \Pr(\mathbf{x}_1) \Pr(\mathbf{x}_2|\mathbf{x}_1) \Pr(\mathbf{x}_3|\mathbf{x}_2, \mathbf{x}_1) \cdots \Pr(\mathbf{x}_M|\mathbf{x}_{M-1}, \ldots, \mathbf{x}_2, \mathbf{x}_1)
 \end{equation}
 The sequence is a Markov chain if it satisfies the Markov property:
 \begin{equation}
-    P(\mathbf{x}_i|\mathbf{x}_{i-1}, \ldots, \mathbf{x}_2, \mathbf{x}_1) = P(\mathbf{x}_i|\mathbf{x}_{i-1}), \quad i = 2, 3, \ldots, M
+    \Pr(\mathbf{x}_i|\mathbf{x}_{i-1}, \ldots, \mathbf{x}_2, \mathbf{x}_1) = \Pr(\mathbf{x}_i|\mathbf{x}_{i-1}), \quad i = 2, 3, \ldots, M
 \end{equation}
-The conditional probability $P(\mathbf{x}_i|\mathbf{x}_{i-1})$ describes the likelihood of observing a value $\mathbf{x}_i$ at step $i$ given the value $\mathbf{x}_{i-1}$ at step $i-1$. The future depends only on the present, not on the past.
+The conditional probability $\Pr(\mathbf{x}_i|\mathbf{x}_{i-1})$ describes the likelihood of observing a value $\mathbf{x}_i$ at step $i$ given the value $\mathbf{x}_{i-1}$ at step $i-1$. The future depends only on the present, not on the past.
 
 Markov chains appear throughout science. The panels in \autoref{fig:markov-examples} give two such cases. \autoref{fig:markov-examples-a} shows a discrete-state chain used for disease progression: the chain moves between Healthy and Sick with the indicated transition probabilities, and the state Dead is absorbing (once entered, it cannot be left). \autoref{fig:markov-examples-b} shows a continuous-state process (Brownian motion): the next position depends only on the current position. Formally,
 \begin{equation}
@@ -579,9 +579,9 @@ where $\alpha$ is the diffusion coefficient. Both panels highlight the Markov pr
     \label{fig:markov-examples}
 \end{figure}
 
-The conditional probability $P(\mathbf{x}_i|\mathbf{x}_{i-1})$ is the transition probability density that governs movement between states $\mathbf{x}_{i-1}$ and $\mathbf{x}_i$. If this transition probability is independent of $i$, the Markov chain is homogeneous. For a homogeneous chain, we write the transition probability as
+The conditional probability $\Pr(\mathbf{x}_i|\mathbf{x}_{i-1})$ is the transition probability density that governs movement between states $\mathbf{x}_{i-1}$ and $\mathbf{x}_i$. If this transition probability is independent of $i$, the Markov chain is homogeneous. For a homogeneous chain, we write the transition probability as
 \begin{equation}
-    P(\mathbf{x}_i|\mathbf{x}_{i-1}) = T(\mathbf{x}_i, \mathbf{x}_{i-1})
+    \Pr(\mathbf{x}_i|\mathbf{x}_{i-1}) = T(\mathbf{x}_i, \mathbf{x}_{i-1})
 \end{equation}
 where $T(\mathbf{x}, \mathbf{y})$ is the probability density for transitioning from state $\mathbf{y}$ to state $\mathbf{x}$. For a homogeneous Markov chain, we can define a stationary distribution (also called an invariant distribution) $\pi(\mathbf{x})$ that represents the steady state of the chain. This is the distribution that remains unchanged under the action of the transition probability:
 \begin{equation}
@@ -589,19 +589,19 @@ where $T(\mathbf{x}, \mathbf{y})$ is the probability density for transitioning f
 \end{equation}
 If the chain starts from the stationary distribution, it stays in that distribution. Under mild ergodicity assumptions (irreducibility and aperiodicity, which we'll discuss momentarily), the distribution of $\mathbf{x}_i$ converges to this stationary distribution regardless of the starting point, making it the limiting distribution of the chain.
 
-To understand this convergence, consider how the distribution evolves. If we start with some initial distribution $P(\mathbf{x}_1)$ and apply the transition probability, we get the distribution at step 2:
+To understand this convergence, consider how the distribution evolves. If we start with some initial distribution $\Pr(\mathbf{x}_1)$ and apply the transition probability, we get the distribution at step 2:
 \begin{equation}
-    P(\mathbf{x}_2) = \int_{\Omega} T(\mathbf{x}_2, \mathbf{x}_1) P(\mathbf{x}_1) \, d\mathbf{x}_1
+    \Pr(\mathbf{x}_2) = \int_{\Omega} T(\mathbf{x}_2, \mathbf{x}_1) \Pr(\mathbf{x}_1) \, d\mathbf{x}_1
 \end{equation}
 Applying the transition again gives
 \begin{equation}
-    P(\mathbf{x}_3) = \int_{\Omega} T(\mathbf{x}_3, \mathbf{x}_2) P(\mathbf{x}_2) \, d\mathbf{x}_2
+    \Pr(\mathbf{x}_3) = \int_{\Omega} T(\mathbf{x}_3, \mathbf{x}_2) \Pr(\mathbf{x}_2) \, d\mathbf{x}_2
 \end{equation}
 Repeated application of the transition probability causes the distribution to converge:
 \begin{equation}
-    \pi(\mathbf{x}) = \lim_{M \to \infty} P(\mathbf{x}_M) = \lim_{M \to \infty} \int_{\Omega} T(\mathbf{x}, \mathbf{y}) P_M(\mathbf{y}) \, d\mathbf{y} = \int_{\Omega} T(\mathbf{x}, \mathbf{y}) \pi(\mathbf{y}) \, d\mathbf{y}
+    \pi(\mathbf{x}) = \lim_{M \to \infty} \Pr(\mathbf{x}_M) = \lim_{M \to \infty} \int_{\Omega} T(\mathbf{x}, \mathbf{y}) P_M(\mathbf{y}) \, d\mathbf{y} = \int_{\Omega} T(\mathbf{x}, \mathbf{y}) \pi(\mathbf{y}) \, d\mathbf{y}
 \end{equation}
-The remarkable fact is that the chain converges to $\pi(\mathbf{x})$ without us needing explicit knowledge of $\pi(\mathbf{x})$ beforehand. We only need to construct a transition probability $T(\mathbf{x}, \mathbf{y})$ that has $\pi(\mathbf{x})$ as its limiting distribution. In fact, this observation is the key to MCMC. If we can design a Markov chain whose limiting distribution is the target distribution $P(\mathbf{x})$ we want to sample from, then running the chain long enough will produce samples from $P(\mathbf{x})$. But how do we construct such a transition probability?
+The remarkable fact is that the chain converges to $\pi(\mathbf{x})$ without us needing explicit knowledge of $\pi(\mathbf{x})$ beforehand. We only need to construct a transition probability $T(\mathbf{x}, \mathbf{y})$ that has $\pi(\mathbf{x})$ as its limiting distribution. In fact, this observation is the key to MCMC. If we can design a Markov chain whose limiting distribution is the target distribution $\Pr(\mathbf{x})$ we want to sample from, then running the chain long enough will produce samples from $\Pr(\mathbf{x})$. But how do we construct such a transition probability?
 
 The answer lies in a condition called detailed balance. A sufficient condition for $\pi(\mathbf{x})$ to be a stationary distribution (and therefore the unique limiting distribution if the chain is also irreducible and aperiodic) is that the transition probability satisfies the detailed balance
 \begin{equation}
@@ -818,7 +818,7 @@ The Metropolis acceptance probability for a symmetric proposal $\boldsymbol{\the
 The acceptance probability depends only on the change in the weighted sum of squared errors and the ratio of the prior. If the prior is uniform, $p(\boldsymbol{\theta}^*) = p(\boldsymbol{\theta}_i)$, it depends only on the change in $\chi^2$. Once we have run the chain and collected samples $\{\boldsymbol{\theta}_i\}$, we can do much more than just find the mean. We can ask/answer any question about the posterior distribution:
 \begin{itemize}
     \item Marginalization: To find $p(\theta_1|\mathcal{D})$, we simply make a histogram of the $\theta_1$ components of all our samples.
-    \item Credible intervals: What is the probability that a parameter $\theta_j$ is in a certain region $\Omega$? We just count the samples: $P(\theta_j \in \Omega) \approx \frac{1}{M} \sum_{i=1}^M \mathbb{I}(\theta_{i,j} \in \Omega)$, where $\mathbb{I}$ is the indicator function.
+    \item Credible intervals: What is the probability that a parameter $\theta_j$ is in a certain region $\Omega$? We just count the samples: $\Pr(\theta_j \in \Omega) \approx \frac{1}{M} \sum_{i=1}^M \mathbb{I}(\theta_{i,j} \in \Omega)$, where $\mathbb{I}$ is the indicator function.
     \item Prediction: What value $y$ might we measure for a new input $x$? We can generate a predictive distribution by taking each sample $\boldsymbol{\theta}_i$ and drawing a corresponding $y$ from the model: $y_i = g(x; \boldsymbol{\theta}_i) + \epsilon_i$, where $\epsilon_i$ is drawn from the measurement noise. The histogram of $\{y_i\}$ shows our full prediction.
 \end{itemize}
 

@@ -1,10 +1,14 @@
 \chapter{Probability}
-Many processes are not deterministic. Factors such as molecular fluctuations, measurement inaccuracies, and turbulent flow introduce inherent randomness to physical observables. To model, simulate, and design systems under these conditions, we need a strong understanding of probability theory. This chapter provides a foundation in the principles of probability, random variables, and distributions that we will need for the numerical methods discussed later on in this book.
+Many processes are not deterministic. Factors such as molecular fluctuations, measurement inaccuracies, and turbulent flow introduce inherent randomness to physical observables. At the microscale, events like chemical reactions are the result of stochastic collisions between molecules. Even at the macroscale, uncertainties in parameter values (e.g., reaction rates, heat transfer coefficients) and external disturbances (e.g., feed composition variations, environmental changes) lead to stochastic system behavior. Uncertainty in values propagate through models, leading to uncertainty in predictions. 
+
+To model, simulate, and design systems under these conditions, we need a basic understanding of probability theory. This chapter provides a foundation in the principles of probability, random variables, and distributions that we will need for the numerical methods discussed later on in this book. While not exhaustive, this chapter covers the essential concepts and tools required to be mathematically precise about uncertainty and randomness in engineering contexts.
 
 \section{Events, Sample Spaces, and Axioms}
-An \textbf{experiment} is any process with a well-defined set of outcomes. The set of all possible outcomes is the \textbf{sample space}, denoted by $\mathcal{E}$. For the simple experiment of rolling a standard six-sided die, the sample space is a discrete set of six \textbf{outcomes}: $\mathcal{E} = \{1, 2, 3, 4, 5, 6\}$. For a more complex experiment, like measuring a reactor's temperature in Kelvin, the sample space is continuous: $\mathcal{E} = [0,\infty)$ K. A single performance of an experiment is called a \textbf{trial}.
+An \textbf{experiment} is any process with a well-defined set of outcomes. The set of all possible outcomes is the \textbf{sample space}, denoted by $\mathcal{E}$. For the simple experiment of rolling a standard six-sided die, the sample space is a discrete set of six \textbf{outcomes}: $\mathcal{E} = \{1, 2, 3, 4, 5, 6\}$. For a more complex experiment, like measuring a reactor's temperature in Kelvin, the sample space is continuous: $\mathcal{E} = (0,\infty)$ K. A single performance of an experiment is called a \textbf{trial}. If we run one trial, we will observe one outcome.
 
-We are usually interested in more than just single outcomes. An \textbf{event} is any subset of the sample space ($A \subseteq \mathcal{E}$). For our die roll, the event ``the outcome is even'' corresponds to the subset $A = \{2, 4, 6\}$. For the temperature measurement, the event ``the reactor is between 350 K and 360 K'' is $A = [350, 360]$ K. This framework allows us to define the phenomena whose likelihood we want to quantify.  We often describe complex situations by combining events using the language of set theory. The \textbf{intersection} of two events, $A \cap B$, represents the event where \textit{both} A and B occur (``A and B''). The \textbf{union}, $A \cup B$, represents the outcome where \textit{at least one} of the events occurs (``A or B''). For example, going back to the temperature measurement example, if we define events $A = (300, \infty)$ K and $B = [0, 400)$ K, then their intersection is the event that the temperature is between 300 and 400 K, and their union is the event that the temperature is greater than 0 K. In mathematical notation, these are $A \cap B = (300, 400)$ K and $A \cup B = [0, \infty)$ K, respectively.
+We are usually interested in more than just single outcomes. An \textbf{event} is any subset of the sample space ($A \subseteq \mathcal{E}$). For our die roll, the event ``the outcome is even'' corresponds to the subset $A = \{2, 4, 6\}$. For the temperature measurement, the event ``the reactor is between 350 K and 360 K'' is $A = [350, 360]$ K. This framework allows us to define the phenomena whose likelihood we want to quantify. 
+
+We often describe complex situations by combining events using the language of set theory. The \textbf{intersection} of two events, $A \cap B$, represents the event where \textit{both} A and B occur (``A and B''). The \textbf{union}, $A \cup B$, represents the outcome where \textit{at least one} of the events occurs (``A or B''). For example, if we define events $A = (300, \infty)$ K and $B = [0, 400)$ K, then their intersection is the event that the temperature is between 300 and 400 K, and their union is the event that the temperature is greater than 0 K. In mathematical notation, these are $A \cap B = (300, 400)$ K and $A \cup B = [0, \infty)$ K, respectively.
 
 \begin{figure}[h]
     \centering
@@ -67,40 +71,40 @@ We are usually interested in more than just single outcomes. An \textbf{event} i
     \label{fig:venn-probability}
 \end{figure}
 
-The probability of an event $A$, denoted $P(A)$, is a number in $[0,1]$ that quantifies its likelihood. A useful way to estimate $P(A)$ is via long-run frequency: if we repeat an experiment $N$ times under identical conditions and $A$ occurs $N_A$ times, then $N_A/N$ is an estimate of $P(A)$. In idealized settings, according to the strong law of large numbers, this converges to the true probability as $N \to \infty$:
+The probability of an event $A$, denoted $\Pr(A)$ or $P(A)$ or $\mathbb{P}(A)$, is a number in $[0,1]$ that quantifies its likelihood. A useful way to estimate $\Pr(A)$ is via long-run frequency: if we repeat an experiment $N$ times under identical conditions and $A$ occurs $N_A$ times, then $N_A/N$ is an estimate of $\Pr(A)$. In idealized settings, according to the strong law of large numbers, this converges to the true probability as $N \to \infty$:
 \begin{equation}
-    P(A) = \lim_{N\to\infty} \frac{N_A}{N}
+    \Pr(A) = \lim_{N\to\infty} \frac{N_A}{N} % TODO: replace all P with \Pr
     \label{eq:prob-limit}
 \end{equation}
-We'll use this frequentist picture for intuition and for simulation results.\footnote{Other interpretations of what ``probability'' means exist. For example, the Bayesian view treats probability as a degree of belief that is updated by data via Bayes' rule. Still, both views use the same axioms and lead to the same calculations for this course.} To avoid circularity, we do not \emph{define} probability by the limit in \autoref{eq:prob-limit}\footnote{This is a bit of a nuance that is not of real consequence to us in 10.34.}. Instead, we take $P(\cdot)$ as a primitive that must obey a few simple rules. These are Kolmogorov's axioms and are listed below.
+We'll use this frequentist picture for intuition and for simulation results.\footnote{Other interpretations of what ``probability'' means exist. For example, the Bayesian view treats probability as a degree of belief that is updated by data via Bayes' rule. Still, both views use the same axioms and lead to the same calculations for this course.} To avoid circularity, we do not \emph{define} probability by the limit in \autoref{eq:prob-limit}\footnote{This is a bit of a nuance that is not of real consequence to us in 10.34.}. Instead, we take $\Pr(\cdot)$ as a primitive that must obey a few simple rules. These are Kolmogorov's axioms and are listed below.
 \begin{definitionBox}
     \textbf{The Axioms of Probability}
     For any events $A_i$ within a sample space $\mathcal{E}$:
     \begin{enumerate}
         \item \textbf{Non-negativity:} The probability of any event is non-negative.
         \begin{equation}
-            P(A) \ge 0
+            \Pr(A) \ge 0
         \end{equation}
         \item \textbf{Unity:} The probability of the entire sample space is 1. Some outcome must occur.
         \begin{equation}
-            P(\mathcal{E}) = 1
+            \Pr(\mathcal{E}) = 1
         \end{equation}
         \item \textbf{Additivity:} If events $\{A_i\}_{i=1}^\infty$ are pairwise disjoint,
         \begin{equation}
-          P\!\left(\bigcup_{i=1}^\infty A_i\right)=\sum_{i=1}^\infty P(A_i)
+          \Pr\!\left(\bigcup_{i=1}^\infty A_i\right)=\sum_{i=1}^\infty \Pr(A_i)
         \end{equation}
-        For example, if two events are mutually exclusive (i.e., they cannot both occur, $A \cap B = \emptyset$), the probability that either one occurs is  the sum of their individual probabilities: $P(A \cup B) = P(A) + P(B)$. To help visualize this, one can think of this two-event, mutually exclusive case as a figure similar to \autoref{fig:venn-union} but with the two circles non-overlapping. To get the total area of the two circles, the areas can just be added. The non-mutually exlusive case is covered by the law of total probability later on.
+        For example, if two events are mutually exclusive (i.e., they cannot both occur, $A \cap B = \emptyset$), the probability that either one occurs is  the sum of their individual probabilities: $\Pr(A \cup B) = \Pr(A) + \Pr(B)$. To help visualize this, one can think of this two-event, mutually exclusive case as a figure similar to \autoref{fig:venn-union} but with the two circles non-overlapping. To get the total area of the two circles, the areas can just be added. The non-mutually exlusive case is covered by the law of total probability later on.
     \end{enumerate}
 \end{definitionBox}
-Note that from these axioms, we immediately have that (1) the probability of the complement of an event $A^{c}$ (the event that $A$ does not occur) is $P(A^{c}) = 1 - P(A)$, and (2) $P(\emptyset) = 0$.
+Note that from these axioms, we immediately have that (1) the probability of the complement of an event $A^{c}$ (the event that $A$ does not occur) is $\Pr(A^{c}) = 1 - \Pr(A)$, and (2) $\Pr(\emptyset) = 0$.
     
 
 \section{Conditional Probability and Independence}
 The axioms of probability describe static situations. However, we often need to update our assessment of an event's likelihood in light of new information. The framework for this is \textbf{conditional probability}.
 
-The conditional probability of event $A$ occurring given that event $B$ has occurred is denoted $P(A \mid B)$. Intuitively, knowing that $B$ has happened restricts our sample space from $\mathcal{E}$ to just the outcomes in $B$. The probability of $A$ is then the fraction of this new, smaller sample space that is also occupied by $A$ (\autoref{fig:cond-prob}). This intuition is formalized by the definition:
+The conditional probability of event $A$ occurring given that event $B$ has occurred is denoted $\Pr(A \mid B)$. Intuitively, knowing that $B$ has happened restricts our sample space from $\mathcal{E}$ to just the outcomes in $B$. The probability of $A$ is then the fraction of this new, smaller sample space that is also occupied by $A$ (\autoref{fig:cond-prob}). This intuition is formalized by the definition:
 \begin{equation}
-    P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad \text{provided } P(B) > 0
+    \Pr(A \mid B) = \frac{\Pr(A \cap B)}{\Pr(B)}, \quad \text{provided } \Pr(B) > 0
     \label{eq:cond-prob}
 \end{equation}
 
@@ -127,119 +131,119 @@ The conditional probability of event $A$ occurring given that event $B$ has occu
     
         % --- legend boxes ---
         \foreach \col/\txt/\y in {
-            cyan!35/$P(A)$/1.10,
-            green!35/$P(B)$/0.55,
-            red!60/$P(A\cap B)$/0.00
+            cyan!35/$\Pr(A)$/1.10,
+            green!35/$\Pr(B)$/0.55,
+            red!60/$\Pr(A\cap B)$/0.00
         }{
         \fill[\col,draw=black] (4.15,\y) rectangle +(0.42,0.42);
         \node[anchor=west] at (4.65,\y+0.21) {\txt};
         }
         % % --- formula and caption ---
-        % \node[anchor=west,align=left] at (7.15,.5) {$P(A\mid B)=\dfrac{P(A\cap B)}{P(B)}$\\[2pt]
+        % \node[anchor=west,align=left] at (7.15,.5) {$\Pr(A\mid B)=\dfrac{\Pr(A\cap B)}{\Pr(B)}$\\[2pt]
         % (restrict sample space to $B$ since it's given)};
     
     \end{tikzpicture}
-    \caption{When we condition on $B$, the sample space is restricted to just the $B$ circle, so the probability of $A$ given $B$ is $P(A\mid B)=P(A\cap B)/P(B)$}
+    \caption{When we condition on $B$, the sample space is restricted to just the $B$ circle, so the probability of $A$ given $B$ is $\Pr(A\mid B)=\Pr(A\cap B)/\Pr(B)$}
     \label{fig:cond-prob}
 \end{figure}
 
 The formula in \autoref{eq:cond-prob} is one of the most important in all of probability. By rearranging it, we get the multiplication rule:
 \begin{equation}
-    P(A \cap B) = P(A \mid B)P(B)
+    \Pr(A \cap B) = \Pr(A \mid B)\Pr(B)
     \label{eq:mult-rule}
 \end{equation}
 
 \begin{exampleBox}
-    \textbf{Example (Rolling a Die)}: Let's roll a standard six-sided die, so $\mathcal{E} = \{1, 2, 3, 4, 5, 6\}$. Let $A$ be the event of rolling a 3, so $A=\{3\}$, and $B$ be the event of rolling an odd number, so $B=\{1, 3, 5\}$. The unconditional probability is clearly $P(A) = 1/6$. Now, suppose we are told the roll was odd (event $B$). What is the new probability of $A$? The intersection is $A \cap B = \{3\}$, with $P(A \cap B)=1/6$. The probability of our condition is $P(B)=3/6 = 1/2$. Using \autoref{eq:cond-prob}, 
+    \textbf{Example (Rolling a Die)}: Let's roll a standard six-sided die, so $\mathcal{E} = \{1, 2, 3, 4, 5, 6\}$. Let $A$ be the event of rolling a 3, so $A=\{3\}$, and $B$ be the event of rolling an odd number, so $B=\{1, 3, 5\}$. The unconditional probability is clearly $\Pr(A) = 1/6$. Now, suppose we are told the roll was odd (event $B$). What is the new probability of $A$? The intersection is $A \cap B = \{3\}$, with $\Pr(A \cap B)=1/6$. The probability of our condition is $\Pr(B)=3/6 = 1/2$. Using \autoref{eq:cond-prob}, 
     \begin{equation}
-        P(A \mid B) = \frac{P(A \cap B)}{P(B)} = \frac{1/6}{3/6} = \frac{1}{3}
+        \Pr(A \mid B) = \frac{\Pr(A \cap B)}{\Pr(B)} = \frac{1/6}{3/6} = \frac{1}{3}
     \end{equation}
     This matches our intuition: once we know the number is odd, there are only three possibilities (1, 3, or 5), each equally likely, so the chance of it being a 3 is $1/3$. Our belief was updated by the new information.
 \end{exampleBox}
 
 When the occurrence of one event gives us no information about another, we say the events are \textbf{independent}. We define independence via the product rule:
 \begin{equation}
-    \text{$A$ and $B$ are independent} \iff P(A \cap B) = P(A)\,P(B)
+    \text{$A$ and $B$ are independent} \iff \Pr(A \cap B) = \Pr(A)\,\Pr(B)
     \label{eq:prob-independence}
 \end{equation}
-When $P(B)>0$, this is equivalent to the conditional statement $P(A\mid B)=P(A)$ (and conversely, $P(A\mid B)=P(A)$ together with $P(B)>0$ implies \autoref{eq:prob-independence}). This property extends to any number of \emph{mutually independent} events. Specifically, events $A_1,\dots,A_N$ are mutually independent if for every nonempty subset $\mathcal{I}\subseteq\{1,\dots,N\}$,
+When $\Pr(B)>0$, this is equivalent to the conditional statement $\Pr(A\mid B)=\Pr(A)$ (and conversely, $\Pr(A\mid B)=\Pr(A)$ together with $\Pr(B)>0$ implies \autoref{eq:prob-independence}). This property extends to any number of \emph{mutually independent} events. Specifically, events $A_1,\dots,A_N$ are mutually independent if for every nonempty subset $\mathcal{I}\subseteq\{1,\dots,N\}$,
 \begin{equation}
-    P\!\Big(\bigcap_{i\in \mathcal{I}} A_i\Big) = \prod_{i\in \mathcal{I}} P(A_i)
+    P\!\Big(\bigcap_{i\in \mathcal{I}} A_i\Big) = \prod_{i\in \mathcal{I}} \Pr(A_i)
 \end{equation}
-For example, $P(A\cap B\cap C)=P(A)P(B)P(C)$ holds when $A,B,C$ are mutually independent.
+For example, $\Pr(A\cap B\cap C)=\Pr(A)\Pr(B)\Pr(C)$ holds when $A,B,C$ are mutually independent.
 
 \begin{warningBox}
-    \textbf{Warning:} Pairwise independence (every pair independent) does not, in general, imply mutual independence! Here's an example: Toss two fair coins. Let $A=\{\text{first is H}\}$, $B=\{\text{second is H}\}$, and $C=\{\text{coins show the same face}\}$. Then $P(A)=P(B)=P(C)=1/2$ and each pair is independent (e.g., $P(A\cap B)=1/4=P(A)P(B)$, $P(A\cap C)=1/4=P(A)P(C)$, $P(B\cap C)=1/4=P(B)P(C)$), but $P(A\cap B\cap C)=1/4 \neq P(A)P(B)P(C)=1/8$, so $A,B,C$ are pairwise independent yet not mutually independent.
+    \textbf{Warning:} Pairwise independence (every pair independent) does not, in general, imply mutual independence! Here's an example: Toss two fair coins. Let $A=\{\text{first is H}\}$, $B=\{\text{second is H}\}$, and $C=\{\text{coins show the same face}\}$. Then $\Pr(A)=\Pr(B)=\Pr(C)=1/2$ and each pair is independent (e.g., $\Pr(A\cap B)=1/4=\Pr(A)\Pr(B)$, $\Pr(A\cap C)=1/4=\Pr(A)\Pr(C)$, $\Pr(B\cap C)=1/4=\Pr(B)\Pr(C)$), but $\Pr(A\cap B\cap C)=1/4 \neq \Pr(A)\Pr(B)\Pr(C)=1/8$, so $A,B,C$ are pairwise independent yet not mutually independent.
 \end{warningBox}
 
 \begin{exampleBox}
     \textbf{Example (Independent Safety Valves)}: A process has three independent safety valves. Each valve has a 5\% chance of being defective. What is the probability that at least one valve is defective?
 
-    Let $D_i$ be the event that valve $i$ is defective. We are given $P(D_i) = 0.05$. The event that a valve works correctly, $W_i$, is the complement, so $P(W_i) = 1 - P(D_i) = 0.95$.
+    Let $D_i$ be the event that valve $i$ is defective. We are given $\Pr(D_i) = 0.05$. The event that a valve works correctly, $W_i$, is the complement, so $\Pr(W_i) = 1 - \Pr(D_i) = 0.95$.
 
     Calculating the probability of ``at least one defective'' directly is complicated (one fails, or two fail, or all three fail). It is far easier to calculate the probability of the complement event: ``all three valves work correctly.'' Since the valves are independent, we can use \autoref{eq:prob-independence}:
     \begin{equation}
-        P(W_1 \cap W_2 \cap W_3) = P(W_1)P(W_2)P(W_3) = (0.95)^3 \approx 0.8574
+        \Pr(W_1 \cap W_2 \cap W_3) = \Pr(W_1)\Pr(W_2)\Pr(W_3) = (0.95)^3 \approx 0.8574
     \end{equation}
     The event ``at least one valve is defective'' is the complement of ``all three valves work correctly.'' Therefore, its probability is
     \begin{equation}
-        P(\text{at least one defective}) = 1 - P(\text{all work}) = 1 - 0.8574 = 0.1426
+        \Pr(\text{at least one defective}) = 1 - \Pr(\text{all work}) = 1 - 0.8574 = 0.1426
     \end{equation}
     So, there is a 14.26\% chance that the system has at least one point of failure.
 \end{exampleBox}
 
 \subsection{Law of Total Probability}
-It is often the case that we might not know $P(B)$ directly, but we can compute the conditional probabilities $P(B \mid A_j)$ and $P(A_j)$ for each $j$. In this case, we can use the law of total probability to compute $P(B)$. Let $\{A_j\}_{j=1}^m$ be a pairwise disjoint ($A_j \cap A_k = \emptyset$ for $j\neq k$) and collectively exhaustive ($\bigcup_{j=1}^m A_j = \mathcal{E}$) partition of the sample space $\mathcal{E}$ with $P(A_j)>0$. For any event $B$,
+It is often the case that we might not know $\Pr(B)$ directly, but we can compute the conditional probabilities $\Pr(B \mid A_j)$ and $\Pr(A_j)$ for each $j$. In this case, we can use the law of total probability to compute $\Pr(B)$. Let $\{A_j\}_{j=1}^m$ be a pairwise disjoint ($A_j \cap A_k = \emptyset$ for $j\neq k$) and collectively exhaustive ($\bigcup_{j=1}^m A_j = \mathcal{E}$) partition of the sample space $\mathcal{E}$ with $\Pr(A_j)>0$. For any event $B$,
 \begin{equation}
-    P(B) = \sum_{j=1}^m P\!\left(B \mid A_j\right)\,P(A_j)
+    \Pr(B) = \sum_{j=1}^m P\!\left(B \mid A_j\right)\,\Pr(A_j)
     \label{eq:ltp-events}
 \end{equation}
 
 % MC: commenting this out since RVs haven't been discussed yet, and probably jut the above is clear enough
 % Equivalently, let $\mathsf{s}$ be a discrete random variable with support $\mathcal{S}=\{s_1,\dots,s_m\}$ (or countable). Then
 % \begin{equation}
-%   P(B) = \sum_{s\in\mathcal{S}} P\!\left(B \mid \mathsf{s}=s\right)\,P(\mathsf{s}=s)
+%   \Pr(B) = \sum_{s\in\mathcal{S}} P\!\left(B \mid \mathsf{s}=s\right)\,\Pr(\mathsf{s}=s)
 % \end{equation}
 % If $\mathsf{s}$ is continuous with density $p_{\mathsf{s}}(s)$ supported on $\mathcal{S}\subseteq\mathbb{R}^d$, the sum becomes an integral over the support:
 % \begin{equation}
-%   P(B) = \int_{\mathcal{S}} P\!\left(B \mid \mathsf{s}=s\right)\, p_{\mathsf{s}}(s)\,ds.
+%   \Pr(B) = \int_{\mathcal{S}} P\!\left(B \mid \mathsf{s}=s\right)\, p_{\mathsf{s}}(s)\,ds.
 %   \label{eq:ltp-cont}
 % \end{equation}
 % We are basically averaging the conditional probability over the distribution of $\mathsf{s}$.
 
 
 \subsection{\texorpdfstring{Inclusion-Exclusion and Union Bounds\textsuperscript{*}}{Inclusion-Exclusion and Union Bounds}}
-Often, we want the probability that at least one of several events occurs. The Venn diagrams in \Cref{fig:venn-union,fig:venn-intersection} already hint at the key idea: if we simply add $P(A)$ and $P(B)$, we overcount the overlap $A\cap B$, so we must subtract it once. This leads to the \textbf{inclusion-exclusion principle}. The case of two and three events (\autoref{eq:IE-two} and \autoref{eq:IE-three}) are the most common and are likely familiar to you from previous math classes. The general formula is given by \autoref{eq:IE-general}. All the general formula is doing is applying the addition rule repeatedly and then accounting for the overcounting appropriately. In particular, the alternating signs in \autoref{eq:IE-general} correct for overcounting: singles are counted once, pairwise overlaps were counted twice so we subtract them, triple overlaps were then subtracted too many times so we add them back, and so on.
+Often, we want the probability that at least one of several events occurs. The Venn diagrams in \Cref{fig:venn-union,fig:venn-intersection} already hint at the key idea: if we simply add $\Pr(A)$ and $\Pr(B)$, we overcount the overlap $A\cap B$, so we must subtract it once. This leads to the \textbf{inclusion-exclusion principle}. The case of two and three events (\autoref{eq:IE-two} and \autoref{eq:IE-three}) are the most common and are likely familiar to you from previous math classes. The general formula is given by \autoref{eq:IE-general}. All the general formula is doing is applying the addition rule repeatedly and then accounting for the overcounting appropriately. In particular, the alternating signs in \autoref{eq:IE-general} correct for overcounting: singles are counted once, pairwise overlaps were counted twice so we subtract them, triple overlaps were then subtracted too many times so we add them back, and so on.
 
 \begin{definitionBox}
 \textbf{Inclusion-Exclusion (IE)}. For events $A_1,\dots,A_N$,
 \begin{align}
-    P(A\cup B) &= P(A)+P(B)-P(A\cap B) \label{eq:IE-two}\\[4pt]
-    P(A\cup B\cup C) &= P(A)+P(B)+P(C) \nonumber\\
-    &\quad - \big[P(A\cap B)+P(A\cap C)+P(B\cap C)\big] \nonumber\\
-    &\quad + P(A\cap B\cap C) \label{eq:IE-three}\\[4pt]
-    P\!\Big(\bigcup_{i=1}^N A_i\Big) &= \sum_{i} P(A_i)
-    \;-\!\!\sum_{i<j} P(A_i\cap A_j)
-    \;+\!\!\sum_{i<j<k} P(A_i\cap A_j\cap A_k)
+    \Pr(A\cup B) &= \Pr(A)+\Pr(B)-\Pr(A\cap B) \label{eq:IE-two}\\[4pt]
+    \Pr(A\cup B\cup C) &= \Pr(A)+\Pr(B)+\Pr(C) \nonumber\\
+    &\quad - \big[\Pr(A\cap B)+\Pr(A\cap C)+\Pr(B\cap C)\big] \nonumber\\
+    &\quad + \Pr(A\cap B\cap C) \label{eq:IE-three}\\[4pt]
+    \Pr\!\Big(\bigcup_{i=1}^N A_i\Big) &= \sum_{i} \Pr(A_i)
+    \;-\!\!\sum_{i<j} \Pr(A_i\cap A_j)
+    \;+\!\!\sum_{i<j<k} \Pr(A_i\cap A_j\cap A_k)
     \;\mp \cdots \nonumber\\
-    &\qquad + (-1)^{r+1}\!\!\!\sum_{i_1<\cdots<i_r}\!\!\! P(A_{i_1}\cap\cdots\cap A_{i_r})
+    &\qquad + (-1)^{r+1}\!\!\!\sum_{i_1<\cdots<i_r}\!\!\! \Pr(A_{i_1}\cap\cdots\cap A_{i_r})
     \;\mp \cdots \nonumber\\
-    &\qquad + (-1)^{N+1} P(A_1\cap\cdots\cap A_N)\label{eq:IE-general}
+    &\qquad + (-1)^{N+1} \Pr(A_1\cap\cdots\cap A_N)\label{eq:IE-general}
 \end{align}
 \end{definitionBox}
-We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $P(A\cap B)=P(A)P(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses to the additivity axiom.
+We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $\Pr(A\cap B)=\Pr(A)\Pr(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses to the additivity axiom.
 
 \begin{exampleBox}
 \textbf{Example: At Least One Defective, Revisited.}
-Let $D_1,D_2,D_3$ be the events that each of three safety valves is defective. With independence and $P(D_i)=0.05$,
+Let $D_1,D_2,D_3$ be the events that each of three safety valves is defective. With independence and $\Pr(D_i)=0.05$,
 \begin{gather}
-    \sum_i P(D_i)=3(0.05)=0.15 \\
-    \sum_{i<j} P(D_i\cap D_j)=3(0.05)^2=0.0075 \\
-    P(D_1\cap D_2\cap D_3)=(0.05)^3=0.000125
+    \sum_i \Pr(D_i)=3(0.05)=0.15 \\
+    \sum_{i<j} \Pr(D_i\cap D_j)=3(0.05)^2=0.0075 \\
+    \Pr(D_1\cap D_2\cap D_3)=(0.05)^3=0.000125
 \end{gather}
 By \autoref{eq:IE-three},
 \begin{equation}
-    P(D_1\cup D_2\cup D_3)=0.15-0.0075+0.000125=0.142625
+    \Pr(D_1\cup D_2\cup D_3)=0.15-0.0075+0.000125=0.142625
 \end{equation}
 which matches the complement calculation $1-(0.95)^3 \approx 0.142625$ from earlier.
 \end{exampleBox}
@@ -247,12 +251,12 @@ which matches the complement calculation $1-(0.95)^3 \approx 0.142625$ from earl
 \paragraph*{\texorpdfstring{Union bounds and Bonferroni inequalities\textsuperscript{*}}{Union bounds and Bonferroni inequalities}}
 Exact IE can be tedious for large $N$. Truncating \autoref{eq:IE-general} gives us useful bounds, known as Bonferroni inequalities. Keeping only the first (positive) term gives the union bound (a.k.a.\ Boole's inequality):
 \begin{equation}
-    P\!\Big(\bigcup_{i=1}^N A_i\Big) \le \sum_{i=1}^N P(A_i)
+    P\!\Big(\bigcup_{i=1}^N A_i\Big) \le \sum_{i=1}^N \Pr(A_i)
     \label{eq:union-bound}
 \end{equation}
 Including the pairwise term gives a lower bound:
 \begin{equation}
-    P\!\Big(\bigcup_{i=1}^N A_i\Big) \ge \sum_i P(A_i) - \sum_{i<j} P(A_i\cap A_j)
+    P\!\Big(\bigcup_{i=1}^N A_i\Big) \ge \sum_i \Pr(A_i) - \sum_{i<j} \Pr(A_i\cap A_j)
     \label{eq:bonferroni-lb}
 \end{equation}
 More generally, truncating after an odd number of terms gives an upper bound, while truncating after an even number gives a lower bound. We emphasize that these bounds follow directly from \autoref{eq:IE-general}.
@@ -261,7 +265,7 @@ More generally, truncating after an odd number of terms gives an upper bound, wh
 \textbf{Example: Quick Estimate with a Union Bound.}
 If sensors $S_1,\dots,S_5$ have false-alarm probabilities at most $1\%$ each, then
 \begin{equation}
-    P(\text{at least one false alarm}) \le \sum_{i=1}^5 0.01 = 0.05
+    \Pr(\text{at least one false alarm}) \le \sum_{i=1}^5 0.01 = 0.05
 \end{equation}
 This bound is immediate and does not require independence.
 \end{exampleBox}
@@ -297,44 +301,44 @@ Conditional probability can lead to counterintuitive results when we fail to acc
 The main message to get across here is that when analyzing data, we must carefully consider what variables to condition on. If important conditioning variables are omitted from the analysis, the results can be completely misleading. Always consider what additional information might be relevant to properly interpret probabilistic relationships.
 
 \subsection{Bayes' Theorem}
-The law of total probability allows us to synthesize the probability of an effect ($D$) from various potential causes ($A, B, C$). But what if we observe the effect and want to infer the cause? For instance, if we find a defective part, what is the probability that it came from Machine A? We are looking to invert the conditional probability from $P(\text{Effect} \mid \text{Cause})$ to $P(\text{Cause} \mid \text{Effect})$. This is the purpose of \textbf{Bayes' theorem}.
+The law of total probability allows us to synthesize the probability of an effect ($D$) from various potential causes ($A, B, C$). But what if we observe the effect and want to infer the cause? For instance, if we find a defective part, what is the probability that it came from Machine A? We are looking to invert the conditional probability from $\Pr(\text{Effect} \mid \text{Cause})$ to $\Pr(\text{Cause} \mid \text{Effect})$. This is the purpose of \textbf{Bayes' theorem}.
 
 The theorem is a direct consequence of the definition of conditional probability. From the multiplication rule, we have two ways of expressing the intersection $A_i \cap B$:
 \begin{align*}
-    P(A_i \cap B) &= P(B \mid A_i)P(A_i) \\
-    P(A_i \cap B) &= P(A_i\mid B)P(B)
+    \Pr(A_i \cap B) &= \Pr(B \mid A_i)\Pr(A_i) \\
+    \Pr(A_i \cap B) &= \Pr(A_i\mid B)\Pr(B)
 \end{align*}
-Setting these equal and rearranging to solve for $P(A_i \mid B)$ gives the simple form of Bayes' theorem (assuming $P(B)>0$):
+Setting these equal and rearranging to solve for $\Pr(A_i \mid B)$ gives the simple form of Bayes' theorem (assuming $\Pr(B)>0$):
 \begin{equation}
-    P(A_i \mid B) = \frac{P(B \mid A_i)P(A_i)}{P(B)}
+    \Pr(A_i \mid B) = \frac{\Pr(B \mid A_i)\Pr(A_i)}{\Pr(B)}
     \label{eq:bayes-simple}
 \end{equation}
-A lot of the time, we don't know $P(B)$ directly, so we expand it via the law of total probability. This gives us the full form of Bayes' theorem:
+A lot of the time, we don't know $\Pr(B)$ directly, so we expand it via the law of total probability. This gives us the full form of Bayes' theorem:
 \begin{definitionBox}
-    \textbf{Bayes' Theorem.} Let $\{A_j\}$ be a partition of the sample space (mutually exclusive and collectively exhaustive) with $P(A_j)>0$, and let $P(B)>0$. Then
+    \textbf{Bayes' Theorem.} Let $\{A_j\}$ be a partition of the sample space (mutually exclusive and collectively exhaustive) with $\Pr(A_j)>0$, and let $\Pr(B)>0$. Then
     \begin{equation}
-        P(A_i \mid B) = \frac{P(B \mid A_i)P(A_i)}{\sum_{j} P(B \mid A_j)P(A_j)}
+        \Pr(A_i \mid B) = \frac{\Pr(B \mid A_i)\Pr(A_i)}{\sum_{j} \Pr(B \mid A_j)\Pr(A_j)}
         \label{eq:bayes-full}
     \end{equation}
 \end{definitionBox}
 This formula provides a systematic way to update our beliefs in light of new evidence. The terms have special names that reflect this process:
 \begin{itemize}
-    \item $P(A_i)$ is the \textbf{prior probability}: our initial belief about the cause before seeing any evidence.
-    \item $P(B \mid A_i)$ is the \textbf{likelihood}: the probability of observing the evidence $B$ if the cause $A_i$ were true.
-    \item $P(A_i \mid B)$ is the \textbf{posterior probability}: our updated belief about the cause after observing the evidence.
-    \item $P(B)$ is the \textbf{marginal likelihood} of the evidence (also just called the evidence), which serves as a normalization constant.
+    \item $\Pr(A_i)$ is the \textbf{prior probability}: our initial belief about the cause before seeing any evidence.
+    \item $\Pr(B \mid A_i)$ is the \textbf{likelihood}: the probability of observing the evidence $B$ if the cause $A_i$ were true.
+    \item $\Pr(A_i \mid B)$ is the \textbf{posterior probability}: our updated belief about the cause after observing the evidence.
+    \item $\Pr(B)$ is the \textbf{marginal likelihood} of the evidence (also just called the evidence), which serves as a normalization constant.
 \end{itemize}
 
 \begin{exampleBox}
-    \textbf{Example (Manufacturing Defects, continued)}: We found that the overall defect rate was $P(D) = 0.021$. Now, suppose we have a defective part in hand. What is the probability it came from Machine B, i.e., what is $P(B\mid D)$?
+    \textbf{Example (Manufacturing Defects, continued)}: We found that the overall defect rate was $\Pr(D) = 0.021$. Now, suppose we have a defective part in hand. What is the probability it came from Machine B, i.e., what is $\Pr(B\mid D)$?
 
-    Our prior belief was $P(B) = 0.35$. We now use Bayes' Theorem to update this belief with the evidence that the part is defective.
+    Our prior belief was $\Pr(B) = 0.35$. We now use Bayes' Theorem to update this belief with the evidence that the part is defective.
     \begin{equation}
-        P(B \mid D) = \frac{P(D \mid B)P(B)}{P(D)}
+        \Pr(B \mid D) = \frac{\Pr(D \mid B)\Pr(B)}{\Pr(D)}
     \end{equation}
-    We have all the necessary components: $P(D \mid B)=0.03$, $P(B)=0.35$, and $P(D)=0.021$. So
+    We have all the necessary components: $\Pr(D \mid B)=0.03$, $\Pr(B)=0.35$, and $\Pr(D)=0.021$. So
     \begin{equation}
-        P(B \mid D) = \frac{0.03 \times 0.35}{0.021} = \frac{0.0105}{0.021} = 0.5
+        \Pr(B \mid D) = \frac{0.03 \times 0.35}{0.021} = \frac{0.0105}{0.021} = 0.5
     \end{equation}
     After finding a defective part, the probability that it came from Machine B has increased from 35\% (the prior) to 50\% (the posterior). This is because Machine B has the highest defect rate, so it is disproportionately responsible for the defective parts.
 \end{exampleBox}
@@ -342,15 +346,15 @@ This formula provides a systematic way to update our beliefs in light of new evi
 \begin{exampleBox}
     \textbf{Example (Diagnostic Testing)}: A diagnostic test for pipeline corrosion has a sensitivity of 85\% (it correctly identifies corrosion 85\% of the time) and a specificity of 99.9\% (it correctly reports no corrosion 99.9\% of the time). Industry data suggests that this corrosion is present in 1\% of pipes of a certain age. If a pipe tests positive, what is the probability it actually has corrosion?
 
-    Let $C$ be the event the pipe has corrosion, and $C^c$ be the event it does not. Let $T^+$ be a positive test result. We are given the prior that $P(C) = 0.01$, so $P(C^c) = 0.99$. We also know that the sensitivity is $P(T^+ \mid C)=0.85$, and the specificity is $P(T^- \mid C^c)=0.999$, which implies a false positive rate of $P(T^+ \mid C^c) = 1 - 0.999 = 0.001$.
+    Let $C$ be the event the pipe has corrosion, and $C^c$ be the event it does not. Let $T^+$ be a positive test result. We are given the prior that $\Pr(C) = 0.01$, so $\Pr(C^c) = 0.99$. We also know that the sensitivity is $\Pr(T^+ \mid C)=0.85$, and the specificity is $\Pr(T^- \mid C^c)=0.999$, which implies a false positive rate of $\Pr(T^+ \mid C^c) = 1 - 0.999 = 0.001$.
 
-    We want to find the posterior, $P(C \mid T^+)$. Using Bayes' Theorem (\autoref{eq:bayes-full}):
+    We want to find the posterior, $\Pr(C \mid T^+)$. Using Bayes' Theorem (\autoref{eq:bayes-full}):
     \begin{equation}
-        P(C \mid T^+) = \frac{P(T^+ \mid C)P(C)}{P(T^+ \mid C)P(C) + P(T^+ \mid C^c)P(C^c)}
+        \Pr(C \mid T^+) = \frac{\Pr(T^+ \mid C)\Pr(C)}{\Pr(T^+ \mid C)\Pr(C) + \Pr(T^+ \mid C^c)\Pr(C^c)}
     \end{equation}
     Plugging in the numbers:
     \begin{equation}
-        P(C \mid T^+) = \frac{0.85 \times 0.01}{0.85 \times 0.01 + 0.001 \times 0.99} = \frac{0.0085}{0.0085 + 0.00099} = \frac{0.0085}{0.00949} \approx 0.896
+        \Pr(C \mid T^+) = \frac{0.85 \times 0.01}{0.85 \times 0.01 + 0.001 \times 0.99} = \frac{0.0085}{0.0085 + 0.00099} = \frac{0.0085}{0.00949} \approx 0.896
     \end{equation}
     Despite strong test characteristics, a positive result has a posterior below 100\% ($\approx 89.6\%$) because the prior prevalence is only 1\%. The base rate still materially limits certainty.
 \end{exampleBox}
@@ -362,10 +366,10 @@ We make a brief note on notation: To distinguish between the RV itself (which is
 
 The primary utility of a random variable is that it allows us to define events using numerical statements. For example, instead of describing a complex set of outcomes, we can make a simple statement like ``the temperature is greater than 400 K.'' This translates an event in the numerical space back to a corresponding event in the original sample space:
 \begin{equation}
-    P(\mathsf{x} \ge a) := P(\{\xi \in \mathcal{E} \mid \mathsf{x}(\xi) \ge a\})
+    \Pr(\mathsf{x} \ge a) := \Pr(\{\xi \in \mathcal{E} \mid \mathsf{x}(\xi) \ge a\})
 \end{equation}
 
-Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have probability zero: $P(\mathsf{T}=t)=0$. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
+Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have probability zero: $\Pr(\mathsf{T}=t)=0$. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
 
 \section{CDFs, PMFs, and PDFs}
 Random variables give us a tool to map experimental outcomes to numbers. The next step is to describe the probabilistic behavior of that variable. We need to answer the question: ``What are the probabilities that the random variable $\mathsf{x}$ will take on certain values?'' This is the role of a \textbf{probability distribution}. There are two main functions we use to fully characterize a random variable's distribution. One is universal, while the other is specific to whether the variable is discrete or continuous.
@@ -377,12 +381,12 @@ We write $\mathcal{S}_{\mathsf{x}}$ for the support of $\mathsf{x}$, i.e., the s
 \subsection{The Cumulative Distribution Function}
 The most fundamental description of any random variable's distribution is the \textbf{cumulative distribution function (CDF)}. The CDF, denoted by $F_{\mathsf{x}}(x)$, is defined as the probability that the random variable $\mathsf{x}$ takes on a value less than or equal to a specific value $x$.
 \begin{equation}
-    F_{\mathsf{x}}(x) = P(\mathsf{x} \le x)
+    F_{\mathsf{x}}(x) = \Pr(\mathsf{x} \le x)
     \label{eq:cdf-def}
 \end{equation}
 The CDF accumulates probability as $x$ increases. By definition, it is a non-decreasing function that starts at 0 for $x \to -\infty$ and ends at 1 for $x \to +\infty$; it should be obvious why these limits are necessary given the axioms of probability. A consequence of \autoref{eq:cdf-def} is that for any $a<b$,
 \begin{equation}
-    P(a<\mathsf{x}\le b)=F_{\mathsf{x}}(b)-F_{\mathsf{x}}(a)
+    \Pr(a<\mathsf{x}\le b)=F_{\mathsf{x}}(b)-F_{\mathsf{x}}(a)
     \label{eq:cdf-range}
 \end{equation}
 The use of $<$ and $\le$ is very deliberate here: the CDF is right-continuous, but not necessarily left-continuous. Only if the CDF is (fully) continuous at $a$ and $b$ are we allowed to switch both bounds to $\le$.
@@ -390,7 +394,7 @@ The use of $<$ and $\le$ is very deliberate here: the CDF is right-continuous, b
 \subsection{The Probability Mass Function for Discrete RVs}
 For a discrete random variable, it's most intuitive to describe the ``lump'' of probability at each specific value it can take. This is the job of the \textbf{probability mass function (PMF)}, denoted by $p_{\mathsf{x}}(x)$.
 \begin{equation}
-    p_{\mathsf{x}}(x) = P(\mathsf{x} = x)
+    p_{\mathsf{x}}(x) = \Pr(\mathsf{x} = x)
     \label{eq:pmf-def}
 \end{equation}
 The PMF gives a probability for each possible outcome. It must satisfy two conditions: $p_{\mathsf{x}}(x) \ge 0$ for all $x$, and the sum over all possible values in its support must be 1: $\sum_{x \in \mathcal{S}_{\mathsf{x}}} p_{\mathsf{x}}(x) = 1$. The PMF links to the CDF via
@@ -399,9 +403,9 @@ The PMF gives a probability for each possible outcome. It must satisfy two condi
 \end{equation}
 
 \subsection{The Probability Density Function for Continuous RVs}
-For a continuous random variable, the situation is more subtle. Since there are infinitely many possible values in any range, the probability of the RV taking on any single, exact value is zero. For example, $P(\mathsf{T} = 373.150000... \text{ K}) = 0$. Instead, we talk about the probability of the variable falling within a range $[a,b]$. We describe this using a \textbf{probability density function (PDF)}. We'll again use $p_{\mathsf{x}}(x)$ to denote a PDF; context will make clear whether it's a PMF or PDF. The PDF is the function we integrate to find the probability of being in a range:
+For a continuous random variable, the situation is more subtle. Since there are infinitely many possible values in any range, the probability of the RV taking on any single, exact value is zero. For example, $\Pr(\mathsf{T} = 373.150000... \text{ K}) = 0$. Instead, we talk about the probability of the variable falling within a range $[a,b]$. We describe this using a \textbf{probability density function (PDF)}. We'll again use $p_{\mathsf{x}}(x)$ to denote a PDF; context will make clear whether it's a PMF or PDF. The PDF is the function we integrate to find the probability of being in a range:
 \begin{equation}
-    P(a \le \mathsf{x} \le b) = \int_{a}^{b} p_{\mathsf{x}}(x)\,dx
+    \Pr(a \le \mathsf{x} \le b) = \int_{a}^{b} p_{\mathsf{x}}(x)\,dx
     \label{eq:pdf-range}
 \end{equation}
 Like the PMF, the PDF must be non-negative, $p_{\mathsf{x}}(x) \ge 0$, and its total integral must be 1: $\int_{-\infty}^{\infty} p_{\mathsf{x}}(x)\,dx = 1$. We take the support to be $\mathcal{S}_{\mathsf{x}}=\{x: p_{\mathsf{x}}(x)>0\}$, and probabilities of intervals outside $\mathcal{S}_{\mathsf{x}}$ are zero. Assuming the PDF exists and is continuous (which is not always true), the PDF links to the CDF via
@@ -412,8 +416,8 @@ Like the PMF, the PDF must be non-negative, $p_{\mathsf{x}}(x) \ge 0$, and its t
 \begin{warningBox}
     \textbf{Warning: PDF Danger Zone.}\quad Here are two points to watch out for when working with PDFs:
     \begin{enumerate}
-        \item A PDF value is not a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability density. It can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $P(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
-        \item The probability at a point is zero (if in doubt, check out \autoref{eq:pdf-range} and realize that you would be integrating over a zero-width interval). For any continuous RV, $P(\mathsf{x}=c)=0$. This means that $P(a \le \mathsf{x} \le b)$ is the same as $P(a < \mathsf{x} < b)$.
+        \item A PDF value is not a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability density. It can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $\Pr(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
+        \item The probability at a point is zero (if in doubt, check out \autoref{eq:pdf-range} and realize that you would be integrating over a zero-width interval). For any continuous RV, $\Pr(\mathsf{x}=c)=0$. This means that $\Pr(a \le \mathsf{x} \le b)$ is the same as $\Pr(a < \mathsf{x} < b)$.
     \end{enumerate}
 \end{warningBox}
 
@@ -504,7 +508,7 @@ For random variables $\mathsf{x}$ and $\mathsf{s}$,
 \end{equation}
 In words, this means that we first average the conditional mean within each group $\mathsf{s}$, then average across groups with the distribution of $\mathsf{s}$. In discrete form,
 \begin{equation}
-  \mathbb{E}[\mathsf{x}]=\sum_j \mathbb{E}\left[\mathsf{x}\mid \mathsf{s}=s_j\right]\,P(\mathsf{s}=s_j)
+  \mathbb{E}[\mathsf{x}]=\sum_j \mathbb{E}\left[\mathsf{x}\mid \mathsf{s}=s_j\right]\,\Pr(\mathsf{s}=s_j)
 \end{equation}
 where the sum runs over the support of $\mathsf{s}$. In continuous form with $\mathcal{S}_\mathsf{s}$ being the support of $\mathsf{s}$,
 \begin{equation}
@@ -516,7 +520,7 @@ The intuition behind LIE is that the conditional expectation $\mathbb{E}[\mathsf
     \textbf{Example: Hits by Scaffold.}
     In a small-molecule generator, each proposal is first sampled by scaffold cluster $\mathsf{s}\in\{\text{A},\text{B},\text{C}\}$ and then instantiated with substituents. Let $\mathsf{h}\in\{0,1\}$ indicate whether the molecule hits (e.g., passes a docking/physics threshold). By construction, the scaffold determines the conditional hit rate $p_{\text{hit}}(s)=\mathbb{E}[\mathsf{h}\mid \mathsf{s}=s]$. Suppose the generator samples scaffolds with
     \begin{equation}
-        P(\mathsf{s}=\text{A})=0.5,\quad P(\mathsf{s}=\text{B})=0.3,\quad P(\mathsf{s}=\text{C})=0.2
+        \Pr(\mathsf{s}=\text{A})=0.5,\quad \Pr(\mathsf{s}=\text{B})=0.3,\quad \Pr(\mathsf{s}=\text{C})=0.2
     \end{equation}
     and the conditional hit rates (estimated from prior campaigns or a calibrated surrogate) are
     \begin{equation}
@@ -526,7 +530,7 @@ The intuition behind LIE is that the conditional expectation $\mathbb{E}[\mathsf
     \begin{equation}
         \mathbb{E}[\mathsf{h}]
         = \mathbb{E}\left[\mathbb{E}[\mathsf{h}\mid \mathsf{s}]\right]
-        = \sum_{s\in\{\text{A,B,C}\}} p_{\text{hit}}(s)\,P(\mathsf{s}=s)
+        = \sum_{s\in\{\text{A,B,C}\}} p_{\text{hit}}(s)\,\Pr(\mathsf{s}=s)
         = (0.008)(0.5)+(0.021)(0.3)+(0.003)(0.2)=0.0109
     \end{equation}
     Thus the expected hit rate is $1.09\%$. By linearity, for a batch of $N$ proposals, the expected number of hits is
@@ -1160,15 +1164,15 @@ The sum is over all possible values $x$ in the support of $\mathsf{x}$. For each
     \end{equation}
     For example, if we're rolling two dice and want a total of 4, the event is $\{\text{die 1}=1, \text{die 2}=3\} \cup \{\text{die 1}=2, \text{die 2}=2\} \cup \{\text{die 1}=3, \text{die 2}=1\}$. Because these ways are mutually exclusive ($\mathsf{x}$ cannot be both 1 and 2 at the same time), the probability of the total event is the sum of the probabilities of the sub-events:
     \begin{equation}
-        P(\mathsf{s}=s) = \sum_{x} P(\mathsf{x}=x \text{ and } \mathsf{y}=s-x)
+        \Pr(\mathsf{s}=s) = \sum_{x} \Pr(\mathsf{x}=x \text{ and } \mathsf{y}=s-x)
     \end{equation}
     Now, we use our key assumption that $\mathsf{x}$ and $\mathsf{y}$ are independent. The probability of two independent events both occurring is the product of their individual probabilities:
     \begin{equation}
-        P(\mathsf{x}=x \text{ and } \mathsf{y}=s-x) = P(\mathsf{x}=x) \cdot P(\mathsf{y}=s-x)
+        \Pr(\mathsf{x}=x \text{ and } \mathsf{y}=s-x) = \Pr(\mathsf{x}=x) \cdot \Pr(\mathsf{y}=s-x)
     \end{equation}
     Substituting this product back into the sum gives us the discrete convolution formula:
     \begin{align}
-        p_{\mathsf{s}}(s) = P(\mathsf{s}=s) &= \sum_{x} P(\mathsf{x}=x) \cdot P(\mathsf{y}=s-x) \nonumber\\
+        p_{\mathsf{s}}(s) = \Pr(\mathsf{s}=s) &= \sum_{x} \Pr(\mathsf{x}=x) \cdot \Pr(\mathsf{y}=s-x) \nonumber\\
         &= \sum_{x} p_{\mathsf{x}}(x) \cdot p_{\mathsf{y}}(s-x)
     \end{align}
     Therefore, convolution is simply the mathematical embodiment of considering all possible ways an outcome can be formed ($s = x + (s-x)$), calculating the probability of each way by multiplying (due to independence), and summing them all up.
