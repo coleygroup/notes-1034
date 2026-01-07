@@ -1,14 +1,15 @@
 \chapter{Probability}
 Many processes are not deterministic. Factors such as molecular fluctuations, measurement inaccuracies, and turbulent flow introduce inherent randomness to physical observables. At the microscale, events like chemical reactions are the result of stochastic collisions between molecules. Even at the macroscale, uncertainties in parameter values (e.g., reaction rates, heat transfer coefficients) and external disturbances (e.g., feed composition variations, environmental changes) lead to stochastic system behavior. Uncertainty in values propagate through models, leading to uncertainty in predictions. 
 
-To model, simulate, and design systems under these conditions, we need a basic understanding of probability theory. This chapter provides a foundation in the principles of probability, random variables, and distributions that we will need for the numerical methods discussed later on in this book. While not exhaustive, this chapter covers the essential concepts and tools required to be mathematically precise about uncertainty and randomness in engineering contexts.
+To model, simulate, and design systems under these conditions, we need a basic understanding of probability theory. This chapter provides a foundation in the principles of probability, random variables, and distributions that we will need for the numerical methods discussed later on in this book. While not exhaustive, this chapter covers the essential concepts and tools required to be mathematically precise about uncertainty and randomness in engineering contexts. We'll start simple and almost overly formal, and build our way up in complexity so that we're able to talk about probabilities in a quantitative, mathematical sense as needed for model fitting, parameter estimation, and simulation.
+
 
 \section{Events, Sample Spaces, and Axioms}
 An \textbf{experiment} is any process with a well-defined set of outcomes. The set of all possible outcomes is the \textbf{sample space}, denoted by $\mathcal{E}$. For the simple experiment of rolling a standard six-sided die, the sample space is a discrete set of six \textbf{outcomes}: $\mathcal{E} = \{1, 2, 3, 4, 5, 6\}$. For a more complex experiment, like measuring a reactor's temperature in Kelvin, the sample space is continuous: $\mathcal{E} = (0,\infty)$ K. A single performance of an experiment is called a \textbf{trial}. If we run one trial, we will observe one outcome.
 
 We are usually interested in more than just single outcomes. An \textbf{event} is any subset of the sample space ($A \subseteq \mathcal{E}$). For our die roll, the event ``the outcome is even'' corresponds to the subset $A = \{2, 4, 6\}$. For the temperature measurement, the event ``the reactor is between 350 K and 360 K'' is $A = [350, 360]$ K. This framework allows us to define the phenomena whose likelihood we want to quantify. 
 
-We often describe complex situations by combining events using the language of set theory. The \textbf{intersection} of two events, $A \cap B$, represents the event where \textit{both} A and B occur (``A and B''). The \textbf{union}, $A \cup B$, represents the outcome where \textit{at least one} of the events occurs (``A or B''). For example, if we define events $A = (300, \infty)$ K and $B = [0, 400)$ K, then their intersection is the event that the temperature is between 300 and 400 K, and their union is the event that the temperature is greater than 0 K. In mathematical notation, these are $A \cap B = (300, 400)$ K and $A \cup B = [0, \infty)$ K, respectively.
+We often describe complex situations by combining events using the language of set theory. The \textbf{intersection} of two events, $A \cap B$, represents the event where \textit{both} A and B occur (``A and B''). The \textbf{union}, $A \cup B$, represents the outcome where \textit{at least one} of the events occurs (``A or B''). For example, if we define events $A = (300, \infty)$ K and $B = [0, 400)$ K, then their intersection is the event that the temperature is between 300 and 400 K, and their union is the event that the temperature is greater than 0 K. In mathematical notation, these are $A \cap B = (300, 400)$ K and $A \cup B = [0, \infty)$ K, respectively. Both of these operators are commutative, i.e., $A \cap B = B \cap A$ and $A \cup B = B \cup A$. 
 
 \begin{figure}[h]
     \centering
@@ -71,19 +72,21 @@ We often describe complex situations by combining events using the language of s
     \label{fig:venn-probability}
 \end{figure}
 
-The probability of an event $A$, denoted $\Pr(A)$ or $P(A)$ or $\mathbb{P}(A)$, is a number in $[0,1]$ that quantifies its likelihood. A useful way to estimate $\Pr(A)$ is via long-run frequency: if we repeat an experiment $N$ times under identical conditions and $A$ occurs $N_A$ times, then $N_A/N$ is an estimate of $\Pr(A)$. In idealized settings, according to the strong law of large numbers, this converges to the true probability as $N \to \infty$:
+
+The \textbf{probability} of an event $A$, denoted $\Pr(A)$ or $P(A)$ or $\mathbb{P}(A)$, is a number in $[0,1]$ that quantifies its likelihood. A useful way to estimate $\Pr(A)$ is via long-run frequency: if we repeat an experiment $N$ times under identical conditions and $A$ occurs $N_A$ times, then $N_A/N$ is an estimate of $\Pr(A)$. In idealized settings, according to the strong law of large numbers, this converges to the true probability as $N \to \infty$:
 \begin{equation}
-    \Pr(A) = \lim_{N\to\infty} \frac{N_A}{N} % TODO: replace all P with \Pr
+    \Pr(A) = \lim_{N\to\infty} \frac{N_A}{N}
     \label{eq:prob-limit}
 \end{equation}
-We'll use this frequentist picture for intuition and for simulation results.\footnote{Other interpretations of what ``probability'' means exist. For example, the Bayesian view treats probability as a degree of belief that is updated by data via Bayes' rule. Still, both views use the same axioms and lead to the same calculations for this course.} To avoid circularity, we do not \emph{define} probability by the limit in \autoref{eq:prob-limit}\footnote{This is a bit of a nuance that is not of real consequence to us in 10.34.}. Instead, we take $\Pr(\cdot)$ as a primitive that must obey a few simple rules. These are Kolmogorov's axioms and are listed below.
+
+Probabilities must obey a few simple rules. These are Kolmogorov's axioms and are listed below.
 \begin{definitionBox}
-    \textbf{The Axioms of Probability}
+    \textbf{The Axioms of Probability:}
     For any events $A_i$ within a sample space $\mathcal{E}$:
     \begin{enumerate}
         \item \textbf{Non-negativity:} The probability of any event is non-negative.
         \begin{equation}
-            \Pr(A) \ge 0
+            \Pr(A_i) \ge 0
         \end{equation}
         \item \textbf{Unity:} The probability of the entire sample space is 1. Some outcome must occur.
         \begin{equation}
@@ -92,6 +95,7 @@ We'll use this frequentist picture for intuition and for simulation results.\foo
         \item \textbf{Additivity:} If events $\{A_i\}_{i=1}^\infty$ are pairwise disjoint,
         \begin{equation}
           \Pr\!\left(\bigcup_{i=1}^\infty A_i\right)=\sum_{i=1}^\infty \Pr(A_i)
+          \label{eq:probability-additivity-axiom}
         \end{equation}
         For example, if two events are mutually exclusive (i.e., they cannot both occur, $A \cap B = \emptyset$), the probability that either one occurs is  the sum of their individual probabilities: $\Pr(A \cup B) = \Pr(A) + \Pr(B)$. To help visualize this, one can think of this two-event, mutually exclusive case as a figure similar to \autoref{fig:venn-union} but with the two circles non-overlapping. To get the total area of the two circles, the areas can just be added. The non-mutually exlusive case is covered by the law of total probability later on.
     \end{enumerate}
@@ -102,7 +106,7 @@ Note that from these axioms, we immediately have that (1) the probability of the
 \section{Conditional Probability and Independence}
 The axioms of probability describe static situations. However, we often need to update our assessment of an event's likelihood in light of new information. The framework for this is \textbf{conditional probability}.
 
-The conditional probability of event $A$ occurring given that event $B$ has occurred is denoted $\Pr(A \mid B)$. Intuitively, knowing that $B$ has happened restricts our sample space from $\mathcal{E}$ to just the outcomes in $B$. The probability of $A$ is then the fraction of this new, smaller sample space that is also occupied by $A$ (\autoref{fig:cond-prob}). This intuition is formalized by the definition:
+The conditional probability of event $A$ occurring given that event $B$ has occurred is denoted $\Pr(A \mid B)$. When talking about this value, we would say that it is the ``probability of $A$ given $B$''. Intuitively, knowing that $B$ has happened restricts our sample space from $\mathcal{E}$ to just the outcomes in $B$---it gives us information. The probability of $A$ is then the fraction of this new, smaller sample space that is also occupied by $A$ (\autoref{fig:cond-prob}). This intuition is formalized by the definition:
 \begin{equation}
     \Pr(A \mid B) = \frac{\Pr(A \cap B)}{\Pr(B)}, \quad \text{provided } \Pr(B) > 0
     \label{eq:cond-prob}
@@ -166,7 +170,7 @@ When the occurrence of one event gives us no information about another, we say t
     \text{$A$ and $B$ are independent} \iff \Pr(A \cap B) = \Pr(A)\,\Pr(B)
     \label{eq:prob-independence}
 \end{equation}
-When $\Pr(B)>0$, this is equivalent to the conditional statement $\Pr(A\mid B)=\Pr(A)$ (and conversely, $\Pr(A\mid B)=\Pr(A)$ together with $\Pr(B)>0$ implies \autoref{eq:prob-independence}). This property extends to any number of \emph{mutually independent} events. Specifically, events $A_1,\dots,A_N$ are mutually independent if for every nonempty subset $\mathcal{I}\subseteq\{1,\dots,N\}$,
+When $\Pr(B)>0$, this is equivalent to the conditional statement $\Pr(A\mid B)=\Pr(A)$; conversely, $\Pr(B\mid A)=\Pr(B)$ together with $\Pr(B)>0$ implies \autoref{eq:prob-independence}. This property extends to any number of \emph{mutually independent} events. Specifically, events $A_1,\dots,A_N$ are mutually independent if for every nonempty subset $\mathcal{I}\subseteq\{1,\dots,N\}$,
 \begin{equation}
     P\!\Big(\bigcap_{i\in \mathcal{I}} A_i\Big) = \prod_{i\in \mathcal{I}} \Pr(A_i)
 \end{equation}
@@ -193,7 +197,7 @@ For example, $\Pr(A\cap B\cap C)=\Pr(A)\Pr(B)\Pr(C)$ holds when $A,B,C$ are mutu
 \end{exampleBox}
 
 \subsection{Law of Total Probability}
-It is often the case that we might not know $\Pr(B)$ directly, but we can compute the conditional probabilities $\Pr(B \mid A_j)$ and $\Pr(A_j)$ for each $j$. In this case, we can use the law of total probability to compute $\Pr(B)$. Let $\{A_j\}_{j=1}^m$ be a pairwise disjoint ($A_j \cap A_k = \emptyset$ for $j\neq k$) and collectively exhaustive ($\bigcup_{j=1}^m A_j = \mathcal{E}$) partition of the sample space $\mathcal{E}$ with $\Pr(A_j)>0$. For any event $B$,
+It is often the case that we might not know $\Pr(B)$ directly, but we can compute the conditional probabilities $\Pr(B \mid A_j)$ and $\Pr(A_j)$ for each $j$. In this case, we can use the law of total probability to compute $\Pr(B)$. Let $\{A_j\}_{j=1}^m$ be a pairwise disjoint ($A_j \cap A_k = \emptyset$ for $j\neq k$) and collectively exhaustive ($\bigcup_{j=1}^m A_j = \mathcal{E}$) partition of the sample space $\mathcal{E}$ with $\Pr(A_j)>0$. In simple terms, one and only one $A_i$ occurs. For any event $B$,
 \begin{equation}
     \Pr(B) = \sum_{j=1}^m P\!\left(B \mid A_j\right)\,\Pr(A_j)
     \label{eq:ltp-events}
@@ -213,10 +217,10 @@ It is often the case that we might not know $\Pr(B)$ directly, but we can comput
 
 
 \subsection{\texorpdfstring{Inclusion-Exclusion and Union Bounds\textsuperscript{*}}{Inclusion-Exclusion and Union Bounds}}
-Often, we want the probability that at least one of several events occurs. The Venn diagrams in \Cref{fig:venn-union,fig:venn-intersection} already hint at the key idea: if we simply add $\Pr(A)$ and $\Pr(B)$, we overcount the overlap $A\cap B$, so we must subtract it once. This leads to the \textbf{inclusion-exclusion principle}. The case of two and three events (\autoref{eq:IE-two} and \autoref{eq:IE-three}) are the most common and are likely familiar to you from previous math classes. The general formula is given by \autoref{eq:IE-general}. All the general formula is doing is applying the addition rule repeatedly and then accounting for the overcounting appropriately. In particular, the alternating signs in \autoref{eq:IE-general} correct for overcounting: singles are counted once, pairwise overlaps were counted twice so we subtract them, triple overlaps were then subtracted too many times so we add them back, and so on.
+Often, we want the probability that at least one of several events occurs. The Venn diagrams in \Cref{fig:venn-union,fig:venn-intersection} already hint at the key idea: if we simply add $\Pr(A)$ and $\Pr(B)$, we overcount the overlap $A\cap B$, so we must subtract it once. This leads to the \textbf{inclusion-exclusion principle}. The case of two and three events (\autoref{eq:IE-two} and \autoref{eq:IE-three}) are the most common and are potentially familiar to you from previous math classes. The general formula is given by \autoref{eq:IE-general}. All the general formula is doing is applying the addition rule repeatedly and then accounting for the overcounting appropriately. In particular, the alternating signs in \autoref{eq:IE-general} correct for overcounting: singles are counted once, pairwise overlaps were counted twice so we subtract them, triple overlaps were then subtracted too many times so we add them back, and so on.
 
 \begin{definitionBox}
-\textbf{Inclusion-Exclusion (IE)}. For events $A_1,\dots,A_N$,
+\textbf{Inclusion-Exclusion (IE)}
 \begin{align}
     \Pr(A\cup B) &= \Pr(A)+\Pr(B)-\Pr(A\cap B) \label{eq:IE-two}\\[4pt]
     \Pr(A\cup B\cup C) &= \Pr(A)+\Pr(B)+\Pr(C) \nonumber\\
@@ -231,7 +235,7 @@ Often, we want the probability that at least one of several events occurs. The V
     &\qquad + (-1)^{N+1} \Pr(A_1\cap\cdots\cap A_N)\label{eq:IE-general}
 \end{align}
 \end{definitionBox}
-We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $\Pr(A\cap B)=\Pr(A)\Pr(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses to the additivity axiom.
+We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $\Pr(A\cap B)=\Pr(A)\Pr(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses , \autoref{eq:probability-additivity-axiom}.
 
 \begin{exampleBox}
 \textbf{Example: At Least One Defective, Revisited.}
@@ -245,7 +249,7 @@ By \autoref{eq:IE-three},
 \begin{equation}
     \Pr(D_1\cup D_2\cup D_3)=0.15-0.0075+0.000125=0.142625
 \end{equation}
-which matches the complement calculation $1-(0.95)^3 \approx 0.142625$ from earlier.
+which matches the complement calculation $1-(0.95)^3$ from earlier.
 \end{exampleBox}
 
 \paragraph*{\texorpdfstring{Union bounds and Bonferroni inequalities\textsuperscript{*}}{Union bounds and Bonferroni inequalities}}
@@ -272,38 +276,39 @@ This bound is immediate and does not require independence.
 The takeaway here is to use \autoref{eq:IE-two}-\autoref{eq:IE-general} for exact computations when intersections are accessible (by symmetry, structure, or independence). When they are not, \autoref{eq:union-bound} and \autoref{eq:bonferroni-lb} provide fast, informative bounds. The pictures in \Cref{fig:venn-union,fig:venn-intersection} are a helpful guide to remember the alternating-sign corrections.
 
 
-\subsection{Simpson's paradox}
-Conditional probability can lead to counterintuitive results when we fail to account for all relevant information. \textbf{Simpson's paradox} occurs when a trend appears in different groups of data but disappears or reverses when the groups are combined. When a confounding variable influences both the condition and the outcome, ignoring this variable can lead to misleading conclusions. It's easiest to see this with an example.
+\subsection{Simpson's Paradox}
+Conditional probability can lead to counterintuitive results when we fail to account for all relevant information. \textbf{Simpson's paradox} occurs when a trend appears in different groups of data but disappears or reverses when the groups are combined. When a confounding variable influences both the condition and the outcome, ignoring this variable can lead to misleading conclusions. Simpson's paradox is not truly a pardox. It's easiest to see this with an example.
 
 \begin{exampleBox}
     \textbf{Example (Simpson's Paradox):}
-    Let $x$ denote weekly exercise hours, $y$ resting blood pressure, and $S\in\{\text{Younger (A)},\text{Older (B)}\}$ indicate age group. In the scatter of \autoref{fig:simpsons-scatter}, each age group shows the expected \emph{negative} association: within a fixed age group, more exercise is linked to lower blood pressure. However, when the groups are pooled and the age indicator $S$ is omitted,
+    Let $x$ denote weekly exercise hours, $y$ resting blood pressure, and $S\in\{\text{Younger (Group A)},\text{Older (Group B)}\}$ indicate age group. In the scatter of \autoref{fig:simpsons-scatter}, each age group shows the expected \emph{negative} association: within a fixed age group, more exercise is linked to lower blood pressure. However, when the groups are pooled and the age indicator $S$ is omitted,
     \begin{equation}
         y = \alpha + \beta x + \varepsilon,\quad \beta>0
     \end{equation}
-    so exercise appears (misleadingly) to increase blood pressure. The reversal occurs because age is a confounder: older adults (group B) both exercise more on average ($x$ larger) and have higher baseline blood pressure ($\alpha_B>\alpha_A$). This shift in intercepts and in the distribution of $x$ across groups means that
-    \begin{equation}
-        \operatorname{sign}\!\left(\operatorname{Cov}(x,y\mid S=s)\right)<0
-        \quad\text{but}\quad
-        \operatorname{sign}\!\left(\operatorname{Cov}(x,y)\right)>0
-    \end{equation}
+    so exercise appears (misleadingly) to increase blood pressure. The reversal occurs because age is a confounder: older adults (Group B) both exercise more on average ($x$ larger) and have higher baseline blood pressure ($\alpha_B>\alpha_A$). 
+    % This shift in intercepts and in the distribution of $x$ across groups means that
+    % \begin{equation}
+    %     \operatorname{sign}\!\left(\operatorname{Cov}(x,y\mid S=s)\right)<0
+    %     \quad\text{but}\quad
+    %     \operatorname{sign}\!\left(\operatorname{Cov}(x,y)\right)>0
+    % \end{equation} % have not covered Cov yet
     We can see then how important it is to condition on the relevant variables.
 
     \begin{figure}[H]
       \centering
-      \includegraphics[width=\linewidth]{figs/probability/simpsons_paradox_scatter.pdf}
-      \caption{Simpson's paradox in a continuous setting. Within each age group (A: younger, B: older) the fitted slope is negative; pooled across groups the fitted slope is positive.}
+      \includegraphics[width=0.8\linewidth]{figs/probability/simpsons_paradox_scatter.pdf}
+      \caption{Simpson's paradox in a continuous setting. Within each age group (A: younger, B: older) the fitted slope is negative; pooled across groups, the fitted slope is positive.}
       \label{fig:simpsons-scatter}
     \end{figure}
     
 \end{exampleBox}
     
-The main message to get across here is that when analyzing data, we must carefully consider what variables to condition on. If important conditioning variables are omitted from the analysis, the results can be completely misleading. Always consider what additional information might be relevant to properly interpret probabilistic relationships.
+The main message to get across here is that when analyzing data, we must carefully consider what variables to condition on. If important conditioning variables are omitted from the analysis, the results can be completely misleading. Always consider what additional information might be relevant to properly interpret probabilistic relationships. Simpson's paradox frequently arises in real-world data analysis, such as patient outcomes in healthcare stratified by demographics.
 
 \subsection{Bayes' Theorem}
 The law of total probability allows us to synthesize the probability of an effect ($D$) from various potential causes ($A, B, C$). But what if we observe the effect and want to infer the cause? For instance, if we find a defective part, what is the probability that it came from Machine A? We are looking to invert the conditional probability from $\Pr(\text{Effect} \mid \text{Cause})$ to $\Pr(\text{Cause} \mid \text{Effect})$. This is the purpose of \textbf{Bayes' theorem}.
 
-The theorem is a direct consequence of the definition of conditional probability. From the multiplication rule, we have two ways of expressing the intersection $A_i \cap B$:
+Bayes' theorem is a direct consequence of the definition of conditional probability. From the multiplication rule, we have two ways of expressing the intersection $A_i \cap B$:
 \begin{align*}
     \Pr(A_i \cap B) &= \Pr(B \mid A_i)\Pr(A_i) \\
     \Pr(A_i \cap B) &= \Pr(A_i\mid B)\Pr(B)
@@ -328,6 +333,7 @@ This formula provides a systematic way to update our beliefs in light of new evi
     \item $\Pr(A_i \mid B)$ is the \textbf{posterior probability}: our updated belief about the cause after observing the evidence.
     \item $\Pr(B)$ is the \textbf{marginal likelihood} of the evidence (also just called the evidence), which serves as a normalization constant.
 \end{itemize}
+We will revisit these ideas in more depth in the context of Bayesian inference later on. For now, we illustrate Bayes' theorem with a couple of examples.
 
 \begin{exampleBox}
     \textbf{Example (Manufacturing Defects, continued)}: We found that the overall defect rate was $\Pr(D) = 0.021$. Now, suppose we have a defective part in hand. What is the probability it came from Machine B, i.e., what is $\Pr(B\mid D)$?
@@ -356,32 +362,42 @@ This formula provides a systematic way to update our beliefs in light of new evi
     \begin{equation}
         \Pr(C \mid T^+) = \frac{0.85 \times 0.01}{0.85 \times 0.01 + 0.001 \times 0.99} = \frac{0.0085}{0.0085 + 0.00099} = \frac{0.0085}{0.00949} \approx 0.896
     \end{equation}
-    Despite strong test characteristics, a positive result has a posterior below 100\% ($\approx 89.6\%$) because the prior prevalence is only 1\%. The base rate still materially limits certainty.
+    A positive result suggests that the probability the pipe has corrosion is $\approx 89.6\%$. Even though the false positive rate is only 0.1\%, the large proportion of non-corroded pipes (i.e., a low baseline rate of 1\% corroded before we do any testing) means that false positives still make up a significant fraction ($\approx 10.4\%$) of positive test results.
 \end{exampleBox}
 
 \section{Random Variables}
 So far, we have worked with events defined on a sample space $\mathcal{E}$. The outcomes in $\mathcal{E}$ can be numerical (like the result of a die roll) or categorical (like ``heads'' or ``defective''). To unify the analysis of these experiments, we introduce the concept of a \textbf{random variable (RV)}, which provides a consistent way to assign a numerical value to every possible outcome. Formally, a random variable is a function that maps an outcome from the sample space $\mathcal{E}$ to a real number.
 
-We make a brief note on notation: To distinguish between the RV itself (which is a function) and the specific values it can take, we will adopt the convention that an RV will be denoted with a sans-serif font, like $\mathsf{x}$ or $\mathsf{t}$, while a specific, single value that the random variable takes after a trial (known as a \emph{realization}) will be denoted with a standard italic font, like $x$ or $t$. So, if $\xi$ is the outcome of a particular trial, $x = \mathsf{x}(\xi)$ is the numerical value assigned to that outcome by the RV $\mathsf{x}$.
+We make a brief note on notation: To distinguish between the RV itself (which is like a die we have not yet rolled, a coin we have not yet flipped, or a non-deterministic function we have not yet evaluated) and the specific values it can take, we will adopt the convention that an RV will be denoted with a sans-serif font, like $\mathsf{x}$ or $\mathsf{t}$, while a specific, single value that the random variable takes after a trial (known as a \emph{realization}) will be denoted with a standard italic font, like $x$ or $t$. So, if $\xi$ is the outcome of a particular trial, $x = \mathsf{x}(\xi)$ is the numerical value assigned to that outcome by the RV $\mathsf{x}$.
 
-The primary utility of a random variable is that it allows us to define events using numerical statements. For example, instead of describing a complex set of outcomes, we can make a simple statement like ``the temperature is greater than 400 K.'' This translates an event in the numerical space back to a corresponding event in the original sample space:
+Random variables allow us to define events using numerical statements and with mathematical precision. For example, instead of describing a complex set of outcomes, we can make a simple statement like ``the temperature is greater than 400 K.'' This translates an event in the numerical space back to a corresponding event in the original sample space:
 \begin{equation}
     \Pr(\mathsf{x} \ge a) := \Pr(\{\xi \in \mathcal{E} \mid \mathsf{x}(\xi) \ge a\})
 \end{equation}
 
-Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have probability zero: $\Pr(\mathsf{T}=t)=0$. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
+Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have vanishingly small probabilities: the probability that the random variable $\mathsf{T}$ takes on a value that is \emph{exactly} equal to $t$, $\Pr(\mathsf{T}=t)$, is infinitessimally small. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
 
-\section{CDFs, PMFs, and PDFs}
-Random variables give us a tool to map experimental outcomes to numbers. The next step is to describe the probabilistic behavior of that variable. We need to answer the question: ``What are the probabilities that the random variable $\mathsf{x}$ will take on certain values?'' This is the role of a \textbf{probability distribution}. There are two main functions we use to fully characterize a random variable's distribution. One is universal, while the other is specific to whether the variable is discrete or continuous.
+\section{Describing Random Variables: Probability Distributions}
+Random variables give us a tool to map experimental outcomes to numbers. The next step is to describe the probabilistic behavior of that variable. We need to answer the question: ``What are the probabilities that the random variable $\mathsf{x}$ will take on certain values?'' This is the role of a \textbf{probability distribution}. There are two main functions we use to fully characterize a random variable's distribution. The first is the \textbf{cumulative distribution function (CDF)}, which applies to all types of random variables that take on numerical values. The second function depends on whether the random variable is discrete or continuous: for discrete random variables, we use the \textbf{probability mass function (PMF)}, which also applies to random variables that take on non-numerical values; for continuous random variables, we use the \textbf{probability density function (PDF)}.
 
-\paragraph*{Support}
-We write $\mathcal{S}_{\mathsf{x}}$ for the support of $\mathsf{x}$, i.e., the set of values where the distribution puts positive probability (discrete) or positive density (continuous).
+\begin{definitionBox}
+    \textbf{Definition:} The \textbf{support} of a random variable $\mathsf{x}$ is the set of values where the distribution puts positive probability (discrete) or positive density (continuous). Essentially, it describes the range of values that the random variable can take on with non-zero probability. We write $\mathcal{S}_{\mathsf{x}}$ for the support of $\mathsf{x}$.
+\end{definitionBox}
 
-% TODO: add TikZ sketches for CDF, PMF, and PDF
+% \begin{figure}[H]
+%   \centering
+
+  % TODO: add TikZ sketches for CDF, PMF, and PDF
+%   \begin{tikzpicture}[scale=1.0]
+% \end{tikzpicture}
+%   \caption{Illustration of probability distributions for continuous and discrete random variables. Left: Continuous RV with PDF $f(x)$ and CDF $F(x)$. Right: Discrete RV with PMF $p(k)$ and CDF $F(k)$.}
+%   \label{fig:rv-distributions}
+% \end{figure}
+
 \subsection{The Cumulative Distribution Function}
-The most fundamental description of any random variable's distribution is the \textbf{cumulative distribution function (CDF)}. The CDF, denoted by $F_{\mathsf{x}}(x)$, is defined as the probability that the random variable $\mathsf{x}$ takes on a value less than or equal to a specific value $x$.
+The most fundamental description of any random variable's distribution is the \textbf{cumulative distribution function (CDF)}. The CDF, typically denoted by $F_{\mathsf{x}}(x)$, is defined as the probability that the random variable $\mathsf{x}$ takes on a value less than or equal to a specific value $x$.
 \begin{equation}
-    F_{\mathsf{x}}(x) = \Pr(\mathsf{x} \le x)
+    F_{\mathsf{x}}(x) := \Pr(\mathsf{x} \le x)
     \label{eq:cdf-def}
 \end{equation}
 The CDF accumulates probability as $x$ increases. By definition, it is a non-decreasing function that starts at 0 for $x \to -\infty$ and ends at 1 for $x \to +\infty$; it should be obvious why these limits are necessary given the axioms of probability. A consequence of \autoref{eq:cdf-def} is that for any $a<b$,
@@ -389,7 +405,7 @@ The CDF accumulates probability as $x$ increases. By definition, it is a non-dec
     \Pr(a<\mathsf{x}\le b)=F_{\mathsf{x}}(b)-F_{\mathsf{x}}(a)
     \label{eq:cdf-range}
 \end{equation}
-The use of $<$ and $\le$ is very deliberate here: the CDF is right-continuous, but not necessarily left-continuous. Only if the CDF is (fully) continuous at $a$ and $b$ are we allowed to switch both bounds to $\le$.
+The use of $<$ and $\le$ is very deliberate here: the CDF is right-continuous, but not necessarily left-continuous. Only if the CDF is (fully) continuous at $a$ and $b$ are we allowed to switch both bounds to $\le$. This distinction matters for discrete random variables, where there can be jumps in the CDF at points in the support, but does not generally matter for continuous random variables.
 
 \subsection{The Probability Mass Function for Discrete RVs}
 For a discrete random variable, it's most intuitive to describe the ``lump'' of probability at each specific value it can take. This is the job of the \textbf{probability mass function (PMF)}, denoted by $p_{\mathsf{x}}(x)$.
@@ -397,18 +413,33 @@ For a discrete random variable, it's most intuitive to describe the ``lump'' of 
     p_{\mathsf{x}}(x) = \Pr(\mathsf{x} = x)
     \label{eq:pmf-def}
 \end{equation}
-The PMF gives a probability for each possible outcome. It must satisfy two conditions: $p_{\mathsf{x}}(x) \ge 0$ for all $x$, and the sum over all possible values in its support must be 1: $\sum_{x \in \mathcal{S}_{\mathsf{x}}} p_{\mathsf{x}}(x) = 1$. The PMF links to the CDF via
+PMFs directly give the probability of each possible value. For example, if $\mathsf{x}$ is the result of rolling a fair six-sided die, then its PMF is $p_{\mathsf{x}}(k) = 1/6$ for $k=1,2,3,4,5,6$ and $p_{\mathsf{x}}(k) = 0$ otherwise.
+
+
+Any valid PMF must satisfy two conditions:
+\begin{enumerate}
+    \item Non-negativity: $p_{\mathsf{x}}(x) \ge 0$ for all $x$.
+    \item Normalization: $\sum_{x \in \mathcal{S}_{\mathsf{x}}} p_{\mathsf{x}}(x) = 1$.
+\end{enumerate}
+
+The PMF links to the CDF via
 \begin{equation}
     F_{\mathsf{x}}(x) = \sum_{a \le x} p_{\mathsf{x}}(a)
 \end{equation}
 
+
 \subsection{The Probability Density Function for Continuous RVs}
-For a continuous random variable, the situation is more subtle. Since there are infinitely many possible values in any range, the probability of the RV taking on any single, exact value is zero. For example, $\Pr(\mathsf{T} = 373.150000... \text{ K}) = 0$. Instead, we talk about the probability of the variable falling within a range $[a,b]$. We describe this using a \textbf{probability density function (PDF)}. We'll again use $p_{\mathsf{x}}(x)$ to denote a PDF; context will make clear whether it's a PMF or PDF. The PDF is the function we integrate to find the probability of being in a range:
+For a continuous random variable, the situation is more subtle. Since there are infinitely many possible values in any range, the probability of the RV taking on any single, exact value is zero.  Instead, we talk about the probability of the variable falling within a range $[a,b]$. We describe this using a \textbf{probability density function (PDF)}. We'll again use $p_{\mathsf{x}}(x)$ to denote a PDF; the context should make clear whether it's a PMF or PDF. The PDF is a function we can integrate to find the probability of the random variable taking on a value in a given range:
 \begin{equation}
     \Pr(a \le \mathsf{x} \le b) = \int_{a}^{b} p_{\mathsf{x}}(x)\,dx
     \label{eq:pdf-range}
 \end{equation}
-Like the PMF, the PDF must be non-negative, $p_{\mathsf{x}}(x) \ge 0$, and its total integral must be 1: $\int_{-\infty}^{\infty} p_{\mathsf{x}}(x)\,dx = 1$. We take the support to be $\mathcal{S}_{\mathsf{x}}=\{x: p_{\mathsf{x}}(x)>0\}$, and probabilities of intervals outside $\mathcal{S}_{\mathsf{x}}$ are zero. Assuming the PDF exists and is continuous (which is not always true), the PDF links to the CDF via
+Like the PMF, the PDF must satisfy two conditions:
+\begin{enumerate}
+    \item Non-negativity: $p_{\mathsf{x}}(x) \ge 0$ for all $x$.
+    \item Normalization: $\int_{-\infty}^{\infty} p_{\mathsf{x}}(x)\,dx = 1$.
+\end{enumerate}
+We take the support to be $\mathcal{S}_{\mathsf{x}}=\{x: p_{\mathsf{x}}(x)>0\}$, and probabilities of intervals outside $\mathcal{S}_{\mathsf{x}}$ are zero. Assuming the PDF exists and is continuous (which is not always true), the PDF links to the CDF via
 \begin{equation}
     F_{\mathsf{x}}(x) = \int_{-\infty}^{x} p_{\mathsf{x}}(t)\,dt \iff p_{\mathsf{x}}(x) = \frac{d}{dx}F_{\mathsf{x}}(x)
 \end{equation}
@@ -416,7 +447,7 @@ Like the PMF, the PDF must be non-negative, $p_{\mathsf{x}}(x) \ge 0$, and its t
 \begin{warningBox}
     \textbf{Warning: PDF Danger Zone.}\quad Here are two points to watch out for when working with PDFs:
     \begin{enumerate}
-        \item A PDF value is not a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability density. It can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $\Pr(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
+        \item A PDF value is \emph{not} a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability emph{density}. As a result, it can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $\Pr(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
         \item The probability at a point is zero (if in doubt, check out \autoref{eq:pdf-range} and realize that you would be integrating over a zero-width interval). For any continuous RV, $\Pr(\mathsf{x}=c)=0$. This means that $\Pr(a \le \mathsf{x} \le b)$ is the same as $\Pr(a < \mathsf{x} < b)$.
     \end{enumerate}
 \end{warningBox}
@@ -424,10 +455,12 @@ Like the PMF, the PDF must be non-negative, $p_{\mathsf{x}}(x) \ge 0$, and its t
 \section{Sampling and Expectations}
 % MC: seems like sampling doesn't come up in this section so maybe should retitle and remove intro about sampling
 % or rewrite to discuss sampling first
-The link between a theoretical probability distribution and real-world data is \textbf{sampling}. When we perform an experiment and get a realization $x$ of a random variable $\mathsf{x}$, we are ``drawing a sample'' from its distribution. With independent and identically distributed sampling, relative frequencies (discrete) converge to the true probabilities, and histograms/density estimators (continuous) approximate the PDF as the sample size grows. This connects our formal definitions back to the intuitive idea of probability as long-run frequency. When we get these distributions (empirically or theoretically), we get a complete, but sometimes overwhelmingly detailed, description of a random variable. We often want to summarize a distribution with a few key numbers that describe its central tendency, spread, and shape. We will cover some of these below and see how they can be estimated from sample data.
+The link between a theoretical probability distribution and real-world data is \textbf{sampling}. When we perform an experiment and get a realization $x$ of a random variable $\mathsf{x}$, we are ``drawing a sample'' from its distribution. With independent and identically distributed sampling (``i.i.d.'', a concept that comes up many times in probability theory), relative frequencies (discrete) converge to the true probabilities, and histograms/density estimators (continuous) approximate the PDF as the sample size grows. This connects our formal definitions back to the intuitive idea of probability as long-run frequency, \autoref{eq:prob-limit}. 
+
+While the PDF or CDF of a RV gives us a full description of a random variable's behavior, there are simpler summary statistics we often want to compute. We will cover some of these below and see how they can be estimated from sample data.
 
 \paragraph*{The Expected Value (Mean)}
-The most important summary statistic is the \textbf{expected value} (also known as the expectation or the mean). It represents the long-run average value of the random variable over many trials. It is the center of mass of the distribution. The expectation operator is denoted by $\mathbb{E}[\cdot]$ or angle brackets $\langle\cdot\rangle$. For a discrete RV,
+The most important summary statistic is the \textbf{expected value} of a RV (also known as the expectation or the mean). It represents the long-run average value of the random variable over many trials and is the center of mass of the distribution. The expectation operator is denoted by $\mathbb{E}[\cdot]$ or angle brackets $\langle\cdot\rangle$. For a discrete RV,
 \begin{equation}
     \mu_{\mathsf{x}} = \mathbb{E}[\mathsf{x}] = \sum_{x} x \, p_{\mathsf{x}}(x) \qquad\text{(discrete)}
 \end{equation}
@@ -437,38 +470,42 @@ And for a continuous RV,
 \end{equation}
 These integrals/sums assume the expectation exists (is finite).
 
-% MC: we can delete these boxes to avoid confusion
-The below warning and example are both a little beyond the scope of 10.34, but it's something you should be aware of since you'll see it in the literature all the time.
-\begin{warningBox}
-    \textbf{Warning:} If you're keeping track of multiple variables, it helps to explicitly specify what the expectation is over. Use $\mathbb{E}_\mathsf{x}[\cdot]$ to indicate expectation with respect to $p_\mathsf{x}$, and $\mathbb{E}[\cdot \mid \mathsf{y}]$ for the conditional under $p_{\mathsf{x}\mid \mathsf{y}}$. If other variables are random, either condition on them or integrate them out; don't silently treat them as fixed. Recall that $\mathsf{x}$ (a random variable) is distinct from a realized value $x$.
-\end{warningBox}
+When we are dealing with more complex expressions involving expectation operators, it's important to be clear about what random variable(s) the expectation is taken over and what their distributions are. We can write the above expressions equivalently as $\mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x}}}[\mathsf{x}]$ to explicitly indicate that the expectation is with respect to the distribution of $\mathsf{x}$, $p_{\mathsf{x}}(x)$. This notation becomes especially useful when dealing with multiple random variables or conditional expectations, where we need to specify which variable's distribution we are averaging over. As a short-hand for conditional expectation values, $\mathbb{E}[\mathsf{x} \mid \mathsf{y}]$ represents the mean value of $\mathsf{x}$ according to the conditional distribution $p_{\mathsf{x}\mid \mathsf{y}}$, which we might also write as $\mathbb{E}_{\mathsf{x} \mid \mathsf{y}}[\mathsf{x}]$. This notational clarity will be especially important when we discuss Monte Carlo methods later on.
 
-\begin{exampleBox}
-    \textbf{Example:} Let's take a look at an example of explicitly specifying what the expectation is over from the paper \href{https://arxiv.org/abs/2006.11239}{Denoising Diffusion Probabilistic Models} by Ho et al. We keep the notation of the paper here (notice how they don't use sans serif for the random variables, etc.---this is very common in the literature and is generally accepted by the community). In the paper, the simplified training loss is
-    \begin{equation}
-    L_{\text{simple}}(\theta)
-    =\mathbb{E}_{t,x_0,\varepsilon}\!\left[
-    \left\|\varepsilon-\varepsilon_\theta\!\left(\sqrt{\bar\alpha_t}\,x_0+\sqrt{1-\bar\alpha_t}\,\varepsilon,\,t\right)\right\|^2
-    \right]
-    \end{equation}
-    Here, $t\sim\mathrm{Unif}\{1,\dots,T\}$ (discrete uniform distribution), $x_0\sim q(x_0)$ is a random data point, and $\varepsilon\sim\mathcal{N}(0,I)$. Thus, $\mathbb{E}_{t,x_0,\varepsilon}[\cdot]$ averages jointly over these three sources of randomness. If we instead \emph{condition} on a fixed datapoint, we write
-    \begin{equation}
-    \mathbb{E}\!\left[\cdot \mid x_0\right]=\mathbb{E}_{t,\varepsilon}\!\left[\cdot \,\big|\, x_0\right]
-    \end{equation}
-    so the expectation is only over $t$ and $\varepsilon$ while $x_0$ is held fixed. Likewise, a single reverse-process term can be written as
-    \begin{equation}
-    L_{t-1}
-    =\mathbb{E}_{x_0,\varepsilon}\!\left[
-    \frac{\beta_t^2}{2\sigma_t^2\alpha_t(1-\bar\alpha_t)}
-    \left\|\varepsilon-\varepsilon_\theta\!\left(\sqrt{\bar\alpha_t}\,x_0+\sqrt{1-\bar\alpha_t}\,\varepsilon,\,t\right)\right\|^2
-    \right]+C
-    \end{equation}
-    making explicit that the averaging is with respect to the data $x_0$ and the Gaussian noise $\varepsilon$, with constants collected in $C$.
-\end{exampleBox}
+% % MC: we can delete these boxes to avoid confusion
+% The below warning and example are both a little beyond the scope of 10.34, but it's something you should be aware of since you'll see it in the literature all the time.
+% \begin{warningBox}
+%     \textbf{Warning:} If you're keeping track of multiple variables, it helps to explicitly specify what the expectation is over. Use $\mathbb{E}_\mathsf{x}[\cdot]$ to indicate expectation with respect to $p_\mathsf{x}$, and $\mathbb{E}[\cdot \mid \mathsf{y}]$ for the conditional under $p_{\mathsf{x}\mid \mathsf{y}}$. If other variables are random, either condition on them or integrate them out; don't silently treat them as fixed. Recall that $\mathsf{x}$ (a random variable) is distinct from a realized value $x$.
+% \end{warningBox}
+
+% \begin{exampleBox}
+%     \textbf{Example:} Let's take a look at an example of explicitly specifying what the expectation is over from the paper \href{https://arxiv.org/abs/2006.11239}{Denoising Diffusion Probabilistic Models} by Ho et al. We keep the notation of the paper here (notice how they don't use sans serif for the random variables, etc.---this is very common in the literature and is generally accepted by the community). In the paper, the simplified training loss is
+%     \begin{equation}
+%     L_{\text{simple}}(\theta)
+%     =\mathbb{E}_{t,x_0,\varepsilon}\!\left[
+%     \left\|\varepsilon-\varepsilon_\theta\!\left(\sqrt{\bar\alpha_t}\,x_0+\sqrt{1-\bar\alpha_t}\,\varepsilon,\,t\right)\right\|^2
+%     \right]
+%     \end{equation}
+%     Here, $t\sim\mathrm{Unif}\{1,\dots,T\}$ (discrete uniform distribution), $x_0\sim q(x_0)$ is a random data point, and $\varepsilon\sim\mathcal{N}(0,I)$. Thus, $\mathbb{E}_{t,x_0,\varepsilon}[\cdot]$ averages jointly over these three sources of randomness. If we instead \emph{condition} on a fixed datapoint, we write
+%     \begin{equation}
+%     \mathbb{E}\!\left[\cdot \mid x_0\right]=\mathbb{E}_{t,\varepsilon}\!\left[\cdot \,\big|\, x_0\right]
+%     \end{equation}
+%     so the expectation is only over $t$ and $\varepsilon$ while $x_0$ is held fixed. Likewise, a single reverse-process term can be written as
+%     \begin{equation}
+%     L_{t-1}
+%     =\mathbb{E}_{x_0,\varepsilon}\!\left[
+%     \frac{\beta_t^2}{2\sigma_t^2\alpha_t(1-\bar\alpha_t)}
+%     \left\|\varepsilon-\varepsilon_\theta\!\left(\sqrt{\bar\alpha_t}\,x_0+\sqrt{1-\bar\alpha_t}\,\varepsilon,\,t\right)\right\|^2
+%     \right]+C
+%     \end{equation}
+%     making explicit that the averaging is with respect to the data $x_0$ and the Gaussian noise $\varepsilon$, with constants collected in $C$.
+% \end{exampleBox}
     
     
 \paragraph*{Expectation of a Function of an RV}
-We can also calculate the expected value of a function of a random variable, $g(\mathsf{x})$. For a discrete RV,
+We can also calculate the expected value of a function of a random variable, $g(\mathsf{x})$. Functions of random variables are themselves random variables, since their values depend on the outcome of the original random variable. You can think of $g(\mathsf{x})$ as applying a transformation to the original random variable $\mathsf{x}$. When we sample $\mathsf{x}$, we can compute $g(x$ for that sample, and over many samples, we can analyze the distribution of $g(\mathsf{x})$. 
+
+For a discrete RV,
 \begin{equation}
 \mathbb{E}[g(\mathsf{x})] = \sum_{x} g(x) \, p_{\mathsf{x}}(x) \qquad\text{(discrete)}
 \end{equation}
@@ -476,7 +513,9 @@ And for a continuous RV,
 \begin{equation}
 \mathbb{E}[g(\mathsf{x})] = \int_{-\infty}^{\infty} g(x) \, p_{\mathsf{x}}(x)\,dx \qquad\text{(continuous)}
 \end{equation}
-These formulas are often referred to as the law of the unconscious statistician (commonly known as LOTUS). A very important property is that expectation is a linear operator, meaning $\mathbb{E}[a\mathsf{x} + b] = a\mathbb{E}[\mathsf{x}] + b$. However, for a general nonlinear function $g$, it is \emph{not} true that $\mathbb{E}[g(\mathsf{x})] = g(\mathbb{E}[\mathsf{x}])$.
+These formulas are often referred to as the law of the unconscious statistician (commonly known as LOTUS). 
+
+A very important property of the expectation operator is that it is a linear operator, meaning $\mathbb{E}[a\mathsf{x} + b] = a\mathbb{E}[\mathsf{x}] + b$. This property allows us to convert the expectation of a sum to the sum of individual expectations. However, for a general nonlinear function $g$, it is \emph{not} true that $\mathbb{E}[g(\mathsf{x})] = g(\mathbb{E}[\mathsf{x}])$.
 
 \begin{exampleBox}
     \textbf{Example ($\mathbb{E}[g(\mathsf{x})] \neq g(\mathbb{E}[\mathsf{x}])$)}: Consider rolling a fair six-sided die. The RV $\mathsf{x}$ can take values $\{1, 2, 3, 4, 5, 6\}$, each with $p_{\mathsf{x}}(x)=1/6$. The expected value is $\mathbb{E}[\mathsf{x}] = (1+2+3+4+5+6)/6 = 3.5$.
@@ -488,7 +527,7 @@ These formulas are often referred to as the law of the unconscious statistician 
 \paragraph*{Variance and Standard Deviation}
 The \textbf{variance} measures the spread or dispersion of a distribution around its mean. It is defined as the expected squared deviation from the mean.
 \begin{equation}
-    \sigma_{\mathsf{x}}^2 = \operatorname{Var}(\mathsf{x}) = \mathbb{E}\big[(\mathsf{x} - \mu_{\mathsf{x}})^2\big]
+    \sigma_{\mathsf{x}}^2 = \operatorname{Var}(\mathsf{x}) := \mathbb{E}\big[(\mathsf{x} - \mu_{\mathsf{x}})^2\big]
 \end{equation}
 A more convenient formula for computation can be derived using the linearity of expectation:
 \begin{align}
@@ -500,13 +539,18 @@ A more convenient formula for computation can be derived using the linearity of 
 \end{align}
 The \textbf{standard deviation}, $\sigma_{\mathsf{x}} = \sqrt{\operatorname{Var}(\mathsf{x})}$, is the square root of the variance and has the same units as the random variable itself. Other properties like skewness (asymmetry) and kurtosis (tailedness) are defined by higher-order centered moments.
 
-\paragraph*{\texorpdfstring{Law of Iterated Expectations\textsuperscript{*}}{Law of Iterated Expectations}}
+\begin{align}
+\text{Skewness} &= \frac{\mathbb{E}[(\mathsf{x} - \mu_{\mathsf{x}})^3]}{\sigma_{\mathsf{x}}^3} \\
+\text{Kurtosis} &= \frac{\mathbb{E}[(\mathsf{x} - \mu_{\mathsf{x}})^4]}{\sigma_{\mathsf{x}}^4}
+\end{align}
+
+\paragraph*{Law of Iterated Expectations}
 For random variables $\mathsf{x}$ and $\mathsf{s}$,
 \begin{equation}
-  \mathbb{E}[\mathsf{x}] = \mathbb{E}\left[\mathbb{E}[\mathsf{x}\mid \mathsf{s}]\right]
+  \mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x}}}[\mathsf{x}] = \mathbb{E}_{\mathsf{s} \sim p_{\mathsf{s}} }\left[\mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x \mid s}}} [\mathsf{x}\mid \mathsf{s}]\right]
   \label{eq:lie}
 \end{equation}
-In words, this means that we first average the conditional mean within each group $\mathsf{s}$, then average across groups with the distribution of $\mathsf{s}$. In discrete form,
+In words, this means that we can first find the conditional mean within each group $\mathsf{s}$, then average across groups with the distribution of $\mathsf{s}$. In discrete form,
 \begin{equation}
   \mathbb{E}[\mathsf{x}]=\sum_j \mathbb{E}\left[\mathsf{x}\mid \mathsf{s}=s_j\right]\,\Pr(\mathsf{s}=s_j)
 \end{equation}
@@ -537,12 +581,12 @@ The intuition behind LIE is that the conditional expectation $\mathbb{E}[\mathsf
     \begin{equation}
         \mathbb{E}[\text{hits in batch}] = N\,\mathbb{E}[\mathsf{h}] = 0.0109 \,N
     \end{equation}
-    e.g., with $N=2000$, $\mathbb{E}[\text{hits}]=21.8\approx 22$.
+    e.g., with $N=2000$ molecules, $\mathbb{E}[\text{hits}]=21.8\approx 22$.
 \end{exampleBox}
   
 
-\paragraph*{\texorpdfstring{Law of Total Variance\textsuperscript{*}}{Law of Total Variance}}
-For the same $\mathsf{x}$ and $\mathsf{s}$,
+\paragraph*{Law of Total Variance}
+For random variables $\mathsf{x}$ and $\mathsf{s}$,
 \begin{equation}
   \operatorname{Var}(\mathsf{x})
   =
@@ -556,19 +600,20 @@ We can interpret each term as follows:
   \item $\mathbb{E}[\operatorname{Var}(\mathsf{x}\mid \mathsf{s})]$: average \emph{within-group} variability (irreducible noise once $\mathsf{s}$ is known).
   \item $\operatorname{Var}(\mathbb{E}[\mathsf{x}\mid \mathsf{s}])$: \emph{between-group} variability (how group means differ across $\mathsf{s}$).
 \end{itemize}
+We will not need to invoke these laws in 10.34, but they are very useful results in probability theory and statistics.
 % TODO: add good, illustrative examples
 
 \section{Some Notable Probability Distributions}
 While there are countless probability distributions, a small number of them appear so frequently in science and engineering that they deserve special attention. They serve as fundamental building blocks for modeling a vast range of stochastic phenomena.
 
 \paragraph*{The Binomial Distribution}
-The binomial distribution is a discrete distribution that answers the question: ``If I run $n$ independent trials, each with a success probability of $p$, what is the probability of getting exactly $k$ successes?'' It's used for modeling binary outcomes (yes/no, success/failure, on/off) in a fixed number of trials.
+The binomial distribution is a discrete distribution that answers the question: ``If I run $n$ independent trials, each with a success probability of $p$, what is the probability of getting exactly $k$ successes?'' It's used for modeling binary outcomes (yes/no, success/failure, on/off) in a fixed number of trials. The classic example is flipping a (potentially biased) coin $n$ times and counting the number of heads.
 
 Let $\mathsf{k}$ be the random variable for the number of successes. The PMF is given by
 \begin{equation}
     p_{\mathsf{k}}(k) = \binom{n}{k} p^k (1-p)^{n-k} \quad \text{for } k \in \{0, 1, \dots, n\}
 \end{equation}
-This formula combines the probability of one specific sequence of $k$ successes and $n-k$ failures, $p^k(1-p)^{n-k}$, with the number of ways that sequence can occur, given by the binomial coefficient $\binom{n}{k} = n!/(k!(n-k)!)$.
+This formula combines the probability of observing one specific sequence of $k$ successes and $n-k$ failures, $p^k(1-p)^{n-k}$, multiplied by the number of ways that sequence can occur given by the binomial coefficient $\binom{n}{k} = n!/(k!(n-k)!)$.
 
 % MC: was using minipage but using this hack to get vertical centering. looks better imo
 \begin{tabular}{@{}>{\raggedright\arraybackslash}m{0.48\textwidth} >{\raggedleft\arraybackslash}m{0.48\textwidth}@{}}
@@ -579,7 +624,7 @@ This formula combines the probability of one specific sequence of $k$ successes 
         \item \textbf{Support}: $\mathsf{k} \in \{0, 1, \dots, n\} = \mathbb{Z}_{\ge 0}$
     \end{itemize}
     &
-    \includegraphics[width=\linewidth]{figs/probability/binomial_pmf.pdf} \\
+    \includegraphics[width=\linewidth]{figs/probability/binomial_pmf.pdf} \\ % TODO: change all "simple" plots like this to use tikz? Or if we are generating them externally, we should have those scripts in the repo
 \end{tabular}
 
 
@@ -604,11 +649,11 @@ The height of the PDF, $1/(b-a)$, is set to ensure that the total area under the
         \item \textbf{Support}: $\mathsf{x} \in [a, b]$
     \end{itemize}
     &
-    \includegraphics[width=\linewidth]{figs/probability/uniform_pdf.pdf} \\
+    \includegraphics[width=\linewidth]{figs/probability/uniform_pdf.pdf} \\ 
 \end{tabular}
 
 \paragraph*{The Normal (Gaussian) Distribution}
-The normal distribution, also known as the Gaussian distribution, is arguably the most important continuous distribution in all of probability and statistics. Its importance comes from the central limit theorem, which states that the sum of a large number of independent random variables will be approximately normally distributed, regardless of their individual distributions (we'll discuss this in more detail later). This is why it appears everywhere. It is the classic ``bell curve.'' 
+The normal distribution, also known as the Gaussian distribution, is arguably the most important continuous distribution in all of probability and statistics. Its importance comes from the central limit theorem, which states that the sum of a large number of independent and identically distributed (i.i.d.) random variables will be approximately normally distributed, regardless of their individual distributions (we'll discuss this in more detail later). This is why it appears everywhere. It is the classic ``bell curve.'' 
 
 The PDF is parameterized by the mean $\mu$ and the variance $\sigma^2$:
 \begin{equation}
@@ -628,9 +673,9 @@ The mean $\mu$ sets the center of the peak, and the standard deviation $\sigma$ 
 \end{tabular}
 
 \paragraph*{The Poisson Distribution}
-The Poisson distribution is a discrete distribution used to model the number of times an event occurs within a fixed interval of time or space. It is the quintessential model for counting rare, independent events happening at a constant average rate, such as the number of emails arriving at a server in one minute, the number of defects per square meter of a material, or the number of radioactive decays in a second. 
+The Poisson distribution is a discrete distribution used to model the number of times an event occurs within a fixed interval of time or space. It is the quintessential model for counting rare, independent events happening at a constant average rate, such as the number of radioactive decays in a second or the number of defects per square meter of a material.
 
-The distribution is defined by a single parameter, $\lambda$, which is the average number of events in the given interval. The PMF for the number of observed events, $\mathsf{k}$, is:
+The Poisson distribution is defined by a single parameter, $\lambda$, which is the average number of events in the given interval. The PMF for the number of observed events, $\mathsf{k}$, is:
 \begin{equation}
     p_{\mathsf{k}}(k) = \frac{\lambda^k e^{-\lambda}}{k!} \quad \text{for } k \in \{0, 1, 2, \dots\}
 \end{equation}
@@ -650,7 +695,7 @@ An important feature of the Poisson distribution is that its mean and variance a
 The Poisson distribution can also be viewed as an approximation of the Binomial distribution $B(n, p)$ when the number of trials $n$ is very large and the success probability $p$ is very small, such that $\lambda = np$.
 
 \paragraph*{The Exponential Distribution}
-The exponential distribution models the waiting time between events in a Poisson process with constant rate $\lambda$. It is the continuous analog of the geometric distribution and (uniquely among continuous distributions on $[0,\infty)$) has the memoryless property that the probability of an event occurring in the next $t$ units of time is independent of the time already elapsed.
+The exponential distribution models the waiting time between events in a Poisson process with constant rate $\lambda$. It is the continuous analog of the geometric distribution and (uniquely among continuous distributions on $[0,\infty)$) has the memoryless property that the probability of an event occurring in the next $t$ units of time is independent of the time already elapsed. We will invoke the exponential distribution when discussing kinetic Monte Carlo methods.
 
 The PDF is
 \begin{equation}
@@ -672,8 +717,15 @@ The PDF is
 \includegraphics[width=\linewidth]{figs/probability/exponential_pdf.pdf} \\
 \end{tabular}
 
+\section{Recognizing Distributions by Shape}
+The requirement that a probability density function be normalized means that when we are describing the behavior of a random variable $\mathsf{x}$ with PDF $p_{\mathsf{x}}(x)$, we are really describing the \emph{shape} of the distribution---how that function depends on $x$. The area under the curve must equal 1, so if we know the shape, we know everything there is to know about the distribution. The normalization is necessary for $p_{\mathsf{x}}(x)$ to be a valid PDF, but it is not what distinguishes one distribution from another.
+
+As a result, distributions can be recognized by their dependence on the argument without worrying about the normalization constant. If we know that a PDF $p_{\mathsf{x}}(x)$ is proportional to $\exp(-x^2/2)$, which might be written as $p_{\mathsf{x}}(x) \propto \exp(-x^2/2)$, we can immediately identify it as a normal distribution with mean 0 and variance 1 without needing to compute the normalization constant $1/\sqrt{2\pi}$. Similarly, if we see a PMF proportional to $\lambda^k /k!$, we can identify it as a Poisson distribution with rate parameter $\lambda$ despite the lack of the $e^{-\lambda}$ term.
+
+Being able to recognize distributions by their shape is a useful skill in probability and statistics will be useful when we start discussing Bayesian inference and Monte Carlo methods later in the course.
+
 \section{Empirical Distributions}
-The probability distributions we have discussed (normal, Poisson, etc.) are theoretical models. They represent a complete and perfect description of a random variable, assuming we know its underlying properties (like $\mu$, $\sigma^2$, or $\lambda$). In any real-world scenario, however, we do not have access to this true, latent distribution. Instead, all we have is a finite collection of data points, or samples, drawn from it. 
+The probability distributions we have discussed (normal, Poisson, etc.) are theoretical models. They represent a complete and perfect description of a random variable, assuming we know its underlying parameters (like $\mu$, $\sigma^2$, or $\lambda$). In most real-world scenario, however, we do not have access to this true, latent distribution. Instead,  we might have is a finite collection of data points, or samples, drawn from it. 
 
 The distribution of our collected data is called the \textbf{empirical distribution}. It is our best approximation of the true, underlying distribution. For a discrete random variable, we can define the empirical probability mass function, $\hat{p}_{\mathsf{x}}(x)$\footnote{The hat notation is used universally in statistics to denote an estimator, a value calculated from data that is our best guess for an unknown true value. We'll revisit estimators momentarily.}, as the relative frequency of each outcome in our data:
 \begin{equation}
@@ -687,16 +739,16 @@ The distribution of our collected data is called the \textbf{empirical distribut
     \label{fig:die-roll-convergence}
 \end{figure}
 
-The \textbf{law of large numbers} guarantees that as our sample size $N$ grows, our empirical distribution will converge to the true underlying distribution. The plot in \autoref{fig:die-roll-convergence} illustrates this perfectly. The left panel traces the running empirical probability of each die face as the number of rolls $N$ increases, with the dashed line at $1/6$ marking the theoretical value. Sampling variability dominates for small $N$ but steadily diminishes. The right panel overlays stem plots of the full discrete distribution at selected sample sizes ($N=1,10,10000$). We can see how a single observation yields an extreme, noisy snapshot, a handful of rolls produces visible imbalance, and a large sample approaches the uniform distribution across faces. The same is true for any underlying and corresponding empirical distribution. If we draw only five samples from a normal distribution, the resulting histogram might look nothing like a bell curve, and any parameters we estimate from it (like the mean) could be very inaccurate. But if we keep adding more samples, we are guaranteed to get a better and better approximation of the true distribution.
+The \textbf{law of large numbers} guarantees that as our sample size $N$ grows, our empirical distribution must converge to the true underlying distribution, i.e., $\hat \lim_{N \to \infty} p_\mathsf{x}(x) = p_\mathsf{x}(x)$. The plot in \autoref{fig:die-roll-convergence} illustrates this. The left panel traces the running empirical probability of each die face as the number of rolls $N$ increases, with the dashed line at $1/6$ marking the theoretical value for this fair die. At small $N$, the empirical probabilities of different numbers fluctuate widely but the sampling variability steadily diminishes as $N$ increases. The right panel overlays stem plots of the full discrete distribution at selected sample sizes ($N=1,10,10000$). We can see how a single observation yields an extreme, noisy snapshot, a handful of rolls produces visible imbalance, and a large sample approaches the uniform distribution across faces. The same is true for any underlying and corresponding empirical distribution. If we draw only five samples from a normal distribution, the resulting histogram might look nothing like a bell curve, and any parameters we estimate from it (like the mean) could be very inaccurate. But if we keep adding more samples, we are guaranteed to get a better and better approximation of the true distribution.
 
 \section{The Central Limit Theorem}
-We've seen that we use samples from a distribution to learn about it. One of the most common things we compute from a sample is its average. This leads to a question: if we take many different samples and compute the average for each, how will those averages themselves be distributed? The answer is provided by one of the most powerful and perhaps surprising results in all of statistics: the \textbf{central limit theorem (CLT)}.
+When using empirical samples to estimate an underlying probability distribution, one of the properties we might be interested is in the population mean. If we sample values $\{x_1, x_2, ..., x_N\}$, a reasonable estimate for the mean of the underlying distribution is the sample mean, $\frac{1}{N} \sum_{i_1}^N x_i$. A natural question arises: how accurate is this estimate? How close is it likely to be to the true mean of the underlying distribution? The answer is provided by the \textbf{central limit theorem (CLT)}.
 
-First, we have to recognize that the sample mean is a random variable itself. If we have a set of $N$ independent and identically distributed (i.i.d.) observations $\{\mathsf{x}_1, \dots, \mathsf{x}_N\}$, their sample mean, $\mathsf{S}_N$, is also a random variable:
+First, we have to recognize that the sample mean is a random variable itself. If we have a set of $N$ independent and identically distributed (i.i.d.) random variables $\{\mathsf{x}_1, \dots, \mathsf{x}_N\}$, their sample mean, $\mathsf{S}_N$, is also a random variable:
 \begin{equation}
     \mathsf{S}_N = \frac{1}{N}\sum_{i=1}^N \mathsf{x}_i
 \end{equation}
-If we were to repeat our experiment (drawing $N$ samples) again, we would get a different value of the sample mean $\mathsf{S}_N$. The CLT describes the distributional shape of this sample mean. Informally, for large $N$, $\mathsf{S}_N$ is approximately normal regardless of the parent distribution's shape (under mild conditions). The formal statement follows.
+If we were to run an experiment once, we would calculate one sample mean, $S_N$. If we repeat it with another $N$ samples, we might get a different sample mean. The CLT describes the distributional shape of this sample mean. For large $N$, the distribution of $\mathsf{S}_N$  converges to the normal distribution regardless of the parent distribution's shape (under mild conditions). The formal statement follows.
 
 \begin{definitionBox}
     \textbf{Central Limit Theorem.}
@@ -714,15 +766,18 @@ and, in fact, when the observations are i.i.d.\ with variance $\sigma^2$, the va
 \begin{equation}
     \operatorname{Var}(\mathsf{S}_N)=\frac{\sigma^2}{N}
 \end{equation}
-holds exactly (the normality is the approximation). This tells us two important things:
+holds exactly (the normality is the approximation).
+
+There are several important aspects of the CLT to highlight: 
 \begin{enumerate}
-    \item The distribution of sample means is centered at the true mean $\mu$.
+    \item The distribution of sample means is centered at the true mean $\mu$. Therefore, $\mathbb{E}[\mathsf{S}_N] = \mu$. On average, the sample mean is correct.
     \item The variance of the sample means is $\sigma^2/N$. This means that as our sample size $N$ increases, the sample means cluster more and more tightly around the true mean. Our uncertainty in the estimate decreases proportionally to $1/\sqrt{N}$.
+    \item The CLT does not require the underlying distribution to be normal. Even if the original data are drawn from a highly skewed or heavy-tailed distribution, the distribution of the sample mean will still approach a normal distribution as $N$ increases.
 \end{enumerate}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth]{figs/probability/clt.pdf}
+    \includegraphics[width=\textwidth]{figs/probability/clt.pdf} % TODO: label x axes S_{10} and S_{1000}
     \caption{Central Limit Theorem demonstration. Left: histogram of raw \(\mathcal{U}(0,1)\) draws. Middle/Right: histograms of the sample mean \(\mathsf{S}_N\) from \(M=5000\) repeated experiments with \(N=10\) and \(N=1000\) per experiment. The solid curve is the normal approximation \(\mathcal{N}(\mu,\sigma^2/N)\) with \(\mu=0.5\) and \(\sigma^2=1/12\); the dashed line marks \(\mu\). As \(N\) increases, the distribution of \(\mathsf{S}_N\) becomes more Gaussian and concentrates around \(\mu\) with standard deviation \(\sigma/\sqrt{N}\). Here, \(M\) is the number of independent repetitions used to build each histogram.}
     \label{fig:clt-demo}
 \end{figure}
@@ -739,34 +794,34 @@ holds exactly (the normality is the approximation). This tells us two important 
     
 
 \section{Estimators and Bias}
-The central limit theorem describes the behavior of a specific calculation, the sample mean. This is an example of an \textbf{estimator}: a rule for calculating a value from data to approximate an unknown property of the underlying distribution. We denote estimators using a hat, e.g., the sample mean $\hat{\mu}_{\mathsf{x}} = \mathsf{S}_N$, which we used to estimate the true mean $\mu$. But how do we know if an estimator is a good one? One way is to look at its \textbf{bias}. The bias of an estimator ($\hat{\theta}$) is the difference between its expected value and the true value of the parameter it is trying to estimate ($\theta$):
+The central limit theorem describes the behavior of a specific calculation, the sample mean. This is an example of an \textbf{estimator}: a rule for calculating a value from data to approximate an unknown property of the underlying distribution. We denote estimators using a hat by convention. For example, the sample mean $\hat{\mu}_{\mathsf{x}} \equiv \mathsf{S}_N$, which we used to estimate the true mean $\mu_{\mathsf{x}}$. But how do we know if an estimator is a good one? One way is to look at its \textbf{bias}. The bias of an estimator ($\hat{\theta}$) is the difference between its expected value and the true value of the parameter it is trying to estimate ($\theta$):
 \begin{equation}
     \text{Bias}(\hat{\theta}) = \mathbb{E}[\hat{\theta}] - \theta
 \end{equation}
-An estimator is unbiased if its bias is zero, meaning $\mathbb{E}[\hat{\theta}] = \theta$. An unbiased estimator is correct on average, even if any single estimate is off the mark.
+An estimator is unbiased if and only if its bias is zero, meaning $\mathbb{E}[\hat{\theta}] = \theta$. 
 
 \paragraph*{The Sample Mean is Unbiased}
-Assume we observe $N$ i.i.d.\ random variables $\{\mathsf{x}_1, \dots, \mathsf{x}_N\}$ drawn from the same distribution $\mathcal{D}$ with population mean $\mu=\mathbb{E}[\mathsf{x}_i]$ and population variance $\sigma^2=\operatorname{Var}(\mathsf{x}_i)$:
+Assume we observe $N$ i.i.d.\ random variables $\{\mathsf{x}_1, \dots, \mathsf{x}_N\}$ drawn from the same distribution $p_\mathsf{x}$ with mean $\mu=\mathbb{E}[\mathsf{x}_i]$ and variance $\sigma^2=\operatorname{Var}(\mathsf{x}_i)$:
 \begin{equation}
-\mathsf{x}_1,\ldots,\mathsf{x}_N \stackrel{\text{i.i.d.}}{\sim} \mathcal{D}
+\mathsf{x}_1,\ldots,\mathsf{x}_N \stackrel{\text{i.i.d.}}{\sim} p_\mathsf{x}
 \label{eq:iid-samples}
 \end{equation}
-The sample mean is an unbiased estimator of the true mean $\mu$. We can show this easily using the linearity of expectation:
+We can calculate the expectation of this estimator this easily using the linearity of expectation:
 \begin{equation}
     \mathbb{E}[\hat{\mu}_{\mathsf{x}}] = \mathbb{E}\left[\frac{1}{N}\sum_{i=1}^N \mathsf{x}_i\right] = \frac{1}{N}\sum_{i=1}^N \mathbb{E}[\mathsf{x}_i] = \frac{1}{N}\sum_{i=1}^N \mu = \frac{N\mu}{N} = \mu
 \end{equation}
 Since $\mathbb{E}[\hat{\mu}_{\mathsf{x}}] = \mu$, the bias is zero.
 
 \paragraph*{Estimating Variance and Bessel's Correction}
-Now, let's consider estimating the true variance, $\sigma^2$ of the same distribution $\mathcal{D}$ from which $\mathsf{x}_1,\ldots,\mathsf{x}_N$ are drawn as in \autoref{eq:iid-samples}. A natural first guess might be to take the average of the squared differences from our estimated mean:
+Now, let's consider trying to estimate the true variance, $\sigma^2$ of the same distribution $p_\mathsf{x}$ from which $\mathsf{x}_1,\ldots,\mathsf{x}_N$ are drawn as in \autoref{eq:iid-samples}. A natural first guess might be to take the average of the squared differences from our estimated mean:
 \begin{equation}
 \hat{\sigma}^{2}_{\text{naive}} = \frac{1}{N}\sum_{i=1}^{N}\!\bigl(\mathsf{x}_i-\hat{\mu}_{\mathsf{x}}\bigr)^{2}
 \end{equation}
-This estimator is biased low. To see this, we first rewrite deviations from the sample mean in terms of deviations from the population mean:
+It turns out that this estimator is biased and will underestimate the true variance, $\sigma^2$. To see this, we first rewrite deviations from the sample mean in terms of deviations from the population mean:
 \begin{equation}
     \mathsf{x}_i-\hat{\mu}_{\mathsf{x}} =\bigl(\mathsf{x}_i-\mu\bigr)-\bigl(\hat{\mu}_{\mathsf{x}}-\mu\bigr)
 \end{equation}
-Next, we expand the square and take expectations (the expectation is over repeated random samples from $\mathcal{D}$):
+Next, we expand the square and take expectations (the expectation is over repeated random samples from $p_\mathsf{x}$):
 \begin{align}
     \mathbb{E}\!\left[\hat{\sigma}^{2}_{\text{naive}}\right]
     &=\mathbb{E}\!\left[\frac{1}{N}\sum_{i=1}^{N}\!\bigl((\mathsf{x}_i-\mu)-(\hat{\mu}_{\mathsf{x}}-\mu)\bigr)^{2}\right] \nonumber \\
@@ -794,7 +849,7 @@ Putting the pieces together, we get
     = \sigma^2 - 2\,\operatorname{Var}(\hat{\mu}_{\mathsf{x}}) + \operatorname{Var}(\hat{\mu}_{\mathsf{x}})
     =\sigma^{2}-\operatorname{Var}(\hat{\mu}_{\mathsf{x}})
 \end{equation}
-But for i.i.d.\ data, $\operatorname{Var}(\hat{\mu}_{\mathsf{x}})=\sigma^{2}/N$. Therefore,
+For i.i.d.\ data, $\operatorname{Var}(\hat{\mu}_{\mathsf{x}})=\sigma^{2}/N$ according to the Central Limit Theorem, since $\hat \mu_\mathsf{x} \equiv \mathsf{S}_N$. Therefore,
 \begin{equation}
     \mathbb{E}\!\left[\hat{\sigma}^{2}_{\text{naive}}\right]
     =\left(1-\frac{1}{N}\right)\sigma^{2}
@@ -802,7 +857,7 @@ But for i.i.d.\ data, $\operatorname{Var}(\hat{\mu}_{\mathsf{x}})=\sigma^{2}/N$.
 \end{equation}
 which shows the bias: the naive estimator systematically underestimates the population variance $\sigma^2$.
 
-It's clear how to remove this bias: just multiply the naive estimator by $N/(N-1)$. We thus define the unbiased sample variance
+It's clear how to remove this bias: just multiply the naive estimator by $N/(N-1)$. We thus define the \emph{unbiased} sample variance
 \begin{equation}
     \hat{\sigma}^{2}_{\text{unbiased}} = \frac{1}{N-1}\sum_{i=1}^{N}\bigl(\mathsf{x}_i-\hat{\mu}_{\mathsf{x}}\bigr)^{2}
 \end{equation}
@@ -832,13 +887,13 @@ so $\hat{\sigma}^{2}_{\text{unbiased}}$ is an unbiased estimator of the populati
 
 \end{exampleBox}
 
-\paragraph*{Unbiased \texorpdfstring{$\neq$}{≠} Best MSE} We are foreshadowing a later section a bit here, but this is very important to keep in mind. Unbiasedness concerns the mean of an estimator, not its overall error. The mean-squared error (MSE) decomposes as
+\paragraph*{Unbiased \texorpdfstring{$\neq$}{≠} Best Mean-Squared Error} Unbiasedness concerns the mean of an estimator, not its expected absolute or squared error. The ``best'' way to estimate a parameter is subjective, but we might consider the mean-squared error (MSE) as a reasonable criterion: if we use our estimator with a finite number of samples, what is its expected squared deviation from the true parameter? The mean-squared error (MSE) decomposes as
 \begin{equation}
     \operatorname{MSE}(\hat\theta)
     = \mathbb{E}\!\left[(\hat\theta-\theta)^2\right]
-    = \operatorname{Var}(\hat\theta) + \bigl(\operatorname{Bias}(\hat\theta)\bigr)^2
+    = \operatorname{Var}(\hat\theta) + \operatorname{Bias}(\hat\theta)^2
 \end{equation}
-A slightly biased estimator can have \emph{smaller} MSE if it meaningfully reduces variance. For example, let $\hat\theta$ be unbiased with $\operatorname{Var}(\hat\theta)=\alpha$, and consider another estimator $\tilde\theta$ that just shrinks $\hat\theta$:
+A slightly biased estimator can have \emph{smaller} MSE if it meaningfully reduces variance. For example, let $\hat\theta$ be unbiased with $\operatorname{Var}(\hat\theta)=\alpha$ (so $\operatorname{MSE}(\hat\theta)=\alpha$), and consider another estimator $\tilde\theta$ that just shrinks $\hat\theta$:
 \begin{equation}
     \tilde\theta=(1-\lambda)\hat\theta,\qquad 0<\lambda<1
 \end{equation}
@@ -859,10 +914,10 @@ For sufficiently small $\lambda>0$, we have $\operatorname{MSE}(\tilde\theta) < 
 
 
 \section{Multivariate Random Variables}
-Our discussion so far has focused on single, or univariate, random variables. However, in many engineering and scientific problems, we are interested in multiple random quantities at once. For example, an experiment might measure the temperature and pressure in a reactor, or the velocity of a particle in three dimensions. To handle these cases, we generalize our framework from random variables to random vectors.
+Our discussion so far has focused on single, or univariate, random variables. However, in many engineering and scientific problems, we are interested in multiple random quantities at once. For example, an experiment might measure the temperature and pressure in a reactor, or the velocity of a particle in three dimensions. To handle these cases, we generalize our discussion from ``random variables'' to ``random vectors''.
 
 \subsection{Random Vectors}
-A \textbf{random vector} is simply a vector whose elements are scalar random variables. A random vector $\boldsymbol{\mathsf{x}}$ of dimension $N$ is written as
+A \textbf{random vector} is simply a vector whose elements are  random variables, and is equivalently described as a \textbf{multivariate random variable}. A random vector $\boldsymbol{\mathsf{x}}$ of dimension $N$ can be written as
 \begin{equation}
     \boldsymbol{\mathsf{x}} = 
     \begin{bmatrix}
@@ -904,6 +959,10 @@ The mean of a random vector is a vector containing the means of each of its comp
     \vdots \\
     \mathbb{E}[\mathsf{x}_N]
 \end{bmatrix}
+\end{equation}
+And more generally, the expectation of any function $f:\mathbb{R}^N\to\mathbb{R}$ of a random vector $\boldsymbol{\mathsf{x}}$ is given by
+\begin{equation}
+    \mathbb{E}[f(\boldsymbol{\mathsf{x}})] = \int_{\mathbb{R}^N} f(\mathbf{x})\,p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})\,d\mathbf{x}
 \end{equation}
 
 \begin{exampleBox}
@@ -949,19 +1008,28 @@ The sign of the covariance tells us the nature of the linear relationship:
     \item $\operatorname{Cov}(\mathsf{x}_i, \mathsf{x}_j) = 0$: There is no linear relationship between them. They are said to be uncorrelated.
 \end{itemize}
 
-For a random vector $\boldsymbol{\mathsf{x}}$, we summarize all of these pairwise relationships in the \textbf{covariance matrix} $\mathbf{C}$. The element $C_{ij}$ is the covariance between $\mathsf{x}_i$ and $\mathsf{x}_j$.
+For a random vector $\boldsymbol{\mathsf{x}}$, we summarize all of these pairwise relationships in the \textbf{covariance matrix} $\mathbf{C}$, also commonly denoted by $\boldsymbol \Sigma$. The element $C_{ij}$ is the covariance between $\mathsf{x}_i$ and $\mathsf{x}_j$.
 \begin{equation}
     \mathbf{C} = \begin{bmatrix}
         \operatorname{Var}(\mathsf{x}_1) & \operatorname{Cov}(\mathsf{x}_1, \mathsf{x}_2) & \cdots & \operatorname{Cov}(\mathsf{x}_1, \mathsf{x}_N) \\
         \operatorname{Cov}(\mathsf{x}_2, \mathsf{x}_1) & \operatorname{Var}(\mathsf{x}_2) & \cdots & \operatorname{Cov}(\mathsf{x}_2, \mathsf{x}_N) \\
         \vdots & \vdots & \ddots & \vdots \\
-        \operatorname{Cov}(\mathsf{x}_N, \mathsf{x}_1) & \operatorname{Cov}(\mathsf{x}_N, \mathsf{x}_2) & \cdots & \operatorname{Var}(\mathsf{x}_N)
-    \end{bmatrix}
+        \operatorname{Cov}(\mathsf{x}_N, \mathsf{x}_1) & \operatorname{Cov}(\mathsf{x}_N, \mathsf{x}_2) & \cdots & \operatorname{Var}(\mathsf{x}_N)  
+    \end{bmatrix} \equiv \mathbb{E}[ (\boldsymbol{\mathsf{x}} - \boldsymbol \mu) (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top ]
 \end{equation}
-The diagonal entries of the covariance matrix are the variances of each component, $C_{ii} = \operatorname{Cov}(\mathsf{x}_i, \mathsf{x}_i) = \operatorname{Var}(\mathsf{x}_i)$, and the off-diagonal entries describe how the components co-vary. If the off-diagonal entries are all zero, the covariance matrix is diagonal, and the components are said to be pairwise uncorrelated.
+The diagonal entries of the covariance matrix are the variances of each component, $C_{ii} = \operatorname{Cov}(\mathsf{x}_i, \mathsf{x}_i) = \operatorname{Var}(\mathsf{x}_i)$, and the off-diagonal entries describe how the components co-vary. If the off-diagonal entries are all zero, the covariance matrix is diagonal, and the components are said to be pairwise uncorrelated. 
+
+Note also that the covariance matrix is always symmetric ($C_{ij} = C_{ji}$) and positive semi-definite. The proof that a covariance matrix must be positive semi-definite connects back to our earlier discussions of linear algebra, so we will write it out here as a simple proof. Consider any non-zero vector $\mathbf{z} \in \mathbb{R}^N$. We can express the quadratic form $\mathbf{z}^\top \mathbf{C} \mathbf{z}$ as follows:
+\begin{align}
+    \mathbf{z}^\top \mathbf{C} \mathbf{z} &= \mathbf{z}^\top\mathbb{E}[ (\boldsymbol{\mathsf{x}} - \boldsymbol \mu) (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top ] \mathbf{z} \\
+    &= \mathbb{E}[ \mathbf{z}^\top (\boldsymbol{\mathsf{x}} - \boldsymbol \mu) (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top  \mathbf{z} ] \\
+    &= \mathbb{E}[ ( (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top \mathbf{z} )^\top ( (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top \mathbf{z} ) ] \\
+    &= \mathbb{E}[ \boldsymbol{\mathsf{v}}^\top \boldsymbol{\mathsf{v}} ] 
+\end{align}
+where we define the random variable $\boldsymbol{\mathsf{v}} = (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top \mathbf{z}$. Since the inner product of a vector with itself is strictly non-negative, this expectation value is also non-negative. Therefore, we have $\mathbf{z}^\top \mathbf{C} \mathbf{z} \geq 0$ for all non-zero vectors $\mathbf{z}$, which confirms that the covariance matrix $\mathbf{C}$ is positive semi-definite.
 
 \begin{exampleBox}
-    \textbf{Example (Covariance and Scatter Patterns):}
+    \textbf{Example Covariance and Scatter Patterns for Multivariate Gaussian Random Variables:} 
     Consider three zero-mean bivariate normal random vectors
     \(
     \boldsymbol{\mathsf{x}}^{(k)}\sim \mathcal{N}(\mathbf{0},\,\mathbf{\Sigma}^{(k)})
@@ -972,15 +1040,15 @@ The diagonal entries of the covariance matrix are the variances of each componen
     \mathbf{\Sigma}^{(2)}=\begin{bmatrix}1&0.8\\0.8&1\end{bmatrix},\quad
     \mathbf{\Sigma}^{(3)}=\begin{bmatrix}1&-0.8\\-0.8&1\end{bmatrix}.
     \]
-    A major point here is that for the cases with off-diagonal entries, we do \emph{not} have the product of the marginal PDFs as the joint PDF. Instead, the joint PDF has the following quadratic-exponential form (for 10.34, don't worry about knowing where this comes from, but it is a general result for multivariate Gaussians):
+    A major point here is that for the cases with off-diagonal entries, we do \emph{not} have the product of the marginal PDFs as the joint PDF. Instead, the joint PDF has the following quadratic-exponential form, which is the general expression for a $k$-dimensional Gaussian random variable with mean $\boldsymbol \mu$ and covariance $\mathbf \Sigma$:
     \begin{equation}
-    p_{\boldsymbol{\mathsf{x}}^{(k)}}(\mathbf{x})
-    = \frac{1}{2\pi\sqrt{\det\mathbf{\Sigma}^{(k)}}}\,
+    p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})
+    = \frac{1}{(2 \pi)^{k/2}\sqrt{\det\mathbf{\Sigma}}}\,
     \exp\!\left(
-    -\frac{1}{2}\,\mathbf{x}^\top \left(\mathbf{\Sigma}^{(k)}\right)^{-1}\mathbf{x}
-    \right),\qquad \mathbf{x}=[x_1,x_2]^\top
+    -\frac{1}{2}\,(\mathbf{x}-\boldsymbol \mu)^\top \mathbf{\Sigma}^{-1}(\mathbf{x}-\boldsymbol \mu)
+    \right)
     \end{equation}
-    We draw i.i.d.\ samples from each $p_{\boldsymbol{\mathsf{x}}^{(k)}}(\mathbf{x})$ and plot them:
+    We draw i.i.d.\ samples from each $p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})$ and plot them:
     \begin{center}
       \includegraphics[width=\textwidth]{figs/probability/covariance_panels.pdf}
     \end{center}
