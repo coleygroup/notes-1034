@@ -544,6 +544,21 @@ The \textbf{standard deviation}, $\sigma_{\mathsf{x}} = \sqrt{\operatorname{Var}
 \text{Kurtosis} &= \frac{\mathbb{E}[(\mathsf{x} - \mu_{\mathsf{x}})^4]}{\sigma_{\mathsf{x}}^4}
 \end{align}
 
+\paragraph*{Means and variances of linear combinations of RVs}
+For random variables $\mathsf{x}$ and $\mathsf{y}$, and constants $a$ and $b$, the linearity of the expectation operator gives
+\begin{equation}
+    \mathbb{E}[a\mathsf{x} + b\mathsf{y}] = a\mathbb{E}[\mathsf{x}] + b\mathbb{E}[\mathsf{y}]
+\end{equation}
+If $\mathsf{x}$ and $\mathsf{y}$ are independent, then 
+\begin{equation}
+    \operatorname{Var}(a\mathsf{x} + b\mathsf{y}) = a^2\operatorname{Var}(\mathsf{x}) + b^2\operatorname{Var}(\mathsf{y})
+\end{equation}
+If they are not independent, then
+\begin{equation}
+    \operatorname{Var}(a\mathsf{x} + b\mathsf{y}) = a^2\operatorname{Var}(\mathsf{x}) + b^2\operatorname{Var}(\mathsf{y}) + 2ab\,\operatorname{Cov}(\mathsf{x},\mathsf{y})
+\end{equation}
+where the covariance is introduced later in this chapter. These properties are completely general and do not depend on the type of distribution of the random variables. 
+
 \paragraph*{Law of Iterated Expectations}
 For random variables $\mathsf{x}$ and $\mathsf{s}$,
 \begin{equation}
@@ -671,6 +686,8 @@ The mean $\mu$ sets the center of the peak, and the standard deviation $\sigma$ 
     &
     \includegraphics[width=\linewidth]{figs/probability/normal_pdf.pdf} \\
 \end{tabular}
+
+The Gaussian distribution gives rise to additional convenient properties related to linear combinations of Gaussian random variables.  If $\mathsf{x}$ and $\mathsf{y}$ are jointly normally distributed, then any linear combination $a\mathsf{x} + b\mathsf{y}$ is also normally distributed. Combined with the above formulas for the mean and variance of linear combinations of RVs, this allows us to fully characterize the distribution of $a\mathsf{x} + b\mathsf{y}$ as $\mathcal{N}(a\mathbb{E}[\mathsf{x}] + b\mathbb{E}[\mathsf{y}],\, a^2\operatorname{Var}(\mathsf{x}) + b^2\operatorname{Var}(\mathsf{y}) + 2ab\,\operatorname{Cov}(\mathsf{x},\mathsf{y}))$. If $\mathsf{x}$ and $\mathsf{y}$ are independent, the covariance term is zero.
 
 \paragraph*{The Poisson Distribution}
 The Poisson distribution is a discrete distribution used to model the number of times an event occurs within a fixed interval of time or space. It is the quintessential model for counting rare, independent events happening at a constant average rate, such as the number of radioactive decays in a second or the number of defects per square meter of a material.
@@ -1019,7 +1036,7 @@ For a random vector $\boldsymbol{\mathsf{x}}$, we summarize all of these pairwis
 \end{equation}
 The diagonal entries of the covariance matrix are the variances of each component, $C_{ii} = \operatorname{Cov}(\mathsf{x}_i, \mathsf{x}_i) = \operatorname{Var}(\mathsf{x}_i)$, and the off-diagonal entries describe how the components co-vary. If the off-diagonal entries are all zero, the covariance matrix is diagonal, and the components are said to be pairwise uncorrelated. 
 
-Note also that the covariance matrix is always symmetric ($C_{ij} = C_{ji}$) and positive semi-definite. The proof that a covariance matrix must be positive semi-definite connects back to our earlier discussions of linear algebra, so we will write it out here as a simple proof. Consider any non-zero vector $\mathbf{z} \in \mathbb{R}^N$. We can express the quadratic form $\mathbf{z}^\top \mathbf{C} \mathbf{z}$ as follows:
+Note also that the covariance matrix is always symmetric ($C_{ij} = C_{ji}$) and positive semi-definite. The fact that a covariance matrix must be positive semi-definite won't be used directly in the remainder of our discussion of probability, but connects back to our earlier discussions of linear algebra, so we will write it out here as a simple proof. Consider any non-zero vector $\mathbf{z} \in \mathbb{R}^N$. We can express the quadratic form $\mathbf{z}^\top \mathbf{C} \mathbf{z}$ as follows:
 \begin{align}
     \mathbf{z}^\top \mathbf{C} \mathbf{z} &= \mathbf{z}^\top\mathbb{E}[ (\boldsymbol{\mathsf{x}} - \boldsymbol \mu) (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top ] \mathbf{z} \\
     &= \mathbb{E}[ \mathbf{z}^\top (\boldsymbol{\mathsf{x}} - \boldsymbol \mu) (\boldsymbol{\mathsf{x}} - \boldsymbol \mu)^\top  \mathbf{z} ] \\
@@ -1080,7 +1097,7 @@ The relationship between independence and correlation is a common point of confu
     \begin{figure}[H]
         \centering
         \includegraphics[width=.4\textwidth]{figs/probability/uncorrelated_dependent.pdf}
-        \caption{Uncorrelated but dependent.}
+        \caption{Uncorrelated but dependent random variables.}
         \label{fig:uncorrelated-dependent}
     \end{figure}
 \end{exampleBox}
@@ -1091,56 +1108,57 @@ Finally, since the magnitude of covariance depends on the units of the variables
     = \left(\frac{\operatorname{Cov}(\mathsf{x}, \mathsf{y})}{\sigma_{\mathsf{x}}\sigma_{\mathsf{y}}}\right)^2
     = \frac{\left(\mathbb{E}[\mathsf{x}\mathsf{y}] - \mathbb{E}[\mathsf{x}]\mathbb{E}[\mathsf{y}]\right)^2}{\left(\mathbb{E}[\mathsf{x}^2] - \mathbb{E}[\mathsf{x}]^2\right)\left(\mathbb{E}[\mathsf{y}^2] - \mathbb{E}[\mathsf{y}]^2\right)}
 \end{equation}
-To visualize this, we simulate three bivariate normals, plot the scatter, and overlay the least-squares line.
+To visualize this, we simulate three bivariate normals, plot the scatter, and overlay the least-squares line (which we will define more formally in the next chapter).
 \begin{center}
   \includegraphics[width=\textwidth]{figs/probability/r2_panels.pdf}
 \end{center}
 
 \subsection{Conditional Probability}
-We have seen how a joint PDF $p_{\mathbf{\mathsf{x}}}(\mathbf{x})$ describes the behavior of a random vector. But how does our knowledge about one component of the vector change once we observe the value of another? This is the domain of \textbf{conditional probability distributions}. The conditional PDF of $\mathsf{x}_2$ given that we have observed $\mathsf{x}_1=x_1$ is defined as the joint PDF divided by the marginal PDF of the known variable:
+We have seen how a joint PDF $p_{\mathbf{\mathsf{x}}}(\mathbf{x})$ describes the behavior of a random vector. But how does our knowledge about one component of the vector change once we observe the value of another? This is the domain of \textbf{conditional probability distributions}. The mathematical relationships here will be directly analogous to what we saw for discrete random variables at the beginning of the chapter. The conditional PDF of $\mathsf{x}_2$ given that we have observed $\mathsf{x}_1=x_1$ is defined as the joint PDF divided by the marginal PDF of the known variable:
 \begin{equation}
     p_{\mathsf{x}_2 \mid \mathsf{x}_1}(x_2 \mid x_1) = \frac{p_{\mathsf{x}_1, \mathsf{x}_2}(x_1, x_2)}{p_{\mathsf{x}_1}(x_1)} \quad \text{provided } p_{\mathsf{x}_1}(x_1) > 0
 \end{equation}
-Intuitively, you can think of the joint PDF as a mountain range over the $(x_1, x_2)$ plane. Observing that $\mathsf{x}_1=x_1$ is like taking a vertical slice of that mountain at a specific $x_1$ value. The curve you see on that slice is the shape of the conditional distribution. We divide by $p_{\mathsf{x}_1}(x_1)$ to re-normalize the area under this curve to 1, making it a valid PDF.
+Intuitively, you can think of the joint PDF in the 2D case as a mountain range over the $(x_1, x_2)$ plane. Observing that $\mathsf{x}_1=x_1$ is like taking a vertical slice of that mountain at a specific $x_1$ value. The curve you see on that slice is the shape of the conditional distribution. We divide by $p_{\mathsf{x}_1}(x_1)$ to re-normalize the area under this curve to 1, making it a valid PDF.
 
 By rearranging this definition, we get the \textbf{chain rule of probability} for random variables, which allows us to build a joint distribution from conditional and marginal parts:
 \begin{equation}
-    p_{\mathsf{x}_1, \mathsf{x}_2}(x_1, x_2) = p_{\mathsf{x}_2 \mid \mathsf{x}_1}(x_2 \mid x_1)p_{\mathsf{x}_1}(x_1)
+    p_{\mathsf{x}_1, \mathsf{x}_2}(x_1, x_2) = p_{\mathsf{x}_2 \mid \mathsf{x}_1}(x_2 \mid x_1)\,p_{\mathsf{x}_1}(x_1)
 \end{equation}
 
 \begin{exampleBox}
-    \textbf{Example}: Consider a 2D random vector where $\mathsf{x}_1 \sim \mathcal{N}(0, 0.25)$ and the conditional distribution of $\mathsf{x}_2$ is given by $\mathsf{x}_2 \mid \mathsf{x}_1 \sim \mathcal{N}(-2x_1, 1)$. How does the distribution of $\mathsf{x}_2$ change for different observations of $\mathsf{x}_1$?
+    \textbf{Example}: Consider a 2D random vector where $\mathsf{x}_1 \sim \mathcal{N}(0, 0.25)$ and the conditional distribution of $\mathsf{x}_2$ is given by $\mathsf{x}_2 \mid x_1 \sim \mathcal{N}(-2x_1, 1)$. How does the distribution of $\mathsf{x}_2$ change for different observations of $\mathsf{x}_1$?
     \begin{itemize}
         \item If we observe $x_1 = 0$, the distribution of $\mathsf{x}_2$ is $\mathcal{N}(-2(0), 1) = \mathcal{N}(0, 1)$.
         \item If we observe $x_1 = 1$, the distribution of $\mathsf{x}_2$ becomes $\mathcal{N}(-2(1), 1) = \mathcal{N}(-2, 1)$.
     \end{itemize}
-    Our knowledge of $\mathsf{x}_1$ directly influences our expectation of $\mathsf{x}_2$. This is visualized in \autoref{fig:conditional-slice}, where the conditional distribution is a vertical slice of the joint distribution.
-\end{exampleBox}
+    Our knowledge of $\mathsf{x}_1$ directly influences our expectation of $\mathsf{x}_2$. This is visualized below, where the conditional distribution is a vertical slice of the joint distribution.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figs/probability/conditional_fig.pdf}
-    \caption{A visualization of conditional probability. The blue scatter plot represents samples from a joint distribution. Fixing a value of $\mathsf{x}_1$ (e.g., $x_1=0$ or $x_1=1$) is like taking a vertical slice. The distribution of the points within that slice is the conditional distribution of $\mathsf{x}_2$ given $\mathsf{x}_1$.}
+    \caption{A visualization of conditional probability. The colored surface illustrates the joint PDF of two random variables. Fixing a value of $\mathsf{x}_1$ (e.g., $x_1=0$ or $x_1=1$) is like taking a single slice. The distribution of the points within that slice is the conditional distribution of $\mathsf{x}_2$ given $\mathsf{x}_1$.}
     \label{fig:conditional-slice}
 \end{figure}
+\end{exampleBox}
 
 \paragraph*{Conditional Independence}
 A related concept is conditional independence. Two random variables $\mathsf{x}_1$ and $\mathsf{x}_2$ are conditionally independent given a third variable $\mathsf{x}_3$ if, once we know $\mathsf{x}_3$, knowing $\mathsf{x}_1$ gives us no additional information about $\mathsf{x}_2$. Mathematically:
 \begin{equation}
-    p(x_1, x_2 \mid x_3) = p(x_1 \mid x_3)p(x_2 \mid x_3)
+    p(x_1, x_2 \mid x_3) = p(x_1 \mid x_3)\,p(x_2 \mid x_3)
 \end{equation}
-For example, two noisy temperature sensors are not independent; if one reads high, the other likely will too. But they are \textit{conditionally independent given the true temperature}. Once we know the true temperature, the noise in one sensor reading is independent of the noise in the other.
+For example, two noisy temperature sensors placed next to each other are not independent; if one reads high, the other likely will too. But they are \textit{conditionally independent given the true temperature}. Once we know the true temperature, the noise in one sensor reading is independent of the noise in the other.
 
 \subsection{Marginalization}
-Often, we have a high-dimensional joint distribution but are only interested in the distribution of a single component. How do we get the PDF of $\mathsf{x}_1$ alone from $p_{\mathsf{x}_1, \mathsf{x}_2}(x_1, x_2)$? The process is called \textbf{marginalization}. To find the marginal distribution of one variable, we ``integrate out'' all other variables. This is the continuous version of the law of total probability.
+We might have a high-dimensional joint distribution that describes a large set of random variables but be particularly interested in the distribution of a single component. How do we get the PDF of $\mathsf{x}_1$ alone from a joint PDF? The process is called \textbf{marginalization}. To find the marginal distribution of one variable, we ``integrate out'' the uncertainty in all other variables. This is the continuous version of the law of total probability.
 \begin{equation}
     p_{\mathsf{x}_1}(x_1) = \int_{-\infty}^{\infty} p_{\mathsf{x}_1, \mathsf{x}_2}(x_1, x_2)\,dx_2
+    \label{eq:marginalization}
 \end{equation}
-We can substitute the chain rule into this expression to see the connection to conditioning:
+We can substitute the chain rule into this expression to see the connection to conditional probabilities; this is simply expanding the integrand of \autoref{eq:marginalization}:
 \begin{equation}
-    p_{\mathsf{x}_1}(x_1) = \int_{-\infty}^{\infty} p_{\mathsf{x}_1 \mid \mathsf{x}_2}(x_1 \mid x_2)p_{\mathsf{x}_2}(x_2)\,dx_2
+    p_{\mathsf{x}_1}(x_1) = \int_{-\infty}^{\infty} p_{\mathsf{x}_1 \mid \mathsf{x}_2}(x_1 \mid x_2)\,p_{\mathsf{x}_2}(x_2)\,dx_2
 \end{equation}
-Visually, marginalization is like taking the 3D mountain of the joint PDF and projecting or collapsing its mass onto one of the axes. The resulting shadow on that axis is the marginal PDF.
+Visually, marginalization is like taking the 3D mountain of the joint PDF and projecting or collapsing its mass onto one of the axes. The resulting shadow on that axis is the marginal PDF. An example of marginalizing a 2D empirical distribution--essentially, projecting a 2D scatterplot onto two 1D histograms--is shown in \autoref{fig:marginalization}.
 
 \begin{figure}[h!]
     \centering
@@ -1158,13 +1176,16 @@ Visually, marginalization is like taking the 3D mountain of the joint PDF and pr
         \qquad 
         \mathsf{x}_2 \mid \mathsf{x}_1=x_1 \sim \mathcal{N}(-2x_1,1)
     \end{equation}
-    with $\mathsf{x}_1$ and the conditional noise independent. The joint PDF is
+    What is the marginal PDF of $\mathsf{x}_2$, $p_{\mathsf{x}_2}(x_2)$?
+
+    First, note that in general, the joint PDF can be written using the chain rule as % TODO: Change to focus on integral definition; can mention that Gaussian identities as shortcuts for this special case earlier and revise
+
     \begin{equation}
         p_{\mathsf{x}_1,\mathsf{x}_2}(x_1,x_2)
         = p_{\mathsf{x}_2\mid \mathsf{x}_1}(x_2\mid x_1)\,p_{\mathsf{x}_1}(x_1)
     \end{equation}
     
-    We are interested in the marginal PDF of $\mathsf{x}_2$, i.e., $p_{\mathsf{x}_2}(x_2)$. Let's look at a few ways we can do this.
+    . Let's look at a few ways we then can find the marginal distribution of $\mathsf{x}_2$.
     
     \medskip
     \textit{(A) By definition: integrate out the unneeded variable.}
