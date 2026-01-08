@@ -1169,7 +1169,7 @@ Visually, marginalization is like taking the 3D mountain of the joint PDF and pr
 
 % MC: maybe (B) and (C) are confusing here, but good to expose students to this way of thinking?
 \begin{exampleBox}
-    \textbf{Example (Marginalizing a PDF in Several Equivalent Ways).}
+    \textbf{Example (Marginalizing a Joint PDF).}
     Suppose we build a 2D random vector by using the following:
     \begin{equation}
         \mathsf{x}_1 \sim \mathcal{N}(0,\;0.25), 
@@ -1178,17 +1178,15 @@ Visually, marginalization is like taking the 3D mountain of the joint PDF and pr
     \end{equation}
     What is the marginal PDF of $\mathsf{x}_2$, $p_{\mathsf{x}_2}(x_2)$?
 
-    First, note that in general, the joint PDF can be written using the chain rule as % TODO: Change to focus on integral definition; can mention that Gaussian identities as shortcuts for this special case earlier and revise
-
+    First, note that in general, the joint PDF can be written using the chain rule as 
     \begin{equation}
         p_{\mathsf{x}_1,\mathsf{x}_2}(x_1,x_2)
         = p_{\mathsf{x}_2\mid \mathsf{x}_1}(x_2\mid x_1)\,p_{\mathsf{x}_1}(x_1)
     \end{equation}
     
+    The standard way of finding the marginal distribution is to integrate out the unneeded variable. We can integrate over $x_1$ to find $p_{\mathsf{x}_2}(x_2)$:
+
     . Let's look at a few ways we then can find the marginal distribution of $\mathsf{x}_2$.
-    
-    \medskip
-    \textit{(A) By definition: integrate out the unneeded variable.}
     \begin{align}
     p_{\mathsf{x}_2}(x_2)
     &= \int_{-\infty}^{\infty} p_{\mathsf{x}_1,\mathsf{x}_2}(x_1,x_2)\,dx_1 \\
@@ -1197,50 +1195,51 @@ Visually, marginalization is like taking the 3D mountain of the joint PDF and pr
     \frac{1}{\sqrt{2\pi}}\exp\!\left(-\frac{(x_2+2x_1)^2}{2}\right)\;
     \frac{1}{\sqrt{2\pi\cdot 0.25}}\exp\!\left(-\frac{x_1^2}{2\cdot 0.25}\right)\,dx_1
     \end{align}
-    This integral is a convolution of Gaussians in $x_1$. Completing the square (or using a standard identity) gives
+
+    The result of this integral can be found by completing the square or using a standard identity of Gaussian integrals to yield:
     \begin{equation}
-        p_{\mathsf{x}_2}(x_2)=\mathcal{N}\big(0,1+4\cdot 0.25\big)=\mathcal{N}(0,2)
+        p_{\mathsf{x}_2}(x_2)= \frac{1}{\sqrt{4\pi}} \exp\!\left(-\frac{x_2^2}{4}\right) = \mathcal{N}(0,2)
     \end{equation}
+
     
-    \medskip
-    \textit{(B) Using moments.}
-    This is a quicker way to do it. We know that the marginal distribution of $\mathsf{x}_2$ is Gaussian (a linear combination of independent Gaussians is Gaussian), so we can completely characterize it by its mean and variance, which are easily computed using the information we have. From the model, $\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]= -2\mathsf{x}_1$ and $\operatorname{Var}(\mathsf{x}_2\mid \mathsf{x}_1)=1$. The law of total expectation/variance\footnote{We don't cover the latter in 10.34, so you would not be expected to use this route on an exam. But we provide this route for illustration purposes.} gives
-    \begin{gather}
-        \mathbb{E}[\mathsf{x}_2]=\mathbb{E}\!\big[\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]\big]
-        =-2\,\mathbb{E}[\mathsf{x}_1]=0, \\
-        \operatorname{Var}(\mathsf{x}_2)=\mathbb{E}\!\big[\operatorname{Var}(\mathsf{x}_2\mid \mathsf{x}_1)\big]
-        +\operatorname{Var}\!\big(\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]\big)
-        =1+4\,\operatorname{Var}(\mathsf{x}_1)=1+4(0.25)=2
-    \end{gather}
-    Therefore, $\mathsf{x}_2\sim\mathcal{N}(0,2)$.
+    % \medskip
+    % \textit{(B) Using moments.}
+    % This is a quicker way to do it. We know that the marginal distribution of $\mathsf{x}_2$ is Gaussian (a linear combination of independent Gaussians is Gaussian), so we can completely characterize it by its mean and variance, which are easily computed using the information we have. From the model, $\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]= -2\mathsf{x}_1$ and $\operatorname{Var}(\mathsf{x}_2\mid \mathsf{x}_1)=1$. The law of total expectation/variance\footnote{We don't cover the latter in 10.34, so you would not be expected to use this route on an exam. But we provide this route for illustration purposes.} gives
+    % \begin{gather}
+    %     \mathbb{E}[\mathsf{x}_2]=\mathbb{E}\!\big[\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]\big]
+    %     =-2\,\mathbb{E}[\mathsf{x}_1]=0, \\
+    %     \operatorname{Var}(\mathsf{x}_2)=\mathbb{E}\!\big[\operatorname{Var}(\mathsf{x}_2\mid \mathsf{x}_1)\big]
+    %     +\operatorname{Var}\!\big(\mathbb{E}[\mathsf{x}_2\mid \mathsf{x}_1]\big)
+    %     =1+4\,\operatorname{Var}(\mathsf{x}_1)=1+4(0.25)=2
+    % \end{gather}
+    % Therefore, $\mathsf{x}_2\sim\mathcal{N}(0,2)$.
     
-    \medskip
-    \textit{(C) Linear-Gaussian viewpoint.} Even quicker! We equivalently write $\mathsf{x}_2=-2\mathsf{x}_1+\varepsilon$ with $\varepsilon\sim\mathcal{N}(0,1)$ independent of $\mathsf{x}_1$. Then immediately we have
+    We can also use a shortcut by taking advantage of the fact that these are Gaussian random variables. We can equivalently write $\mathsf{x}_2=-2\mathsf{x}_1+\varepsilon$ with $\varepsilon\sim\mathcal{N}(0,1)$ independent of $\mathsf{x}_1$. Because linear combinations of Gaussian random variables are also Gaussian, we can compute the mean and variance of $\mathsf{x}_2$ directly:
     \begin{equation}
         \mathsf{x}_2 \sim \mathcal{N}\!\big(-2\cdot 0,(-2)^2\cdot 0.25 + 1\big)=\mathcal{N}(0,2)
     \end{equation}
-    Note that we are relying on the linearity and Gaussianity of the distribution to do this.
+    Note that this only works because we are dealing with Gaussian random variables; in general, we must perform the integral.
 \end{exampleBox}
 
 \section{A Unified View of Probability Distributions}
 
 This chapter has introduced several probability distributions as separate entities, but it is important to recognize that they exist within a deeply interconnected web. Indeed, many distributions can be seen as special cases, generalizations, or limiting transformations of others. A classic example of this is the relationship between the Bernoulli, binomial, and normal distributions.
 
-\paragraph*{Bernoulli to Binomial:} A single coin flip, with a binary outcome (e.g., success or failure), is a Bernoulli trial. The probability of success, $p$, is the only parameter. If you perform $n$ independent and identical Bernoulli trials and count the total number of successes, this count follows a binomial distribution. Thus, a binomial random variable is simply the sum of $n$ independent Bernoulli random variables.
+\paragraph*{Bernoulli to Binomial:} A single coin flip, with a binary outcome (e.g., success or failure), is a Bernoulli trial. The probability of success, $p$, is the only parameter. If you perform $n$ independent and identical Bernoulli trials and count the total number of successes, this count follows a binomial distribution. Thus, a binomial random variable is simply the sum of $n$ independent Bernoulli random variables that share a single parameter $p$.
     
-\paragraph*{Binomial to Normal:} The central limit theorem states that the sum of a large number of independent and identically distributed random variables will be approximately normally distributed. As a result, when the number of trials $n$ becomes large, the shape of the discrete binomial distribution becomes so close to the continuous normal distribution that the normal can be used as an excellent approximation for the binomial.
+\paragraph*{Binomial to Normal:} The central limit theorem states that the sum of a large number of independent and identically distributed random variables will be approximately normally distributed. As a result, when the number of trials $n$ in the binomial distribution becomes large, the shape of the discrete binomial distribution becomes so close to the continuous normal distribution that the normal can be used as an excellent approximation for the binomial.
 
-These connections are illustrative, not exhaustive. Many further bridges exist: the rare-event limit links binomial to Poisson; Poisson processes connect counts to exponential and gamma waiting times; the normal, $\chi^2$, $t$, and $F$ families arise from sums and ratios; conjugate mixtures (e.g., beta-binomial, Dirichlet-multinomial) tie priors to likelihoods; monotonic transformations give rise to new laws (e.g., lognormal from a normal); and multivariate generalizations introduce structures such as the Wishart distribution (a generalization of the gamma distribution). A great resource for a comprehensive overview of the relationships between univariate distributions is \href{https://www.math.wm.edu/~leemis/chart/UDR/UDR.html}{this beautiful interactive chart} produced by Prof.\ Larry Leemis at William \& Mary.
+These connections are illustrative, not exhaustive. An even simpler example is connecting a normal distribution to a standard normal distribution via the Z-score transformation; e.g., if $\mathsf{x} \sim \mathcal{N}(\mu, \sigma^2)$, then the standardized variable $\mathsf{z} = \frac{\mathsf{x} - \mu}{\sigma} \sim \mathcal{N}(0, 1)$. Many further bridges exist: the rare-event limit links binomial to Poisson; Poisson processes connect counts to exponential and gamma waiting times; the normal, $\chi^2$, $t$, and $F$ families arise from sums and ratios; conjugate mixtures (e.g., beta-binomial, Dirichlet-multinomial) tie priors to likelihoods; monotonic transformations give rise to new laws (e.g., lognormal from a normal); and multivariate generalizations introduce structures such as the Wishart distribution (a generalization of the gamma distribution). A fun resource for a comprehensive overview of the relationships between univariate distributions is \href{https://www.math.wm.edu/~leemis/chart/UDR/UDR.html}{this beautiful interactive chart} produced by Prof.\ Larry Leemis at William \& Mary.
 
 \subsection{Convolution}
 The relationship we just discussed, where a binomial random variable is the sum of independent Bernoulli random variables, is a specific case of a more general concept called convolution. Convolution is the mathematical operation that gives the probability distribution of a sum of two independent random variables.
 
-Suppose we have two independent random variables, $\mathsf{x}$ and $\mathsf{y}$. We are interested in the distribution of their sum, $\mathsf{s} = \mathsf{x} + \mathsf{y}$. To find the probability of a specific total outcome $\mathsf{s}$, we must consider every possible pair of outcomes, one from $\mathsf{x}$ and one from $\mathsf{y}$, that sum to $\mathsf{s}$. Because $\mathsf{x}$ and $\mathsf{y}$ are independent, the probability of each such pair is the product of their individual probabilities. We then add up the probabilities of all these possible pairs to get the total probability for $\mathsf{s}$. This process of pairing up, multiplying, and summing is precisely what convolution represents.
+Suppose we have two independent random variables, $\mathsf{x}$ and $\mathsf{y}$. We are interested in the distribution of their sum, $\mathsf{s} = \mathsf{x} + \mathsf{y}$. To find the probability of a specific total outcome $\mathsf{s}$, we must consider every possible pair of outcomes, one from $\mathsf{x}$ and one from $\mathsf{y}$, that sum to $\mathsf{s}$. Because $\mathsf{x}$ and $\mathsf{y}$ are independent, the probability of each such pair is the product of their individual probabilities, i.e., $p_{\mathsf{x,y}}(x,y) = p_{\mathsf{x}}(x)\, p_{\mathsf{y}}(y)$. We then add up the probabilities of all these possible pairs to get the total probability for $\mathsf{s}$. This process of pairing up, multiplying, and summing is precisely what convolution represents.
 
 \paragraph*{The Discrete Case}
 Let $\mathsf{x}$ and $\mathsf{y}$ be independent, integer-valued random variables with PMFs $p_{\mathsf{x}}$ and $p_{\mathsf{y}}$, respectively. The PMF of their sum, $\mathsf{s} = \mathsf{x} + \mathsf{y}$, is given by the discrete convolution of $p_{\mathsf{x}}$ and $p_{\mathsf{y}}$, denoted $(p_{\mathsf{x}} * p_{\mathsf{y}})(s)$:
 \begin{equation}
-    p_{\mathsf{s}}(s) = (p_{\mathsf{x}} * p_{\mathsf{y}})(s) = \sum_{x} p_{\mathsf{x}}(x) \cdot p_{\mathsf{y}}(s-x)
+    p_{\mathsf{s}}(s) = (p_{\mathsf{x}} * p_{\mathsf{y}})(s) = \sum_{x} p_{\mathsf{x}}(x) \, p_{\mathsf{y}}(s-x)
 \end{equation}
 The sum is over all possible values $x$ in the support of $\mathsf{x}$. For each $x$, the corresponding value from $\mathsf{y}$ that would result in the sum $s$ is $s-x$.
 
@@ -1267,8 +1266,29 @@ The sum is over all possible values $x$ in the support of $\mathsf{x}$. For each
     Therefore, convolution is simply the mathematical embodiment of considering all possible ways an outcome can be formed ($s = x + (s-x)$), calculating the probability of each way by multiplying (due to independence), and summing them all up.
 \end{exampleBox}
 
+\begin{exampleBox}
+\textbf{Example: Convolution of Two Geometric Random Variables}
+
+Let $\mathsf{x}$ and $\mathsf{y}$ be independent geometric random variables with parameter $\theta$. The PMF of a geometric random variable is given by:
+\begin{equation}
+    p_{\mathsf{x}}(k) = \theta (1-\theta)^{k} , \quad k = 0, 1, 2, \ldots
+\end{equation} 
+We want to find the PMF of their sum $\mathsf{s} = \mathsf{x} + \mathsf{y}$. Using the discrete convolution formula, we have:
+\begin{align}
+    p_{\mathsf{s}}(s) &= \sum_{k=0}^{s} p_{\mathsf{x}}(k) \cdot p_{\mathsf{y}}(s-k) \\
+    &= \sum_{k=0}^{s} \theta (1-\theta)^{k} \cdot \theta (1-\theta)^{s-k} \\
+    &= \theta^2 (1-\theta)^{s} \sum_{k=0}^{s} 1 \\
+    &= \theta^2 (1-\theta)^{s} (s + 1)
+\end{align}
+Thus, the PMF of the sum $\mathsf{s} = \mathsf{x} + \mathsf{y}$ is:
+\begin{equation}
+    p_{\mathsf{s}}(s) = \theta^2 (s + 1) (1-\theta)^{s}, \quad s = 0, 1, 2, \ldots
+\end{equation}
+This distribution turns out to have a special name: it is a negative binomial distribution with parameters $r=2$ and $p=\theta$.
+\end{exampleBox}
+
 \paragraph*{The Continuous Case}
-For independent continuous random variables $\mathsf{x}$ and $\mathsf{y}$ with PDFs $p_{\mathsf{x}}$ and $p_{\mathsf{y}}$, the pdf of their sum $\mathsf{s} = \mathsf{x} + \mathsf{y}$ is given by the continuous convolution, which replaces the sum with an integral:
+For independent continuous random variables $\mathsf{x}$ and $\mathsf{y}$ with PDFs $p_{\mathsf{x}}$ and $p_{\mathsf{y}}$, the PDF of their sum $\mathsf{s} = \mathsf{x} + \mathsf{y}$ is given by the continuous convolution, which replaces the sum with an integral:
 \begin{equation}
     p_{\mathsf{s}}(s) = (p_{\mathsf{x}} * p_{\mathsf{y}})(s) = \int_{-\infty}^{\infty} p_{\mathsf{x}}(x) \cdot p_{\mathsf{y}}(s-x) \,dx
 \end{equation}
@@ -1276,10 +1296,16 @@ The derivation of the continuous convolution formula is similar to the discrete 
 
 
 \section{Random Number Generation}
-So far, this chapter has laid the theoretical groundwork of probability. Now, we turn to the practical question of how these concepts are used in a computational setting. All of the scatter plots, histograms, and convergence demonstrations in this chapter rely on our ability to generate data that behaves according to a specific probability distribution. We will discuss more about methods for generating this data for arbitrary distributions later, but for now, we will focus on one of the most fundamental concepts in this area that other methods will rely on: random number generation.
+So far, this chapter has laid the theoretical groundwork of probability and introduced us to some useful mathematical formalisms and notation. Now, we turn to the practical question of how these concepts are used in a computational setting. All of the scatter plots, histograms, and convergence demonstrations in this chapter have relied on our ability to generate data that behaves according to a specific probability distribution. We will discuss more about methods for sampling from arbitrary distributions later, but for now, we will focus on one of the most fundamental concepts in this area that other methods will rely on: random number generation.
 
 \subsection{Pseudorandom Numbers and Seeding}
-A computer is a deterministic machine, so it is incapable of generating truly random numbers. Instead, it uses algorithms called pseudorandom number generators (PRNGs) to create long sequences of numbers that are for all practical purposes indistinguishable from random. These algorithms start with an initial value called a \textbf{seed}. Given the same seed, a PRNG will always produce the exact same sequence of numbers.
+A computer is a deterministic machine, so it is incapable of generating truly random numbers. Instead, it uses algorithms called pseudorandom number generators (PRNGs) to create long sequences of numbers that are---for all practical purposes---indistinguishable from random. These algorithms start with an initial value called a \textbf{seed}. Given the same seed, a PRNG will always produce the exact same sequence of numbers.
+
+A very simple (and not very good!) example of a PRNG is the middle squares method. This method starts with a seed number, squares it, and then extracts the middle digits to form the next number in the sequence. This process is repeated to generate more numbers. For example, generating four-digit integers seeded with ``1034'', we might have:
+\begin{equation*}
+1034 ~ \rightarrow ~ 1034^2 = 1,069,156 ~ \rightarrow ~ \text{next number: } 0691 ~ \rightarrow ~ 0691^2 = 477,481 ~ \rightarrow ~ \text{next number: } 7748 ~ \rightarrow ~ \ldots
+\end{equation*} 
+While this method can produce a sequence that appears random, it has several weaknesses, such as short periods and poor distribution properties.
 
 This determinism is a feature, not a bug. By setting the seed manually at the beginning of a simulation, we can make sure that our results are perfectly reproducible. This is helpful for debugging code and for allowing other scientists to verify our work. Most programming environments provide a simple command for this (e.g., \texttt{rng(seed)} in MATLAB or \texttt{np.random.seed(seed)} in Python's NumPy library).
 
@@ -1292,7 +1318,12 @@ This determinism is a feature, not a bug. By setting the seed manually at the be
 \subsection{Sampling from Distributions}
 At the heart of most PRNGs is a generator that produces samples from the standard uniform distribution, $\mathcal{U}(0, 1)$. We can then use these uniform samples to generate samples from any other distribution using various transformation methods.
 
-A general and powerful technique is \textbf{inverse transform sampling}. We will only cover the discrete case here: For a discrete distribution with probabilities $P_i$ for outcomes $x_i$, we can partition the interval $[0, 1]$ into segments of length $P_i$. We then draw a sample $u \sim \mathcal{U}(0, 1)$ and see which segment it falls into. This is illustrated in \autoref{fig:discrete-sampling}. Modern programming environments have built-in functions to sample directly from dozens of common distributions (e.g., \texttt{normrnd}, \texttt{poissrnd}, etc.), which should almost always be used in practice.
+The simplest transformation is for the uniform distribution itself. If we want samples from a uniform distribution over an arbitrary interval $[a, b]$, we can take a sample $u \sim \mathcal{U}(0, 1)$ and transform it as follows:
+\begin{equation}
+    x = a + (b - a) \cdot u \implies \mathsf{x} \sim \mathcal{U}(a, b)
+\end{equation}
+
+A general and powerful technique is \textbf{inverse transform sampling}. We will only cover the discrete case here and mention the continuous case later: For a discrete distribution with probabilities $\{P_i\}$ for outcomes $\{x_i\}$, we can partition the interval $[0, 1]$ into segments of length $P_i$. We then draw a sample $u \sim \mathcal{U}(0, 1)$ and see which segment it falls into. This is illustrated in \autoref{fig:discrete-sampling}. 
 
 \begin{figure}[h!]
     \centering
@@ -1331,14 +1362,18 @@ A general and powerful technique is \textbf{inverse transform sampling}. We will
     \label{fig:discrete-sampling}
 \end{figure}
 
-\subsection{\texorpdfstring{Distances Between Distributions\textsuperscript{*}}{Distances Between Distributions}}
-In many applications, especially in statistics and machine learning\footnote{For example, generative modeling objectives (MLE, VAEs, GANs, WGANs, diffusion) are built around specific divergences/distances (KL, JS, Wasserstein, Fisher).}, we need to quantify how different two probability distributions, $p_{\mathsf{x}}(x)$ and $q_{\mathsf{x}}(x)$, are. This turns a modeling question into a geometric one: how far is our model's predictive law $q_{\mathsf{x}}$ from the data-generating law $p_{\mathsf{x}}$? A first note is that some notions are true metrics\footnote{We mean this in a formal mathematical sense (see \href{https://en.wikipedia.org/wiki/Metric_(mathematics)}{Wikipedia} if this term is new to you and you're curious).} (non-negative, symmetric, and obeying the triangle inequality) while others are asymmetric divergences that act more like directional penalties. Choosing between them induces different learning behaviors and different numerical estimators.
+Modern programming environments have built-in functions to sample directly from dozens of common distributions (e.g., \texttt{normrnd}, \texttt{poissrnd}, etc.), which should almost always be used in practice.
 
-\paragraph*{\texorpdfstring{Kullback-Leibler Divergence\textsuperscript{*}}{Kullback-Leibler Divergence}} The Kullback-Leibler divergence is the canonical asymmetric example. In the continuous case, it is defined as
-\begin{equation}
-    D_{\mathrm{KL}}(p_{\mathsf{x}}\Vert q_{\mathsf{x}})=\int p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right)\,dx
-\end{equation}
-it measures the expected extra log-loss incurred when coding samples from $p_{\mathsf{x}}$ with a code optimized for $q_{\mathsf{x}}$. Because the expectation is taken under $p_{\mathsf{x}}$, regions where $p_{\mathsf{x}}$ assigns mass but $q_{\mathsf{x}}$ is small are penalized heavily; if $q_{\mathsf{x}}(x)=0$ on a set where $p_{\mathsf{x}}(x)>0$, the divergence is infinite. The reverse divergence, $D_{\mathrm{KL}}(q_{\mathsf{x}}\Vert p_{\mathsf{x}})$, flips this emphasis and tends to be “mode-seeking,” preferring to place $q_{\mathsf{x}}$'s mass on a subset of $p_{\mathsf{x}}$'s high-density regions rather than cover all of $p_{\mathsf{x}}$.
+\subsection{Distances Between Distributions}
+In many applications, especially in statistics and machine learning, we need to quantify how different two probability distributions, $p_{\mathsf{x}}(x)$ and $q_{\mathsf{x}}(x)$, are.\footnote{For example, generative modeling objectives (MLE, VAEs, GANs, WGANs, diffusion) are built around specific divergences/distances (KL, JS, Wasserstein, Fisher).} This turns a modeling question into a geometric one: how far is our model's predictive law $q_{\mathsf{x}}$ from the data-generating law $p_{\mathsf{x}}$? A first note is that some notions are true metrics (in a formal mathematical sense: non-negative, symmetric, and obeying the triangle inequality) while others are asymmetric divergences that act more like directional penalties. Choosing between different distance metrics can be subjective or application-dependent.
+
+\paragraph*{Kullback-Leibler Divergence} The Kullback-Leibler (KL) divergence  is the canonical asymmetric example and is the most popular choice in machine learning to quantify differences in distributions. In the continuous case, it is defined as
+\begin{align}
+    D_{\mathrm{KL}}(p_{\mathsf{x}}\Vert q_{\mathsf{x}})= \mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x}}(x)}\left[ \frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)} \right] &=  \int p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right)\,dx \text{ (continuous)} \\
+    &=  \sum_x p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right) \text{ (discrete)}
+\end{align}
+
+The KL divergence measures the expected extra log-loss incurred when coding samples from $p_{\mathsf{x}}$ with a code optimized for $q_{\mathsf{x}}$. Because the expectation is taken under $p_{\mathsf{x}}$, regions where $p_{\mathsf{x}}$ assigns non-zero probability density but $q_{\mathsf{x}}$ is small are penalized heavily; if $q_{\mathsf{x}}(x)=0$ for any values of $x$ where $p_{\mathsf{x}}(x)>0$, the divergence is infinite. The reverse divergence, $D_{\mathrm{KL}}(q_{\mathsf{x}}\Vert p_{\mathsf{x}})$, flips this emphasis and tends to be “mode-seeking,” preferring to place $q_{\mathsf{x}}$'s mass on a subset of $p_{\mathsf{x}}$'s high-density regions rather than cover all of $p_{\mathsf{x}}$. The convention $0\log(0/q)=0$ is used to handle zero probabilities gracefully.
 
 
 \begin{exampleBox}
@@ -1375,9 +1410,10 @@ it measures the expected extra log-loss incurred when coding samples from $p_{\m
 \begin{equation}
     \mathrm{JSD}(p_{\mathsf{x}},q_{\mathsf{x}})=\frac12 D_{\mathrm{KL}}(p_{\mathsf{x}}\Vert m_{\mathsf{x}})+\frac12 D_{\mathrm{KL}}(q_{\mathsf{x}}\Vert m_{\mathsf{x}}), \quad m_{\mathsf{x}}=\frac12(p_{\mathsf{x}}+q_{\mathsf{x}})
 \end{equation}
-It behaves like a metric (its square root is a true metric) and remains finite even when supports do not. This is used in text, image, and generative-model comparisons.
+It behaves like a metric (its square root is a true metric) and remains finite even when supports do not. That is, we avoid the issue of infinite divergence when comparing distributions with disjoint supports. This is used in text, image, and generative-model comparisons.
 
-\paragraph*{\texorpdfstring{Wasserstein Distance\textsuperscript{*}}{Wasserstein Distance}} Optimal-transport distances, or Wasserstein metrics, take a geometric view of discrepancy: they measure the minimal work needed to move one distribution into another by transporting probability mass through space. Concretely, if moving unit mass from $x$ to $y$ costs $c(x,y)=|x-y|^p$, the $p$-Wasserstein distance is
+% TODO: simplify?
+\paragraph*{\texorpdfstring{Wasserstein Distance\textsuperscript{*}}{Wasserstein Distance}} Optimal-transport distances, or Wasserstein metrics, take a geometric view of discrepancy: they measure the minimal ``work'' needed to move one distribution into another by transporting probability mass through space. Concretely, if moving unit mass from $x$ to $y$ costs $c(x,y)=|x-y|^p$, the $p$-Wasserstein distance is
 \begin{equation}
     W_p(p_{\mathsf{x}},q_{\mathsf{x}})=\left(\inf_{\gamma\in\Gamma(p_{\mathsf{x}},q_{\mathsf{x}})}\int |x-y|^p\,d\gamma(x,y)\right)^{1/p}
 \end{equation}
@@ -1395,11 +1431,11 @@ In higher dimensions, the formula involves matrix square roots:
 \end{equation}
 This version has become a staple in comparing embeddings and generative models. Indeed, its optimal-transport foundation makes it especially useful in normalizing flows and diffusion models, where it gives robust, physically interpretable discrepancies between distributions (even with support mismatch!) and connects learning to Fokker-Planck/Schr\"odinger bridge dynamics. These types of models are extremely popular in current research (image/video/audio/small molecule generation, etc.).
 
-\paragraph*{\texorpdfstring{Kolmogorov-Smirnov Statistic\textsuperscript{*}}{Kolmogorov-Smirnov Statistic}} When the goal is hypothesis testing rather than a continuous measure of discrepancy, we can use the Kolmogorov-Smirnov statistic to compare cumulative distribution functions. Given a sample $\mathsf{x}_{1:n}$ from $p_{\mathsf{x}}$, with empirical CDF $F_n$, and a fully specified theoretical CDF $F_0$ for $q_{\mathsf{x}}$, the one-sample statistic is 
+\paragraph{Kolmogorov-Smirnov Statistic} The Kolmogorov-Smirnov (KS) statistic is a nonparametric test that compares the cumulative distribution functions (CDFs) of two samples.  Given a sample $\mathsf{x}_{1:n}$ from $p_{\mathsf{x}}$, with empirical CDF $F_n$, and a fully specified theoretical CDF $F_{\infty}$ for $q_{\mathsf{x}}$, the one-sample statistic is 
 \begin{equation}
-    D_n=\sup_x |F_n(x)-F_0(x)|
+    D_n=\sup_x |F_n(x)-F_\infty(x)|
 \end{equation}
-That is, it's the maximum vertical gap between the empirical and theoretical CDFs. Large values indicate a poor fit. Because KS looks only at CDF gaps, it is most sensitive near the median and can miss tail differences. If tail sensitivity is important, one might instead consider something like the Cram\'er-von Mises or Anderson-Darling statistics, which reweight discrepancies, though these require more setup than KS's simple sup-norm.
+That is, it's the maximum vertical gap between the empirical and theoretical CDFs. Large values indicate a poor fit. Because KS looks only at CDF gaps, it is most sensitive near the median and can miss tail differences. If tail sensitivity is important, one might instead consider something like the Cram\'er-von Mises or Anderson-Darling statistics, which reweight discrepancies, though these require more setup than KS's simple sup-norm. The KS statistic is widely used in goodness-of-fit testing and model validation.
 
 
 %%% Local Variables:
