@@ -1314,6 +1314,10 @@ This determinism is a feature, not a bug. By setting the seed manually at the be
     The video game Minecraft is a large-scale example of using PRNGs and seeding as a core feature. The game procedurally generates enormous, unique worlds from a single starting value (the seed) so that players can share a short string and explore the same large-scale terrain and biomes. (This reproducibility holds for the same edition, version, and settings.) Under the hood, many parts of world generation use a seeded PRNG. In Java Edition, this involves \texttt{java.util.Random}, whose state follows a linear congruential generator, which is a specific type of PRNG. The deterministic outputs feed Perlin-style layered gradient noise to build smooth fields and heightmaps that shape mountains, valleys, and cave systems. Moreover, the game instantiates multiple generators with seeds derived from the world seed for specific tasks such as caves, ores, trees, keeping everything reproducible from that initial seed. The result is a (very) complex, seemingly random world that is actually perfectly reproducible from the initial seed.
 \end{exampleBox}
 
+Note that generating good random numbers is computationally expensive. When writing computer programs
+whose main cost involves calls to a random number generator, which occurs in Monte Carlo methods
+described later, one goal is to design the algorithm to avoid performing any unnecessary
+calls to the random number generator.
 
 \subsection{Sampling from Distributions}
 At the heart of most PRNGs is a generator that produces samples from the standard uniform distribution, $\mathcal{U}(0, 1)$. We can then use these uniform samples to generate samples from any other distribution using various transformation methods.
@@ -1437,6 +1441,71 @@ This version has become a staple in comparing embeddings and generative models. 
 \end{equation}
 That is, it's the maximum vertical gap between the empirical and theoretical CDFs. Large values indicate a poor fit. Because KS looks only at CDF gaps, it is most sensitive near the median and can miss tail differences. If tail sensitivity is important, one might instead consider something like the Cram\'er-von Mises or Anderson-Darling statistics, which reweight discrepancies, though these require more setup than KS's simple sup-norm. The KS statistic is widely used in goodness-of-fit testing and model validation.
 
+
+\section{Exercises}
+
+\begin{exercise}
+Suppose that we are going bird watching, and the number of birds we see per hour follows a Poisson distribution with rate parameter $\lambda = 3$.
+What is the probability that we see at least one bird in one hour?
+\end{exercise}
+
+\begin{solution}
+Let $\mathsf{k}$ denote the number of birds observed in one hour, with
+\[
+\mathsf{k} \sim \text{Poisson}(\lambda=3).
+\]
+The probability of seeing at least one bird is
+\[
+\Pr(\mathsf{k} \ge 1) = 1 - \Pr(\mathsf{k}=0).
+\]
+Using the Poisson PMF,
+\[
+\Pr(\mathsf{k}=0) = \frac{3^0 e^{-3}}{0!} = e^{-3}.
+\]
+Therefore,
+\[
+\Pr(\mathsf{k} \ge 1) = 1 - e^{-3}.
+\]
+\end{solution}
+
+
+
+\begin{exercise}
+Consider a 2D distribution that has constant probability density on the shaded region shown in the figure below and zero elsewhere.  Use a visual/geometric argument to find the conditional PDF, $p_\mathsf{x_1 \mid x_2}(x_1 | x_2 > 3)$. 
+
+% --- figure: reproduction of the problem image ---
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+  % Axes and ticks 0..5
+  \draw[->] (0,0) -- (5.5,0) node[right] {$x_1$};
+  \draw[->] (0,0) -- (0,5.5) node[above] {$x_2$};
+  \foreach \i in {0,1,2,3,4,5} {
+    \draw (\i,0.06) -- (\i,-0.06) node[below,yshift=-2pt] {\small \i};
+    \draw (0.06,\i) -- (-0.06,\i) node[left,xshift=-2pt] {\small \i};
+  }
+
+  % light grid (reference)
+  \foreach \i in {0,1,2,3,4} \foreach \j in {0,1,2,3,4} {
+    \draw[gray!20] (\i,\j) rectangle (\i+1,\j+1);
+  }
+
+  \filldraw[gray!30] (1,1) rectangle (2.5,2.5);
+  \filldraw[gray!30] (2, 2) rectangle (3, 3);
+  \filldraw[gray!30] (2.5, 2.5) rectangle (4, 4);
+
+%   % horizontal reference line x2 = 3
+%   \draw[red, dashed, thick] (-0.1,3) -- (5.6,3) node[right,black] {\small $x_2=3$};
+
+\end{tikzpicture}
+\end{center}
+\end{exercise}
+
+\begin{solution}
+The constant joint density implies probability is proportional to area. Taking the conditional $x_2 > 3$ means that we are only considering the portion of the shaded region above the horizontal line \(x_2=3\). That region is a simple rectangle where the probability density is (still) uniform. 
+
+Thus \(_1\mid(X_2>3)\) is uniform on \((3,5)\) with density \(1/2\). \(\square\)
+Thus, $p_\mathsf{x_1 \mid x_2}(x_1 | x_2 > 3)$ = \mathcal{U}[3,5]
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX
