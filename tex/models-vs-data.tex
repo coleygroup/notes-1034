@@ -1,30 +1,36 @@
-\chapter{Models vs.\ Data}
+\chapter{Parameter Estimation} % feels like a better title?
 \label{sec:models-vs-data}
 
 The previous chapter provided us with the language of probability, a formal framework for describing uncertainty. Now, we will put that language to work. We frequently rely on mathematical models to describe physical phenomena, predict system behavior, and optimize processes. However, a model is only as good as its parameters, which are often unknown and must be determined from experimental measurements. The process of relating models to data involves a cycle of designing experiments, collecting data, estimating model parameters, and quantifying the uncertainty associated with those estimates. This chapter explores the fundamental concepts and numerical methods that we use throughout this process.
 
-We will begin by establishing the formal problem of parameter estimation. We will then look at two major philosophical frameworks for statistical inference: the frequentist and Bayesian approaches. For each, we will discuss methods for obtaining point estimates of parameters and for characterizing the uncertainty of those estimates. Finally, we will explore the principles of optimal experimental design, which provides a systematic way to choose experiments that are maximally informative to our models and their parameters.
+We will begin by establishing the formal problem of parameter estimation. We will then look at two major philosophical frameworks for statistical inference: the frequentist and Bayesian approaches. For each, we will discuss methods for obtaining point estimates of parameters and for characterizing the uncertainty of those estimates. Finally, we will explore the principles of optimal experimental design, which provides a systematic way to choose experiments that are maximally informative to our models and their parameters. Each of these topics could be (and is) the subject of entire textbooks and courses, and we will only be able to scratch the surface here. However, the goal is to provide a solid foundation that will allow you to understand and apply these concepts in your own work.
 
 \section{Linear Model Fitting}
-The simplest and most ubiquitous type of model is a linear one. We propose that a single scalar output, $\mathsf{y}$, can be described as a weighted sum of $n$ input variables, or features, contained in a vector $\mathbf{x}$. We assume that this linear relationship is the true underlying process, but our measurements are corrupted by some random noise, $\mathsf{\epsilon}$. Mathematically, we write this as
+The simplest and most ubiquitous type of model is a linear one. When we construct a linear model, we are asserting that a single scalar output, $\mathsf{y}$, can be described as a weighted sum of $n$ input variables, or features, contained in a vector $\bm{\mathsf{x}}$. We assume that this linear relationship is the true underlying process, but our measurements are corrupted by some random noise, $\mathsf{\epsilon}$. Mathematically, we write this as
 \begin{equation}
-    \mathsf{y} = \sum_{i=1}^n x_i \theta_i + \mathsf{\epsilon} = \mathbf{x}^\top \boldsymbol{\theta} + \mathsf{\epsilon}
+    \mathsf{y} = \sum_{i=1}^n \mathsf{x}_i \theta_i + \mathsf{\epsilon} = \bm{\mathsf{x}}^\top \boldsymbol{\theta} + \mathsf{\epsilon}
+    \label{eq:linear-model}
 \end{equation}
-Here, $\boldsymbol{\theta}$ is the vector of unknown regression parameters we want to find. Our model's prediction, denoted $\tilde{\mathsf{y}}$, is the deterministic part of this relationship:
+Here, $\boldsymbol{\theta}$ is a vector of unknown regression parameters we want to find. Our model's prediction, denoted $\tilde{y}$, is the deterministic part of this relationship given a particular input vector, $\mathbf{x}$:
 \begin{equation}
-    \tilde{y}(\mathbf{x}; \boldsymbol{\theta}) = \mathbf{x}^\top \boldsymbol{\theta}
+    \tilde{y}(\bm{x}; \boldsymbol{\theta}) = \bm{x}^\top \boldsymbol{\theta}
+    \label{eq:linear-model-prediction}
 \end{equation}
-The noise term $\mathsf{\epsilon}$ is a random variable, typically assumed to be drawn from a zero-mean normal distribution, $\mathsf{\epsilon} \sim \mathcal{N}(0, \sigma^2_\epsilon)$, meaning our measurements are unbiased but subject to Gaussian fluctuations.
+The noise term $\mathsf{\epsilon}$ is a random variable. It is very often assumed to be drawn from a zero-mean normal distribution, $\mathsf{\epsilon} \sim \mathcal{N}(0, \sigma^2_\epsilon)$, meaning our measurements are unbiased but subject to Gaussian fluctuations; however, other noise models are possible depending on the experimental context and this assumption should not be made blindly.
+
 
 \paragraph*{Linearity in the Parameters}
-A linear model is one that is linear in its parameters $\boldsymbol{\theta}$, not necessarily in its inputs $\mathbf{x}$. For example, we can model the temperature $T$ as a quadratic function of radius $r$, and it is still a linear model:
+A linear model is one that is linear in its parameters $\boldsymbol{\theta}$, not necessarily in its inputs $\bm{x}$. For example, we can model the temperature $T$ as a quadratic function of radius $r$, and it is still a linear model:
 \begin{equation}
-    T(r) = \theta_0 + \theta_1 r + \theta_2 r^2
+    T(r; \bm{\theta}) = \theta_0 + \theta_1 r + \theta_2 r^2
 \end{equation}
-This is a linear model because we can define an input vector $\mathbf{x} = [1, r, r^2]^\top$ and the model becomes $T(r) = \mathbf{x}^\top \boldsymbol{\theta}$. In contrast, a model like $\tilde{y} = \theta_1 x_1 + \theta_1^2 x_2$ would be nonlinear in the parameters.
+This is a linear model because we can define an input vector $\mathbf{x} = [1, r, r^2]^\top$ and the model becomes $T(r; \bm{\theta}) = \mathbf{x}^\top \boldsymbol{\theta}$. In contrast, a model like $\tilde{y}(x; \theta_1) = \theta_1 x_1 + \theta_1^2 x_2$ would be considered nonlinear, as it is nonlinear in the parameter $\theta_1$.
 
-\subsection{Solving for the Best Parameters}
-Suppose we have performed $N$ experiments, giving us a set of $N$ data points. For each experiment $j$, we have a known input vector $\mathbf{x}_j$ and a measured output $y_j$. We can stack these observations into a single matrix equation:
+\begin{warningBox}
+Note that while we wrote our most general linear model, \autoref{eq:linear-model} with sans-serif fonts to denote random variables, we will often drop this distinction in this chapter and use regular math fonts. We will commonly write our model as we would write a function instead, like in \autoref{eq:linear-model-prediction}. The context will usually make it clear whether we are referring to a random variable or a specific realization (measurement). Similarly, sometimes we may drop the ``$; \bm{\theta}$'' in the function arguments when it is clear we are referring to a model with fixed parameters.
+\end{warningBox}
+
+\subsection{Constructing the Design Matrix} Suppose we have performed $N$ experiments, giving us a set of $N$ data points. For each experiment $j$, we have a known input vector $\mathbf{x}_j$ and a measured output $y_j$. We can stack these observations into a single matrix equation:
 \begin{equation}
     \begin{bmatrix}
         y_1 \\
@@ -56,52 +62,124 @@ This is more compactly written as
 \begin{equation}
     \mathbf{y} = \mathbf{X}\boldsymbol{\theta} + \boldsymbol{\epsilon}
 \end{equation}
-Here, $\mathbf{y}$ is the vector of all observations, $\boldsymbol{\epsilon}$ is the vector of all noise terms, and $\mathbf{X}$ is the $N \times n$ matrix known as the \textbf{design matrix}, whose rows are our input vectors. The entire problem of fitting now comes down to this: given the observed data $(\mathbf{X}, \mathbf{y})$, how do we find the optimal parameter vector, $\boldsymbol{\theta}^*$?
+Here, $\mathbf{y}$ is the vector of all measured values, $\boldsymbol{\epsilon}$ is the vector of all noise terms, and $\mathbf{X}$ is the $N \times n$ matrix known as the \textbf{design matrix}, whose rows are our input vectors. The entire problem of fitting now comes down to this: given the observed data $(\mathbf{X}, \mathbf{y})$, how do we find the optimal parameter vector, $\boldsymbol{\theta}^*$?
+
+\begin{exampleBox}
+\textbf{Example: Constructing the Design Matrix:}
+Consider a simple linear regression problem where we want to model the relationship between two input features, $x_1$ and $x_2$, and a single output variable, $y$. We have collected data from 4 experiments, resulting in the following observations:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ccc}
+        \toprule
+        Experiment & Input Features $(x_1, x_2)$ & Measured Output $y$ \\
+        \midrule
+        1 & (1.0, 2.0) & 5.0 \\
+        2 & (2.0, 1.0) & 6.0 \\
+        3 & (3.0, 3.0) & 10.0 \\
+        4 & (4.0, 2.0) & 9.0 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+To construct the design matrix $\mathbf{X}$, we arrange the input features of each experiment into rows. Each row corresponds to an experiment, and each column corresponds to a feature. Thus, our design matrix $\mathbf{X}$ and output vector $\mathbf{y}$ are:
+\begin{equation}
+    \mathbf{X} =
+    \begin{bmatrix}
+        1.0 & 2.0 \\
+        2.0 & 1.0 \\
+        3.0 & 3.0 \\
+        4.0 & 2.0
+    \end{bmatrix}, \quad
+    \mathbf{y} =
+    \begin{bmatrix}
+        5.0 \\
+        6.0 \\
+        10.0 \\
+        9.0
+    \end{bmatrix}
+\end{equation}
+With this setup, our parameter vector $\boldsymbol{\theta}$ will have two components in the linear relationship we are modelling: $y = \theta_0 x_1 + \theta_1 x_2 + \epsilon$.
+
+
+When performing a linear regression, we might also choose to include an intercept term (bias) in our model. To do this, we add a column of ones to the design matrix:
+\begin{equation}
+    \mathbf{X} =
+    \begin{bmatrix}
+        1 & 1.0 & 2.0 \\
+        1 & 2.0 & 1.0 \\
+        1 & 3.0 & 3.0 \\
+        1 & 4.0 & 2.0
+    \end{bmatrix}, \quad
+    \mathbf{y} =
+    \begin{bmatrix}
+        5.0 \\
+        6.0 \\
+        10.0 \\
+        9.0
+    \end{bmatrix}
+\end{equation}
+This extra column acts like a constant $x_0 = 1$ and allows the model to learn an intercept term in addition to the coefficients for $x_1$ and $x_2$. Thus, our parameter vector $\boldsymbol{\theta}$ will now have three components in the linear relationship we are modelling: $y = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \epsilon$.
+\end{exampleBox}
+
+\subsection{Solving for the Best Parameters}
+With the design matrix constructed, we can now focus on finding the optimal parameters, $\boldsymbol{\theta}^*$. But what does ``optimal'' even mean in this context? There are several methods to achieve this, each with its own assumptions and implications. We will discuss two common approaches: Ordinary Least Squares (OLS) and Weighted Least Squares (WLS), and how they can be extended with regularization techniques to improve model robustness.
 
 \paragraph*{Ordinary Least Squares (OLS)}
-The most common approach is to find the parameters that minimize the discrepancy between our model's predictions and the actual data. Specifically, we seek to minimize the sum of squared errors (SSE), also known as the residual sum of squares.
+The most common definition of optimality is to minimize the discrepancy between our model's predictions and the observed data. Specifically, we seek to minimize the sum of squared errors (SSE), also known as the residual sum of squares.
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} \sum_{j=1}^N \left(y_j - \tilde{y}(\mathbf{x}_j; \boldsymbol{\theta})\right)^2
+    \boldsymbol{\theta}^*_\text{OLS} = \argmin_{\boldsymbol{\theta}} \sum_{j=1}^N \left(y_j - \tilde{y}(\mathbf{x}_j; \boldsymbol{\theta})\right)^2
 \end{equation}
 This objective function can also be written in vector form as the squared Euclidean norm of the residual vector:
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})
+    \boldsymbol{\theta}^*_\text{OLS} = \argmin_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})
 \end{equation}
 To find the minimum, we can first expand this expression as
-\begin{align*}
+\begin{align}
     \text{SSE} &= (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) \\
                  &= \mathbf{y}^\top\mathbf{y} - \mathbf{y}^\top\mathbf{X}\boldsymbol{\theta} - \boldsymbol{\theta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\theta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\theta} \\
                  &= \mathbf{y}^\top\mathbf{y} - 2\boldsymbol{\theta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\theta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\theta}
-\end{align*}
+\end{align}
 Taking the gradient with respect to $\boldsymbol{\theta}$ gives
 \begin{equation}
     \frac{\partial \text{SSE}}{\partial \boldsymbol{\theta}} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\theta}
+    \label{ols-sse-deriv}
 \end{equation}
-Setting this to zero gives us the normal equations:
+Setting this to zero (the necessary first-order optimality condition for an optimization problem) gives us:
 \begin{equation}
     \mathbf{X}^\top\mathbf{X}\boldsymbol{\theta} = \mathbf{X}^\top\mathbf{y}
 \end{equation}
-The solution for the optimal parameters, $\boldsymbol{\theta}^*$, is found by solving this system of linear equations and is given by
+The solution for the optimal parameters, $\boldsymbol{\theta}^*_\text{OLS}$, is found by solving this system of linear equations and is given by
 \begin{equation}
-    \boldsymbol{\theta}^* = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}
+    \boldsymbol{\theta}^*_\text{OLS} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}
 \end{equation}
-This is the famous OLS solution for linear regression. The term $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is often called the pseudoinverse of $\mathbf{X}$ (when $\mathbf{X}$ has full column rank). We note that if $\mathbf{X}$ is square and invertible, then $\boldsymbol{\theta}^* = \mathbf{X}^{-1}\mathbf{y}$, as we would expect.
+This is the famous OLS solution for linear regression. The term $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is often called the pseudoinverse of $\mathbf{X}$ (when $\mathbf{X}$ has full column rank). We note that if $\mathbf{X}$ is square and invertible, then $\boldsymbol{\theta}^*_\text{OLS} = \mathbf{X}^{-1}\mathbf{y}$, as we would expect.
+
+\begin{warningBox}
+    \textbf{Warning...?}
+    Since we have defined $\boldsymbol{\theta}^*_\text{OLS}$ using only the first-order optimality criterion, is there a risk that this solution is not the global minimum, but rather a local minimum or even a maximum? 
+    
+    Fortunately, the objective function we are minimizing, the sum of squared errors, is a convex function in $\boldsymbol{\theta}$. Taking the derivative of \autoref{ols-sse-deriv} once more, the Hessian is $\mathbf{X}^\top \mathbf{X}$, which is a positive semi-definite matrix. We know this because for any vector $\mathbf{v} \neq \mathbf{0}$, $\mathbf{v}^\top \mathbf{X}^\top \mathbf{X} \mathbf{v} = (\mathbf{X} \mathbf{v})^\top (\mathbf{X} \mathbf{v}) \equiv || \mathbf{Xv} ||_2^2 \ge 0$. Thus, the function is convex, and any stationary point is guaranteed to be a global minimum.
+\end{warningBox}
 
 \paragraph*{Weighted Least Squares (WLS)}
-The OLS solution implicitly assumes that the noise in each measurement, $\epsilon_j$, has the same variance. This property is called \textbf{homoscedasticity}. In many experiments, however, we have higher confidence in some measurements than others. This situation, where the noise variance is different for different observations, is called \textbf{heteroscedasticity}. In this case, it makes sense to give more weight to the low-noise data points when minimizing the error. We can achieve this by minimizing a weighted sum of squared errors, where the weighting is done by the inverse of the noise covariance matrix, $\mathbf{V}_{\boldsymbol{\epsilon}} = \text{Cov}(\boldsymbol{\epsilon})$. The objective function becomes
+The OLS solution treats all data points as equally important. Implicitly, the assumption is that all are equally trustworthy because they have identical measurement noise---this property is called \textbf{homoscedasticity}. In many experiments, however, we will have higher confidence in some measurements than others. This situation, where the noise variance is different for different observations, is called \textbf{heteroscedasticity}. In this case, it makes sense to give more weight to the low-noise data points when minimizing the error. If we are more confident in some data than others, we prioritize fitting the high-confidence data. 
+
+We can achieve this \textbf{weighted least squares} regression by minimizing a weighted sum of squared errors, where the weighting is done by the inverse of the noise covariance matrix, $\mathbf{V}_{\boldsymbol{\epsilon}} = \text{Cov}(\boldsymbol{\epsilon})$. If our measurement errors are uncorrelated, this matrix is diagonal with entries equal to the variances of each measurement error, $\sigma_{\epsilon_j}^2$. The objective function in this special case is 
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})
+    \boldsymbol{\theta}^*_\text{WLS} = \argmin_{\boldsymbol{\theta}} \sum_{j=1}^N \frac{ \left(y_j - \tilde{y}(\mathbf{x}_j; \boldsymbol{\theta})\right)^2}{\sigma_{\epsilon_j}^2}
 \end{equation}
-The solution to this weighted least squares problem can be found the same way as before. The result is
+In general, however, the errors may be correlated, leading to off-diagonal terms in $\mathbf{V}_{\boldsymbol{\epsilon}}$. The objective function in this more general case cannot be expressed as a simple sum over individual experiments; instead, we write it in matrix form as
 \begin{equation}
-    \boldsymbol{\theta}^* = (\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{y}
+    \boldsymbol{\theta}^*_\text{WLS} = \argmin_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})
+\end{equation}
+The solution to this weighted least squares problem can be found through the same process of differentiation and algebraic manipulation we saw for OLS. The result is
+\begin{equation}
+    \boldsymbol{\theta}^*_\text{WLS} = (\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{y}
 \end{equation}
 This ensures that experiments with low variance (high confidence) have a greater influence on the final parameter estimates. Of course, this method requires that we know or can estimate the noise covariance matrix $\mathbf{V}_{\boldsymbol{\epsilon}}$. If repeated trials are available, an empirical estimator for the measurement-error covariance is
 \begin{equation*}
     \left[\mathbf{V}_{\boldsymbol{\epsilon}}\right]_{ij} \approx \frac{1}{N} \sum_{n=1}^{N} \big(y_{i,n} - \langle y_i\rangle\big)\big(y_{j,n} - \langle y_j\rangle\big)
 \end{equation*}
-WLS tends to perform well when the number of parameters is small relative to the number of experiments; ill-conditioned problems benefit from regularization.
-
+where $y_{i,n}$ is the $n$th measurement of experiment $i$, and $\langle y_i \rangle$ is the mean of all measurements for experiment $i$.
 \begin{exampleBox}
     \textbf{Example: OLS vs.\ WLS in the Presence of Heteroscedastic Errors}
     
@@ -116,16 +194,16 @@ WLS tends to perform well when the number of parameters is small relative to the
 
     OLS treats all measurements equally, regardless of their precision. The biased high-concentration outliers heavily influence the fit, pulling the slope upward. The resulting OLS estimate has a slope of 0.729, representing a 21.5\% error from the true value of 0.600.
     
-    WLS assigns weights inversely proportional to measurement variance ($w_i = 1/\sigma_i^2$), effectively down-weighting unreliable high-concentration data while trusting precise low-concentration measurements. The WLS fit yields a slope of 0.588, only 2.0\% from the true value. This is roughly 10.8 times more accurate than OLS! So we can see that when measurement precision varies systematically (heteroscedasticity), WLS provides substantially better parameter estimates by appropriately weighting each data point according to its reliability. Common sources of heteroscedastic errors include detector saturation, signal-dependent noise, and concentration-dependent matrix effects.
+    WLS assigns weights inversely proportional to measurement variance ($w_i = 1/\sigma_i^2$), effectively down-weighting unreliable high-concentration data while trusting precise low-concentration measurements. The WLS fit yields a slope of 0.588, only 2.0\% from the true value. This is roughly 10.8 times more accurate than OLS! So we can see that when measurement precision varies in a known manner, WLS provides substantially better parameter estimates by appropriately weighting each data point according to its reliability. Common sources of heteroscedastic errors include detector saturation, signal-dependent noise, and concentration-dependent matrix effects.
     
 \end{exampleBox}
 
 \subsection{Regularization}
-The ordinary and weighted least squares solutions provide a direct way to find parameters that minimize the fit error. However, these methods can encounter problems, particularly when: (1) the number of features $n$ is large, approaching or exceeding the number of data points $N$; (2) the input features are highly correlated (multicollinearity), making the $\mathbf{X}^\top\mathbf{X}$ matrix ill-conditioned or singular, leading to unstable solutions; or (3) we want to encourage a simpler model, perhaps one where many parameters are exactly zero. In these situations, the OLS/WLS solution can have extremely large parameter values, leading to a model that fits the training data perfectly but performs poorly on new, unseen data (i.e., it overfits). To combat this, we introduce \textbf{regularization terms} to our objective function. These terms add a penalty for complexity, which drives the parameter estimates towards more stable and generalizable solutions.
+The ordinary and weighted least squares solutions provide a direct way to find parameters that minimize the fit error. However, these methods can encounter problems, particularly when: (1) the number of features $n$ is large, approaching or exceeding the number of data points $N$; (2) the input features are highly correlated (multicollinearity), making the $\mathbf{X}^\top\mathbf{X}$ matrix ill-conditioned or singular, leading to unstable solutions; or (3) we want to encourage a simpler model, perhaps one where many parameters are exactly zero. In these situations, the OLS/WLS solution may fit the training data well but perform poorly on new, unseen data (i.e., it overfits). To combat this, we introduce \textbf{regularization terms} into our objective function. These terms add a penalty for complexity, which drives the parameter estimates towards more stable and generalizable solutions.
 
 The general idea is to modify the optimization problem to minimize not just the sum of squared errors, but also a function of the parameter magnitudes:
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} \left( (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \text{Regularization Penalty} \right)
+    \boldsymbol{\theta}^* = \argmin_{\boldsymbol{\theta}}  (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \text{regularization penalty} 
     \label{eq:regularization-general}
 \end{equation}
 The choice of the regularization penalty defines different types of regularized regression.
@@ -133,27 +211,27 @@ The choice of the regularization penalty defines different types of regularized 
 \paragraph*{L2 Regularization}
 L2 regularization, also known as ridge regression, adds a penalty proportional to the sum of the squared magnitudes of the parameters. This encourages parameters to be small (i.e., it more evenly distributes the weight across all parameters) but rarely drives them exactly to zero.
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \beta||\boldsymbol{\theta}||_2^2
+    \boldsymbol{\theta}^* = \argmin_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \beta||\boldsymbol{\theta}||_2^2 
     \label{eq:l2-regularization}
 \end{equation}
 where $||\boldsymbol{\theta}||_2^2 = \sum_{i=1}^n \theta_i^2$ is the squared Euclidean (L2) norm of the parameter vector, and $\beta > 0$ is a tuning parameter that controls the strength of the regularization. A larger $\beta$ implies a stronger penalty on parameter magnitudes. The solution for ridge regression also has a closed form: 
 \begin{equation}
     \boldsymbol{\theta}^* = (\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{X} + \beta\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{y}
 \end{equation}
-where $\mathbf{I}$ is the identity matrix. The addition of $\beta\mathbf{I}$ to $\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{X}$ makes the matrix more stable and invertible (hopefully you remember that we've seen this type of trick to address ill-conditioning before in the context of iterative methods' update rules!).
+where $\mathbf{I}$ is the identity matrix. The addition of $\beta\mathbf{I}$ to $\mathbf{X}^\top\mathbf{V}_{\boldsymbol{\epsilon}}^{-1}\mathbf{X}$ makes the matrix more stable and invertible (hopefully you remember that we've seen this type of trick to address ill-conditioning before in the context of iterative methods' update rules, e.g., the Hessian modification for Newton's method!).
 
 \paragraph*{L1 Regularization}
-L1 regularization, or lasso regression (least absolute shrinkage and selection operator), adds a penalty proportional to the sum of the absolute magnitudes of the parameters. A unique property of L1 regularization is that it tends to drive some parameters exactly to zero. This means it is effectively performing feature selection and thus giving a sparse model. The minimization problem is
+L1 regularization, or lasso regression (least absolute shrinkage and selection operator), adds a penalty proportional to the 1-norm: the sum of the absolute magnitudes of the parameters. A unique property of L1 regularization is that it tends to drive some parameters exactly to zero. This means it is effectively performing feature selection and thus giving a sparse model. The minimization problem is
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \alpha||\boldsymbol{\theta}||_1
+    \boldsymbol{\theta}^* = \argmin_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \alpha||\boldsymbol{\theta}||_1
     \label{eq:l1-regularization}
 \end{equation}
-where $||\boldsymbol{\theta}||_1 = \sum_{i=1}^n |\theta_i|$ is the L1 norm of the parameter vector, and $\alpha > 0$ controls the regularization strength. Unlike ridge regression, lasso generally does not have a closed-form solution and typically requires iterative optimization algorithms to solve.
+where $||\boldsymbol{\theta}||_1 = \sum_{i=1}^n |\theta_i|$ is the L1 norm of the parameter vector, and $\alpha > 0$ controls the regularization strength. Unlike ridge regression, lasso generally does not have a closed-form solution and typically requires iterative optimization algorithms to solve. Lasso regression is popular in many scientific and engineering applications where interpretability and simplicity of the model are desired.
 
 \paragraph*{Elastic Net Regularization}
 The elastic net combines both L1 and L2 regularization penalties. It encourages both small parameters (like ridge) and sparsity (like lasso).
 \begin{equation}
-    \boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \alpha||\boldsymbol{\theta}||_1 + \beta||\boldsymbol{\theta}||_2^2
+    \boldsymbol{\theta}^* = \argmin_{\boldsymbol{\theta}} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \alpha||\boldsymbol{\theta}||_1 + \beta||\boldsymbol{\theta}||_2^2
     \label{eq:elastic-net-regularization}
 \end{equation}
 
@@ -163,7 +241,7 @@ The elastic net combines both L1 and L2 regularization penalties. It encourages 
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{figs/models-vs-data/regularization_comparison.pdf}
+        \includegraphics[width=\textwidth]{figs/models-vs-data/regularization_comparison.pdf} % TODO: fix Lasso subplot titles to say L1
         \caption{Regularization in action (polynomial regression).}
         \label{fig:regularization-comparison}
     \end{figure}
@@ -172,15 +250,17 @@ The elastic net combines both L1 and L2 regularization penalties. It encourages 
     
     \textbf{Ridge (L2):} L2 regularization dramatically improves the fit. The prediction closely follows the true function with smooth interpolation between training points. The coefficient histogram shows that all parameters are shrunk to modest magnitudes, with most coefficients distributed around similar scales.
     
-    \textbf{Lasso (L1):} L1 regularization also produces a smooth, accurate fit. Notably, the coefficient histogram reveals the sparsity-inducing property of lasso: the large bar at zero means that many coefficients are driven to exactly zero. Only a handful of the 15 polynomial terms are deemed necessary, so we get a simpler model.
+    \textbf{Lasso (L1):} L1 regularization also produces a smooth fit. Notably, the coefficient histogram reveals the sparsity-inducing property of lasso: the large bar at zero means that many coefficients are driven to exactly zero. Only a handful of the 15 polynomial terms are deemed necessary, so we get a simpler model.
     
     \textbf{Elastic Net (L1 + L2):} Combining both penalties, elastic net produces results similar to lasso with some coefficient sparsity, though perhaps not as aggressively as pure lasso. 
 
 \end{exampleBox}
 
+
+\section{Frequentist vs.\ Bayesian Schools of Thought}
 Above, we derived the OLS and WLS solutions by seeking the parameters that minimized the sum of squared errors. This is an intuitive and reasonable goal. However, this approach can be more rigorously justified by reframing the entire problem of parameter estimation from a probabilistic viewpoint. This is what we'll do next.
 
-\section{Frequentist vs.\ Bayesian}
+
 When we think about the uncertainty in model fitting, there are two dominant philosophical approaches for treating the model parameters $\boldsymbol{\theta}$. The frequentist view assumes that there is one true, fixed, but unknown parameter vector, $\boldsymbol{\theta}^*$. The data we observe, $\mathcal{D}$, is considered a random sample from a process governed by these true parameters. If we were to repeat our entire experiment, we would get different data, but the true $\boldsymbol{\theta}^*$ would remain the same. The goal of a frequentist is to devise procedures (estimators) that have good long-run properties, like being unbiased. On the other hand, the Bayesian view treats the parameters themselves as uncertain quantities. It assumes that $\boldsymbol{\theta}$ is a random vector, and we can use probability distributions to describe our degree of belief about its values.
 
 The Bayesian approach uses Bayes' theorem to formalize the process of learning. Given our observed data $\mathcal{D}$, we update our initial beliefs about the parameters (the \textit{prior}) to arrive at an updated belief (the \textit{posterior}).
@@ -193,7 +273,7 @@ We've seen this before when we introduced Bayes' theorem in the context of proba
 \section{Maximum Likelihood Estimation}
 The most common frequentist method for parameter estimation is maximum likelihood estimation (MLE). MLE takes the simple stance that we should choose the parameters $\boldsymbol{\theta}^*$ that make our observed data $\mathcal{D}$ the most probable. In other words, we seek the parameters that maximize the likelihood function.
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MLE}}^* = \arg\max_{\boldsymbol{\theta}} p(\mathcal{D}|\boldsymbol{\theta})
+    \boldsymbol{\theta}_{\text{MLE}}^* = \argmax_{\boldsymbol{\theta}} p(\mathcal{D}|\boldsymbol{\theta})
 \end{equation}
 Let's apply this to the linear model we've been using: $\boldsymbol{\mathsf{y}} = \mathbf{X}\boldsymbol{\theta} + \boldsymbol{\epsilon}$, where we assume the noise is drawn from a multivariate Gaussian distribution with zero mean and covariance $\mathbf{V}_{\boldsymbol{\epsilon}}$, i.e., $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{V}_{\boldsymbol{\epsilon}})$. Under this assumption, the likelihood of observing our data vector $\mathbf{y}$ for a given set of parameters $\boldsymbol{\theta}$ is given by the multivariate normal PDF:
 \begin{equation}
@@ -206,26 +286,26 @@ Our goal is to find the $\boldsymbol{\theta}$ that maximizes this expression. Be
 \end{align*}
 To find the optimal $\boldsymbol{\theta}$, we can discard any terms that do not depend on it, giving us
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MLE}}^* = \arg\max_{\boldsymbol{\theta}} \left[ -\frac{1}{2}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) \right]
+    \boldsymbol{\theta}_{\text{MLE}}^* = \argmax_{\boldsymbol{\theta}} \left[ -\frac{1}{2}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) \right]
 \end{equation}
 Maximizing a negative quantity is the same as minimizing its positive counterpart, and we can throw away the prefactor of $1/2$ since it doesn't change the location of the minimum. Therefore, the MLE solution is
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MLE}}^* = \arg\min_{\boldsymbol{\theta}} \left[ (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) \right]
+    \boldsymbol{\theta}_{\text{MLE}}^* = \argmin_{\boldsymbol{\theta}} \left[ (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) \right]
 \end{equation}
 This is precisely the objective function for WLS! So the intuitive method of minimizing the sum of squared errors is equivalent to the more formal method of MLE provided that we assume the experimental noise is independent and Gaussian. This gives a nice probabilistic justification for the widespread use of least-squares methods.
 
 \section{Maximum a Posteriori Estimation}
 The MLE approach assumes there is one true parameter set that we are trying to find. By contrast, the Bayesian approach allows for uncertainty in the parameters themselves by treating them as random variables. This lets us incorporate our own prior knowledge or beliefs into the estimation process. While a full Bayesian analysis involves finding the entire posterior distribution $p(\boldsymbol{\theta}|\mathcal{D})$, we often want a single point estimate for the parameters. The Bayesian equivalent of the MLE is the \textbf{maximum a posteriori (MAP)} estimate, which seeks the most probable parameter vector \textit{given the data}. In other words, we find the peak, or mode, of the posterior distribution.
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MAP}}^* = \arg\max_{\boldsymbol{\theta}} p(\boldsymbol{\theta}|\mathcal{D})
+    \boldsymbol{\theta}_{\text{MAP}}^* = \argmax_{\boldsymbol{\theta}} p(\boldsymbol{\theta}|\mathcal{D})
 \end{equation}
 Using Bayes' theorem, we can rewrite this as
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MAP}}^* = \arg\max_{\boldsymbol{\theta}} \frac{p(\mathcal{D}|\boldsymbol{\theta})p(\boldsymbol{\theta})}{p(\mathcal{D})}
+    \boldsymbol{\theta}_{\text{MAP}}^* = \argmax_{\boldsymbol{\theta}} \frac{p(\mathcal{D}|\boldsymbol{\theta})p(\boldsymbol{\theta})}{p(\mathcal{D})}
 \end{equation}
 Since the evidence term $p(\mathcal{D})$ in the denominator does not depend on our parameters $\boldsymbol{\theta}$, it doesn't affect the location of the maximum. We can therefore simplify the optimization problem to maximizing the numerator:
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MAP}}^* = \arg\max_{\boldsymbol{\theta}} p(\mathcal{D}|\boldsymbol{\theta})p(\boldsymbol{\theta})
+    \boldsymbol{\theta}_{\text{MAP}}^* = \argmax_{\boldsymbol{\theta}} p(\mathcal{D}|\boldsymbol{\theta})p(\boldsymbol{\theta})
 \end{equation}
 The difference between MLE and MAP is just one term, the prior distribution $p(\boldsymbol{\theta})$. MLE maximizes only the likelihood, whereas MAP maximizes the likelihood multiplied by the prior.
 
@@ -296,11 +376,11 @@ Maximizing the posterior is equivalent to maximizing the log-likelihood plus the
 \end{equation}
 Substituting this and the log-likelihood into the MAP objective gives
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MAP}}^* = \arg\max_{\boldsymbol{\theta}} \left( -\frac{1}{2}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) - \frac{\beta}{2}\boldsymbol{\theta}^\top\boldsymbol{\theta} \right)
+    \boldsymbol{\theta}_{\text{MAP}}^* = \argmax_{\boldsymbol{\theta}} \left( -\frac{1}{2}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) - \frac{\beta}{2}\boldsymbol{\theta}^\top\boldsymbol{\theta} \right)
 \end{equation}
 Maximizing this is equivalent to minimizing its negative, so
 \begin{equation}
-    \boldsymbol{\theta}_{\text{MAP}}^* = \arg\min_{\boldsymbol{\theta}} \left( (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \beta\boldsymbol{\theta}^\top\boldsymbol{\theta} \right)
+    \boldsymbol{\theta}_{\text{MAP}}^* = \argmin_{\boldsymbol{\theta}} \left( (\mathbf{y} - \mathbf{X}\boldsymbol{\theta})^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1}(\mathbf{y} - \mathbf{X}\boldsymbol{\theta}) + \beta\boldsymbol{\theta}^\top\boldsymbol{\theta} \right)
 \end{equation}
 This is exactly the objective function for L2 regularization (ridge regression)! So we have a Bayesian interpretation for regularization: it is equivalent to MAP estimation with a prior belief that the parameters should be small and centered around zero. A similar result holds for L1 regularization using a Laplace prior.
 
@@ -309,7 +389,7 @@ We have established that for a linear model with Gaussian noise, the MLE is equi
 \begin{equation}
     \chi^2 = (\mathbf{y} - \tilde{\mathbf{y}}(\mathbf{X}; \boldsymbol{\theta}))^\top \mathbf{V}_{\boldsymbol{\epsilon}}^{-1} (\mathbf{y} - \tilde{\mathbf{y}}(\mathbf{X}; \boldsymbol{\theta}))
 \end{equation}
-Here, $\tilde{\mathbf{y}}(\mathbf{X}; \boldsymbol{\theta})$ represents the model's predictions using a specific set of parameters $\boldsymbol{\theta}$. Finding the maximum likelihood estimate, $\boldsymbol{\theta}_{\text{MLE}}^*$, is therefore entirely equivalent to finding the parameters that \textit{minimize} the chi-square value: $\boldsymbol{\theta}_{\text{MLE}}^* = \arg\min_{\boldsymbol{\theta}} \chi^2$.
+Here, $\tilde{\mathbf{y}}(\mathbf{X}; \boldsymbol{\theta})$ represents the model's predictions using a specific set of parameters $\boldsymbol{\theta}$. Finding the maximum likelihood estimate, $\boldsymbol{\theta}_{\text{MLE}}^*$, is therefore entirely equivalent to finding the parameters that \textit{minimize} the chi-square value: $\boldsymbol{\theta}_{\text{MLE}}^* = \argmin_{\boldsymbol{\theta}} \chi^2$.
 
 The $\chi^2$ value has an intuitive meaning. If the noise is uncorrelated so that the covariance matrix $\mathbf{V}_{\boldsymbol{\epsilon}}$ is diagonal with entries $[\mathbf{V}_{\boldsymbol{\epsilon}}]_{ii} = \sigma_i^2$, the expression simplifies to a sum:
 \begin{equation}
