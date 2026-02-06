@@ -822,6 +822,48 @@ The acceptance probability depends only on the change in the weighted sum of squ
     \item Prediction: What value $y$ might we measure for a new input $x$? We can generate a predictive distribution by taking each sample $\boldsymbol{\theta}_i$ and drawing a corresponding $y$ from the model: $y_i = g(x; \boldsymbol{\theta}_i) + \epsilon_i$, where $\epsilon_i$ is drawn from the measurement noise. The histogram of $\{y_i\}$ shows our full prediction.
 \end{itemize}
 
+\section{Kinetic Monte Carlo}
+\label{sec:kmc}
+
+Everything we have done so far uses Monte Carlo to sample from a \emph{static} distribution. ``Static'' refers to the fact that we draw samples from some target $\pi(\mathbf{x})$ to compute averages at equilibrium. But many problems in chemical engineering are inherently \emph{dynamic}. Reactions fire, molecules adsorb and desorb, crystals grow. The question is not ``what is the equilibrium state?'' but ``what happens next, and when?'' Kinetic Monte Carlo (kMC) methods answer this question by simulating the time evolution of a system one random event at a time.\footnote{As a fun fact, the earliest application of kMC to an atomistic system appears to have been \href{https://doi.org/10.1103/PhysRev.150.470}{Beeler's 1966 simulation of radiation damage annealing in iron}.}
+% fun fact is from https://helper.ipam.ucla.edu/publications/matut/matut_5898_preprint.pdf
+
+The setting is a system that can be in one of many discrete states $\mathbf{s}$ with $R$ possible events (reactions, transitions) that can occur. Each event $\mu$ has a \emph{propensity} $a_\mu(\mathbf{s})$ that depends on the current state and plays the role of a rate, which means that the probability that event $\mu$ fires in a small time interval $[t, t+dt)$ is $a_\mu \, dt$. The total propensity is $a_0 = \sum_{\mu=1}^{R} a_\mu$, and the time until the next event of \emph{any} kind is exponentially distributed:
+\begin{equation}
+    \tau \sim \text{Exp}(a_0), \quad \text{i.e.,} \quad p(\tau) = a_0 \, e^{-a_0 \tau}
+\end{equation}
+When that event fires, it is reaction $\mu$ with probability $a_\mu / a_0$. This is exact. It is mathematically equivalent to solving the chemical master equation, which tracks $p(\mathbf{s}, t)$ for every state $\mathbf{s}$, but without ever writing down or storing the (enormous) transition matrix!
+
+\begin{algorithmBox}
+    \textbf{The Gillespie (kMC) Algorithm}
+    \begin{enumerate}
+        \item Initialize the state $\mathbf{s}$ and set $t = 0$.
+        \item Compute all propensities $a_\mu(\mathbf{s})$ for $\mu = 1, \ldots, R$ and their sum $a_0 = \sum_{\mu} a_\mu$.
+        \item If $a_0 = 0$, stop (no more events can occur).
+        \item Draw the waiting time: $\tau = -\ln(r_1) / a_0$, where $r_1 \sim \mathcal{U}(0,1)$.
+        \item Select which event fires: find the $\mu$ satisfying $\sum_{\nu=1}^{\mu-1} a_\nu < r_2 \, a_0 \le \sum_{\nu=1}^{\mu} a_\nu$, where $r_2 \sim \mathcal{U}(0,1)$.
+        \item Update the state $\mathbf{s}$ according to event $\mu$ and advance $t \to t + \tau$.
+        \item Return to step 2.
+    \end{enumerate}
+\end{algorithmBox}
+
+The algorithm presented here is usually called the Gillespie algorithm when applied to well-mixed chemical kinetics and kMC when applied to spatially resolved systems such as surface reactions on a lattice. The underlying mathematical framework (exact stochastic simulation of a continuous-time Markov chain) is the same in both cases.
+
+The intuition behind this algorithm is a picture of competing clocks. Imagine each possible event $\mu$ has its own independent alarm clock that rings after a random, exponentially distributed time with rate $a_\mu$. All $R$ clocks are ticking simultaneously, and whatever rings first is the event that happens. The time to the first ring out of all $R$ clocks is exponential with rate $a_0 = \sum a_\mu$ (the more clocks ticking, the sooner one goes off), and the probability that it was clock $\mu$ that rang first is $a_\mu / a_0$. This is exactly what steps 4 and 5 sample. The property that makes this work is the \emph{memorylessness} property of the exponential distribution, the unique continuous distribution for which $P(\text{wait} > t + s \mid \text{wait} > t) = P(\text{wait} > s)$. After we fire an event and recompute the propensities, the remaining clocks don't ``remember'' how long they've been ticking, so we can throw them all away and start fresh. This is why the algorithm loops back to step 2 with no leftover state.
+
+One subtlety that is easy to overlook is that the propensity $a_\mu$ must be expressed in terms of molecule counts, not concentrations. For a unimolecular reaction $A \to \cdots$ with deterministic rate $r = k[A]$, the stochastic propensity is simply $a = k N_A$ (units of $k$: s$^{-1}$). But for a bimolecular reaction $A + B \to \cdots$ with deterministic rate $r = k[A][B]$, the macroscopic rate constant $k$ (units of M$^{-1}$s$^{-1}$) must be converted to a stochastic rate constant $c = k / (N_{\text{Av}} V)$, giving propensity $a = c \, N_A N_B$, where $V$ is the system volume and $N_{\text{Av}}$ is Avogadro's number. Using the macroscopic $k$ directly would produce simulation timescales that are wrong by orders of magnitude.
+
+As a concrete example, consider the consecutive reaction $A \xrightarrow{k_1} B \xrightarrow{k_2} C$. There are $R = 2$ possible events: the conversion of one $A$ molecule to $B$ (propensity $a_1 = k_1 N_A$) and the conversion of one $B$ molecule to $C$ (propensity $a_2 = k_2 N_B$). Because each event changes the molecule count by $\pm 1$, the trajectories are staircase functions. Figure~\ref{fig:kmc-trajectories} shows several stochastic realizations alongside the deterministic ODE solution $dN_A/dt = -k_1 N_A$, $dN_B/dt = k_1 N_A - k_2 N_B$. With only 50 molecules, individual trajectories fluctuate visibly around the deterministic curve. With 500 molecules, the relative fluctuations shrink (they scale as $1/\sqrt{N}$) and the stochastic trajectories collapse onto the ODE solution. This is the \emph{thermodynamic limit}, where deterministic kinetics emerge as a large-$N$ limit of the stochastic process.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=.98\textwidth]{figs/monte-carlo/kmc_trajectories.pdf}
+    \caption{Kinetic Monte Carlo simulation of $A \to B \to C$ ($k_1 = 1$, $k_2 = 0.5$). Faint step functions are individual stochastic realizations; solid curves are the deterministic ODE solution. Left: with 50 molecules, fluctuations are significant. Right: with 500, the stochastic trajectories closely follow the deterministic limit.}
+    \label{fig:kmc-trajectories}
+\end{figure}
+
+Because the algorithm fires one event at a time, its computational cost is proportional to the number of reaction events. This is fine when molecule counts are small, but becomes prohibitive for large populations or fast rates (e.g., $10^{23}$ molecules). Tau-leaping (\href{https://doi.org/10.1063/1.1378322}{Gillespie, 2001}) addresses this by leaping forward a larger time step $\Delta t$ and firing approximately $a_\mu \Delta t$ reactions per channel (drawn from Poisson distributions) rather than resolving each event individually. As $\Delta t$ grows, tau-leaping smoothly interpolates between the exact kMC and the deterministic ODE limit.
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"
