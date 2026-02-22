@@ -1323,6 +1323,26 @@ This relationship (not the literal equation, but the idea we just talked about) 
     \textbf{Warning}: While a lower condition number generally promotes faster convergence, it is important to recognize that not all matrices can be easily preconditioned to achieve a desirable condition number. Additionally, some iterative methods may exhibit different sensitivities to the condition number, so the choice of method should consider both the properties of $\mathbf{A}$ and the specific requirements of the problem at hand.
 \end{warningBox}
 
+\section{Exercises}
+
+\begin{exercise}
+    Compute the 1, 2, and $\infty$ norms of $\mathbf{v}=[1,1,-1,2,-3]$. 
+\end{exercise}
+
+\begin{solution}
+    The one norm is the sum of the absolute values of the components of the vector:
+\[
+||\mathbf{v}||_1=8
+\]
+The two norm is the euclidean distance:
+\[
+||\mathbf{v}||_2=\left(\sum^4_{i=1} |v_i|^2\right)^{1/2} = (1+1+1+4+9)^{1/2}=\sqrt{16}=4
+\]
+The infinity norm is the absolute value of the largest value in the vector:
+\[
+||\mathbf{v}||_\infty = 3
+\end{solution}
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"
