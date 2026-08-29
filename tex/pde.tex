@@ -1010,7 +1010,7 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L23
-    What is the stability criterion you expect when solving the following PDE using a forward time / central difference discretization?
+    (*) What is the stability criterion you expect when solving the following PDE using a forward time / central difference discretization?
     \[
         \frac{\partial c}{\partial t}
         + u\,\frac{\partial c}{\partial x}
@@ -1020,7 +1020,11 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
 \end{exercise}
 
 \newcommand{\ii}{\mathrm{i}} % imaginary unit
-\newcommand{\derivNote}[1]{\Big\downarrow\ \text{#1}}
+\newcommand{\derivNote}[1]{%
+  \par\addvspace{0.5\baselineskip}%
+  \noindent\hspace*{0.5\linewidth}$\Big\downarrow$\ #1\par
+  \addvspace{0.5\baselineskip}%
+  }
 
 \begin{solution}
     Forward time, central difference discretization
@@ -1032,9 +1036,9 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
     \]
 
     For von Neumann stability analysis we use
-    \[c_i^j = \epsilon_i e^{\ii kj\Delta x}.\]
+    \[c_i^j = \epsilon_i e^{\ii kj\Delta x}\]
     and substitute this into our discretized governning equation.
-    (The $\ii$ in the exponential is \(\ii=\sqrt{-1}\) not an index!)
+    (The $\ii$ in the exponential is \(\ii=\sqrt{-1}\), not an index!)
 
     \[
         \frac{\epsilon_{i+1}e^{\ii kj\Delta x} - \epsilon_i e^{\ii kj\Delta x}}{\Delta t}
@@ -1042,31 +1046,25 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
         - \mathcal{D}\frac{\epsilon_i\left(e^{\ii k(j+1)\Delta x} - 2e^{\ii kj\Delta x} + e^{\ii k(j-1)\Delta x}\right)}{(\Delta x)^2}
         = 0.
     \]
-    \[
-        \derivNote{divide by $e^{\ii kj\Delta x}$ and simplify}
-    \]
+    \derivNote{divide by $e^{\ii kj\Delta x}$ and simplify}
     \[
         \frac{\epsilon_{i+1} - \epsilon_i}{\Delta t}
         + U\frac{\epsilon_i\left(e^{\ii k\Delta x} - e^{-\ii k\Delta x}\right)}{2\Delta x}
         - \mathcal{D}\frac{\epsilon_i\left(e^{\ii k\Delta x} - 2 + e^{-\ii k\Delta x}\right)}{(\Delta x)^2}
         = 0.
     \]
-    \[
-        \derivNote{rearrange for $\epsilon_{i+1}$}
-    \]
+    \derivNote{rearrange for $\epsilon_{i+1}$}
     \[
         \epsilon_{i+1} = \epsilon_i\left[
             1 - \frac{U\Delta t}{2\Delta x}\left(e^{\ii k\Delta x} - e^{-\ii k\Delta x}\right)
             + \frac{\mathcal{D}\Delta t}{(\Delta x)^2}\left(e^{\ii k\Delta x} - 2 + e^{-\ii k\Delta x}\right)
         \right].
     \]
-    \[
-        \Big\downarrow\ \text{use the identities}\quad
+    \derivNote{use the identities \(\quad
         \begin{aligned}
             e^{\ii k\Delta x} + e^{-\ii k\Delta x} &= 2\cos(k\Delta x)\\
             e^{\ii k\Delta x} - e^{-\ii k\Delta x} &= 2\,\ii\sin(k\Delta x)
-        \end{aligned}
-    \]
+        \end{aligned}\)}
     \[
         \epsilon_{i+1} = \epsilon_i\left[
             1 - \frac{U\Delta t\,\ii\sin(k\Delta x)}{\Delta x}
@@ -1085,23 +1083,17 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
     \[
         \Bigl|1 - \ii c\sin(k\Delta x) + 2\alpha\bigl[\cos(k\Delta x) - 1\bigr]\Bigr| \le 1
     \]
-    \[
-        \derivNote{take magnitude and square}
-    \]
+    \derivNote{take magnitude and square}
     \[
         \Bigl(1 + 2\alpha\bigl[\cos(k\Delta x) - 1\bigr]\Bigr)^2
         + c^2\sin^2(k\Delta x) \le 1
     \]
-    \[
-        \derivNote{use \(\sin^2 x = 1 - \cos^2 x = (1-\cos x)(1+\cos x)\)}
-    \]
+    \derivNote{use \(\sin^2 x = 1 - \cos^2 x = (1-\cos x)(1+\cos x)\)}
     \[
         \Bigl(1 - 2\alpha\bigl[1 - \cos(k\Delta x)\bigr]\Bigr)^2
         + c^2\bigl(1-\cos(k\Delta x)\bigr)\bigl(1+\cos(k\Delta x)\bigr) \le 1
     \]
-    \[
-        \derivNote{expand}
-    \]
+    \derivNote{expand}
     \[
         1 - 4\alpha\bigl[1 - \cos(k\Delta x)\bigr]
         + 4\alpha^2\bigl[1 - \cos(k\Delta x)\bigr]^2

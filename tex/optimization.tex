@@ -1740,7 +1740,7 @@ Finally, when gradient information is unavailable, whether due to noisy function
 \section{Exercises}
 
 \begin{exercise} % 2020 Participation quiz L9
-    Find the roots of
+    (*) Find the roots of
     \[
         \lambda x^2 + e^{-x^2} - 1 = 0
     \]
@@ -1748,7 +1748,7 @@ Finally, when gradient information is unavailable, whether due to noisy function
 \end{exercise}
 
 \begin{solution}
-    When \(\lambda = 0\) the only root of \(\lambda x^2 + e^{-x^2}\) is \(x = 0\):
+    When \(\lambda = 0\), the only root of \(\lambda x^2 + e^{-x^2}\) is \(x = 0\):
     \begin{align*}
         0x^2 + e^{-x^2} - 1 &= 0\\
         e^{-x^2} - 1 &= 0\\
@@ -1813,15 +1813,16 @@ Finally, when gradient information is unavailable, whether due to noisy function
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L11
+    Estimate the path taken by the steepest-descent method with large and small step sizes.
+
     \begin{tikzpicture}[x=1cm,y=1cm]
         \draw[->,thick] (0,0) -- (7.8,0);
         \draw[->,thick] (0,0) -- (0,5.8);
 
-        \draw[red] (1.6,1.6) circle (0.3cm);
-        \draw[red] (1.6,1.6) circle (0.7cm);
+        \draw[red] (1.6,1.6) circle (0.4cm);
         \draw[red] (1.6,1.6) circle (1.1cm);
 
-        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.20);
+        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.2);
 
         \draw[red] (0,3.75) -- (2.75,3.75) arc (90:0:1) -- (3.75,0);
         \draw[red] (0,4.5) -- (3.5,4.5) arc (90:0:1) -- (4.5,0);
@@ -1830,9 +1831,9 @@ Finally, when gradient information is unavailable, whether due to noisy function
         \draw[blue,very thick]
             (3.40,4.30) -- (3.80,4.70)
             (3.40,4.70) -- (3.80,4.30);
+        \node[red] at (1.6,1.0) {$f(\mathbf{x})=1$};
+        \node[red] at (6.0,3.60) {$f(\mathbf{x})=7$};
     \end{tikzpicture}
-
-    Estimate the path taken by the steepest-descent method with large and small step sizes.
 \end{exercise}
 
 \newcommand{\drawsegments}[2]{%
@@ -1847,11 +1848,10 @@ Finally, when gradient information is unavailable, whether due to noisy function
                 \draw[->,thick] (0,0) -- (7.8,0);
         \draw[->,thick] (0,0) -- (0,5.8);
 
-        \draw[red] (1.6,1.6) circle (0.3cm);
-        \draw[red] (1.6,1.6) circle (0.7cm);
+        \draw[red] (1.6,1.6) circle (0.4cm);
         \draw[red] (1.6,1.6) circle (1.1cm);
 
-        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.20);
+        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.2);
 
         \draw[red] (0,3.75) -- (2.75,3.75) arc (90:0:1) -- (3.75,0);
         \draw[red] (0,4.5) -- (3.5,4.5) arc (90:0:1) -- (4.5,0);
@@ -1865,8 +1865,10 @@ Finally, when gradient information is unavailable, whether due to noisy function
         (3.6,4.5),(3.6,2.9),(2.0,2.9),(2.0,1.2),(1.3,1.6),(1.6,1.6)%
         }
         \drawsegments{black, thick}{%
-        (3.6,4.5),(3.6,4.0),(3.3,3.4),(2.9,2.9),(2.3,2.3),(1.9,1.9),(1.6,1.6)%
+        (3.6,4.5),(3.6,4.0),(3.3,3.4),(2.9,2.9),(2.5,2.5),(2.0,2.0),(1.6,1.6)%
         }
+        \node[red] at (1.6,1.0) {$f(\mathbf{x})=1$};
+        \node[red] at (6.0,3.60) {$f(\mathbf{x})=7$};
     \end{tikzpicture}
 \end{solution}
 
@@ -1881,11 +1883,10 @@ Finally, when gradient information is unavailable, whether due to noisy function
         \draw[->,thick] (0,0) -- (7.8,0);
         \draw[->,thick] (0,0) -- (0,5.8);
 
-        \draw[red] (1.6,1.6) circle (0.3cm);
-        \draw[red] (1.6,1.6) circle (0.7cm);
+        \draw[red] (1.6,1.6) circle (0.4cm);
         \draw[red] (1.6,1.6) circle (1.1cm);
 
-        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.20);
+        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.2);
 
         \draw[red] (0,3.75) -- (2.75,3.75) arc (90:0:1) -- (3.75,0);
         \draw[red] (0,4.5) -- (3.5,4.5) arc (90:0:1) -- (4.5,0);
@@ -1902,22 +1903,22 @@ Finally, when gradient information is unavailable, whether due to noisy function
         % labels
         \node[green!60!black] (cl) at (1.20,5.7) {$c(\mathbf{x})=0$};
         \draw[green!60!black,->,thin] (cl.south) -- (1.20,4.8);
-        \node[red] at (5.8,3.60) {$f(\mathbf{x})$};
+        \node[red] at (1.6,1.0) {$f(\mathbf{x})=1$};
+        \node[red] at (6.0,3.60) {$f(\mathbf{x})=7$};
     \end{tikzpicture}
 \end{exercise}
 
 \begin{solution}
-    A defining characteristic of constrained optimization is that the solution is at a tangent point between a contour and the constrain. The smallest contour in contact with teh constraint is \(f(\mathbf{x})=3\), and its tangent point to the constraint is shown in blue.
+    A defining characteristic of constrained optimization is that the solution is at a tangent point between a contour and the constrain. The smallest contour in contact with the constraint is \(f(\mathbf{x})=2\), and its tangent point to the constraint is shown in blue.
 
     \begin{tikzpicture}[x=1cm,y=1cm]
         \draw[->,thick] (0,0) -- (7.8,0);
         \draw[->,thick] (0,0) -- (0,5.8);
 
-        \draw[red] (1.6,1.6) circle (0.3cm);
-        \draw[red] (1.6,1.6) circle (0.7cm);
+        \draw[red] (1.6,1.6) circle (0.4cm);
         \draw[red] (1.6,1.6) circle (1.1cm);
 
-        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.20);
+        \draw[red,rounded corners=1.2cm] (0.05,0.05) rectangle (3.2,3.2);
 
         \draw[red] (0,3.75) -- (2.75,3.75) arc (90:0:1) -- (3.75,0);
         \draw[red] (0,4.5) -- (3.5,4.5) arc (90:0:1) -- (4.5,0);
@@ -1934,7 +1935,8 @@ Finally, when gradient information is unavailable, whether due to noisy function
         % labels
         \node[green!60!black] (cl) at (1.20,5.7) {$c(\mathbf{x})=0$};
         \draw[green!60!black,->,thin] (cl.south) -- (1.20,4.8);
-        \node[red] at (5.8,3.60) {$f(\mathbf{x})$};
+        \node[red] at (1.6,1.0) {$f(\mathbf{x})=1$};
+        \node[red] at (6.0,3.60) {$f(\mathbf{x})=7$};
 
         \draw[blue,very thick]
             (1.4,2.5) -- (1.8,2.9)

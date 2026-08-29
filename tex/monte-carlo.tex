@@ -871,8 +871,8 @@ Because the algorithm fires one event at a time, its computational cost is propo
     Write a \textsc{matlab} script that uses rejection sampling to draw samples from the probability density function over \(\mathbf{x}\in\mathbb{R}^2\) with PDF: 
     \[
         p(\mathbf{x}) = \begin{cases}
-            1/3 & x_1, x_2 \leq 1/2 \text{ or } x_1,x_2 > 1/2 \\
-            1/6 & x_1 \leq 1/2, x_2 > 1/2 \text{ or } x_1 > 1/2, x_2 \leq 1/2
+            1/3, & x_1, x_2 \leq 1/2 \text{ or } x_1,x_2 > 1/2 \\
+            1/6, & x_1 \leq 1/2, x_2 > 1/2 \text{ or } x_1 > 1/2, x_2 \leq 1/2
         \end{cases}
     \]
     \begin{tikzpicture}[scale=4]
@@ -903,9 +903,13 @@ Because the algorithm fires one event at a time, its computational cost is propo
     For a target distribution: \(\pi(\mathbf{x})\sim \dfrac{1}{1+|\mathbf{x}|^2}\), with $\mathbf{x} \in \mathbb{R}^2$, write a \textsc{matlab} script that uses a Markov chain to draw samples. Plot a histogram of 1000 samples.
 \end{exercise}
 
+\begin{solution}
+    
+\end{solution}
+
 \begin{exercise} % 2020 Participation quiz L33
     Consider the system with \ce{I + I -> D} where the number of I initially is 5 and the number of D is 0.\\
-    Explain why the possible states \(\mathbf{x}=(x_I, x_D)\) are \((5,0), (3,1), (1,2)\).\\
+    Explain why the possible states, \(\mathbf{x}=(x_I, x_D)\), are \((5,0), (3,1), (1,2)\).\\
     The chemical master equation (CME) for this system is
     \begin{align*}
         \frac{d}{dt}P((5,0),t|(5,0),0) &= c[-(5)(4)P((5,0),t|(5,0),0)] \\[4pt]
@@ -916,6 +920,10 @@ Because the algorithm fires one event at a time, its computational cost is propo
     
     Write a \textsc{matlab} script to solve the CME with $c = 1$ and compute the average number of I with time.
 \end{exercise}
+
+\begin{solution}
+    
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX

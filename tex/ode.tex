@@ -1692,8 +1692,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
         \begin{pmatrix}-1 & 0\\-1 & -10\end{pmatrix}
         \begin{pmatrix}C_A\\C_B\end{pmatrix}.
     \]
-    The eigenvalues of a triangular matrix (upper- or lower-triangle) are just the diagonal elements; in this case, $-1\;\mathrm{sec}^{-1}$ and $-10\;\mathrm{sec}^{-1}$. The largest (magnitude) eigenvalue, corresponding to the shortest timescale, is smallest timescale, is
-    $-10\;\mathrm{sec}^{-1}$.
+    The eigenvalues of a triangular matrix (upper- or lower-triangle) are just the diagonal elements; in this case, $-1\;\mathrm{sec}^{-1}$ and $-10\;\mathrm{sec}^{-1}$. The largest (magnitude) eigenvalue, corresponding to the shortest timescale, is $-10\;\mathrm{sec}^{-1}$.
 
     For forward Euler, the region of stability is known to be $|1+\lambda\Delta t|\le 1$. Solve this inequality for \(\Delta t\):
     \begin{align*}
@@ -1735,7 +1734,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L18
-    Suppose we are solving a BVP using hte Shooting Method. If an initial guess $c$ gives a result $x(\tau; c) > x_f$, where $x(\tau) = x_f$ is the boundary condition for
+    Suppose we are solving a BVP using the Shooting Method. If an initial guess $c$ gives a result $x(\tau; c) > x_f$, where $x(\tau) = x_f$ is the boundary condition for
     \[
         \frac{dx}{dt} = g(f(t), t)\qquad t\in [0,\tau]
     \]
@@ -1764,7 +1763,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
 \end{exercise}
 
 \begin{solution}
-    Let the state be \(M\)-dimensional. Then, there are \underline{\underline{\(M\cdot N\) unknowns}} \(c_i \in\mathbb{R}^M,\, i=1,\cdots, N\) in the truncated series expansion. Without any further information, we shouldn't assert that any of the BCs is implied by the choice of basis functions.
+    Let the state \(x\) be \(M\)-dimensional. (\(M\) could be 1, in the case of a scalar state. Then, there are \underline{\underline{\(M\cdot N\) unknowns}} \(c_i \in\mathbb{R}^M,\, i=1,\cdots, N\) in the truncated series expansion. Without any further information, we shouldn't assert that any of the BCs is implied by the choice of basis functions.
 
     Thus, we need to pick \fbox{\(N-1\) collocation points} to obtain a square equation system:
     \[

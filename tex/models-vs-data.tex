@@ -1431,7 +1431,7 @@ One important practical consideration is batch size. Rather than designing one e
         \Rightarrow \mathbf{V}_{\theta} = \left(\mathbf{X}^\top\mathbf{V}_{\epsilon}^{-1}\mathbf{X}\right)^{-1} = \sigma^2\left(\mathbf{X}^\top\mathbf{X}\right)^{-1}
     \]
 
-    A-optimal design: \(\displaystyle \min_{\alpha\in[0,1]} \mathrm{tr}(\mathbf{V}_{\theta}(\alpha)) = \min_{\alpha\in[0,1]} \sigma^2 \mathrm{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right)\)
+    A-optimal design: \(\displaystyle \min_{\alpha\in[0,1]} \operatorname{tr}(\mathbf{V}_{\theta}(\alpha)) = \min_{\alpha\in[0,1]} \sigma^2 \operatorname{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right)\)
     \[
         \Rightarrow \mathbf{X}(\alpha)^\top \mathbf{X}(\alpha) = \begin{bmatrix}
             1 & 0 & 0\\
@@ -1448,7 +1448,7 @@ One important practical consideration is batch size. Rather than designing one e
         \end{bmatrix}
     \]
     \[
-         \Rightarrow \mathrm{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right) = \frac{1}{1/4 + \alpha^2} + 1
+         \Rightarrow \operatorname{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right) = \frac{1}{1/4 + \alpha^2} + 1
     \]
 
     Thus, A-optimal choice of \(\alpha\) is given by \(\alpha^{*} = 1\) as that clearly minimizes \(\dfrac{\sigma^2}{1/4 + \alpha^2}\) on \([0,1]\).

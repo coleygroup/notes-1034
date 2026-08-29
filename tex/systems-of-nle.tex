@@ -1288,11 +1288,11 @@ This chapter has introduced several important concepts and techniques for solvin
 
 \begin{solution}
     \(\boxed{\displaystyle 
-    \mathbf{J}(\mathbf{x}) = \begin{bmatrix} \cos(x_1) & e^{x_3} & x_2 e^{x_3} \\ x_2 x_3 & x_1 x_3 & x_1 x_2 \\ e^{-x_2} & -x_1 e^{-x_2} & -\sin(x_3) \end{bmatrix}} \) , arrived at by computing \(J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x}),\, \forall\, i,j \in \{1,2,3\}\).
+    \mathbf{J}(\mathbf{x}) = \begin{bmatrix} \cos x_1 & e^{x_3} & x_2 e^{x_3} \\ x_2 x_3 & x_1 x_3 & x_1 x_2 \\ e^{-x_2} & -x_1 e^{-x_2} & -\sin x_3 \end{bmatrix}} \) , arrived at by computing \(J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x}),\, \forall\, i,j \in \{1,2,3\}\).
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L8
-    Linearize $\mathbf{f}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\,\mathbf{x}$, about $\mathbf{x} = \mathbf{x}_0$, for $\mathbf{x} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{N \times N}$.
+    (*) Linearize $\mathbf{f}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\,\mathbf{x}$, about $\mathbf{x} = \mathbf{x}_0$, for $\mathbf{x} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{N \times N}$.
 \end{exercise}
 
 \begin{solution}
@@ -1311,17 +1311,17 @@ This chapter has introduced several important concepts and techniques for solvin
     \]
     where $\mathbf{a}_j^R$ and $\mathbf{a}_j^C$ are the $j$-th row and column of $\mathbf{A}$ as column vectors, respectively
     \[
-        \Rightarrow \mathbf{J}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x}) \cdot \mathbf{Id} +
+        \Rightarrow \mathbf{J}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x}) \cdot \mathbf{I} +
         \begin{bmatrix} x_1 \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \\ x_2 \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \\ \vdots \\ x_N \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \end{bmatrix}
     \]
     \[
-        = (\mathbf{x}^T \mathbf{A}\mathbf{x}) \cdot \mathbf{Id} + \mathbf{x}\mathbf{x}^T(\mathbf{A}+\mathbf{A}^T)
+        = (\mathbf{x}^T \mathbf{A}\mathbf{x}) \cdot \mathbf{I} + \mathbf{x}\mathbf{x}^T(\mathbf{A}+\mathbf{A}^T)
     \]
     (``$\cdot$'' is scalar multiplication here, not a dot product!)
     
     Overall:
     \(\displaystyle\boxed{
-        \hat{\mathbf{f}}(\mathbf{x}) = (\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{x}_0 + \Bigl[(\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{Id} + \mathbf{x}_0\,\mathbf{x}_0^T(\mathbf{A}+\mathbf{A}^T)\Bigr](\mathbf{x} - \mathbf{x}_0)
+        \hat{\mathbf{f}}(\mathbf{x}) = (\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{x}_0 + \Bigl[(\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{I} + \mathbf{x}_0\,\mathbf{x}_0^T(\mathbf{A}+\mathbf{A}^T)\Bigr](\mathbf{x} - \mathbf{x}_0)
         }
     \)
 \end{solution}

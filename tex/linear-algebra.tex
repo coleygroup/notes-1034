@@ -1327,21 +1327,21 @@ This relationship (not the literal equation, but the idea we just talked about) 
 
 % Error
 \begin{exercise} % 2020 Participation quiz L1
-    Compute the 1, 2, and $\infty$ norms of $\mathbf{v}=[1, 1,-1,2,-3]$. 
+    Compute the 1-, 2-, and $\infty$-norms of $\mathbf{v}=[1, 1,-1,2,-3]$. 
 \end{exercise}
 
 \begin{solution}
-    The one norm is the sum of the absolute values of the components of the vector:
+    The 1-norm is the sum of the absolute values of the components of the vector:
     \[
         \vert\vert\mathbf{v}\vert\vert_1 = 8.
     \]
 
-    The two norm is the euclidean distance:
+    The 2-norm is the euclidean distance:
     \[
         \vert\vert\mathbf{v}\vert\vert_2 = \left(\sum_{i=1}^4 \vert v_i \vert^2\right)^{1/2} = (1+1+1+4+9)^{1/2} = \sqrt{16} = 4.
     \]
 
-    The infinity norm is the absolute value of the largest value in the vector:
+    The $\infty$-norm is the absolute value of the largest value in the vector:
     \[
         \vert\vert\mathbf{v}\vert\vert_\infty = 3.
     \]
@@ -1390,7 +1390,7 @@ For the second one, I'll also use column 3:
     \end{align*}
 Plugging these results back in,
     \[
-        \det \mathbf{A} = -9 \times 18 + 1 \times(-56) = -218
+        \det \mathbf{A} = -9 \times 18 + 1 \times(-56) = -218.
     \]
 \end{solution}
 
@@ -1398,7 +1398,7 @@ Plugging these results back in,
     Solve the following system via Gaussian Elimination:
     \[
         \begin{bmatrix}3&1&0\\1&1&-1\\2&0&1\end{bmatrix}\mathbf{x}
-        = \begin{bmatrix}1\\1\\1\end{bmatrix}
+        = \begin{bmatrix}1\\1\\1\end{bmatrix}.
     \]
 \end{exercise}
 
@@ -1420,11 +1420,11 @@ Plugging these results back in,
         \mathbf{x}
         = \begin{bmatrix}
             1 \\ 2/3 \\ 1
-        \end{bmatrix}
+        \end{bmatrix}.
     \]
     The last row of the reduced coefficient matrix is all zeros. Writing this last row out in equation form we have:
     \[
-        0 x_1+ 0 x_2 + 0 x_3 = 1
+        0 x_1+ 0 x_2 + 0 x_3 = 1.
     \]
     There are no values of $\mathbf{x}$ that can make this true. \textbf{There is no solution to this system of equations.}
 \end{solution}
@@ -1432,7 +1432,7 @@ Plugging these results back in,
 \begin{exercise} % 2020 Participation quiz L4
     What is the dimension of the column space of
     \[
-        A = \begin{bmatrix}
+        \mathbf{A} = \begin{bmatrix}
             1 & 3 & 1 & 0 \\
             2 & 6 & 3 & 1 \\
             1 & 3 & 2 & 1
@@ -1455,7 +1455,7 @@ Plugging these results back in,
             1 & 3 & 1 & 0 \\
             0 & 0 & 1 & 1 \\
             0 & 0 & 0 & 0
-        \end{bmatrix}
+        \end{bmatrix}.
     \]
     The number of nonzero rows is 2 so the rank is 2.
     \[
@@ -1469,7 +1469,7 @@ Plugging these results back in,
 \end{exercise}
 
 \begin{solution}
-    Find roots of $\det (\mathbf{A} - \lambda \mathbf{Id})$:
+    Find roots of $\det (\mathbf{A} - \lambda \mathbf{I})$:
     \[
     \det\begin{bmatrix} 3-\lambda & 0 & 2 \\ 0 & 1-\lambda & 0 \\ -1 & 0 & 3-\lambda \end{bmatrix} = 0
     \]
@@ -1495,9 +1495,9 @@ Plugging these results back in,
 \end{exercise}
 
 \begin{solution}
-    Singular values are sqrt of eigenvalues of $\mathbf{A}^T\mathbf{A}$. 
+    Singular values are the square roots of the eigenvalues of $\mathbf{A}^T\mathbf{A}$. 
     
-    \(\Rightarrow\) find solutions of $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{Id}) = 0$
+    \(\Rightarrow\) find solutions of $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{I}) = 0$
     \[
     \det\begin{bmatrix} 10-\lambda & 3 \\ 3 & 10-\lambda \end{bmatrix} = 0 \iff (10-\lambda)^2 - 9 = 0
     \]
