@@ -864,6 +864,59 @@ As a concrete example, consider the consecutive reaction $A \xrightarrow{k_1} B 
 
 Because the algorithm fires one event at a time, its computational cost is proportional to the number of reaction events. This is fine when molecule counts are small, but becomes prohibitive for large populations or fast rates (e.g., $10^{23}$ molecules). Tau-leaping (\href{https://doi.org/10.1063/1.1378322}{Gillespie, 2001}) addresses this by leaping forward a larger time step $\Delta t$ and firing approximately $a_\mu \Delta t$ reactions per channel (drawn from Poisson distributions) rather than resolving each event individually. As $\Delta t$ grows, tau-leaping smoothly interpolates between the exact kMC and the deterministic ODE limit.
 
+\newpage
+\section{Exercises}
+
+\begin{exercise} % 2020 Participation quiz L31
+    Write a \textsc{matlab} script that uses rejection sampling to draw samples from the probability density function over \(\mathbf{x}\in\mathbb{R}^2\) with PDF: 
+    \[
+        p(\mathbf{x}) = \begin{cases}
+            1/3 & x_1, x_2 \leq 1/2 \text{ or } x_1,x_2 > 1/2 \\
+            1/6 & x_1 \leq 1/2, x_2 > 1/2 \text{ or } x_1 > 1/2, x_2 \leq 1/2
+        \end{cases}
+    \]
+    \begin{tikzpicture}[scale=4]
+        \draw[->,thick] (-0.10,0) -- (1.20,0) node[below right]{$x_1$};
+        \draw[->,thick] (0,-0.10) -- (0,1.20) node[above left] {$x_2$};
+        \draw[blue,thick]        (0,0) rectangle (1,1);
+        \draw[blue,thick,dashed] (0.5,0) -- (0.5,1);
+        \draw[blue,thick,dashed] (0,0.5) -- (1,0.5);
+        \node[blue] at (0.25,0.75){$\dfrac{1}{6}$};
+        \node[blue] at (0.75,0.75){$\dfrac{1}{3}$};
+        \node[blue] at (0.25,0.25){$\dfrac{1}{3}$};
+        \node[blue] at (0.75,0.25){$\dfrac{1}{6}$};
+        \node[below] at (-0.05,0){$0$};
+        \node[below] at (0.5, 0){$\tfrac{1}{2}$};
+        \node[below] at (1,   0){$1$};
+        \node[left]  at (0, 0.5){$\tfrac{1}{2}$};
+        \node[left]  at (0,   1){$1$};
+    \end{tikzpicture}
+
+    Plot a histogram of 1000 samples.
+\end{exercise}
+
+\begin{solution}
+    
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L32
+    For a target distribution: \(\pi(\mathbf{x})\sim \dfrac{1}{1+|\mathbf{x}|^2}\), with $\mathbf{x} \in \mathbb{R}^2$, write a \textsc{matlab} script that uses a Markov chain to draw samples. Plot a histogram of 1000 samples.
+\end{exercise}
+
+\begin{exercise} % 2020 Participation quiz L33
+    Consider the system with \ce{I + I -> D} where the number of I initially is 5 and the number of D is 0.\\
+    Explain why the possible states \(\mathbf{x}=(x_I, x_D)\) are \((5,0), (3,1), (1,2)\).\\
+    The chemical master equation (CME) for this system is
+    \begin{align*}
+        \frac{d}{dt}P((5,0),t|(5,0),0) &= c[-(5)(4)P((5,0),t|(5,0),0)] \\[4pt]
+        \frac{d}{dt}P((3,1),t|(5,0),0) &= c[(5)(4)P((5,0),t|(5,0),0) - (3)(2)P((3,1),t|(5,0),0)] \\[4pt]
+        \frac{d}{dt}P((1,2),t|(5,0),0) &= c[(3)(2)P((3,1),t|(5,0),0)]
+    \end{align*}
+    with initial conditions $P((5,0),0|(5,0),0) = 1,\, P((3,1),0|(5,0),0) = 0, \text{ and } P((1,2),0|(5,0),0) = 0$.
+    
+    Write a \textsc{matlab} script to solve the CME with $c = 1$ and compute the average number of I with time.
+\end{exercise}
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"

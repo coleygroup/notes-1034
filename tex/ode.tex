@@ -1671,6 +1671,132 @@ The finite element method builds the approximation from local pieces (low-order 
 
 Finally, the finite volume method is closest to a conservation-law viewpoint. You still represent the solution with local degrees of freedom, but you enforce the governing equation by integrating it over control volumes. Equivalently, you test against piecewise-constant ``top-hat'' functions. This makes the discrete equations read like a physical balance: flux in minus flux out plus any volumetric production/consumption equals the volumetric source. That structure is exactly why FVM dominates in transport and fluid problems. In the FVM, conservation is built in by construction, and it remains meaningful even when coefficients are discontinuous or the solution develops sharp gradients.
 
+\section{Exercises}
+
+\begin{exercise} % 2020 Participation quiz L13
+    Consider a reaction system \ce{A ->[k_1] B ->[k_2] 2C} with $k_1 = 1\;\mathrm{s}^{-1}$ and $k_2 = 10\;\mathrm{s}^{-1}$.
+    \[
+        \text{i.e.,}\quad \frac{\textrm{d}}{\textrm{d}t} \begin{pmatrix} C_A \\ C_B \end{pmatrix}
+        = \begin{pmatrix} -1 & 0 \\ +1 & -10 \end{pmatrix}
+        \begin{pmatrix} C_A \\ C_B \end{pmatrix}
+        \]
+    What is the largest step size $\Delta t$ that we should use if solving this problem with forward Euler?
+\end{exercise}
+
+\begin{solution}
+    The matrix equation is given as follows:
+    \[
+        \frac{d}{dt}
+        \begin{pmatrix}C_A\\C_B\end{pmatrix}
+        =
+        \begin{pmatrix}-1 & 0\\-1 & -10\end{pmatrix}
+        \begin{pmatrix}C_A\\C_B\end{pmatrix}.
+    \]
+    The eigenvalues of a triangular matrix (upper- or lower-triangle) are just the diagonal elements; in this case, $-1\;\mathrm{sec}^{-1}$ and $-10\;\mathrm{sec}^{-1}$. The largest (magnitude) eigenvalue, corresponding to the shortest timescale, is smallest timescale, is
+    $-10\;\mathrm{sec}^{-1}$.
+
+    For forward Euler, the region of stability is known to be $|1+\lambda\Delta t|\le 1$. Solve this inequality for \(\Delta t\):
+    \begin{align*}
+         |1 - 10\Delta t| &\le 1\\
+        -1 \le 1 - 10\Delta t &\le 1\\
+        -2 \le -10\Delta t &\le 0\\
+        \frac{1}{5} \ge \Delta t \ge 0.
+    \end{align*}
+    \(\Delta t \ge 0\) is trivially satisfied, so the only limit is the upper limit of 0.2 sec.
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L15
+    Plotted (black) is the Global Truncation Error for the forward Euler method. Which trace is more likely to describe the GTE of Crank-Nicolson for the same problem? \textcolor{red}{Red} or \textcolor{blue}{blue}?
+
+    \begin{tikzpicture}
+        \draw[->, thick] (0,0) -- (4.5,0) node[right] {$\log \Delta t$};
+        \draw[->, thick] (0,0) -- (0,4.5) node[above] {$\log |\varepsilon|$};
+
+        \draw[step=0.5, gray!40, thin] (0,0) grid (4,4);
+
+        \filldraw[blue]  (1,1.5) circle (3pt);
+        \filldraw[black] (1,1  ) circle (3pt);
+        \filldraw[red]   (1,0.5) circle (3pt);
+
+        \filldraw[blue]  (2,2.5) circle (3pt);
+        \filldraw[black] (2,1.5) circle (3pt);
+        \filldraw[red]   (2,1  ) circle (3pt);
+
+        \filldraw[blue]  (3,3.5) circle (3pt);
+        \filldraw[black] (3,2  ) circle (3pt);
+        \filldraw[red]   (3,1.5) circle (3pt);
+    \end{tikzpicture}
+\end{exercise}
+
+\begin{solution}
+    The forward Euler scheme has second-order accurate local truncation error, so we approximate its global truncation error as first-order accurate (one order lower). Likewise, the Crank-Nicolson scheme has third-order accurate local truncation error, so we approximate its global truncation error as second-order accurate.
+
+    On a log-log plot, these power laws appear as lines, whose slopes are the exponents of the power laws. Therefore, the slope of the Crank-Nicholson line should be twice that of the forward Euler line, indicating that the blue dots represent Crank-Nicolson global truncation error.
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L18
+    Suppose we are solving a BVP using hte Shooting Method. If an initial guess $c$ gives a result $x(\tau; c) > x_f$, where $x(\tau) = x_f$ is the boundary condition for
+    \[
+        \frac{dx}{dt} = g(f(t), t)\qquad t\in [0,\tau]
+    \]
+    and the sensitivity, $S(\tau; c)$, is negative, would the Shooting Method suggest to increase or decrease $c$?
+\end{exercise}
+
+\begin{solution}
+    In first order approximation (Newton's method):
+    \[
+        \tilde{x}(\tau;c+\Delta c) = x(\tau; c) + \delta(c;\tau)\Delta c
+    \]
+    \(\Rightarrow\) Choose \(\Delta c\) st. \(\tilde{x}(\tau;c+\Delta c) = x_f \Rightarrow \Delta c = \dfrac{x_f-x(\tau;c)}{\delta(c;\tau)}\)\\
+    Thus, the \fbox{shooting method suggests \underline{\underline{increasing}} \(c\)!}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L19
+    If we are using collocation to approximate the solution of
+    \[
+        \frac{dx}{dt} = f(x(t),t) \qquad g(x(t_0), x(t_f)) = 0
+    \]
+    using
+    \[
+        x(t) = \sum_{i=1}^N c_i \cos \left(\frac{i\pi x}{t_f-t_0}\right),
+    \]
+    how many collocation points, \{\(t_i\)\}, do we need to choose?
+\end{exercise}
+
+\begin{solution}
+    Let the state be \(M\)-dimensional. Then, there are \underline{\underline{\(M\cdot N\) unknowns}} \(c_i \in\mathbb{R}^M,\, i=1,\cdots, N\) in the truncated series expansion. Without any further information, we shouldn't assert that any of the BCs is implied by the choice of basis functions.
+
+    Thus, we need to pick \fbox{\(N-1\) collocation points} to obtain a square equation system:
+    \[
+        \begin{array}{llr}
+        \dfrac{dx}{dt}(t_i) = f\left(x(t_i),t_i\right),\quad i = 1,\dots,N-1  & \qquad\longrightarrow\qquad & M(N-1) \text{ equations}\\[10pt]
+        g\left(x(t_0),x(t_1)\right) = 0                                       & \qquad\longrightarrow\qquad & M \text{ equations}\\[4pt]
+              \cline{3-3}\\[-8pt]
+          & & M \cdot N \text{ equations}
+        \end{array}
+    \]
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L20
+    How many unknowns will we have if we are using Finite Volumes to approximate a 2D concentration profile over the following (very coarse) discretized domain?
+
+    \begin{center}
+    \begin{tikzpicture}
+        \draw (0,0) grid (4,2);
+        \foreach \x in {0,1,2,3,4} {
+            \foreach \y in {0,1,2} {
+            \filldraw[fill=black, draw=black] (\x,\y) circle (3pt);
+            }
+        }
+    \end{tikzpicture}
+    \end{center}
+\end{exercise}
+
+\begin{solution}
+    There are 8 cells in the grid and we want to find the average concentration for all. \(\Rightarrow \boxed{8 \text{ unknowns}}\)
+\end{solution}
+
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"

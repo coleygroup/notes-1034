@@ -670,6 +670,50 @@ In many cases, discrete events occur when certain conditions are met, such as a 
 
 \section{Exercises}
 
+\begin{exercise} % 2020 Participation quiz L16
+    What are the differential and algebraic states of:
+    \begin{align*}
+        (1) &\; \dot{x}_1 + \dot{x}_2 = g_1(t)\\
+        (2) &\; x_2 + x_3             = g_2(t)\\
+        (3) &\; x_3                   = g_3(t)
+    \end{align*}
+\end{exercise}
+
+\begin{solution}
+    DAE:
+    \begin{align*}
+        (1) &\; \dot{x}_1 + \dot{x}_2 = g_1(t)\\
+        (2) &\; x_2 + x_3             = g_2(t)\\
+        (3) &\; x_3                   = g_3(t)
+    \end{align*}
+    
+    Differential States: \(x_1, x_2\)\\
+    Algebraic States: \(x_3\)
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L17
+    Does the following index-2 DAE have implicit constraints?
+    \begin{align*}
+        (1) &\; \dot{x}_1 - x_2 = 0\\
+        (2) &\; x_1             = g_1(t)
+    \end{align*}
+\end{exercise}
+
+\begin{solution}
+    We can answer this question immediately upon being told that the index is 2, as index-2 systems necessarily have at least one implicit constraint. We can actually calculate the implicit constraint by converting the DAE to an ODE and looking for intermediate equations that are used. Take two derivatives of the system:
+    \[
+        \begin{array}{lll}
+        (1)\ \dot{x}_1 - x_2 = 0 \qquad &
+        (1')\ \dot{x}_1 - \dot{x}_2 = 0 \qquad &
+        (1'')\ \ddot{x}_1 - \ddot{x}_2 = 0\\[2pt]
+        (2)\ x_1 = g_1(t) &
+        (2')\ \dot{x}_1 = g_1'(t) &
+        (2'')\ \ddot{x}_1 = g_1''(t)
+        \end{array}
+    \]
+    Equation (1) gives an equation for $\dot{x}_1$. Equation (1$'$) gives an equation for $\dot{x}_2$ in terms of $\ddot{x}_1$, which can be eliminated  using equation (2$''$). The intermediate equation, (2$'$), is the implicit constraint.
+\end{solution}
+
 \begin{exercise}
 Identify the differential states, algebraic states, index, implicit constraints (if any), and a consistent initialization for the following DAE:
 

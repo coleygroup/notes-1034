@@ -1401,6 +1401,59 @@ In the Bayesian framework, sequential design is very natural. After conducting a
 
 One important practical consideration is batch size. Rather than designing one experiment at a time (which may be inefficient, especially when experiments can be run in parallel), we often want to select batches of multiple experiments to conduct simultaneously. The optimal batching strategy depends on the specific utility function and computational constraints. Some utility functions naturally extend to batch selection by identifying sets of experiments that collectively maximize information gain, while others are more naturally suited to greedy, one-at-a-time selection. How to efficiently select optimal batches of multiple experiments remains an active area of research; this connects to topics in machine learning such as batch active learning and optimal sensor placement. These advanced techniques are increasingly important in modern applications where high-throughput experimentation enables the simultaneous execution of dozens or hundreds of experiments and careful design can dramatically accelerate the rate of discovery.
 
+\section{Exercises}
+
+\begin{exercise} % 2020 Participation quiz L29
+    Suppose I set a $p$-value threshold for significance at $p = 0.01$. If I regress my 3-parameter model to 20 data points, what is the $\nu$(DOF) in the $\chi^2$ distribution I expect? What is the largest $\chi^2_{\text{max}}$ that would still look consistent with the data? (You'll need to use MATLAB.)
+\end{exercise}
+
+\begin{solution}
+    \(\nu =\) \# data points \(-\) \# parameters estimated \(= 20 - 3 = 17\)
+
+    \(\chi^2_{\text{max}} = \text{CDF}^{-1}_{\chi^2,\nu}(1-p) = 33.4087\)\\
+    \phantom{\(\chi^2_{\text{max}} = \) C}\(\uparrow\) \textsc{matlab}: \texttt{chi2inv(0.99, 17)}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L30
+    Suppose we have planned 2 experiments out of a total of 3 with the goal of estimating $\boldsymbol{\theta}$ for $y = \theta_1 x_1 + \theta_2 x_2 + \epsilon$. What conditions should we choose for the third experiment if we want it to be A-optimal? Set $x_1 = 0$,\ $x_2 = \alpha \in [0,1]$.
+    \[
+        \mathbf{X} = \begin{bmatrix} 1 & 0 \\ 0 & 0.5 \\ 0 & \alpha \end{bmatrix}.
+    \]
+\end{exercise}
+
+\begin{solution}
+    Given: \(\displaystyle \mathbf{X}(\alpha) = \begin{bmatrix}
+        1 & 0\\ 0 & 1/2\\ 0 & \alpha
+    \end{bmatrix}\)
+    
+    Assume i.i.d. measurement errors with variance \(\mathbf{V}_{\epsilon} = \sigma^2\mathbf{I}\). 
+    \[
+        \Rightarrow \mathbf{V}_{\theta} = \left(\mathbf{X}^\top\mathbf{V}_{\epsilon}^{-1}\mathbf{X}\right)^{-1} = \sigma^2\left(\mathbf{X}^\top\mathbf{X}\right)^{-1}
+    \]
+
+    A-optimal design: \(\displaystyle \min_{\alpha\in[0,1]} \mathrm{tr}(\mathbf{V}_{\theta}(\alpha)) = \min_{\alpha\in[0,1]} \sigma^2 \mathrm{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right)\)
+    \[
+        \Rightarrow \mathbf{X}(\alpha)^\top \mathbf{X}(\alpha) = \begin{bmatrix}
+            1 & 0 & 0\\
+            0 & 1/2 & \alpha
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 & 0\\
+            0 & 1/2\\
+            0 & \alpha
+        \end{bmatrix}
+        = \begin{bmatrix}
+            1 & 0\\
+            0 & 1/4 + \alpha^2
+        \end{bmatrix}
+    \]
+    \[
+         \Rightarrow \mathrm{tr}\left((\mathbf{X}(\alpha)^\top\mathbf{X}(\alpha))^{-1}\right) = \frac{1}{1/4 + \alpha^2} + 1
+    \]
+
+    Thus, A-optimal choice of \(\alpha\) is given by \(\alpha^{*} = 1\) as that clearly minimizes \(\dfrac{\sigma^2}{1/4 + \alpha^2}\) on \([0,1]\).
+\end{solution}
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"

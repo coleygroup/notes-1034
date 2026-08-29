@@ -1280,6 +1280,52 @@ This is itself a nonlinear system that can be solved using Newton's method!
 This chapter has introduced several important concepts and techniques for solving systems of nonlinear equations (NLEs). We have emphasized Newton's method, a powerful iterative algorithm that uses the Jacobian matrix to find roots of nonlinear functions. We explored the convergence properties of Newton's method and highlighted practical considerations such as the choice of initial guess, convergence, obtaining the Jacobian, and the several variations and extensions of numerical methods that can help address these challenges.
 
 
+\section{Exercises}
+
+\begin{exercise} % 2020 Participation quiz L7
+    Compute the Jacobian of $\mathbf{f}(\mathbf{x}) = \begin{pmatrix} \sin x_1 + x_2 e^{x_3} \\ x_1 x_2 x_3 \\ \cos x_3 + x_1 e^{-x_2} \end{pmatrix}$.
+\end{exercise}
+
+\begin{solution}
+    \(\boxed{\displaystyle 
+    \mathbf{J}(\mathbf{x}) = \begin{bmatrix} \cos(x_1) & e^{x_3} & x_2 e^{x_3} \\ x_2 x_3 & x_1 x_3 & x_1 x_2 \\ e^{-x_2} & -x_1 e^{-x_2} & -\sin(x_3) \end{bmatrix}} \) , arrived at by computing \(J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x}),\, \forall\, i,j \in \{1,2,3\}\).
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L8
+    Linearize $\mathbf{f}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\,\mathbf{x}$, about $\mathbf{x} = \mathbf{x}_0$, for $\mathbf{x} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{N \times N}$.
+\end{exercise}
+
+\begin{solution}
+    Linearization is given by $\hat{\mathbf{f}}(\mathbf{x}) = \mathbf{f}(\mathbf{x}_0) + \mathbf{J}(\mathbf{x}_0)(\mathbf{x} - \mathbf{x}_0)$, \\[4pt]
+    where $J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x})$ 
+    with \(\displaystyle f_i(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x}) \cdot x_i = \left(\sum_{m=1}^N \sum_{n=1}^N A_{mn}\,x_n x_m\right) x_i\).
+
+    \[
+        \Rightarrow \frac{\partial f_i}{\partial x_j}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\frac{\partial x_i}{\partial x_j} + x_i \cdot \frac{\partial}{\partial x_j}(\mathbf{x}^T \mathbf{A}\,\mathbf{x})
+    \]
+    \[
+        = \begin{cases} 
+            \mathbf{x}^T \mathbf{A}\,\mathbf{x} + x_i \cdot \mathbf{x}^T\!\left(\mathbf{a}_j^R + \mathbf{a}_j^C\right), & i = j \\[4pt] 
+            x_i \cdot \mathbf{x}^T\!\left(\mathbf{a}_j^R + \mathbf{a}_j^C\right), & i \neq j 
+        \end{cases}
+    \]
+    where $\mathbf{a}_j^R$ and $\mathbf{a}_j^C$ are the $j$-th row and column of $\mathbf{A}$ as column vectors, respectively
+    \[
+        \Rightarrow \mathbf{J}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x}) \cdot \mathbf{Id} +
+        \begin{bmatrix} x_1 \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \\ x_2 \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \\ \vdots \\ x_N \cdot \mathbf{x}^T(\mathbf{A}+\mathbf{A}^T) \end{bmatrix}
+    \]
+    \[
+        = (\mathbf{x}^T \mathbf{A}\mathbf{x}) \cdot \mathbf{Id} + \mathbf{x}\mathbf{x}^T(\mathbf{A}+\mathbf{A}^T)
+    \]
+    (``$\cdot$'' is scalar multiplication here, not a dot product!)
+    
+    Overall:
+    \(\displaystyle\boxed{
+        \hat{\mathbf{f}}(\mathbf{x}) = (\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{x}_0 + \Bigl[(\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{Id} + \mathbf{x}_0\,\mathbf{x}_0^T(\mathbf{A}+\mathbf{A}^T)\Bigr](\mathbf{x} - \mathbf{x}_0)
+        }
+    \)
+\end{solution}
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"
