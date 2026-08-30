@@ -951,7 +951,7 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
         \item[] $c(L,y) = c(0,L)=1$
         \item $c(x),\quad \dfrac{d^2c}{dx^2}=0$
         \item[] $\left.\dfrac{dc}{dx}\right|_{x=0} = \left.\dfrac{dc}{dx}\right|_{x=L} = 0$
-        \item $c(x,t),\quad \dfrac{dc}{dt} = \mathrm{D} \dfrac{\partial^2c}{\partial x^2}$
+        \item $c(x,t),\quad \dfrac{dc}{dt} = \mathcal{D} \dfrac{\partial^2c}{\partial x^2}$
         \item[] $c(x,0)=c_0(x)$
         \item[] $c(0,t)=c(L,t)=1$
     \end{enumerate}
@@ -978,10 +978,10 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
         \filldraw[black]          (4,0) circle (3pt);
         \filldraw[black]          (6,0) circle (3pt);
 
-        \node[above, green!70!black] at (0, 0.05) {$\mathcal{C}_0$};
-        \node[above]                 at (2, 0.05) {$\mathcal{C}_1$};
-        \node[above]                 at (4, 0.05) {$\mathcal{C}_2$};
-        \node[above]                 at (6, 0.05) {$\mathcal{C}_3$};
+        \node[above, green!70!black] at (0, 0.05) {$c_0$};
+        \node[above]                 at (2, 0.05) {$c_1$};
+        \node[above]                 at (4, 0.05) {$c_2$};
+        \node[above]                 at (6, 0.05) {$c_3$};
 
         \node[anchor=east]        at (-0.6, -0.6) {$x =$};
         \node[green!70!black]     at (0,    -0.6) {$-\Delta x$};
@@ -1013,8 +1013,8 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
     (*) What is the stability criterion you expect when solving the following PDE using a forward time / central difference discretization?
     \[
         \frac{\partial c}{\partial t}
-        + u\,\frac{\partial c}{\partial x}
-        - D\,\frac{\partial^2 c}{\partial x^2}
+        + U\,\frac{\partial c}{\partial x}
+        - \mathcal{D}\,\frac{\partial^2 c}{\partial x^2}
         = 0
     \]
 \end{exercise}
@@ -1037,7 +1037,7 @@ Elliptic problems are steady and globally coupled, so we discretize space with f
 
     For von Neumann stability analysis we use
     \[c_i^j = \epsilon_i e^{\ii kj\Delta x}\]
-    and substitute this into our discretized governning equation.
+    and substitute this into our discretized governing equation.
     (The $\ii$ in the exponential is \(\ii=\sqrt{-1}\), not an index!)
 
     \[

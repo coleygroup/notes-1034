@@ -1689,7 +1689,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
         \frac{d}{dt}
         \begin{pmatrix}C_A\\C_B\end{pmatrix}
         =
-        \begin{pmatrix}-1 & 0\\-1 & -10\end{pmatrix}
+        \begin{pmatrix}-1 & 0\\+1 & -10\end{pmatrix}
         \begin{pmatrix}C_A\\C_B\end{pmatrix}.
     \]
     The eigenvalues of a triangular matrix (upper- or lower-triangle) are just the diagonal elements; in this case, $-1\;\mathrm{sec}^{-1}$ and $-10\;\mathrm{sec}^{-1}$. The largest (magnitude) eigenvalue, corresponding to the shortest timescale, is $-10\;\mathrm{sec}^{-1}$.
@@ -1699,7 +1699,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
          |1 - 10\Delta t| &\le 1\\
         -1 \le 1 - 10\Delta t &\le 1\\
         -2 \le -10\Delta t &\le 0\\
-        \frac{1}{5} \ge \Delta t \ge 0.
+        \frac{1}{5} \ge \Delta t &\ge 0.
     \end{align*}
     \(\Delta t \ge 0\) is trivially satisfied, so the only limit is the upper limit of 0.2 sec.
 \end{solution}
@@ -1730,7 +1730,7 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
 \begin{solution}
     The forward Euler scheme has second-order accurate local truncation error, so we approximate its global truncation error as first-order accurate (one order lower). Likewise, the Crank-Nicolson scheme has third-order accurate local truncation error, so we approximate its global truncation error as second-order accurate.
 
-    On a log-log plot, these power laws appear as lines, whose slopes are the exponents of the power laws. Therefore, the slope of the Crank-Nicholson line should be twice that of the forward Euler line, indicating that the blue dots represent Crank-Nicolson global truncation error.
+    On a log-log plot, these power laws appear as lines, whose slopes are the exponents of the power laws. Therefore, the slope of the Crank-Nicolson line should be twice that of the forward Euler line, indicating that the blue dots represent Crank-Nicolson global truncation error.
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L18
@@ -1757,19 +1757,19 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
     \]
     using
     \[
-        x(t) = \sum_{i=1}^N c_i \cos \left(\frac{i\pi x}{t_f-t_0}\right),
+        x(t) = \sum_{i=1}^N c_i \cos \left(\frac{i\pi t}{t_f-t_0}\right),
     \]
     how many collocation points, \{\(t_i\)\}, do we need to choose?
 \end{exercise}
 
 \begin{solution}
-    Let the state \(x\) be \(M\)-dimensional. (\(M\) could be 1, in the case of a scalar state. Then, there are \underline{\underline{\(M\cdot N\) unknowns}} \(c_i \in\mathbb{R}^M,\, i=1,\cdots, N\) in the truncated series expansion. Without any further information, we shouldn't assert that any of the BCs is implied by the choice of basis functions.
+    Let the state \(x\) be \(M\)-dimensional. (\(M\) could be 1, in the case of a scalar state.) Then, there are \underline{\underline{\(M\cdot N\) unknowns}} \(c_i \in\mathbb{R}^M,\, i=1,\cdots, N\) in the truncated series expansion. Without any further information, we shouldn't assert that any of the BCs is implied by the choice of basis functions.
 
     Thus, we need to pick \fbox{\(N-1\) collocation points} to obtain a square equation system:
     \[
         \begin{array}{llr}
         \dfrac{dx}{dt}(t_i) = f\left(x(t_i),t_i\right),\quad i = 1,\dots,N-1  & \qquad\longrightarrow\qquad & M(N-1) \text{ equations}\\[10pt]
-        g\left(x(t_0),x(t_1)\right) = 0                                       & \qquad\longrightarrow\qquad & M \text{ equations}\\[4pt]
+        g\left(x(t_0),x(t_f)\right) = 0                                       & \qquad\longrightarrow\qquad & M \text{ equations}\\[4pt]
               \cline{3-3}\\[-8pt]
           & & M \cdot N \text{ equations}
         \end{array}

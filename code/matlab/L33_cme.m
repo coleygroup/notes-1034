@@ -8,10 +8,9 @@ A = [-a(1)    0    0;
 
 P0    = [1; 0; 0];
 tspan = linspace(0,1,401);
-[~,Pode] = ode15s(@(t,P) A*P, tspan, P0);  P = Pode.';
+[~,Pode] = ode45(@(t,P) A*P, tspan, P0);  P = Pode.';
 
 meanI = states(:,1).'*P;
-meanD = states(:,2).'*P;
 
 figure
 subplot(1,2,1)

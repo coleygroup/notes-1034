@@ -868,11 +868,12 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \section{Exercises}
 
 \begin{exercise} % 2020 Participation quiz L31
-    Write a \textsc{matlab} script that uses rejection sampling to draw samples from the probability density function over \(\mathbf{x}\in\mathbb{R}^2\) with PDF: 
+    Write a \textsc{matlab} script that uses rejection sampling to draw samples from the probability density function over \(\mathbf{x}\in\mathbb{R}^2\) with PMF: 
     \[
         p(\mathbf{x}) = \begin{cases}
             1/3, & x_1, x_2 \leq 1/2 \text{ or } x_1,x_2 > 1/2 \\
-            1/6, & x_1 \leq 1/2, x_2 > 1/2 \text{ or } x_1 > 1/2, x_2 \leq 1/2
+            1/6, & x_1 \leq 1/2, x_2 > 1/2 \text{ or } x_1 > 1/2, x_2 \leq 1/2\\
+            0, & x_1,x_2 \notin [0,1]
         \end{cases}
     \]
     \begin{tikzpicture}[scale=4]
@@ -900,7 +901,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L32
-    For a target distribution: \(\pi(\mathbf{x})\sim \dfrac{1}{1+|\mathbf{x}|^2}\), with $\mathbf{x} \in \mathbb{R}^2$, write a \textsc{matlab} script that uses a Markov chain to draw samples. Plot a histogram of 1000 samples.
+    For a target distribution: \(\pi(\mathbf{x})\propto \dfrac{1}{1+|\mathbf{x}|^2}\), with $\mathbf{x} \in \mathbb{R}^2$, write a \textsc{matlab} script that uses a Markov chain to draw samples. Plot a histogram of 1000 samples.
 \end{exercise}
 
 \begin{solution}

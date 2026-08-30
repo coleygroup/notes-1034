@@ -1,6 +1,6 @@
 N = 1000;
 X = zeros(N,2);
-n = 0; ntry = 0;
+n = 0;
 
 p = @(x1,x2) (1/3)*((x1<=0.5 & x2<=0.5) | (x1>0.5 & x2>0.5 )) ...
     + (1/6)*((x1<=0.5 & x2> 0.5) | (x1>0.5 & x2<=0.5));
@@ -17,7 +17,7 @@ while n < N
 end
 
 figure
-h = histogram2(X(:,1),X(:,2),[2 2],'Normalization','pdf','FaceColor','flat');
+h = histogram2(X(:,1),X(:,2),[2 2],'Normalization','probability','FaceColor','flat');
 xlabel('x_1'); ylabel('x_2'); zlabel('p(x)'); colorbar
 title('1000 rejection samples')
 
