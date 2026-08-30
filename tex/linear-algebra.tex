@@ -3,7 +3,7 @@ We will first review some of the main results of linear algebra that will be use
 
 \section{Scalars, Vectors, and Matrices}
 \subsection{Scalars}
-\textbf{Scalars} are single numbers, which can be used to represent quantities, like mass, temperature, or time. In linear algebra, we typically work with scalars from a \textbf{field}, which is a set equipped with two operations (addition and multiplication). Commonly used field---the set of scalars--- include real numbers $ \mathbb{R} $ and complex numbers $ \mathbb{C} $.
+\textbf{Scalars} are single numbers, which can be used to represent quantities, like mass, temperature, or time. In linear algebra, we typically work with scalars from a \textbf{field}, which is a set equipped with two operations (addition and multiplication). Commonly used fields---the sets of scalars---include real numbers $ \mathbb{R} $ and complex numbers $ \mathbb{C} $.
 
 The set of real numbers, commonly denoted by $ \mathbb{R} $, includes all rational and irrational numbers.
 That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, and irrational numbers like $ \pi $ and $ \sqrt{2} $.
@@ -11,12 +11,12 @@ That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, a
 % The field $ \mathbb{C} $ is an extension of $ \mathbb{R} $ using the imaginary unit $ i $, defined by $ i^2 = -1 $.
 
 \subsubsection*{Complex Numbers}
-Complex numbers are the numbers that involves imaginary number.
+Complex numbers are the numbers that involve imaginary numbers.
 Imaginary numbers can be constructed by using $i=\sqrt{-1}$ as a building block.
-Whether this number actually exists or not is not important, but what’s important is we can \emph{conceptually define this number}, and with this definition, we can derive so many \emph{useful properties}.
+Whether this number actually exists or not is not important, but what's important is we can \emph{conceptually define this number}, and with this definition, we can derive so many \emph{useful properties}.
 
 Complex numbers are obtained by combining real numbers and imaginary numbers.
-Conversely, any element in the set of complex number $\mathbb{C}$ can be expressed as the combination of real numbers and imaginary numbers, as follows:
+Conversely, any element in the set of complex numbers $\mathbb{C}$ can be expressed as the combination of real numbers and imaginary numbers, as follows:
 \begin{equation*}
     z = a + b i, \quad a, b \in \mathbb{R}
 \end{equation*}
@@ -135,25 +135,25 @@ Geometrically, scalar multiplication stretches or shrinks the vector by a factor
 
 You can also combine these two operations.
 \begin{align}\label{eqn:ax+by}
-  ax + by = \begin{bmatrix}
+  a\mathbf{x} + b\mathbf{y} = \begin{bmatrix}
     a x_1 + b y_1 \\
     a x_2 + b y_2 \\
     \vdots \\
     a x_N + b y_N
   \end{bmatrix}
 \end{align}
-where $a$ and $b$ are scalar values, and $x$ and $y$ are vectors in $\mathbb{R}^N$.
-We don't need to separetly define subtraction, since $x-y$ is equivalent to \cref{eqn:ax+by} with $a=1$ and $b=-1$.
+where $a$ and $b$ are scalar values, and $\mathbf{x}$ and $\mathbf{y}$ are vectors in $\mathbb{R}^N$.
+We don't need to separately define subtraction, since $\mathbf{x}-\mathbf{y}$ is equivalent to \cref{eqn:ax+by} with $a=1$ and $b=-1$.
 
 
-We can observe that the result of scalar multiplication, vector addition, and even their combination is \emph{closed} within the vector space where $x$ and $y$ lives in.
-This means that $ax + by$ is in $\mathbb{R}^N$, if $x$ and $y$ are in $\mathbb{R}^N$ and $a$ and $b$ are in $\mathbb{R}$.
-The same goes true if you replace $\mathbb{R}$ with $\mathbb{C}$.
+We can observe that the result of scalar multiplication, vector addition, and even their combination is \emph{closed} within the vector space where $\mathbf{x}$ and $\mathbf{y}$ live.
+This means that $a\mathbf{x} + b\mathbf{y}$ is in $\mathbb{R}^N$, if $\mathbf{x}$ and $\mathbf{y}$ are in $\mathbb{R}^N$ and $a$ and $b$ are in $\mathbb{R}$.
+The same holds true if you replace $\mathbb{R}$ with $\mathbb{C}$.
 This observation is one of the key properties of vector spaces, and we will see more about vector spaces in \Cref{sec:vector-space}.
 
-\emph{Null vector}, or zero vector, is a special vector whose all entries are zero:
+\emph{Null vector}, or zero vector, is a special vector all of whose entries are zero:
 \begin{align*}
-  \boldsymbol{0} = (0, 0, \dots, 0).
+  \mathbf{0} = (0, 0, \dots, 0).
 \end{align*}
 
 
@@ -272,7 +272,7 @@ The outer product of vectors satisfies the following properties:
     \item $ \mathbf{u} \otimes (\mathbf{v} + \mathbf{w}) = \mathbf{u} \otimes \mathbf{v} + \mathbf{u} \otimes \mathbf{w} $
     \item $ c (\mathbf{v} \otimes \mathbf{u}) = (c \mathbf{v}) \otimes \mathbf{u} = \mathbf{v} \otimes (c \mathbf{u}) $
 \end{itemize}
-If $\mathbf{u} \neq \mathbf{0}$ and $\mathbf{v} \neq \mathbf{0}$, then $\mathbf{u} \otimes \mathbf{v}$ always has matrix rank 1 since the columns of the outer product are all proportional to $\mathbf{u}$. As we will see later, this property has important implications in constructing low-rank approximations of matrices (Sherman-Morrison formula).
+If $\mathbf{u} \neq \mathbf{0}$ and $\mathbf{v} \neq \mathbf{0}$, then $\mathbf{u} \otimes \mathbf{v}$ always has matrix rank 1 since the columns of the outer product are all proportional to $\mathbf{u}$. As we will see later, this property has important implications for efficiently updating the inverse of a matrix under a rank-1 perturbation (the Sherman-Morrison formula).
 
 To emphasize, the outer product constructs a matrix from the product of two vectors, while the inner product (dot product) constructs a scalar from the product of two vectors.
 
@@ -561,7 +561,7 @@ Linear systems arise in many scientific and engineering applications (even in se
     \mathbf{A}\mathbf{x} = \mathbf{b}
     \label{eq:linear-system}
 \end{equation}
-where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for a given $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
+where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for any possible $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
 
 
 \subsection{Condition Number}
@@ -754,6 +754,11 @@ Vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ are \textbf{orthogonal} if $
 
 \subsection{The four fundamental subspaces}
 We next formalize when a linear system has a solution and when that solution is unique. When needed, we denote by $\mathbf{A}_i^c$ the $i$-th column and by $\mathbf{A}_i^r$ the $i$-th row.
+
+\begin{warningBox}
+    \textbf{Note on Notation:} From this point on, we write $\mathbf{A}\in\mathbb{R}^{N\times M}$, meaning $N$ rows and $M$ columns---the opposite of the $\mathbf{A}\in\mathbb{R}^{M\times N}$ convention used earlier in this chapter (e.g., \autoref{eq:linear-system}), where $M$ denoted the number of rows/equations and $N$ the number of columns/unknowns. There is no single universal convention for which letter denotes rows versus columns; different textbooks (and, as you can see, even different sections of these notes!) make different choices. As a numerical methods student, you should be comfortable reading a matrix's dimensions directly from context (or from code, e.g., \texttt{size(A)} in MATLAB) rather than relying on a fixed mapping from variable names to rows and columns.
+\end{warningBox}
+
 For a matrix $\mathbf{A}\in\mathbb{R}^{N\times M}$ there are four canonical subspaces:
 \begin{enumerate}
     \item \textbf{Column space (range):} $\displaystyle \mathcal{R}(\mathbf{A})=\operatorname{span}\{\mathbf{A}_1^c,\dots,\mathbf{A}_M^c\}\subseteq\mathbb{R}^N$
@@ -1119,10 +1124,10 @@ Iterative methods attempt to solve linear systems ($\mathbf{A}\mathbf{x} = \math
 \subsection{Jacobi Iteration}
 Jacobi iteration is an iterative method for solving linear systems. Let's build some intuition for this method before giving the matrix form of the update formula. Suppose we have the linear system
 \begin{align*}
-    a_{11}x_1 + a_{12}x_2 + \dots + a_{1n} & = b_1 \\
-    a_{21}x_1 + a_{22}x_2 + \dots + a_{2n} & = b_2 \\
+    a_{11}x_1 + a_{12}x_2 + \dots + a_{1n}x_n & = b_1 \\
+    a_{21}x_1 + a_{22}x_2 + \dots + a_{2n}x_n & = b_2 \\
     \vdots & \\
-    a_{n1}x_1 + a_{n2}x_2 + \dots + a_{nn} & = b_n
+    a_{n1}x_1 + a_{n2}x_2 + \dots + a_{nn}x_n & = b_n
 \end{align*}
 and some initial approximation/guess for the solution, $ x_1^{(0)}, x_2^{(0)}, \dots, x_n^{(0)} $. How can we improve this guess? Well, rewriting the $i$-th equation in terms of the other variables, we have
 \begin{equation*}
@@ -1223,10 +1228,10 @@ Gauss-Seidel iteration is another iterative method for solving linear systems, s
 
 Consider the same linear system as before:
 \begin{align*}
-    a_{11}x_1 + a_{12}x_2 + \dots + a_{1n} & = b_1 \\
-    a_{21}x_1 + a_{22}x_2 + \dots + a_{2n} & = b_2 \\
+    a_{11}x_1 + a_{12}x_2 + \dots + a_{1n}x_n & = b_1 \\
+    a_{21}x_1 + a_{22}x_2 + \dots + a_{2n}x_n & = b_2 \\
     \vdots & \\
-    a_{n1}x_1 + a_{n2}x_2 + \dots + a_{nn} & = b_n
+    a_{n1}x_1 + a_{n2}x_2 + \dots + a_{nn}x_n & = b_n
 \end{align*}
 and an initial guess for the solution, $ x_1^{(0)}, x_2^{(0)}, \dots, x_n^{(0)} $. To improve this guess, Gauss-Seidel iteration updates each variable sequentially, immediately using the latest available values. Specifically, the update rule for the $i$-th variable is
 \begin{equation*}

@@ -1,5 +1,5 @@
 \chapter{Probability}
-Many processes are not deterministic. Factors such as molecular fluctuations, measurement inaccuracies, and turbulent flow introduce inherent randomness to physical observables. At the microscale, events like chemical reactions are the result of stochastic collisions between molecules. Even at the macroscale, uncertainties in parameter values (e.g., reaction rates, heat transfer coefficients) and external disturbances (e.g., feed composition variations, environmental changes) lead to stochastic system behavior. Uncertainty in values propagate through models, leading to uncertainty in predictions. 
+Many processes are not deterministic. Factors such as molecular fluctuations, measurement inaccuracies, and turbulent flow introduce inherent randomness to physical observables. At the microscale, events like chemical reactions are the result of stochastic collisions between molecules. Even at the macroscale, uncertainties in parameter values (e.g., reaction rates, heat transfer coefficients) and external disturbances (e.g., feed composition variations, environmental changes) lead to stochastic system behavior. Uncertainty in values propagates through models, leading to uncertainty in predictions.
 
 To model, simulate, and design systems under these conditions, we need a basic understanding of probability theory. This chapter provides a foundation in the principles of probability, random variables, and distributions that we will need for the numerical methods discussed later on in this book. While not exhaustive, this chapter covers the essential concepts and tools required to be mathematically precise about uncertainty and randomness in engineering contexts. We'll start simple and almost overly formal, and build our way up in complexity so that we're able to talk about probabilities in a quantitative, mathematical sense as needed for model fitting, parameter estimation, and simulation.
 
@@ -97,7 +97,7 @@ Probabilities must obey a few simple rules. These are Kolmogorov's axioms and ar
           \Pr\!\left(\bigcup_{i=1}^\infty A_i\right)=\sum_{i=1}^\infty \Pr(A_i)
           \label{eq:probability-additivity-axiom}
         \end{equation}
-        For example, if two events are mutually exclusive (i.e., they cannot both occur, $A \cap B = \emptyset$), the probability that either one occurs is  the sum of their individual probabilities: $\Pr(A \cup B) = \Pr(A) + \Pr(B)$. To help visualize this, one can think of this two-event, mutually exclusive case as a figure similar to \autoref{fig:venn-union} but with the two circles non-overlapping. To get the total area of the two circles, the areas can just be added. The non-mutually exlusive case is covered by the law of total probability later on.
+        For example, if two events are mutually exclusive (i.e., they cannot both occur, $A \cap B = \emptyset$), the probability that either one occurs is  the sum of their individual probabilities: $\Pr(A \cup B) = \Pr(A) + \Pr(B)$. To help visualize this, one can think of this two-event, mutually exclusive case as a figure similar to \autoref{fig:venn-union} but with the two circles non-overlapping. To get the total area of the two circles, the areas can just be added. The non-mutually exclusive case is covered by the law of total probability later on.
     \end{enumerate}
 \end{definitionBox}
 Note that from these axioms, we immediately have that (1) the probability of the complement of an event $A^{c}$ (the event that $A$ does not occur) is $\Pr(A^{c}) = 1 - \Pr(A)$, and (2) $\Pr(\emptyset) = 0$.
@@ -235,7 +235,7 @@ Often, we want the probability that at least one of several events occurs. The V
     &\qquad + (-1)^{N+1} \Pr(A_1\cap\cdots\cap A_N)\label{eq:IE-general}
 \end{align}
 \end{definitionBox}
-We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $\Pr(A\cap B)=\Pr(A)\Pr(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses , \autoref{eq:probability-additivity-axiom}.
+We note that IE holds without any independence assumptions. Independence is only used, when available, to evaluate the intersections, e.g., $\Pr(A\cap B)=\Pr(A)\Pr(B)$ if $A$ and $B$ are independent. When the events are pairwise disjoint, all intersections vanish and \autoref{eq:IE-two} collapses to the additivity axiom, \autoref{eq:probability-additivity-axiom}.
 
 \begin{exampleBox}
 \textbf{Example: At Least One Defective, Revisited.}
@@ -277,7 +277,7 @@ The takeaway here is to use \autoref{eq:IE-two}-\autoref{eq:IE-general} for exac
 
 
 \subsection{Simpson's Paradox}
-Conditional probability can lead to counterintuitive results when we fail to account for all relevant information. \textbf{Simpson's paradox} occurs when a trend appears in different groups of data but disappears or reverses when the groups are combined. When a confounding variable influences both the condition and the outcome, ignoring this variable can lead to misleading conclusions. Simpson's paradox is not truly a pardox. It's easiest to see this with an example.
+Conditional probability can lead to counterintuitive results when we fail to account for all relevant information. \textbf{Simpson's paradox} occurs when a trend appears in different groups of data but disappears or reverses when the groups are combined. When a confounding variable influences both the condition and the outcome, ignoring this variable can lead to misleading conclusions. Simpson's paradox is not truly a paradox. It's easiest to see this with an example.
 
 \begin{exampleBox}
     \textbf{Example (Simpson's Paradox):}
@@ -335,19 +335,21 @@ This formula provides a systematic way to update our beliefs in light of new evi
 \end{itemize}
 We will revisit these ideas in more depth in the context of Bayesian inference later on. For now, we illustrate Bayes' theorem with a couple of examples.
 
-\begin{exampleBox}
-    \textbf{Example (Manufacturing Defects, continued)}: We found that the overall defect rate was $\Pr(D) = 0.021$. Now, suppose we have a defective part in hand. What is the probability it came from Machine B, i.e., what is $\Pr(B\mid D)$?
+%% TODO: reinstate example w/ missing Manufacturing Defects?
 
-    Our prior belief was $\Pr(B) = 0.35$. We now use Bayes' Theorem to update this belief with the evidence that the part is defective.
-    \begin{equation}
-        \Pr(B \mid D) = \frac{\Pr(D \mid B)\Pr(B)}{\Pr(D)}
-    \end{equation}
-    We have all the necessary components: $\Pr(D \mid B)=0.03$, $\Pr(B)=0.35$, and $\Pr(D)=0.021$. So
-    \begin{equation}
-        \Pr(B \mid D) = \frac{0.03 \times 0.35}{0.021} = \frac{0.0105}{0.021} = 0.5
-    \end{equation}
-    After finding a defective part, the probability that it came from Machine B has increased from 35\% (the prior) to 50\% (the posterior). This is because Machine B has the highest defect rate, so it is disproportionately responsible for the defective parts.
-\end{exampleBox}
+% \begin{exampleBox}
+%     \textbf{Example (Manufacturing Defects, continued)}: We found that the overall defect rate was $\Pr(D) = 0.021$. Now, suppose we have a defective part in hand. What is the probability it came from Machine B, i.e., what is $\Pr(B\mid D)$?
+
+%     Our prior belief was $\Pr(B) = 0.35$. We now use Bayes' Theorem to update this belief with the evidence that the part is defective.
+%     \begin{equation}
+%         \Pr(B \mid D) = \frac{\Pr(D \mid B)\Pr(B)}{\Pr(D)}
+%     \end{equation}
+%     We have all the necessary components: $\Pr(D \mid B)=0.03$, $\Pr(B)=0.35$, and $\Pr(D)=0.021$. So
+%     \begin{equation}
+%         \Pr(B \mid D) = \frac{0.03 \times 0.35}{0.021} = \frac{0.0105}{0.021} = 0.5
+%     \end{equation}
+%     After finding a defective part, the probability that it came from Machine B has increased from 35\% (the prior) to 50\% (the posterior). This is because Machine B has the highest defect rate, so it is disproportionately responsible for the defective parts.
+% \end{exampleBox}
 
 \begin{exampleBox}
     \textbf{Example (Diagnostic Testing)}: A diagnostic test for pipeline corrosion has a sensitivity of 85\% (it correctly identifies corrosion 85\% of the time) and a specificity of 99.9\% (it correctly reports no corrosion 99.9\% of the time). Industry data suggests that this corrosion is present in 1\% of pipes of a certain age. If a pipe tests positive, what is the probability it actually has corrosion?
@@ -375,7 +377,7 @@ Random variables allow us to define events using numerical statements and with m
     \Pr(\mathsf{x} \ge a) := \Pr(\{\xi \in \mathcal{E} \mid \mathsf{x}(\xi) \ge a\})
 \end{equation}
 
-Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have vanishingly small probabilities: the probability that the random variable $\mathsf{T}$ takes on a value that is \emph{exactly} equal to $t$, $\Pr(\mathsf{T}=t)$, is infinitessimally small. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
+Random variables are usually classified into two types based on the values they can take. \textbf{Discrete random variables} can take on a finite or countably infinite number of distinct values. For example, we can use a discrete RV to describe the result of a coin flip: $\mathsf{x}$ such that $\mathsf{x}(\text{heads}) = 1$ and $\mathsf{x}(\text{tails}) = 0$. Here, the set of possible values is $\{0, 1\}$. Meanwhile, \textbf{continuous random variables} can take on any value within a given continuous range. The number of possible values is uncountably infinite. For example, consider the measured temperature of a reactor, $\mathsf{T}$, which can be any value in $[0, \infty)$. In such cases, single points have vanishingly small probabilities: the probability that the random variable $\mathsf{T}$ takes on a value that is \emph{exactly} equal to $t$, $\Pr(\mathsf{T}=t)$, is infinitesimally small. Understanding the type of a random variable is the first step toward describing its behavior using a probability distribution, which we will cover next.
 
 \section{Describing Random Variables: Probability Distributions}
 Random variables give us a tool to map experimental outcomes to numbers. The next step is to describe the probabilistic behavior of that variable. We need to answer the question: ``What are the probabilities that the random variable $\mathsf{x}$ will take on certain values?'' This is the role of a \textbf{probability distribution}. There are two main functions we use to fully characterize a random variable's distribution. The first is the \textbf{cumulative distribution function (CDF)}, which applies to all types of random variables that take on numerical values. The second function depends on whether the random variable is discrete or continuous: for discrete random variables, we use the \textbf{probability mass function (PMF)}, which also applies to random variables that take on non-numerical values; for continuous random variables, we use the \textbf{probability density function (PDF)}.
@@ -447,7 +449,7 @@ We take the support to be $\mathcal{S}_{\mathsf{x}}=\{x: p_{\mathsf{x}}(x)>0\}$,
 \begin{warningBox}
     \textbf{Warning: PDF Danger Zone.}\quad Here are two points to watch out for when working with PDFs:
     \begin{enumerate}
-        \item A PDF value is \emph{not} a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability emph{density}. As a result, it can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $\Pr(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
+        \item A PDF value is \emph{not} a probability. Unlike a PMF, the value of a PDF, $p_{\mathsf{x}}(x)$, is a probability \emph{density}. As a result, it can be greater than 1. The probability is the area under the curve. For a very small interval, the probability is approximately the area of a rectangle: $\Pr(x \le \mathsf{x} \le x+dx) \approx p_{\mathsf{x}}(x)dx$.
         \item The probability at a point is zero (if in doubt, check out \autoref{eq:pdf-range} and realize that you would be integrating over a zero-width interval). For any continuous RV, $\Pr(\mathsf{x}=c)=0$. This means that $\Pr(a \le \mathsf{x} \le b)$ is the same as $\Pr(a < \mathsf{x} < b)$.
     \end{enumerate}
 \end{warningBox}
@@ -503,7 +505,7 @@ When we are dealing with more complex expressions involving expectation operator
     
     
 \paragraph*{Expectation of a Function of an RV}
-We can also calculate the expected value of a function of a random variable, $g(\mathsf{x})$. Functions of random variables are themselves random variables, since their values depend on the outcome of the original random variable. You can think of $g(\mathsf{x})$ as applying a transformation to the original random variable $\mathsf{x}$. When we sample $\mathsf{x}$, we can compute $g(x$ for that sample, and over many samples, we can analyze the distribution of $g(\mathsf{x})$. 
+We can also calculate the expected value of a function of a random variable, $g(\mathsf{x})$. Functions of random variables are themselves random variables, since their values depend on the outcome of the original random variable. You can think of $g(\mathsf{x})$ as applying a transformation to the original random variable $\mathsf{x}$. When we sample $\mathsf{x}$, we can compute $g(x)$ for that sample, and over many samples, we can analyze the distribution of $g(\mathsf{x})$. 
 
 For a discrete RV,
 \begin{equation}
@@ -739,10 +741,10 @@ The requirement that a probability density function be normalized means that whe
 
 As a result, distributions can be recognized by their dependence on the argument without worrying about the normalization constant. If we know that a PDF $p_{\mathsf{x}}(x)$ is proportional to $\exp(-x^2/2)$, which might be written as $p_{\mathsf{x}}(x) \propto \exp(-x^2/2)$, we can immediately identify it as a normal distribution with mean 0 and variance 1 without needing to compute the normalization constant $1/\sqrt{2\pi}$. Similarly, if we see a PMF proportional to $\lambda^k /k!$, we can identify it as a Poisson distribution with rate parameter $\lambda$ despite the lack of the $e^{-\lambda}$ term.
 
-Being able to recognize distributions by their shape is a useful skill in probability and statistics will be useful when we start discussing Bayesian inference and Monte Carlo methods later in the course.
+Being able to recognize distributions by their shape is a useful skill in probability and statistics that will be useful when we start discussing Bayesian inference and Monte Carlo methods later in the course.
 
 \section{Empirical Distributions}
-The probability distributions we have discussed (normal, Poisson, etc.) are theoretical models. They represent a complete and perfect description of a random variable, assuming we know its underlying parameters (like $\mu$, $\sigma^2$, or $\lambda$). In most real-world scenario, however, we do not have access to this true, latent distribution. Instead,  we might have is a finite collection of data points, or samples, drawn from it. 
+The probability distributions we have discussed (normal, Poisson, etc.) are theoretical models. They represent a complete and perfect description of a random variable, assuming we know its underlying parameters (like $\mu$, $\sigma^2$, or $\lambda$). In most real-world scenarios, however, we do not have access to this true, latent distribution. Instead, what we might have is a finite collection of data points, or samples, drawn from it.
 
 The distribution of our collected data is called the \textbf{empirical distribution}. It is our best approximation of the true, underlying distribution. For a discrete random variable, we can define the empirical probability mass function, $\hat{p}_{\mathsf{x}}(x)$\footnote{The hat notation is used universally in statistics to denote an estimator, a value calculated from data that is our best guess for an unknown true value. We'll revisit estimators momentarily.}, as the relative frequency of each outcome in our data:
 \begin{equation}
@@ -756,10 +758,10 @@ The distribution of our collected data is called the \textbf{empirical distribut
     \label{fig:die-roll-convergence}
 \end{figure}
 
-The \textbf{law of large numbers} guarantees that as our sample size $N$ grows, our empirical distribution must converge to the true underlying distribution, i.e., $\hat \lim_{N \to \infty} p_\mathsf{x}(x) = p_\mathsf{x}(x)$. The plot in \autoref{fig:die-roll-convergence} illustrates this. The left panel traces the running empirical probability of each die face as the number of rolls $N$ increases, with the dashed line at $1/6$ marking the theoretical value for this fair die. At small $N$, the empirical probabilities of different numbers fluctuate widely but the sampling variability steadily diminishes as $N$ increases. The right panel overlays stem plots of the full discrete distribution at selected sample sizes ($N=1,10,10000$). We can see how a single observation yields an extreme, noisy snapshot, a handful of rolls produces visible imbalance, and a large sample approaches the uniform distribution across faces. The same is true for any underlying and corresponding empirical distribution. If we draw only five samples from a normal distribution, the resulting histogram might look nothing like a bell curve, and any parameters we estimate from it (like the mean) could be very inaccurate. But if we keep adding more samples, we are guaranteed to get a better and better approximation of the true distribution.
+The \textbf{law of large numbers} guarantees that as our sample size $N$ grows, our empirical distribution must converge to the true underlying distribution, i.e., $\lim_{N \to \infty} \hat{p}_\mathsf{x}(x) = p_\mathsf{x}(x)$. The plot in \autoref{fig:die-roll-convergence} illustrates this. The left panel traces the running empirical probability of each die face as the number of rolls $N$ increases, with the dashed line at $1/6$ marking the theoretical value for this fair die. At small $N$, the empirical probabilities of different numbers fluctuate widely but the sampling variability steadily diminishes as $N$ increases. The right panel overlays stem plots of the full discrete distribution at selected sample sizes ($N=1,10,10000$). We can see how a single observation yields an extreme, noisy snapshot, a handful of rolls produces visible imbalance, and a large sample approaches the uniform distribution across faces. The same is true for any underlying and corresponding empirical distribution. If we draw only five samples from a normal distribution, the resulting histogram might look nothing like a bell curve, and any parameters we estimate from it (like the mean) could be very inaccurate. But if we keep adding more samples, we are guaranteed to get a better and better approximation of the true distribution.
 
 \section{The Central Limit Theorem}
-When using empirical samples to estimate an underlying probability distribution, one of the properties we might be interested is in the population mean. If we sample values $\{x_1, x_2, ..., x_N\}$, a reasonable estimate for the mean of the underlying distribution is the sample mean, $\frac{1}{N} \sum_{i_1}^N x_i$. A natural question arises: how accurate is this estimate? How close is it likely to be to the true mean of the underlying distribution? The answer is provided by the \textbf{central limit theorem (CLT)}.
+When using empirical samples to estimate an underlying probability distribution, one of the properties we might be interested in is the population mean. If we sample values $\{x_1, x_2, ..., x_N\}$, a reasonable estimate for the mean of the underlying distribution is the sample mean, $\frac{1}{N} \sum_{i=1}^N x_i$. A natural question arises: how accurate is this estimate? How close is it likely to be to the true mean of the underlying distribution? The answer is provided by the \textbf{central limit theorem (CLT)}.
 
 First, we have to recognize that the sample mean is a random variable itself. If we have a set of $N$ independent and identically distributed (i.i.d.) random variables $\{\mathsf{x}_1, \dots, \mathsf{x}_N\}$, their sample mean, $\mathsf{S}_N$, is also a random variable:
 \begin{equation}
@@ -1136,7 +1138,7 @@ By rearranging this definition, we get the \textbf{chain rule of probability} fo
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figs/probability/conditional_fig.pdf}
-    \caption{A visualization of conditional probability. The colored surface illustrates the joint PDF of two random variables. Fixing a value of $\mathsf{x}_1$ (e.g., $x_1=0$ or $x_1=1$) is like taking a single slice. The distribution of the points within that slice is the conditional distribution of $\mathsf{x}_2$ given $\mathsf{x}_1$.}
+    \caption{A visualization of conditional probability. The colored surface illustrates the joint PDF of two random variables. Fixing a value of $\mathsf{x}_1$ (e.g., $x_1=0$ or $x_1=1$) is like taking a single slice. The distribution of the points within that slice is the conditional distribution of $\mathsf{x}_2$ given $\mathsf{x}_1$. The visualization above shows the PDF of $\mathsf{x}_2$ given $x_1 = 0.7$.}
     \label{fig:conditional-slice}
 \end{figure}
 \end{exampleBox}
@@ -1185,8 +1187,6 @@ Visually, marginalization is like taking the 3D mountain of the joint PDF and pr
     \end{equation}
     
     The standard way of finding the marginal distribution is to integrate out the unneeded variable. We can integrate over $x_1$ to find $p_{\mathsf{x}_2}(x_2)$:
-
-    . Let's look at a few ways we then can find the marginal distribution of $\mathsf{x}_2$.
     \begin{align}
     p_{\mathsf{x}_2}(x_2)
     &= \int_{-\infty}^{\infty} p_{\mathsf{x}_1,\mathsf{x}_2}(x_1,x_2)\,dx_1 \\
@@ -1301,10 +1301,12 @@ So far, this chapter has laid the theoretical groundwork of probability and intr
 \subsection{Pseudorandom Numbers and Seeding}
 A computer is a deterministic machine, so it is incapable of generating truly random numbers. Instead, it uses algorithms called pseudorandom number generators (PRNGs) to create long sequences of numbers that are---for all practical purposes---indistinguishable from random. These algorithms start with an initial value called a \textbf{seed}. Given the same seed, a PRNG will always produce the exact same sequence of numbers.
 
-A very simple (and not very good!) example of a PRNG is the middle squares method. This method starts with a seed number, squares it, and then extracts the middle digits to form the next number in the sequence. This process is repeated to generate more numbers. For example, generating four-digit integers seeded with ``1034'', we might have:
-\begin{equation*}
-1034 ~ \rightarrow ~ 1034^2 = 1,069,156 ~ \rightarrow ~ \text{next number: } 0691 ~ \rightarrow ~ 0691^2 = 477,481 ~ \rightarrow ~ \text{next number: } 7748 ~ \rightarrow ~ \ldots
-\end{equation*} 
+A very simple (and not very good!) example of a PRNG is the middle squares method. This method starts with a seed number, squares it, pads it to 8 digits with leading zeros, and then extracts the middle digits to form the next number in the sequence. This process is repeated to generate more numbers. For example, generating four-digit integers seeded with ``1034'', we might have:
+\begin{align*}
+1034 &~\rightarrow~ 1034^2 = 01,069,156 ~\rightarrow~ \text{next number: } 0691 \\
+0691 &~\rightarrow~ 0691^2 = 00,477,481  ~\rightarrow~ \text{next number: } 4774 \\
+4774 &~\rightarrow~ \ldots
+\end{align*}
 While this method can produce a sequence that appears random, it has several weaknesses, such as short periods and poor distribution properties.
 
 This determinism is a feature, not a bug. By setting the seed manually at the beginning of a simulation, we can make sure that our results are perfectly reproducible. This is helpful for debugging code and for allowing other scientists to verify our work. Most programming environments provide a simple command for this (e.g., \texttt{rng(seed)} in MATLAB or \texttt{np.random.seed(seed)} in Python's NumPy library).
@@ -1373,7 +1375,7 @@ In many applications, especially in statistics and machine learning, we need to 
 
 \paragraph*{Kullback-Leibler Divergence} The Kullback-Leibler (KL) divergence  is the canonical asymmetric example and is the most popular choice in machine learning to quantify differences in distributions. In the continuous case, it is defined as
 \begin{align}
-    D_{\mathrm{KL}}(p_{\mathsf{x}}\Vert q_{\mathsf{x}})= \mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x}}(x)}\left[ \frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)} \right] &=  \int p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right)\,dx \text{ (continuous)} \\
+    D_{\mathrm{KL}}(p_{\mathsf{x}}\Vert q_{\mathsf{x}})= \mathbb{E}_{\mathsf{x} \sim p_{\mathsf{x}}(x)}\left[ \log\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)} \right] &=  \int p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right)\,dx \text{ (continuous)} \\
     &=  \sum_x p_{\mathsf{x}}(x)\log\!\left(\frac{p_{\mathsf{x}}(x)}{q_{\mathsf{x}}(x)}\right) \text{ (discrete)}
 \end{align}
 
@@ -1501,9 +1503,9 @@ Consider a 2D distribution that has constant probability density on the shaded r
 \end{exercise}
 
 \begin{solution}
-The constant joint density implies probability is proportional to area. Taking the conditional $x_2 > 3$ means that we are only considering the portion of the shaded region above the horizontal line \(x_2=3\). That region is a simple rectangle where the probability density is (still) uniform. 
+The constant joint density implies probability is proportional to area. Taking the conditional $x_2 > 3$ means that we are only considering the portion of the shaded region above the horizontal line \(x_2=3\). Only the top-right square, spanning $x_1\in[2.5,4]$ and $x_2\in[2.5,4]$, extends above $x_2=3$ (the other two squares top out at $x_2=2.5$ and $x_2=3$, respectively). The portion of that square with $x_2>3$ is the rectangle $x_1\in[2.5,4]$, $x_2\in(3,4]$, where the probability density is (still) uniform.
 
-Thus, $p_\mathsf{x_1 \mid x_2}(x_1 | x_2 > 3) = \mathcal{U}[3,5]$.
+Thus, $p_\mathsf{x_1 \mid x_2}(x_1 | x_2 > 3) = \mathcal{U}[2.5,4]$.
 \end{solution}
 
 %%% Local Variables:

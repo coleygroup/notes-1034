@@ -65,8 +65,8 @@ The most common floating-point formats are single-precision (float32) and double
     \node[align=center] at (1.75, 1.5) {exponent\\(11 bits)};
     \node[align=center] at (9.5, 1.5) {significand\\(52 bits)};
     
-    \draw [blue!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (0,0.5) --  (.5,.5);
-    \draw [green!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (.5,0.5) --  (3,.5);
+    \draw [blue!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (0,0.5) --  (.25,.5);
+    \draw [green!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (.25,0.5) --  (3,.5);
     \draw [red!80!black,decorate,decoration = {brace, amplitude=5pt, raise=1pt}] (3,.5) --  (16,.5);
   \end{tikzpicture}
   % \includegraphics[width=.7\textwidth]{figs/computation/floating-point.pdf}
@@ -96,7 +96,7 @@ Meanwhile, float64 has 52 explicitly stored bits of precision, which is roughly 
 % \end{equation*}
 
 Binary expansions of most real numbers are non-terminating and must be truncated, e.g.,
-\[ \pi = 1.10010010000011111101101010\ldots \times 2^{1} \]
+\[ \pi = 1.1001001000011111101101010\ldots \times 2^{1} \]
 so the significand is truncated, introducing representation error.
 
 \textbf{Precision and Hardware}\quad
@@ -151,7 +151,7 @@ ans =
 
 % Rounding-off error is the primary drawback of finite precision. Even simple calculations can introduce numerical errors, so we must be careful when designing numerical algorithms. If we use MATLAB to calculate \verb|1 - 3 * (4 / 3 - 1)|, we get \verb|2.22e-16|, which is not zero (the analytical solution). However, if we use MATLAB to calculate \verb|1 - (3 / 3 * 4 - 3)|, we get \verb|0|. This shows that if we design numerical algorithms with care (in this case, that simply means applying the distributive property), we can avoid some of the pitfalls of finite precision. Finally, even though they seem small, the errors associated with floating-point arithmetic can compound and magnify in large calculations, leading to significant errors.
 
-\textbf{Ordering Calculations}\quad Because floating-point numbers are only approximations, the way we arrange computations can create or avoid error. The most common manifestation of this is known as ``catastrophic cancellation'': subtracting nearly equal quantities wipes out correct digits and magnifies rounding noise. For example, the algebraically equivalent expressions $1-3(4/3-1)$ and $1-(3/3\cdot 4-3)$ can result in $2.22\times10^{-16}$ versus $0$ in double precision; this is because the first forces a small difference subtraction while the second avoids it. Similar issues show up when computing $1-\cos x$ for small $x$ (use the fact that $1-\cos x \approx 2\sin^2(x/2)$ at small $x$ to compute this instead), summing terms with very different magnitudes (sum smaller terms first or use compensated summation), or applying the quadratic formula when $b^2\gg4ac$ (use $2c/(-b\mp\sqrt{b^2-4ac})$ for the small root). The practical rule you should know for 10.34 is simple: choose algebraic forms that avoid subtracting nearly equal numbers, keep intermediate values on similar scales (rescale when helpful), and use numerically stable library routines (i.e., no need to reinvent the wheel if MATLAB has something you need). Otherwise, tiny rounding errors can accumulate over many operations into visible inaccuracies.
+\textbf{Ordering Calculations}\quad Because floating-point numbers are only approximations, the way we arrange computations can create or avoid error. The most common manifestation of this is known as ``catastrophic cancellation'': subtracting nearly equal quantities wipes out correct digits and magnifies rounding noise. For example, the algebraically equivalent expressions $1-3(4/3-1)$ and $1-(3/3\cdot 4-3)$ can result in $2.22\times10^{-16}$ versus $0$ in double precision; this is because the first forces a small difference subtraction while the second avoids it. Similar issues show up when computing $1-\cos x$ for small $x$ (use the identity $1-\cos x = 2\sin^2(x/2)$, which follows from the double-angle formula, to compute this instead), summing terms with very different magnitudes (sum smaller terms first or use compensated summation), or applying the quadratic formula when $b^2\gg4ac$ (use $2c/(-b\mp\sqrt{b^2-4ac})$ for the small root). The practical rule you should know for 10.34 is simple: choose algebraic forms that avoid subtracting nearly equal numbers, keep intermediate values on similar scales (rescale when helpful), and use numerically stable library routines (i.e., no need to reinvent the wheel if MATLAB has something you need). Otherwise, tiny rounding errors can accumulate over many operations into visible inaccuracies.
 
 \textbf{Overflow and Underflow}\quad  Overflow/underflow describes the situation where numerical calculation exceeds the limits of floating-point formats. It occurs when we try to store numbers that are too large (overflow) or too small (underflow) for our chosen representation. The finite precision and finite exponent limit the range: approximately $10^{-38} \leq |x| \leq 10^{38}$ for float32 and approximately $10^{-308} \leq |x| \leq 10^{308}$ for float64. Thus, we may need to rescale our numbers to avoid overflow/underflow. Generally, though, this is not something we need to worry much about.
 
@@ -202,7 +202,8 @@ This definition means that for sufficiently large values of $N$, the function $f
             $10$ & $1.05\cdot 10^4$ & $2.01\cdot 10^3$ \\
             $100$ & $6\cdot 10^4$ & $2.0001\cdot 10^6$ \\
             $1000$ & $5.01\cdot 10^6$ & $2.000001\cdot 10^9$ \\
-            $10000$ & $5.000001\cdot 10^{10}$ & $2.0000000001\cdot 10^{15}$ \\
+            $10000$ & $5.0001\cdot 10^{8}$ & $2.00000001\cdot 10^{12}$ \\
+            $100000$ & $5.000001\cdot 10^{10}$ & $2.0000000001\cdot 10^{15}$ \\
         \end{tabular}
     \end{center}
     As the table shows, Algorithm B requires significantly more operations than Algorithm A as $N$ grows (but notice this is NOT true at small $N$!), making it less practical for large problem sizes. This also follows directly from the big O notation, which tells us that $f_B(N)$ grows faster than $f_A(N)$.
@@ -215,7 +216,8 @@ This definition means that for sufficiently large values of $N$, the function $f
             $10$ & $0.105 \,\text{ms}$ & $0.0201 \,\text{ms}$ \\
             $100$ & $0.6 \,\text{ms}$ & $20.001 \,\text{ms}$ \\
             $1000$ & $50.1 \,\text{ms}$ & $20 \,\text{s}$ \\
-            $10000$ & $8.33 \,\text{min}$ & $231 \,\text{days}$ \\
+            $10000$ & $5.00 \,\text{s}$ & $5.56 \,\text{hours}$ \\
+            $100000$ & $8.33 \,\text{min}$ & $231 \,\text{days}$ \\
         \end{tabular}
     \end{center}
 \end{exampleBox}

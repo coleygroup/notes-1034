@@ -93,7 +93,7 @@ Second, and equally important, we must be careful about what happens when the Ja
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=0.6\textwidth]{figs/nle/local_uniqueness.pdf}
-\caption{Application of the inverse function theorem 2D. The red and blue lines indicate the values of $x_1$ and $x_2$ for which two components of a vector-valued function, $f_1$ and $f_2$ respectively, are zero. Intersections of these curves define the roots of the function. Where the curves are tangent to each other indicates that their gradients with respect to $x_1$ and $x_2$ will be parallel, and hence the rows of the Jacobian will be linearly dependent, rendering it singular. Star: A solution where the curves intersect transversely; the Jacobian is clearly nonsingular, and therefore the solution is guaranteed to be locally unique. Dashed circle: A solution where the curves are tangent; the Jacobian is singular, and therefore the solution is \emph{potentially} non-unique. }
+\caption{Application of the inverse function theorem in 2D. The red and blue lines indicate the values of $x_1$ and $x_2$ for which two components of a vector-valued function, $f_1$ and $f_2$ respectively, are zero. Intersections of these curves define the roots of the function. Where the curves are tangent to each other indicates that their gradients with respect to $x_1$ and $x_2$ will be parallel, and hence the rows of the Jacobian will be linearly dependent, rendering it singular. Star: A solution where the curves intersect transversely; the Jacobian is clearly nonsingular, and therefore the solution is guaranteed to be locally unique. Dashed circle: A solution where the curves are tangent; the Jacobian is singular, and therefore the solution is \emph{potentially} non-unique. }
 \end{center}
 \end{figure}
 
@@ -263,7 +263,7 @@ neighborhood, visually confirming the local uniqueness result.
 
 \section{Iterative Methods for Solving Nonlinear Equations}
 
-We are concerned with finding solutions $\vect{x}^* \in \mathbb{R}^N$ to a system of $n$ nonlinear equations $\vect{f}(\vect{x}) = \vect{0}$, where $\vect{f}: \mathbb{R}^N \to \mathbb{R}^N$:
+We are concerned with finding solutions $\vect{x}^* \in \mathbb{R}^N$ to a system of $N$ nonlinear equations $\vect{f}(\vect{x}) = \vect{0}$, where $\vect{f}: \mathbb{R}^N \to \mathbb{R}^N$:
 \begin{equation}
     \vect{f}(\vect{x}^*) = \begin{bmatrix} f_1(x_1^*, x_2^*, \dots, x_N^*) \\ f_2(x_1^*, x_2^*, \dots, x_N^*) \\ \vdots \\ f_N(x_1^*, x_2^*, \dots, x_N^*) \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ \vdots \\ 0 \end{bmatrix} = \vect{0}
 \end{equation}
@@ -366,7 +366,7 @@ We can understand where this comes from quite easily by considering a first-orde
     \vect{f}(\vect{x}_k + \Delta\vect{x}) \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \Delta\vect{x}
     \label{eq:linearized_newton}
 \end{equation}
-where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix (with elements $J_{ij}(\vect{x}_k) = \tfrac{\partial f_i}{\partial x_j}(\vect{x}_k)$ as always). Newton's method proposes that the next iterate $\vect{x}_{k+1}$ should satisfy $\vect{f}(\vect{x}_{k+1}) = \vect{0}$ under this assumption of linearity. Let $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$, where $\vect{d}_k$ is the step/correction/displacement. Substituting this into the linearized equation \ref{eq:linearized_newton}, we get
+where $\mat{J}(\vect{x}_k)$ is the Jacobian matrix (with elements $J_{ij}(\vect{x}_k) = \tfrac{\partial f_i}{\partial x_j}(\vect{x}_k)$ as always). Newton's method proposes that the next iterate $\vect{x}_{k+1}$ should satisfy $\vect{f}(\vect{x}_{k+1}) = \vect{0}$ under this assumption of linearity. Let $\vect{x}_{k+1} = \vect{x}_k + \vect{d}_k$, where $\vect{d}_k$ is the step/correction/displacement. Substituting this into the linearized equation \autoref{eq:linearized_newton}, we get
 \begin{equation}
     \vect{0} \approx \vect{f}(\vect{x}_k) + \mat{J}(\vect{x}_k) \vect{d}_k
 \end{equation}
@@ -481,7 +481,7 @@ This should be quite familiar from previous calculus courses. Geometrically, $x_
     \label{fig:newton_1d}
 \end{figure}
 
-It is worth taking a step back and reminding oneself why a numerical method needs to make this kind of assumption of linearity. When we look at the 1D example in \autoref{fig:newton_1d}, it is easy to think that there must be a better strategy. Recall that we have no made assumptions about the structure of $\mathbf f(\mathbf x)$ and that the algorithm only has the ability to call this function for different values of $\mathbf x$ in search of roots. At each iteration, Newton's method relies on a ``local'' analysis of the function value and its Jacobian to decide where it should look search next. But why not also consider the second derivative? Or third derivative? Computing or estimating these can come at great computational cost, and we know that as we get closer to a root and take smaller and smaller steps, the linear term will dominate; however, algorithms using derivatives past the first derivative do exist.
+It is worth taking a step back and reminding oneself why a numerical method needs to make this kind of assumption of linearity. When we look at the 1D example in \autoref{fig:newton_1d}, it is easy to think that there must be a better strategy. Recall that we have made no assumptions about the structure of $\mathbf f(\mathbf x)$ and that the algorithm only has the ability to call this function for different values of $\mathbf x$ in search of roots. At each iteration, Newton's method relies on a ``local'' analysis of the function value and its Jacobian to decide where it should search next. But why not also consider the second derivative? Or third derivative? Computing or estimating these can come at great computational cost, and we know that as we get closer to a root and take smaller and smaller steps, the linear term will dominate; however, algorithms using derivatives past the first derivative do exist.
 
 
 The Newton-Raphson algorithm for systems is summarized below using both the discussed stopping criteria simultaneously.
@@ -554,16 +554,16 @@ Starting with an initial guess, say $\vect{x}_0 = (-1, 3)^\top$, we can apply Ne
 \begin{tabular}{@{}ccccc@{}}
 \toprule
 $k$ & $\vect{x}^{(k)^\top}$ & $\vect{f}(\vect{x}^{(k)})^\top$ & $\|\vect{x}^{(k)}-\vect{x}^{(k-1)}\|_2$ & $\|\vect{f}(\vect{x}^{(k)})\|_2$ \\ \midrule
-0 & $(-1.000, 3.000)$ & $(1.00, 11.00)$ & --- & $11.100$ \\
-1 & $(-1.250, 1.750)$ & $(1.625, 1.625)$ & $0.556$ & $2.300$ \\
-2 & $(-0.963, 1.270)$ & $(0.310, 0.310)$ & $0.173$ & $0.439$ \\
-3 & $(-0.875, 1.124)$ & $(0.030, 0.030)$ & $0.020$ & $0.042$ \\
-4 & $(-0.864, 1.101)$ & $(0.004, 0.004)$ & $0.003$ & $0.006$ \\
+0 & $(-1.000, 3.000)$ & $(1.000, 11.000)$ & --- & $11.045$ \\
+1 & $(-1.250, 1.750)$ & $(1.625, 1.625)$ & $1.275$ & $2.298$ \\
+2 & $(-0.963, 1.272)$ & $(0.311, 0.311)$ & $0.557$ & $0.439$ \\
+3 & $(-0.874, 1.124)$ & $(0.030, 0.030)$ & $0.173$ & $0.042$ \\
+4 & $(-0.864, 1.107)$ & $(0.0004, 0.0004)$ & $0.020$ & $0.0006$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The iteration rapidly converges to one of the intersection points, approximately $(-0.864, 1.101)$. The choice of initial guess determines which of the two intersection points is found.
+The iteration rapidly converges to one of the intersection points, approximately $(-0.864, 1.106)$. The choice of initial guess determines which of the two intersection points is found.
 
 \end{exampleBox}
 
@@ -815,32 +815,32 @@ Newton's method can be sensitive to the choice of initial guess, and in some cas
 Recall that Newton's method is based on a linear (first-order) approximation that is only locally accurate in a small neighborhood. We make two important observations:
 \begin{itemize}
   \item The \emph{direction} of the Newton step, 
-  \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\), is typically good: if we took a sufficiently small step in this direction, the residual norm 
-  \(\lVert \mathbf{f}(\mathbf{x}_i+\alpha \mathbf{d}_i)\rVert_p\) 
+  \(\mathbf{d}_k=-\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k)\), is typically good: if we took a sufficiently small step in this direction, the residual norm 
+  \(\lVert \mathbf{f}(\mathbf{x}_k+\alpha \mathbf{d}_k)\rVert_p\) 
   would decrease.
   \item The \emph{magnitude} of the step can be problematic: the size 
-  \(\lVert \mathbf{d}_i\rVert_p=\lVert \mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\rVert_p\) 
-  may be so large that the next iterate actually increases the residual (such that \( \lVert \mathbf{f}(\mathbf{x}_{i+1})\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p \)), which pushes us away from the solution instead of toward it.
+  \(\lVert \mathbf{d}_k\rVert_p=\lVert \mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k)\rVert_p\) 
+  may be so large that the next iterate actually increases the residual (such that \( \lVert \mathbf{f}(\mathbf{x}_{k+1})\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_k)\rVert_p \)), which pushes us away from the solution instead of toward it.
 \end{itemize}
 Because our goal is to drive \(\lVert \mathbf{f}(\mathbf{x})\rVert_p \to 0\), we can correct this undesirable behavior by \emph{reducing the step size}. This leads to the damped Newton method:
 \begin{definitionBox}
     \textbf{Definition: Damped Newton Method.}
     The damped Newton method is given by the update rule
     \begin{equation}
-    \mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),\qquad 0<\alpha\le 1
+    \mathbf{x}_{k+1}=\mathbf{x}_k-\alpha\,\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k),\qquad 0<\alpha\le 1
     \end{equation}
     Here, $\alpha$ is the damping parameter that controls the step size by reducing it.
 \end{definitionBox}
 
 \textbf{1D intuition and the ``right'' amount of damping.} In one dimension, the damped Newton method is
 \begin{equation}
-x_{i+1}=x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}
+x_{k+1}=x_k-\alpha\,\frac{f(x_k)}{f'(x_k)}
 \end{equation}
 Ideally, we would pick the \(\alpha\) that minimizes the size of the residual after the step,
 \begin{equation}
-\alpha^\star = \argmin_{\alpha\in(0,1]}\; \left| f\!\left(x_i-\alpha\,\frac{f(x_i)}{f'(x_i)}\right) \right|
+\alpha^\star = \argmin_{\alpha\in(0,1]}\; \left| f\!\left(x_k-\alpha\,\frac{f(x_k)}{f'(x_k)}\right) \right|
 \end{equation}
-With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshooting.
+With such a choice, we guarantee \(|f(x_{k+1})|<|f(x_k)|\) and avoid overshooting.
 
 \begin{figure}[h]
     \centering
@@ -850,22 +850,22 @@ With such a choice, we guarantee \(|f(x_{i+1})|<|f(x_i)|\) and avoid overshootin
 
 In \(N\) dimensions, this generalizes to
 \begin{equation}
-\mathbf{x}_{i+1}=\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i),
+\mathbf{x}_{k+1}=\mathbf{x}_k-\alpha\,\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k),
 \qquad
-\alpha^\star=\arg\min_{0<\alpha\le 1}\;\bigl\|\mathbf{f}\bigl(\mathbf{x}_i-\alpha\,\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\bigr)\bigr\|_p
+\alpha^\star=\arg\min_{0<\alpha\le 1}\;\bigl\|\mathbf{f}\bigl(\mathbf{x}_k-\alpha\,\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k)\bigr)\bigr\|_p
 \end{equation}
 Finding the optimal \(\alpha^\star\) can be just as hard (or harder) than solving the original system of nonlinear equations. As a more practical solution, we typically use an inexpensive backtracking \textbf{line search} that merely ensures the residual decreases. An example algorithm that implements this is shown below.
 
 \begin{algorithm}[H]
 \caption{Backtracking line search (damped Newton).}
 \begin{enumerate}
-\item Compute the Newton direction: \(\mathbf{d}_i=-\mathbf{J}(\mathbf{x}_i)^{-1}\mathbf{f}(\mathbf{x}_i)\).
+\item Compute the Newton direction: \(\mathbf{d}_k=-\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k)\).
 \item Set \(\alpha\leftarrow 1\) (attempt the full Newton step).
-\item While \(\;\lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p:\)
+\item While \(\;\lVert \mathbf{f}(\mathbf{x}_k+\alpha\mathbf{d}_k)\rVert_p \;>\; \lVert \mathbf{f}(\mathbf{x}_k)\rVert_p:\)
 \begin{itemize}
   \item Set \(\alpha \leftarrow \alpha/2\) \hfill (backtrack)
 \end{itemize}
-\item Accept the step: \(\mathbf{x}_{i+1}=\mathbf{x}_i+\alpha\mathbf{d}_i\).
+\item Accept the step: \(\mathbf{x}_{k+1}=\mathbf{x}_k+\alpha\mathbf{d}_k\).
 \end{enumerate}
 \end{algorithm}
 
@@ -880,7 +880,7 @@ This strategy ensures that every iteration decreases \(\lVert \mathbf{f}\rVert_p
 
 % We can use any vector norm \(\lVert\cdot\rVert_p\) here, but the choice \(p=2\) is a common default due to its convergence properties. Additionally, the test above uses a simple decrease condition that
 % \[
-% \lVert \mathbf{f}(\mathbf{x}_i+\alpha\mathbf{d}_i)\rVert_p < \lVert \mathbf{f}(\mathbf{x}_i)\rVert_p
+% \lVert \mathbf{f}(\mathbf{x}_k+\alpha\mathbf{d}_k)\rVert_p < \lVert \mathbf{f}(\mathbf{x}_k)\rVert_p
 % \]
 % but it is very common to replace it with a Armijo condition for stronger convergence guarantees. We'll see more about this in the optimization section.
 
@@ -892,7 +892,7 @@ Looking ahead, other tweaks (trust regions, inexact Newton, etc.) can further im
 
 
 \subsection{Calculating the Jacobian} 
-A major challenge in the practical execution of Newton's method comes from its reliance on the Jacobian matrix at iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
+A major challenge in the practical execution of Newton's method comes from its reliance on the Jacobian matrix at each iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
 
 Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$.  % TODO: add new content on AD
 
@@ -1028,7 +1028,7 @@ At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\
 
 Finding a good initial guess for Newton's method can be difficult, especially when a problem has multiple solutions. Where do starting points come from? And how can we be confident we've found \emph{all} the solutions?\footnote{``All solutions'' is generally unattainable without structure. For arbitrary nonlinear systems, it is impossible to decide or enumerate all solutions from finite samples alone.}  
 
-A simple strategy for looking for multiple solutions is to try many random initial guesses and see what happens. This can work well for low-dimensional problems with a few solutions, but it becomes inefficient in high dimensions or when solutions are rare. More systematic approaches are thanksfully available.
+A simple strategy for looking for multiple solutions is to try many random initial guesses and see what happens. This can work well for low-dimensional problems with a few solutions, but it becomes inefficient in high dimensions or when solutions are rare. More systematic approaches are thankfully available.
 
 This section introduces a powerful family of techniques for systematically exploring a problem's solution landscape. The core idea is simple: instead of solving one hard problem, we solve a sequence of related, easier ones. This general strategy is called continuation. A homotopy provides a general recipe for creating that sequence of problems. Together, they allow us to trace entire families of solutions as parameters change, generate rational initial guesses for root-finders, and discover when new solutions appear or disappear at special points called bifurcations.
 
@@ -1152,7 +1152,7 @@ The next question is how to choose $\mathbf{g}(\mathbf{x})$. The only real requi
     \implies
     \lambda y^2+(1-\lambda)y-\big[\lambda+(1-\lambda)y_0\big]=0.
     \]
-    Following the root that satisfies \(u(0)=u_0\) traces a continuous path from \((x_0,y_0)\) to a solution of \(\mathbf f=\mathbf 0\).
+    Following the root that satisfies \(\mathbf h(x,y,\lambda)=\mathbf 0\) starting from \((x,y)=(x_0,y_0)\) at \(\lambda=0\) as \(\lambda\) increases to \(1\) traces a continuous path from \((x_0,y_0)\) to a solution of \(\mathbf f=\mathbf 0\).
     The figure shows the path in the \((x,y)\)-plane together with the lines \(x=\pm1\) and \(y=\pm1\).
 
     \begin{center}

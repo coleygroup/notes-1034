@@ -176,7 +176,7 @@ This simply translates the initial profile to the right with velocity $u$ withou
     \begin{equation}
         \frac{\partial c}{\partial t} + u \frac{\partial c}{\partial x} = D \frac{\partial^2 c}{\partial x^2}
     \end{equation}
-    By taking limits of the physical parameters, we recover the three fundamental PDE types. In the limit of a stagnant fluid ($u \approx 0$) where the system evolves over time, the advection term vanishes, leaving the \textbf{parabolic} heat equation ($\partial_t c = D \partial_{xx} c$) which smoothes distributions diffusively. Conversely, if diffusion is negligible compared to flow ($D \approx 0$), the second-order term drops out and we get the \textbf{hyperbolic} advection equation ($\partial_t c + u \partial_x c = 0$) where profiles translate without distortion. finally, if the system reaches a steady state ($\partial_t c = 0$) dominated by diffusion, we obtain the \textbf{elliptic} 1D Laplace equation ($\partial_{xx} c = 0$). This context is vital because numerical schemes are often specialized; a method designed for the smooth solutions of parabolic diffusion may fail for the sharp fronts of hyperbolic advection. The limits are shown schematically in \autoref{fig:transport_limits} and also summarized in \autoref{tab:pde-classification}.
+    By taking limits of the physical parameters, we recover the three fundamental PDE types. In the limit of a stagnant fluid ($u \approx 0$) where the system evolves over time, the advection term vanishes, leaving the \textbf{parabolic} heat equation ($\partial_t c = D \partial_{xx} c$) which smooths distributions diffusively. Conversely, if diffusion is negligible compared to flow ($D \approx 0$), the second-order term drops out and we get the \textbf{hyperbolic} advection equation ($\partial_t c + u \partial_x c = 0$) where profiles translate without distortion. Finally, if the system reaches a steady state ($\partial_t c = 0$) dominated by diffusion, we obtain the \textbf{elliptic} 1D Laplace equation ($\partial_{xx} c = 0$). This context is vital because numerical schemes are often specialized; a method designed for the smooth solutions of parabolic diffusion may fail for the sharp fronts of hyperbolic advection. The limits are shown schematically in \autoref{fig:transport_limits} and also summarized in \autoref{tab:pde-classification}.
 
     \begin{figure}[H]
         \centering
@@ -385,7 +385,7 @@ Just as in the ODE case, we saw that FDM for PDEs approximates derivatives direc
 \begin{equation}
     c_{i,j} = \frac{1}{\Delta^2} \int_{(i-1)\Delta}^{i\Delta} \int_{(j-1)\Delta}^{j\Delta} c(x,y) \, dy \, dx
 \end{equation}
-This shift in definition from ``value at a point'' to ``average over a volume'' is what makes FVM particularly suitable for problems where conservation of mass, momentum, or energy are very important. As you might imagine, then, as chemical engineers, we use FVM a lot.
+This shift in definition from ``value at a point'' to ``average over a volume'' is what makes FVM particularly suitable for problems where conservation of mass, momentum, or energy is very important. As you might imagine, then, as chemical engineers, we use FVM a lot.
 
 \subsubsection{Deriving the Conservation Law}
 
@@ -497,7 +497,7 @@ Note the appearance of the factor 5 and the constant term 2 that result from the
     \begin{equation}
     c_{2,j}+c_{1,j-1}+c_{1,j+1}-5c_{1,j}=-2
     \end{equation}
-    (For the top and bottom Neumann walls, the corresponding rows use $-3$ on the diagonal and omit the missing neighbor, e.g.\ $c_{i-1,1}+c_{i+1,1}+c_{i,2}-3c_{i,1}=0$ for bottom-edge cells away from corners; at the two corners on that edge, the diagonal is $-4$ because the Dirichlet half-cell modification in $x$ is also present.) After solving this system with a linear solver, we get the solution shown in \autoref{fig:pde_fvm}. In this case, the solution is exact to almost machine precision (RMS error vs.\ the analytical solution is $1.58\cdot 10^{-16}$)
+    (For the top and bottom Neumann walls, the corresponding rows use $-3$ on the diagonal and omit the missing neighbor, e.g.\ $c_{i-1,1}+c_{i+1,1}+c_{i,2}-3c_{i,1}=0$ for bottom-edge cells away from corners; at the two corners on that edge, the diagonal is $-4$ because the Dirichlet half-cell modification in $x$ is also present.) After solving this system with a linear solver, we get the solution shown in \autoref{fig:pde_fvm}. In this case, the solution is exact to almost machine precision (RMS error vs.\ the analytical solution is $1.58\cdot 10^{-16}$).
 
     \begin{figure}[H]
     \centering
@@ -515,7 +515,7 @@ We now turn our attention to transient PDEs, such as parabolic (diffusion) or hy
 \begin{equation}
     \frac{\partial c}{\partial t} = D \frac{\partial^2 c}{\partial x^2} - u \frac{\partial c}{\partial x} - kc
 \end{equation}
-subject to initial conditions $c(x,0) = \bar{c}(x)$ and boundary conditions, for instance $c(0,t)=1$ and $c(1,t)=0$. Solving this requires discretizing both the spatial domain $x$ and the time domain $t$. Simultaneous discretization can be complex due to numerical stability constraints, specifically the mismatch required between the spatial step $\Delta x$ and time step $\Delta t$, which we will explicitly address in the CFL section.
+subject to initial conditions $c(x,0) = \bar{c}(x)$ and boundary conditions, for instance $c(0,t)=1$ and $c(1,t)=0$. Solving this requires discretizing both the spatial domain $x$ and the time domain $t$. Simultaneous discretization can be complex due to numerical stability constraints, specifically the relationship required between the spatial step $\Delta x$ and time step $\Delta t$, which we will explicitly address in the CFL section.
 
 \subsection{The Method of Lines}
 
@@ -941,14 +941,14 @@ It is easy for us as chemical engineers to picture how PDEs govern the flow of i
 
 Elliptic problems are steady and globally coupled, so we discretize space with finite differences or finite volumes and solve the resulting sparse linear system with iterative solvers (e.g., preconditioned CG for SPD systems; GMRES for nonsymmetric cases) and sometimes multigrid methods for optimal scaling. Parabolic problems evolve in time and diffuse, so a method of lines view is natural. We discretize space first, then choose time stepping with stiffness in mind since explicit diffusion often forces very small $\Delta t$. Hyperbolic problems transport at finite speed, so stability and accuracy depend on respecting flow direction, which is why upwinding and CFL limits matter and why characteristics give the right intuition for which boundary and initial data actually affect a point.
 
-\section{Exercises}
+% \section{Exercises}
 
-\begin{exercise}
-Placeholder - work in progress 1
-\end{exercise}
-\begin{solution}
-Placeholder - work in progress 1
-\end{solution}
+% \begin{exercise}
+% Placeholder - work in progress 1
+% \end{exercise}
+% \begin{solution}
+% Placeholder - work in progress 1
+% \end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX

@@ -188,7 +188,7 @@ where $\mathbf{A}$ is a constant matrix. Applying the forward Euler method gives
 \begin{equation}
     \mathbf{x}(t_{i+1}) = \mathbf{x}(t_i) + \Delta t \mathbf{A} \mathbf{x}(t_i) = (\mathbf{I} + \Delta t \mathbf{A}) \mathbf{x}(t_i)
 \end{equation}
-To analyze the stability, we can decouple this system by diagonalizing the matrix $\mathbf{A}$ (assuming it is diagonalizable) as $\mathbf{A} = \mathbf{W}^{-1} \boldsymbol{\Lambda} \mathbf{W}$, where $\boldsymbol{\Lambda}$ is the diagonal matrix of eigenvalues $\lambda_j$. By defining a new set of variables $\mathbf{y}(t_i) = \mathbf{W}\mathbf{x}(t_i)$, the system becomes a set of independent, 1D problems:
+To analyze the stability, we can decouple this system by diagonalizing the matrix $\mathbf{A}$ (assuming it is diagonalizable) as $\mathbf{A} = \mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}$, where $\boldsymbol{\Lambda}$ is the diagonal matrix of eigenvalues $\lambda_j$ and the columns of $\mathbf{W}$ are the corresponding eigenvectors. By defining a new set of variables $\mathbf{y}(t_i) = \mathbf{W}^{-1}\mathbf{x}(t_i)$, the system becomes a set of independent, 1D problems:
 \begin{equation}
     y_j(t_{i+1}) = (1 + \lambda_j \Delta t) y_j(t_i)
 \end{equation}
@@ -310,7 +310,7 @@ Now, our numerical approximation is $\mathbf{x}(t_{i+1}) = \mathbf{x}(t_i) + \De
     \mathbf{x}(t_{i+1}) &= \mathbf{x}(t_i) + \Delta t_i \left( \mathbf{f}(\mathbf{x}(t_i), t_i) + \frac{\Delta t_i}{2} \frac{d^2\mathbf{x}}{dt^2}\bigg|_{t_i} + O(\Delta t_i^2) \right) \\
     &= \mathbf{x}(t_i) + \Delta t_i \mathbf{f}(\mathbf{x}(t_i), t_i) + \frac{(\Delta t_i)^2}{2} \frac{d^2\mathbf{x}}{dt^2}\bigg|_{t_i} + O(\Delta t_i^3)
 \end{align*}
-Compare this to the Taylor expansion of the \textit{exact} solution, we have
+Comparing this to the Taylor expansion of the \textit{exact} solution, we have
 \begin{equation}
     \mathbf{x}_{\text{exact}}(t_{i+1}) = \mathbf{x}(t_i) + \Delta t_i \frac{d\mathbf{x}}{dt}\bigg|_{t_i} + \frac{(\Delta t_i)^2}{2} \frac{d^2\mathbf{x}}{dt^2}\bigg|_{t_i} + \frac{(\Delta t_i)^3}{6} \frac{d^3\mathbf{x}}{dt^3}\bigg|_{t_i} + \dots
 \end{equation}
@@ -683,7 +683,7 @@ To formalize these observations, let us look again at the prototype problem:
 \begin{equation}
     \frac{d\mathbf{x}}{dt} = \mathbf{A}\mathbf{x}(t), \quad \mathbf{x}(0) = \mathbf{x}_0
 \end{equation}
-The exact solution is $\mathbf{x}(t) = \mathbf{W}^{-1} e^{\boldsymbol{\Lambda} t} \mathbf{W} \mathbf{x}_0$. The system is analytically stable if $\text{Re}(\lambda_i) \le 0$ for all $i = 1, \dots, N$.
+The exact solution is $\mathbf{x}(t) = \mathbf{W} e^{\boldsymbol{\Lambda} t} \mathbf{W}^{-1} \mathbf{x}_0$. The system is analytically stable if $\text{Re}(\lambda_i) \le 0$ for all $i = 1, \dots, N$.
 The system dynamics are characterized by time constants $\tau_i = |\lambda_i^{-1}|$. If we have a system where the time constants are roughly the same magnitude, explicit methods work well. However, consider what happens when the ratio of the largest to smallest time constant is very large:
 \begin{equation}
     \frac{\tau_{\max}}{\tau_{\min}} \gg 1 \quad \text{or} \quad \frac{|\lambda|_{\max}}{|\lambda|_{\min}} \gg 1
@@ -1043,7 +1043,7 @@ While the shooting method is conceptually simple, it suffers from a major weakne
 
 \begin{exampleBox}
     \textbf{Sensitivity in the Lorenz System}
-    Consider the classic chaotic Lorenz system:
+    Consider a chaotic Lorenz system:
     \begin{equation}
         \dot{x} = 10(y-x), \quad \dot{y} = x(30-z)-y, \quad \dot{z} = xy - 2z
     \end{equation}
@@ -1414,7 +1414,7 @@ Let us apply this to our model problem:
 \begin{equation}
     \frac{d^2c}{dx^2} - c = \exp(-x^2), \quad c(0)=0, \quad c(1)=0
 \end{equation}
-We approximate the solution as a linear combination of these tent functions: $c(x) \approx \sum_{j=1}^{M-1} c_j \Phi_j(x)$. Note that we exclude $j=0$ and $j=M$ from the unknowns because the boundary conditions $c(0)=0$ and $c(1)=0$ fix those coefficients to zero. We now plug this appoximation into the Galerkin condition. If we tried to do this in the ``strong'' form, i.e.,
+We approximate the solution as a linear combination of these tent functions: $c(x) \approx \sum_{j=1}^{M-1} c_j \Phi_j(x)$. Note that we exclude $j=0$ and $j=M$ from the unknowns because the boundary conditions $c(0)=0$ and $c(1)=0$ fix those coefficients to zero. We now plug this approximation into the Galerkin condition. If we tried to do this in the ``strong'' form, i.e.,
 \begin{equation}
     \int_0^1 \bigl(c_h''(x) - c_h(x) - f(x)\bigr)\,\Phi_i(x)\,dx = 0
 \end{equation}

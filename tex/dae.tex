@@ -15,9 +15,9 @@ To see why DAEs naturally arise, let's consider the chemical reaction network $A
     \frac{dC_B}{dt} &= k_1 C_A - k_2 C_B + k_3 C_D^2 \\
     \frac{dC_D}{dt} &= 2k_2 C_B - 2k_3 C_D^2
 \end{align}
-In this ODE system, the total mass is implicitly conserved by the kinetics, but numerical integration errors might cause the total mass to drift over time during a simulation. Using any of the ODE-IVP solvers we have discussed, we might expect the truncation error at each timestep to be small, but know that these errors can accumulate over many timesteps as the simulation proceeds. Similarly, if we were to sum over our estimates of $C_A(t)$, $C_B(t)$, and $C_C(t)$ at different timepoints, we will observe this drift.
+In this ODE system, the total mass is implicitly conserved by the kinetics, but numerical integration errors might cause the total mass to drift over time during a simulation. Using any of the ODE-IVP solvers we have discussed, we might expect the truncation error at each timestep to be small, but know that these errors can accumulate over many timesteps as the simulation proceeds. Similarly, if we were to sum over our estimates of $C_A(t)$, $C_B(t)$, and $C_D(t)$ at different timepoints, we will observe this drift.
 
-As an alternative, we can formulate this as a DAE system. We keep the kinetic rate laws for species$A$ and $B$, but we replace the differential equation for $D$ with an algebraic constraint enforcing the exact conservation of atomic species (mass balance). If $Q_2$ is a constant total mass invariant (i.e., $Q_2 = \text{const.}$), the system becomes
+As an alternative, we can formulate this as a DAE system. We keep the kinetic rate laws for species $A$ and $B$, but we replace the differential equation for $D$ with an algebraic constraint enforcing the exact conservation of atomic species (mass balance). If $Q_2$ is a constant total mass invariant (i.e., $Q_2 = \text{const.}$), the system becomes
 \begin{align}
     \frac{dC_A}{dt} &= -k_1 C_A \\
     \frac{dC_B}{dt} &= k_1 C_A - k_2 C_B + k_3 C_D^2 \\
@@ -286,7 +286,7 @@ Note the dependence on $\dot{g}_2(t)$. If the specified volume signal $g_2(t)$ i
 %     \label{fig:index_noise}
 % \end{figure}
 
-This high index is often a result of poor modeling choices. Physically, how could we possibly force the volume to be \emph{exactly} $g_2(t)$ at all times. A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
+This high index is often a result of poor modeling choices. Physically, how could we possibly force the volume to be \emph{exactly} $g_2(t)$ at all times? A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
 
 \subsection{Another Example: Calculation of Higher Indices}
 
@@ -337,7 +337,7 @@ In this course, the differential index is the number of times we must differenti
     \item Do not equate the number of algebraic equations with index. A system can have many algebraic constraints and still be index 1, or have a single constraint and be index 2+.
     \item Elimination can hide the index. If you substitute constraints to eliminate variables, you may get an ODE for $\mathbf{x}$ quickly, but under our definition you must still ask: how many differentiations are needed to determine $\dot{\mathbf{y}}$ (and hence $\dot{\mathbf{z}}$)?
     \item Watch for hidden consistency conditions. Differentiating constraints can introduce additional conditions that must hold at $t_0$ (e.g.\ involving $\dot{\gamma}(t_0)$, $\ddot{\gamma}(t_0)$). If initial conditions violate these, the model is not (classically) solvable without projection/re-initialization. We will see this in more detail later.
-    \item Index is a structural property, not ``how hard it feels.''' Stiffness and fast/slow time scales affect numerics, but they are not the index. The index is about how many differentiations are required to make $\dot{\mathbf{z}}$ explicit.
+    \item Index is a structural property, not ``how hard it feels.'' Stiffness and fast/slow time scales affect numerics, but they are not the index. The index is about how many differentiations are required to make $\dot{\mathbf{z}}$ explicit.
 \end{itemize}
 \end{warningBox}
 
@@ -664,7 +664,7 @@ When using numerical software, consistent initialization is non-negotiable. For 
 \section{Simulation of Mixed Continuous-Discrete Systems}
 Many real-world systems exhibit both continuous dynamics (described by DAEs) and discrete events (instantaneous changes in state or structure), such as when a valve becomes fully open or fully closed, a tank becomes full or runs dry, a safety interlock system kicks in, or the number of fluid phases changes in a tank. Discrete changes in the dynamic equations for the system can occur implicitly as well, and ignoring these changes can lead to incorrect results that arbitrarily deviate from reality. 
 
-If we know in advance when a discrete change is going to occur, such as a valve being opened, we can divide the full time interval of interest into sub-intervals where the system dynamics are continuous and solve each sub-interval separately, passing the final state of one interval as the initial condition for the next. Each of the sub-interval can be treated as a standard DAE simulation problem. 
+If we know in advance when a discrete change is going to occur, such as a valve being opened, we can divide the full time interval of interest into sub-intervals where the system dynamics are continuous and solve each sub-interval separately, passing the final state of one interval as the initial condition for the next. Each of the sub-intervals can be treated as a standard DAE simulation problem. 
 
 In many cases, discrete events occur when certain conditions are met, such as a tank reaching a certain level or pressure, or a temperature exceeding a threshold. In these cases, we need to monitor the system during simulation to detect when these events occur. A simulator for mixed discrete-continuous simulations will continually track all possible events that can occur during the numerical simulation and, once an event has been detected, will iterate the time to determine the precise $t^*$ at which the event has occurred. The simulator will then re-initialize the DAE system at $t^*$, applying any discrete changes to the system equations or states, and continue the simulation from that point onward.
 
@@ -724,7 +724,7 @@ $ \displaystyle \begin{cases}
     \item Algebraic states: $y_1$, $y_2$
     \item Index: 2
     \item Implicit constraints: $\dot{x}_1 = \cos(t)$
-    \item Initialization DoF: (2)(2) + 2 - 3 - 1 = 1
+    \item Initialization DoF: (2)(2) + 2 - 4 - 1 = 1
     \item Consistent initialization example: $\{x_2(0)\}$
 \end{itemize}
 \end{solution}

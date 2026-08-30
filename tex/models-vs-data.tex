@@ -97,7 +97,7 @@ To construct the design matrix $\mathbf{X}$, we arrange the input features of ea
         9.0
     \end{bmatrix}
 \end{equation}
-With this setup, our parameter vector $\boldsymbol{\theta}$ will have two components in the linear relationship we are modelling: $y = \theta_0 x_1 + \theta_1 x_2 + \epsilon$.
+With this setup, our parameter vector $\boldsymbol{\theta}$ will have two components in the linear relationship we are modeling: $y = \theta_1 x_1 + \theta_2 x_2 + \epsilon$.
 
 
 When performing a linear regression, we might also choose to include an intercept term (bias) in our model. To do this, we add a column of ones to the design matrix:
@@ -117,7 +117,7 @@ When performing a linear regression, we might also choose to include an intercep
         9.0
     \end{bmatrix}
 \end{equation}
-This extra column acts like a constant $x_0 = 1$ and allows the model to learn an intercept term in addition to the coefficients for $x_1$ and $x_2$. Thus, our parameter vector $\boldsymbol{\theta}$ will now have three components in the linear relationship we are modelling: $y = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \epsilon$.
+This extra column acts like a constant $x_0 = 1$ and allows the model to learn an intercept term in addition to the coefficients for $x_1$ and $x_2$. Thus, our parameter vector $\boldsymbol{\theta}$ will now have three components in the linear relationship we are modeling: $y = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \epsilon$. Note that $\theta_1$ and $\theta_2$ still pair with $x_1$ and $x_2$ as before, with the intercept singled out as $\theta_0$; it is important to be consistent about this kind of indexing convention, since different sources (and even different examples in these notes) may index coefficients starting from either $0$ or $1$.
 \end{exampleBox}
 
 \subsection{Solving for the Best Parameters}
@@ -310,7 +310,7 @@ Since the evidence term $p(\mathcal{D})$ in the denominator does not depend on o
 The difference between MLE and MAP is just one term, the prior distribution $p(\boldsymbol{\theta})$. MLE maximizes only the likelihood, whereas MAP maximizes the likelihood multiplied by the prior.
 
 \paragraph*{The Role of the Prior}
-The prior distribution $p(\boldsymbol{\theta})$ is our way of encoding beliefs about the parameters \textit{before} observing any data. This knowledge might come from physical laws, previous experiments, or expert opinion. The resulting posterior distribution is a principled compromise between our prior beliefs and the evidence from the new data.
+The prior distribution $p(\boldsymbol{\theta})$ is our way of encoding beliefs about the parameters \textit{before} observing any data. This knowledge might come from physical laws, previous experiments, or expert opinion. The resulting posterior distribution is a principled compromise between our prior beliefs and the evidence from the new data (\autoref{fig:prior-likelihood-posterior}).
 
 \begin{figure}[h!]
     \centering
@@ -461,7 +461,7 @@ where $N-n$ are the degrees of freedom from the goodness-of-fit test ($N$ observ
 \begin{equation}
     \Delta\chi^2 = \chi^2(\boldsymbol{\theta}) - \chi^2(\boldsymbol{\theta}^*_{\text{MLE}}) \leq \chi^2_{\text{inv}}(1-\alpha, n)
 \end{equation}
-where now the degrees of freedom equal the number of parameters $n$. This is the standard method in likelihood-based inference\footnote{This approach comes from Wilks' theorem on the asymptotic distribution of the likelihood ratio statistic; check out the Wikipedia page on Wilk's theorem for more details.}. The confidence region size is independent of overall fit quality and depends only on the local curvature of the $\chi^2$ surface near the minimum; this is a very nice property to have!
+where now the degrees of freedom equal the number of parameters $n$. This is the standard method in likelihood-based inference\footnote{This approach comes from Wilks' theorem on the asymptotic distribution of the likelihood ratio statistic; check out the Wikipedia page on Wilks' theorem for more details.}. The confidence region size is independent of overall fit quality and depends only on the local curvature of the $\chi^2$ surface near the minimum; this is a very nice property to have!
 
 \vspace{0.2cm}
 
@@ -515,7 +515,7 @@ is one of the most important results of the analysis, as it quantifies the uncer
 \begin{equation}
     |\theta_i - \theta_i^*| \leq \sqrt{c_\alpha^2} \sigma_{\theta_i}
 \end{equation}
-where the scaling factor $c_\alpha^2$ depends on which approach we use: for the absolute fit approach, $c_\alpha^2 = \chi^2_{\text{max}} - \chi^2(\boldsymbol{\theta}^*_{\text{MLE}}) = \chi^2_{\text{inv}}(1-\alpha, N-n) - \chi^2(\boldsymbol{\theta}^*_{\text{MLE}})$ and for the likelihood ratio approach, for a single parameter, $c_\alpha^2 = \chi^2_{\text{inv}}(1-\alpha, 1)$. For example, in the likelihood ratio approach with $\alpha = 0.05$ (95\% confidence), a single parameter has $c_\alpha^2 = \chi^2_{\text{inv}}(0.95, 1) \approx 3.84$, so $\sqrt{c_\alpha^2} \approx 1.96 \approx 2$, giving the familiar ``$\pm 2\sigma$'' rule for 95\% confidence intervals. (This rule is most reliable when the sample size is large enough for asymptotic approximations to hold.) The off-diagonal elements of $\mathbf{V}_{\boldsymbol{\theta}}$ quantify correlations between parameter uncertainties. The inequality \autoref{eq:ellipse} describes the interior of an ellipse in 2D or a hyperellipse in higher dimensions.
+where the scaling factor $c_\alpha^2$ depends on which approach we use: for the absolute fit approach, $c_\alpha^2 = \chi^2_{\text{max}} - \chi^2(\boldsymbol{\theta}^*_{\text{MLE}}) = \chi^2_{\text{inv}}(1-\alpha, N-n) - \chi^2(\boldsymbol{\theta}^*_{\text{MLE}})$ and for the likelihood ratio approach, for a single parameter, $c_\alpha^2 = \chi^2_{\text{inv}}(1-\alpha, 1)$. For example, in the likelihood ratio approach with $\alpha = 0.05$ (95\% confidence), a single parameter has $c_\alpha^2 = \chi^2_{\text{inv}}(0.95, 1) \approx 3.84$, so $\sqrt{c_\alpha^2} \approx 1.96 \approx 2$, giving the familiar ``$\pm 2\sigma$'' rule for 95\% confidence intervals. (This rule is most reliable when the sample size is large enough for asymptotic approximations to hold.) The off-diagonal elements of $\mathbf{V}_{\boldsymbol{\theta}}$ quantify correlations between parameter uncertainties. The inequality \autoref{eq:ellipse} describes the interior of an ellipse in 2D or a hyperellipse in higher dimensions (\autoref{fig:hyperellipse}).
 
 \begin{figure}[h!]
     \centering
@@ -614,7 +614,7 @@ In general, $\mathbf{V}_{\boldsymbol{\theta}}$ is not diagonal. The off-diagonal
     \label{fig:corr_uncorr}
 \end{figure}
 
-To better analyze these correlations, we can diagonalize the inverse covariance matrix, $\mathbf{V}_{\boldsymbol{\theta}}^{-1} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^\top$, where $\mathbf{\Lambda}$ is a diagonal matrix of eigenvalues $\lambda_i$ and $\mathbf{W}$ is the matrix of corresponding eigenvectors. The eigenvectors define the \textbf{principal axes} of the uncertainty ellipse, which are the directions in parameter space along which uncertainties are uncorrelated. By transforming our parameter deviations into this natural coordinate system, $\mathbf{q} = \mathbf{W}^\top \Delta\boldsymbol{\theta}$, the inequality simplifies beautifully to
+To better analyze these correlations, we can diagonalize the inverse covariance matrix, $\mathbf{V}_{\boldsymbol{\theta}}^{-1} = \mathbf{W}\mathbf{\Lambda}\mathbf{W}^\top$, where $\mathbf{\Lambda}$ is a diagonal matrix of eigenvalues $\lambda_i$ and $\mathbf{W}$ is the matrix of corresponding eigenvectors. The eigenvectors define the \textbf{principal axes} of the uncertainty ellipse (\autoref{fig:principal_axes}), which are the directions in parameter space along which uncertainties are uncorrelated. By transforming our parameter deviations into this natural coordinate system, $\mathbf{q} = \mathbf{W}^\top \Delta\boldsymbol{\theta}$, the inequality simplifies beautifully to
 \begin{equation}
     \sum_i \lambda_i q_i^2 \leq \chi^2_{\text{max}} - \chi^2(\boldsymbol{\theta}^*_{MLE})
 \end{equation}
@@ -1253,7 +1253,7 @@ Perhaps the most widely used criterion is \textbf{D-optimality} (where ``D'' ref
 \begin{equation}
     \text{D-optimal:} \quad \min_{\mathbf{X}} \det(\mathbf{V}_{\boldsymbol{\theta}}) = \min_{\mathbf{X}} \det\left[\left(\mathbf{X}^\top \mathbf{X}\right)^{-1}\right] \equiv \max_{\mathbf{X}} \det\left(\mathbf{X}^\top \mathbf{X}\right)
 \end{equation}
-The determinant of a matrix has a geometric interpretation as the volume of the parallelepiped defined by the matrix rows (or columns). In the context of parameter estimation, like we saw, $\det(\mathbf{V}_{\boldsymbol{\theta}})$ is proportional to the hypervolume of the confidence ellipsoid in parameter space. Minimizing this volume means making the region of indifference as small as possible, thereby constraining the parameters most tightly. D-optimal designs have nice theoretical properties and are equivalent to maximizing the determinant of the Fisher information matrix $\det(\mathbf{X}^\top \mathbf{X})$, which explains why D-optimality is often described as maximizing the information content of the design.
+The determinant of a matrix has a geometric interpretation as the volume of the parallelepiped defined by the matrix rows (or columns). In the context of parameter estimation, like we saw, $\sqrt{\det(\mathbf{V}_{\boldsymbol{\theta}})}$ is proportional to the hypervolume of the confidence ellipsoid in parameter space. Minimizing $\det(\mathbf{V}_{\boldsymbol{\theta}})$ therefore also minimizes this volume, making the region of indifference as small as possible and constraining the parameters most tightly. D-optimal designs have nice theoretical properties and are equivalent to maximizing the determinant of the Fisher information matrix $\det(\mathbf{X}^\top \mathbf{X})$, which explains why D-optimality is often described as maximizing the information content of the design.
 
 To illustrate the impact of design choices on D-optimality, let's reconsider the $2^{3-1}$ fractional factorial design with design matrix
 \begin{equation}
@@ -1263,7 +1263,7 @@ For this design, $\det(\mathbf{X}^\top \mathbf{X}) = 64$, so if $\sigma^2 = 1$, 
 \begin{equation}
     \mathbf{X} = \begin{bmatrix} +1 & -1 & 1 \\ 1 & -1 & -1 \\ -1 & 1 & -1 \\ 1 & 1 & 1 \end{bmatrix}
 \end{equation}
-This seemingly small change halves the determinant: $\det(\mathbf{X}^\top \mathbf{X}) = 32$, corresponding to $\det(\mathbf{V}_{\boldsymbol{\theta}}) = 1/32$. The confidence ellipsoid volume has doubled; the design is now significantly worse. Had we instead used the full $2^3$ factorial design with eight experiments, we would achieve $\det(\mathbf{X}^\top \mathbf{X}) = 512$ (so $\det(\mathbf{V}_{\boldsymbol{\theta}}) = 1/512$). The full design provides eight times smaller ellipsoid volume (in the D-optimal sense) compared to the half-fraction, which is sensible given that it uses twice as many experiments.
+This seemingly small change halves the determinant: $\det(\mathbf{X}^\top \mathbf{X}) = 32$, corresponding to $\det(\mathbf{V}_{\boldsymbol{\theta}}) = 1/32$. Since the ellipsoid volume scales as $\sqrt{\det(\mathbf{V}_{\boldsymbol{\theta}})}$, this halving of the determinant increases the confidence ellipsoid volume by a factor of $\sqrt{2}\approx1.41$; the design is now worse. Had we instead used the full $2^3$ factorial design with eight experiments, we would achieve $\det(\mathbf{X}^\top \mathbf{X}) = 512$ (so $\det(\mathbf{V}_{\boldsymbol{\theta}}) = 1/512$). The full design provides a $\sqrt{8}\approx2.83$ times smaller ellipsoid volume (in the D-optimal sense) compared to the half-fraction, which is sensible given that it uses twice as many experiments. \autoref{fig:d-optimal-comparison} shows the three designs geometrically as subsets of the vertices of a cube.
 
 \begin{figure}[h!]
     \centering

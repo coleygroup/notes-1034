@@ -25,7 +25,7 @@ The Hessian evaluated at $\mathbf{x}$ is
         \frac{\partial^2 f}{\partial x_N\partial x_1}(\mathbf{x}) & \cdots & \frac{\partial^2 f}{\partial x_N\partial x_N}(\mathbf{x})
     \end{bmatrix}
 \end{equation}
-For smooth functions, $\frac{\partial^2}{\partial x_i\partial x_j}f (\mathbf{x}) = \frac{\partial^2}{\partial x_j\partial x_i}f(\mathbf{x})$, and thus, $\nabla^2 f(\mathbf{x})$ is symmetric. Hessian can be viewed as a Jacobian of the gradient, i.e., $\nabla^2 f(\mathbf{x}) = \nabla(\nabla f(\mathbf{x}))$. 
+For smooth functions, $\frac{\partial^2}{\partial x_i\partial x_j}f (\mathbf{x}) = \frac{\partial^2}{\partial x_j\partial x_i}f(\mathbf{x})$, and thus, $\nabla^2 f(\mathbf{x})$ is symmetric. The Hessian can be viewed as a Jacobian of the gradient, i.e., $\nabla^2 f(\mathbf{x}) = \nabla(\nabla f(\mathbf{x}))$.
 
 \paragraph*{Taylor Expansions}
 For univariate $f: \mathbb{R} \to \mathbb{R}$, if $f$ has a continuous second derivative in a neighborhood of $x^*$, a first-order Taylor expansion at $x^*$ is
@@ -52,7 +52,7 @@ An optimization problem can be expressed in a standard form. For a minimization 
 \begin{equation}
     \min_{\mathbf{x} \in \mathcal{D}} f(\mathbf{x})
 \end{equation}
-Here, $f(\mathbf{x})$ is the \textbf{objective function} (also known as a cost, loss, or energy function) that we want to minimize. The vector $\mathbf{x}$ contains the \textbf{decision variables}. The set $\mathcal{D}$ is the \textbf{feasible set} or feasible region, which defines the space of permissible values for $\mathbf{x}$. We call a problem unconstrained when there are no explicit constraints on $\mathbf{x}$ beyond the natural domain of $f$ (often $\mathbb{R}^N$, but not always, like in the case of $f(x) = \log(x)$, where the domain is $(0,\infty)$). If $\mathcal{D}$ is a proper subset of the domain of $f$ (e.g., defined by equalities or inequalities, like $1 \le x \le 2$), the problem is \textbf{constrained}. It is worth noting that maximizing an objective function is equivalent to minimizing its negative; that is, $\max f(\mathbf{x}) = \min\left( -f(\mathbf{x}) \right)$. Thus, in this chapter, we will focus on minimization problems without loss of generality.
+Here, $f(\mathbf{x})$ is the \textbf{objective function} (also known as a cost, loss, or energy function) that we want to minimize. The vector $\mathbf{x}$ contains the \textbf{decision variables}. The set $\mathcal{D}$ is the \textbf{feasible set} or feasible region, which defines the space of permissible values for $\mathbf{x}$. We call a problem unconstrained when there are no explicit constraints on $\mathbf{x}$ beyond the natural domain of $f$ (often $\mathbb{R}^N$, but not always, like in the case of $f(x) = \log(x)$, where the domain is $(0,\infty)$). If $\mathcal{D}$ is a proper subset of the domain of $f$ (e.g., defined by equalities or inequalities, like $1 \le x \le 2$), the problem is \textbf{constrained}. It is worth noting that maximizing an objective function is equivalent to minimizing its negative; that is, $\max_{\mathbf{x}\in\mathcal{D}} f(\mathbf{x}) = -\min_{\mathbf{x}\in\mathcal{D}}\left( -f(\mathbf{x}) \right)$. Similarly, the maximizer and minimizer coincide once we negate the objective: $\argmax_{\mathbf{x}\in\mathcal{D}} f(\mathbf{x}) = \argmin_{\mathbf{x}\in\mathcal{D}}\left( -f(\mathbf{x}) \right)$. Thus, in this chapter, we will focus on minimization problems without loss of generality.
 
 \begin{figure}[H]
     \centering
@@ -232,7 +232,7 @@ These distinctions give rise to standard classes. Linear programming features li
 
 
 \subsection{Local vs. Global Solutions}
-The goal of an optimization algorithm is to find a solution, but the notion of solution varies. A point $x^*$ is a \textbf{feasible solution} if $x^* \in \mathcal{D}$. A point $x^*$ is a \textbf{local solution} if it is feasible and there exists $\epsilon>0$ such that $f(x^*) \le f(x)$ for all $x \in \mathcal{D} \cap B_{\epsilon}(x^*)$, where $B_\epsilon(x^*) := \{x : \|x-x^*\|_2 < \epsilon\}$ denotes the ball of radius $\epsilon$ around $x^*$ (\autoref{fig:local-solution}). It is a \textbf{global solution} if the inequality holds for every feasible $x \in \mathcal{D}$. Finding global solutions can be difficult in practice, especially for nonconvex problems that feature many local minima (right side of \autoref{fig:convex-nonconvex}). For convex problems, as discussed, any local solution is also global. The solvers we use within this lecture, such as \texttt{fminunc} and \texttt{fmincon} in MATLAB, are local optimizers. To solve the problems to global optimality, it is necessary to use specialized type of solvers (so-called global optimizers), such as BARON.
+The goal of an optimization algorithm is to find a solution, but the notion of solution varies. A point $x^*$ is a \textbf{feasible solution} if $x^* \in \mathcal{D}$. A point $x^*$ is a \textbf{local solution} if it is feasible and there exists $\epsilon>0$ such that $f(x^*) \le f(x)$ for all $x \in \mathcal{D} \cap B_{\epsilon}(x^*)$, where $B_\epsilon(x^*) := \{x : \|x-x^*\|_2 < \epsilon\}$ denotes the ball of radius $\epsilon$ around $x^*$ (\autoref{fig:local-solution}). It is a \textbf{global solution} if the inequality holds for every feasible $x \in \mathcal{D}$. Finding global solutions can be difficult in practice, especially for nonconvex problems that feature many local minima (right side of \autoref{fig:convex-nonconvex}). For convex problems, as we discuss below, any local solution is also global. The solvers we use within this lecture, such as \texttt{fminunc} and \texttt{fmincon} in MATLAB, are local optimizers. To solve the problems to global optimality, it is necessary to use a specialized type of solver (so-called global optimizers), such as BARON.
 
 \begin{figure}[h]
     \centering
@@ -387,12 +387,12 @@ A set $\mathcal{D} \subseteq \mathbb{R}^N$ is convex if for all $\mathbf{x}_1,\m
 \end{center}
 
 \textbf{Convex Functions:}
-A function $f: \mathbb{R}^N \to \mathbb{R}$ is conve if for any two points $\mathbf{x}_1, \mathbf{x}_2$ in its domain and any $\lambda \in [0,1]$:
+A function $f: \mathbb{R}^N \to \mathbb{R}$ is convex if for any two points $\mathbf{x}_1, \mathbf{x}_2$ in its domain and any $\lambda \in [0,1]$:
 \begin{equation}
   f(\lambda \mathbf{x}_1 + (1-\lambda) \mathbf{x}_2) \leq \lambda f(\mathbf{x}_1) + (1-\lambda) f(\mathbf{x}_2)
   \label{eq:convexity}
 \end{equation}
-Similarlyk, we call a function \emph{strictly} convex if it is convex and the inequality \autoref{eq:convexity} is strict for all $\mathbf{x}_1 \neq \mathbf{x}_2$ and $\lambda \in (0,1)$.
+Similarly, we call a function \emph{strictly} convex if it is convex and the inequality \autoref{eq:convexity} is strict for all $\mathbf{x}_1 \neq \mathbf{x}_2$ and $\lambda \in (0,1)$.
 
 The definitions above indicate that the function value at any point on the line segment between $\mathbf{x}_1$ and $\mathbf{x}_2$ is less than or equal to the linear interpolation of the function values at the endpoints. Geometrically, this means that a function is convex if, when you draw a line segment between any two points on the function's graph, the line segment lies above or on the function. For a univariate function, this means the function ``curves upward'' like a bowl. For a multivariate smooth function, this means that the function lies above the tangent plane at any point.
 
@@ -980,7 +980,7 @@ and a line search selects \(\alpha_k>0\). The iterate is then updated by \(\math
 \subsubsection{Convergence}
 Under standard smoothness assumptions, BFGS with a proper line search enjoys the same global convergence guarantees as gradient descent (convergence to a stationary point). Locally, once \(\mathbf{x}_k\) is sufficiently close to a nondegenerate minimizer \(\mathbf{x}^\star\), the convergence is \emph{superlinear}:
 \begin{equation}
-\lim_{i\to\infty}
+\lim_{k\to\infty}
 \frac{\|\mathbf{x}_{k+1}-\mathbf{x}^\star\|_p}{\|\mathbf{x}_k-\mathbf{x}^\star\|_p}=0.
 \end{equation}
 This means BFGS is typically faster than steepest descent and somewhat slower than exact Newton steps, which means it often gives an effective balance between per-iteration cost and speed of convergence. Because of this, it is the default algorithm used by \texttt{fminunc} in MATLAB.
@@ -1464,7 +1464,7 @@ As $\mu \to 0^+$, the influence of the barrier term diminishes, and the solution
     x = [2; 2];
 
     % Loop over decreasing mu values
-    for mu = [1:-0.001:0.001]
+    for mu = [10:-0.001:0.001]
         % Newton's method to minimize phi for the current mu
         while norm(grad_phi(x, mu)) > 1e-8
             x = x - H_phi(x, mu) \ grad_phi(x, mu);
@@ -1725,11 +1725,11 @@ We have now surveyed some of the most fundamental concepts and algorithms in num
 
 When the problem is unconstrained, meaning $\mathcal{D} = \mathbb{R}^N$ (or, more generally, $\mathcal{D}$ coincides with the natural domain of $f$), we can use gradient information to find a solution. Steepest descent offers the simplest approach, moving in the direction of the negative gradient at each step. While guaranteed to converge under mild conditions, this method can be quite slow, particularly near the solution. Newton's method addresses this limitation by incorporating second-order information through the Hessian matrix, leading to much faster convergence when close to the optimum. However, computing and inverting the Hessian at each iteration can be computationally expensive. Quasi-Newton methods like BFGS provide an attractive middle ground, building up an approximation to the Hessian using only gradient information from previous iterations.
 
-The presence of constraints changes the optimization landscape. For equality constraints of the form $\mathbf{g}(\mathbf{x}) = 0$, the method of Lagrange multipliers transforms the constrained problem into finding critical points of the Lagrangian:
+The presence of constraints changes the optimization landscape. For equality constraints of the form $\mathbf{c}(\mathbf{x}) = \mathbf{0}$, the method of Lagrange multipliers transforms the constrained problem into finding critical points of the Lagrangian:
 \begin{equation}
-    L(\mathbf{x}, \boldsymbol{\lambda}) = f(\mathbf{x}) - \boldsymbol{\lambda}^T \mathbf{g}(\mathbf{x})
+    L(\mathbf{x}, \boldsymbol{\lambda}) = f(\mathbf{x}) - \boldsymbol{\lambda}^\top \mathbf{c}(\mathbf{x})
 \end{equation}
-This reduces the problem to solving the system $\nabla_{\mathbf{x}} L = 0$ and $\mathbf{g}(\mathbf{x}) = 0$, which can be tackled using Newton's method for systems of equations.
+This reduces the problem to solving the system $\nabla_{\mathbf{x}} L = \mathbf{0}$ and $\mathbf{c}(\mathbf{x}) = \mathbf{0}$, which can be tackled using Newton's method for systems of equations.
 
 Inequality constraints require different techniques since the active set (the constraints that are binding at the solution) is unknown \emph{a priori}. Interior-point methods handle this by introducing a barrier function that prevents iterates from leaving the feasible region. The constrained problem is then solved as a sequence of unconstrained barrier problems with the barrier parameter gradually reduced to recover the original problem.
 

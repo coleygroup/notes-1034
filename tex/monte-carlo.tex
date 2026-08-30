@@ -22,7 +22,7 @@ To understand why Monte Carlo methods are necessary, we need to see why traditio
 \end{equation}
 This is an $N$-dimensional integral over the unit hypercube. How would we evaluate it numerically? The most basic approach uses the trapezoidal rule, in which we create a grid of points in each dimension and evaluate the function at these grid points. If we use just two points per dimension (the minimum for the trapezoidal rule), how many function evaluations do we need? In one dimension, we need 2 points. In two dimensions, we need $2 \times 2 = 4$ points. In three dimensions, $2 \times 2 \times 2 = 8$ points. For $N$ dimensions, we need $2^N$ function evaluations; that is, there is an exponential scaling of the number of function evaluations with dimension!
 
-But it gets worse. Suppose we're not satisfied with the accuracy of our calculation and want to improve it by an order of magnitude. For the trapezoidal rule, the error scales as $(\Delta x)^2$, where $\Delta x$ is the grid spacing. To reduce the error by a factor of 10, we need to reduce $\Delta x$ by a factor of $\sqrt{10}$, which means using about 3.16 times more points in each direction. In $N$ dimensions, this requires $(\sqrt{10})^N = 10^{N/2}$ times more function evaluations. Let's put this in perspective. Suppose we're working with a modest 10-dimensional problem and want to improve our accuracy by a single order of magnitude. We would need $10^{10/2} = 10^5 = 100{,}000$ times more function evaluations. If each evaluation takes a microsecond, we've gone from nearly instant to effectively unusable on typical hardware. For 20 dimensions, the situation gets completely out of hand. The baseline calculation with just two points per dimension already requires $2^{20} \approx 10^6$ evaluations, taking about one second at a microsecond per evaluation. To improve accuracy by a single order of magnitude, we need $10^{20/2} = 10^{10}$ times more evaluations. This transforms our one-second calculation into one requiring $10^{10}$ seconds, or roughly 300 years.
+But it gets worse. Suppose we're not satisfied with the accuracy of our calculation and want to improve it by an order of magnitude. For the trapezoidal rule, the error scales as $(\Delta x)^2$, where $\Delta x$ is the grid spacing. To reduce the error by a factor of 10, we need to reduce $\Delta x$ by a factor of $\sqrt{10}$, which means using about 3.16 times more points in each direction. In $N$ dimensions, this requires $(\sqrt{10})^N = 10^{N/2}$ times more function evaluations. Let's put this in perspective. Suppose we're working with a modest 10-dimensional problem and want to improve our accuracy by a single order of magnitude. We would need $10^{10/2} = 10^5 = 100{,}000$ times more function evaluations. If each evaluation takes a millisecond, we've gone from nearly instant to highly inconvenient on typical hardware. For 20 dimensions, the situation gets completely out of hand. The baseline calculation with just two points per dimension already requires $2^{20} \approx 10^6$ evaluations, taking about one second at a microsecond per evaluation. To improve accuracy by a single order of magnitude, we need $10^{20/2} = 10^{10}$ times more evaluations. This transforms our one-second calculation into one requiring $10^{10}$ seconds, or roughly 300 years.
 
 This exponential explosion makes traditional numerical integration completely impractical for almost all of the problems we actually care about. The examples we discussed earlier all suffer from this curse. Consider the posterior distribution from parameter estimation:
 \begin{equation}
@@ -427,7 +427,7 @@ The method works as follows. We need a proposal distribution $q(\mathbf{x})$ tha
 \begin{equation}
     p(\mathbf{x}) \le M q(\mathbf{x}) \quad \forall \mathbf{x} \in \Omega
 \end{equation}
-This ensures that $M q(\mathbf{x})$ forms an envelope over $p(\mathbf{x})$ (in the 1D example shown in \autoref{fig:rejection-overview}, the bound $M q(\mathbf{x})$ is a the black dotted line (a constant) since we are using a uniform proposal distribution). For each proposed sample $\mathbf{x}_i$ drawn from $q(\mathbf{x})$, we generate a uniform random number $u_i \in [0,1]$ and accept the sample if
+This ensures that $M q(\mathbf{x})$ forms an envelope over $p(\mathbf{x})$ (in the 1D example shown in \autoref{fig:rejection-overview}, the bound $M q(\mathbf{x})$ is shown as the black dotted line (a constant) since we are using a uniform proposal distribution). For each proposed sample $\mathbf{x}_i$ drawn from $q(\mathbf{x})$, we generate a uniform random number $u_i \in [0,1]$ and accept the sample if
 \begin{equation}
 u_i < \frac{p(\mathbf{x}_i)}{M q(\mathbf{x}_i)}
 \end{equation}
@@ -463,7 +463,7 @@ While rejection sampling is conceptually simple and works for arbitrary distribu
 
 In high dimensions, both problems become severe. The volume of high-dimensional spaces grows exponentially, making it hard to find tight bounds, and the rejection rate can become astronomical. For the problems we actually care about (sampling from posterior distributions in Bayesian inference, computing partition functions in statistical mechanics, exploring configuration spaces of molecules, etc.), rejection sampling is generally impractical. The solution is Markov Chain Monte Carlo, which we'll develop next. This method avoids the need for a bounding envelope and can efficiently explore high-dimensional distributions by constructing a sequence of samples where each new sample depends only on the previous one.
 
-\section{Markov chain Monte Carlo}
+\section{Markov Chain Monte Carlo}
 
 Both the inverse transform method and rejection sampling are generally impractical in high dimensions. Markov chain Monte Carlo (MCMC) fixes this by taking a completely different approach than both of these methods. Instead of generating independent samples, we construct a sequence of correlated samples where each new sample depends only on the previous one. This seemingly simple idea leads to powerful algorithms that can efficiently explore high-dimensional probability distributions.
 
@@ -599,7 +599,7 @@ Applying the transition again gives
 \end{equation}
 Repeated application of the transition probability causes the distribution to converge:
 \begin{equation}
-    \pi(\mathbf{x}) = \lim_{M \to \infty} \Pr(\mathbf{x}_M) = \lim_{M \to \infty} \int_{\Omega} T(\mathbf{x}, \mathbf{y}) P_M(\mathbf{y}) \, d\mathbf{y} = \int_{\Omega} T(\mathbf{x}, \mathbf{y}) \pi(\mathbf{y}) \, d\mathbf{y}
+    \pi(\mathbf{x}) = \lim_{M \to \infty} \Pr(\mathbf{x}_M) = \lim_{M \to \infty} \int_{\Omega} T(\mathbf{x}, \mathbf{x}_{M-1}) \Pr(\mathbf{x}_{M-1}) \, d\mathbf{x}_{M-1} = \int_{\Omega} T(\mathbf{x}, \mathbf{y}) \pi(\mathbf{y}) \, d\mathbf{y}
 \end{equation}
 The remarkable fact is that the chain converges to $\pi(\mathbf{x})$ without us needing explicit knowledge of $\pi(\mathbf{x})$ beforehand. We only need to construct a transition probability $T(\mathbf{x}, \mathbf{y})$ that has $\pi(\mathbf{x})$ as its limiting distribution. In fact, this observation is the key to MCMC. If we can design a Markov chain whose limiting distribution is the target distribution $\Pr(\mathbf{x})$ we want to sample from, then running the chain long enough will produce samples from $\Pr(\mathbf{x})$. But how do we construct such a transition probability?
 
@@ -652,7 +652,11 @@ This gives us a way to design $A$ for any given proposal $M$ and target $\pi$. T
         A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*) M(\mathbf{x}_i, \mathbf{x}^*)}{\pi(\mathbf{x}_i) M(\mathbf{x}^*, \mathbf{x}_i)} \right\}
     \end{equation}
 \end{definitionBox}
-This choice provably satisfies the detailed balance condition. To show this, let $R = \pi(\mathbf{x}^*) M(\mathbf{x}_i, \mathbf{x}^*)/\pi(\mathbf{x}_i) M(\mathbf{x}^*, \mathbf{x}_i)$. The acceptance probability for the reverse move is $A(\mathbf{x}_i, \mathbf{x}^*) = \min\{1, 1/R\}$. If $R \geq 1$, $A(\mathbf{x}^*, \mathbf{x}_i) = 1$ and $A(\mathbf{x}_i, \mathbf{x}^*) = 1/R$. The ratio is $A(\mathbf{x}^*, \mathbf{x}_i) / A(\mathbf{x}_i, \mathbf{x}^*) = 1 / (1/R) = R$. If $R < 1$, $A(\mathbf{x}^*, \mathbf{x}_i) = R$ and $A(\mathbf{x}_i, \mathbf{x}^*) = 1$. The ratio is $A(\mathbf{x}^*, \mathbf{x}_i) / A(\mathbf{x}_i, \mathbf{x}^*) = R / 1 = R$. In both cases, the ratio is $R$, satisfying the condition. This gives us a complete algorithm for generating a Markov chain.
+This choice provably satisfies the detailed balance condition. To show this, let
+\[
+R = \frac{\pi(\mathbf{x}^*) M(\mathbf{x}_i, \mathbf{x}^*)}{\pi(\mathbf{x}_i) M(\mathbf{x}^*, \mathbf{x}_i)}.
+\]
+The acceptance probability for the reverse move is $A(\mathbf{x}_i, \mathbf{x}^*) = \min\{1, 1/R\}$. If $R \geq 1$, $A(\mathbf{x}^*, \mathbf{x}_i) = 1$ and $A(\mathbf{x}_i, \mathbf{x}^*) = 1/R$. The ratio is $A(\mathbf{x}^*, \mathbf{x}_i) / A(\mathbf{x}_i, \mathbf{x}^*) = 1 / (1/R) = R$. If $R < 1$, $A(\mathbf{x}^*, \mathbf{x}_i) = R$ and $A(\mathbf{x}_i, \mathbf{x}^*) = 1$. The ratio is $A(\mathbf{x}^*, \mathbf{x}_i) / A(\mathbf{x}_i, \mathbf{x}^*) = R / 1 = R$. In both cases, the ratio is $R$, satisfying the condition. This gives us a complete algorithm for generating a Markov chain.
 
 \begin{algorithmBox}
     \textbf{The Metropolis-Hastings Algorithm}
