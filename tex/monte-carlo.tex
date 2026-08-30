@@ -896,7 +896,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    
+    \lstinputlisting{code/matlab/L31_rejection.m}
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L32
@@ -904,11 +904,17 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    
+    \lstinputlisting{code/matlab/L32_metropolis.m}
+
+    \textbf{Note:} In two dimensions
+    \[
+        \int_{\mathbb{R}^2}\frac{d\mathbf{x}}{1+|\mathbf{x}|^{2}} = 2\pi\int_0^\infty\frac{r\,dr}{1+r^{2}}=\infty,
+    \]
+    so \(\pi\) as written is not normalizable. The chain drifts outward forever.
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L33
-    Consider the system with \ce{I + I -> D} where the number of I initially is 5 and the number of D is 0.\\
+    Consider the system with \ce{I + I -> D} where the number of \ce{I} initially is 5 and the number of \ce{D} is 0.\\
     Explain why the possible states, \(\mathbf{x}=(x_I, x_D)\), are \((5,0), (3,1), (1,2)\).\\
     The chemical master equation (CME) for this system is
     \begin{align*}
@@ -918,11 +924,13 @@ Because the algorithm fires one event at a time, its computational cost is propo
     \end{align*}
     with initial conditions $P((5,0),0|(5,0),0) = 1,\, P((3,1),0|(5,0),0) = 0, \text{ and } P((1,2),0|(5,0),0) = 0$.
     
-    Write a \textsc{matlab} script to solve the CME with $c = 1$ and compute the average number of I with time.
+    Write a \textsc{matlab} script to solve the CME with $c = 1$ and compute the average number of \ce{I} with time.
 \end{exercise}
 
 \begin{solution}
-    
+    Each event \ce{I + I -> D} removes two \ce{I} and creates one \ce{D}, so after \(k\) events \(\mathbf{x}=(x_I,x_D)=(5-2k,\,k)\); from \((5,0)\) this gives \((5,0)\), \((3,1)\), \((1,2)\).
+
+    \lstinputlisting{code/matlab/L33_cme.m}
 \end{solution}
 
 %%% Local Variables:
