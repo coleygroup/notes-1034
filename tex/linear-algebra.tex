@@ -1328,6 +1328,200 @@ This relationship (not the literal equation, but the idea we just talked about) 
     \textbf{Warning}: While a lower condition number generally promotes faster convergence, it is important to recognize that not all matrices can be easily preconditioned to achieve a desirable condition number. Additionally, some iterative methods may exhibit different sensitivities to the condition number, so the choice of method should consider both the properties of $\mathbf{A}$ and the specific requirements of the problem at hand.
 \end{warningBox}
 
+\section{Exercises}
+
+\begin{exercise} % 2020 Participation quiz L1
+    Compute the 1-, 2-, and $\infty$-norms of $\mathbf{v}=[1, 1,-1,2,-3]$. 
+\end{exercise}
+
+\begin{solution}
+    The 1-norm is the sum of the absolute values of the components of the vector:
+    \[
+        \vert\vert\mathbf{v}\vert\vert_1 = 8.
+    \]
+
+    The 2-norm is the euclidean distance:
+    \[
+        \vert\vert\mathbf{v}\vert\vert_2 = \left(\sum_{i=1}^5 \vert v_i \vert^2\right)^{1/2} = (1+1+1+4+9)^{1/2} = \sqrt{16} = 4.
+    \]
+
+    The $\infty$-norm is the absolute value of the largest value in the vector:
+    \[
+        \vert\vert\mathbf{v}\vert\vert_\infty = 3.
+    \]
+\end{solution}
+
+
+\begin{exercise} % 2020 Participation quiz L2
+    Compute $\det(\mathbf{A})$ where
+    \[
+        \mathbf{A} = \begin{bmatrix}
+            1 & 0 & 2 & 0 \\
+            2 & 7 & 0 & 0 \\
+            4 & 0 & 0 & 9 \\
+            0 & 1 & 2 & 1
+        \end{bmatrix}.
+    \]
+\end{exercise}
+
+\begin{solution}
+Start by picking the row or column with the most zeros to make things
+easier. I’ll pick column 4.
+    \[
+        \det \mathbf{A} = -(0)|\cdots| + (0)|\cdots|
+        -(9)\begin{vmatrix}1&0&2\\2&7&0\\0&1&2\end{vmatrix}
+        +(1)\begin{vmatrix}1&0&2\\2&7&0\\4&0&0\end{vmatrix}
+    \]
+I’ve left the minors that are multiplied by 0 blank since they don’t contribute to the calculation. Now there are two 3×3 determinants left to find. Again we choose the row/column with the most zeros.
+
+For the first one, I’ll use column 3:
+    \begin{align*}
+        \begin{vmatrix}1&0&2\\2&7&0\\0&1&2\end{vmatrix}
+        &= (2)\begin{vmatrix}2&7\\0&1\end{vmatrix}
+          - (0)|\cdots|
+          + (2)\begin{vmatrix}1&0\\2&7\end{vmatrix} \\
+        &= 2(2 \times 1 - 7 \times 0) + 0 + 2(1 \times 7 - 2 \times 0) \\
+        &= 4 + 14 = 18
+    \end{align*}
+
+For the second one, I'll also use column 3:
+    \begin{align*}
+        \begin{vmatrix}1&0&2\\2&7&0\\4&0&0\end{vmatrix}
+        &= (2)\begin{vmatrix}2&7\\4&0\end{vmatrix}
+          - (0)|\cdots|
+          + (0)|\cdots| \\
+        &= 2(2 \times 0 - 4 \times 7) = -56
+    \end{align*}
+Plugging these results back in,
+    \[
+        \det \mathbf{A} = -9 \times 18 + 1 \times(-56) = -218.
+    \]
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L3
+    Solve the following system via Gaussian Elimination:
+    \[
+        \begin{bmatrix}3&1&0\\1&1&-1\\2&0&1\end{bmatrix}\mathbf{x}
+        = \begin{bmatrix}1\\1\\1\end{bmatrix}.
+    \]
+\end{exercise}
+
+\begin{solution}
+    The Gaussian elimination steps:
+    \begin{itemize}
+        \item $R_2 \leftarrow R_2 - \tfrac{1}{3}R_1$
+        \item $R_3 \leftarrow R_3 - \tfrac{2}{3}R_1$
+        \item $R_3 \leftarrow R_3 + R_2$
+    \end{itemize}
+
+    This results in:
+    \[
+        \begin{bmatrix}
+            3 & 1 & 0 \\
+            0 & 2/3 & -1\\
+            0 & 0 & 0
+        \end{bmatrix}
+        \mathbf{x}
+        = \begin{bmatrix}
+            1 \\ 2/3 \\ 1
+        \end{bmatrix}.
+    \]
+    The last row of the reduced coefficient matrix is all zeros. Writing this last row out in equation form we have:
+    \[
+        0 x_1+ 0 x_2 + 0 x_3 = 1.
+    \]
+    There are no values of $\mathbf{x}$ that can make this true. \textbf{There is no solution to this system of equations.}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L4
+    What is the dimension of the column space of
+    \[
+        \mathbf{A} = \begin{bmatrix}
+            1 & 3 & 1 & 0 \\
+            2 & 6 & 3 & 1 \\
+            1 & 3 & 2 & 1
+        \end{bmatrix}?
+    \]
+\end{exercise}
+
+\begin{solution}
+    The dimension of the column space of a matrix is equal to the rank, which is the number of nonzero rows or columns. 
+    
+    Using the following row operations, we get the echelon form of $\mathbf{A}$:
+    \begin{itemize}
+        \item $R_2 \leftarrow R_2 - 2R_1$
+        \item $R_3 \leftarrow R_3 - R_1$
+        \item $R_3 \leftarrow R_3 - R_2$
+    \end{itemize}
+    Echelon form of $\mathbf{A}$:
+    \[
+        \tilde{\mathbf{A}} = \begin{bmatrix}
+            1 & 3 & 1 & 0 \\
+            0 & 0 & 1 & 1 \\
+            0 & 0 & 0 & 0
+        \end{bmatrix}.
+    \]
+    The number of nonzero rows is 2 so the rank is 2.
+    \[
+        \dim\,\mathcal{C}(\mathbf{A}) = r = 2
+    \]
+    Note that there are other ways to find the dimension of the column space. You could also look at the columns of $\mathbf{A}$ and determine how many are linearly independent. This is feasible for this simple matrix. We can easily see that column 2 is $3 \times C1$ and column 3 is $C1+C4$. C1 and C4 are not linear combinations of each other. This means that only C1 and C4 are independent so the column space has dimension 2.
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L5
+    Find the eigenvalues of $\mathbf{A} = \begin{bmatrix} 3 & 0 & 2 \\ 0 & 1 & 0 \\ -1 & 0 & 3 \end{bmatrix}$.
+\end{exercise}
+
+\begin{solution}
+    Find roots of $\det (\mathbf{A} - \lambda \mathbf{I})$:
+    \[
+    \det\begin{bmatrix} 3-\lambda & 0 & 2 \\ 0 & 1-\lambda & 0 \\ -1 & 0 & 3-\lambda \end{bmatrix} = 0
+    \]
+    Applying Laplace's expansion formula:
+    \[
+    (3-\lambda)\det\begin{bmatrix} 1-\lambda & 0 \\ 0 & 3-\lambda \end{bmatrix} + (-1)\det\begin{bmatrix} 0 & 2 \\ 1-\lambda & 0 \end{bmatrix} = 0
+    \]
+    \[
+    (3-\lambda)^2(1-\lambda) + 2(1-\lambda) = 0
+    \]
+    \[
+        \Rightarrow \quad \boxed{
+            \begin{aligned}
+                \lambda_1 &= 1\\
+                \lambda_{2,3} &= 3 \pm \sqrt{2}\,i
+            \end{aligned}
+        }
+    \]
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L6
+    Compute the singular values of $\mathbf{A} = \begin{bmatrix} 3 & 1 \\ 0 & 3 \\ 1 & 0 \end{bmatrix}$.
+\end{exercise}
+
+\begin{solution}
+    Singular values are the square roots of the eigenvalues of $\mathbf{A}^T\mathbf{A}$. 
+    
+    \(\Rightarrow\) find solutions of $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{I}) = 0$
+    \[
+    \det\begin{bmatrix} 10-\lambda & 3 \\ 3 & 10-\lambda \end{bmatrix} = 0 \iff (10-\lambda)^2 - 9 = 0
+    \]
+    \[
+        \Rightarrow\quad
+        \begin{aligned}
+            \lambda_1 &= 13\\
+            \lambda_2 &= 7
+        \end{aligned}
+        \quad\Rightarrow\quad
+        \boxed{
+            \begin{aligned}
+                \sigma_1 &= \sqrt{13}\\
+                \sigma_2 &= \sqrt{7}
+            \end{aligned}
+        }
+    \]
+\end{solution}
+
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"
