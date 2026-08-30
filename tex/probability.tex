@@ -1451,9 +1451,21 @@ That is, it's the maximum vertical gap between the empirical and theoretical CDF
 \end{exercise}
 
 \begin{solution}
-    Event ``at least one bird'' \(= \{k \ge 1\}\)
+    Let $\mathsf{k}$ denote the number of birds observed in one hour, with
     \[
-        \Rightarrow \mathbb{P}[k \ge 1] = 1 - \mathbb{P}[k=0] = 1 - P_{\mathsf{k}}(0) = 1 - \frac{\lambda^0 e^{-\lambda}}{0!} = 1 - e^{-3} = 0.95
+        \mathsf{k} \sim \text{Poisson}(\lambda=3).
+    \]
+    The probability of seeing at least one bird is
+    \[
+        \Pr(\mathsf{k} \ge 1) = 1 - \Pr(\mathsf{k}=0).
+    \]
+    Using the Poisson PMF,
+    \[
+        \Pr(\mathsf{k}=0) = \frac{3^0 e^{-3}}{0!} = e^{-3}.
+    \]
+    Therefore,
+    \[
+        \Pr(\mathsf{k} \ge 1) = 1 - e^{-3} = 0.95.
     \]
 \end{solution}
 
