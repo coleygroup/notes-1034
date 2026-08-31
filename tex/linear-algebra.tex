@@ -1521,6 +1521,14 @@ Plugging these results back in,
     \]
 \end{solution}
 
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    Recall the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm}. What problem could we experience if we instead used Gaussian elimination to solve a tridiagonal linear system with large matrices?
+\end{exercise}
+
+\begin{solution}
+    Gaussian elimination operates on the full dense matrix rather than exploiting the tridiagonal structure. For large systems, storing the dense matrix could take too much memory.
+\end{solution}
+
 
 %%% Local Variables:
 %%% mode: LaTeX

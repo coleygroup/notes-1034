@@ -1944,6 +1944,110 @@ Finally, when gradient information is unavailable, whether due to noisy function
     \end{tikzpicture}
 \end{solution}
 
+\begin{exercise} % 2025 Common mistakes on exam 1 Nathan Morgan
+    Consider $f(\mathbf{x}) : \mathbb{R}^3 \to \mathbb{R}$ and $\mathbf{c}(\mathbf{x}) : \mathbb{R}^3 \to \mathbb{R}^2$ given by
+    \[
+        f(\mathbf{x}) = x_1^2 + 2x_2^2 + 3x_3^2,
+        \qquad
+        \mathbf{c}(\mathbf{x}) =
+        \begin{bmatrix}
+            x_1 + x_2 + x_3 - 3 \\
+            x_1 - x_2
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            c_1 \\ c_2
+        \end{bmatrix}.
+    \]
+    The first-order necessary conditions for a constrained minimum require the existence of multipliers $\lambda_1, \lambda_2$ such that
+    \[
+        \nabla f(\mathbf{x}) = \lambda_1 \nabla c_1(\mathbf{x}) + \lambda_2 \nabla c_2(\mathbf{x}),
+        \qquad
+        \mathbf{c}(\mathbf{x}) = \mathbf{0}.
+    \]
+    For each of the following candidate points, determine whether it satisfies these first-order necessary conditions.
+    \begin{enumerate}[label=(\alph*)]
+        \item $\mathbf{x} = [1,\; 1,\; 1]^\top$
+        \item $\mathbf{x} = [1,\; 0,\; 1/6]^\top$
+        \item $\mathbf{x} = [1.2,\; 1.2,\; 0.6]^\top$
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    The constraint gradients are constant:
+    \[
+        \nabla c_1 =
+        \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix},
+        \qquad
+        \nabla c_2 =
+        \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix}.
+    \]
+
+    \textbf{(a)} $\mathbf{x} = [1,\; 1,\; 1]^\top$. Compute the gradient of $f$:
+    \[
+        \nabla f =
+        \begin{bmatrix} 2x_1 \\ 4x_2 \\ 6x_3 \end{bmatrix}
+        =
+        \begin{bmatrix} 2 \\ 4 \\ 6 \end{bmatrix}.
+    \]
+    We check whether $\lambda_1$ and $\lambda_2$ exist such that $\nabla f = \lambda_1 \nabla c_1 + \lambda_2 \nabla c_2$:
+    \[
+        \begin{bmatrix} 2 \\ 4 \\ 6 \end{bmatrix}
+        =
+        \lambda_1 \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}
+        +
+        \lambda_2 \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix},
+        \qquad
+        \begin{cases}
+            2 = \lambda_1 + \lambda_2, \\
+            4 = \lambda_1 - \lambda_2, \\
+            6 = \lambda_1.
+        \end{cases}
+    \]
+    The third equation gives $\lambda_1 = 6$; substituting into the first two gives $\lambda_2 = -4$ and $\lambda_2 = 2$, which is inconsistent. No choice of $\lambda_1, \lambda_2$ can satisfy the gradient condition, so $\mathbf{x} = [1,\; 1,\; 1]^\top$ is \textbf{not} a potential minimum (even though the constraints are satisfied).
+
+    \textbf{(b)} $\mathbf{x} = [1,\; 0,\; 1/6]^\top$. Compute:
+    \[
+        \nabla f =
+        \begin{bmatrix} 2 \\ 0 \\ 1 \end{bmatrix},
+        \qquad
+        \nabla c_1 + \nabla c_2 =
+        \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}
+        +
+        \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix}
+        =
+        \begin{bmatrix} 2 \\ 0 \\ 1 \end{bmatrix}.
+    \]
+    The gradient condition is satisfied with $\lambda_1 = \lambda_2 = 1$. However, checking the constraints:
+    \[
+        c_1\!\left(1,\, 0,\, \tfrac{1}{6}\right) = 1 + 0 + \tfrac{1}{6} - 3 = -\tfrac{11}{6} \neq 0,
+        \qquad
+        c_2\!\left(1,\, 0,\, \tfrac{1}{6}\right) = 1 - 0 = 1 \neq 0.
+    \]
+    The constraints are not satisfied, so $\mathbf{x} = [1,\; 0,\; 1/6]^\top$ is \textbf{not} a potential minimum.
+
+    \textbf{(c)} $\mathbf{x} = [1.2,\; 1.2,\; 0.6]^\top$. Compute:
+    \[
+        \nabla f =
+        \begin{bmatrix} 2.4 \\ 4.8 \\ 3.6 \end{bmatrix},
+        \qquad
+        3.6
+        \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}
+        +(-1.2)
+        \begin{bmatrix} 1 \\ -1 \\ 0 \end{bmatrix}
+        =
+        \begin{bmatrix} 2.4 \\ 4.8 \\ 3.6 \end{bmatrix}.
+    \]
+    The gradient condition is satisfied with $\lambda_1 = 3.6$ and $\lambda_2 = -1.2$. Checking the constraints:
+    \[
+        c_1(1.2,\, 1.2,\, 0.6) = 1.2 + 1.2 + 0.6 - 3 = 0,
+        \qquad
+        c_2(1.2,\, 1.2,\, 0.6) = 1.2 - 1.2 = 0.
+    \]
+    Both conditions are satisfied, so $\mathbf{x} = [1.2,\; 1.2,\; 0.6]^\top$ satisfies the first-order necessary conditions and is a potential constrained minimum. Note that these are necessary but not sufficient conditions: we cannot determine from this check alone whether the point is a minimum or a maximum, and checking whether the Hessian is positive definite at this point is not sufficient to make that determination for a constrained problem.
+\end{solution}
+
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../main"

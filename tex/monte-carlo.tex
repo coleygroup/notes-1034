@@ -901,7 +901,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    \lstinputlisting{code/matlab/L31_rejection.m}
+    \lstinputlisting{code/matlab/monte-carlo/L31_rejection.m}
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L32
@@ -909,7 +909,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    \lstinputlisting{code/matlab/L32_metropolis.m}
+    \lstinputlisting{code/matlab/monte-carlo/L32_metropolis.m}
 
     \textbf{Note:} In two dimensions
     \[
@@ -937,8 +937,92 @@ Because the algorithm fires one event at a time, its computational cost is propo
 % \begin{solution}
 %     Each event \ce{I + I -> D} removes two \ce{I} and creates one \ce{D}, so after \(k\) events \(\mathbf{x}=(x_I,x_D)=(5-2k,\,k)\); from \((5,0)\) this gives \((5,0)\), \((3,1)\), \((1,2)\).
 
-%     \lstinputlisting{code/matlab/L33_cme.m}
+%     \lstinputlisting{code/matlab/monte-carlo/L33_cme.m}
 % \end{solution}
+
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    A Slater-type orbital is a PDF that is sometimes used to model atomic orbitals in computational chemistry.  One Slater-type orbital is described by
+    \[
+        R(x) = N\exp(-|x|),
+    \]
+    where $N$ is the normalization constant.  Analytically we know $N = 1/2$.
+
+    \begin{figure}[h!]
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            width=0.75\linewidth, height=0.35\linewidth,
+            axis lines=middle,
+            xmin=-6.2, xmax=6.2, ymin=-0.06, ymax=1.12,
+            xtick={-6,-4,-2,2,4,6},
+            ytick={0.5,1},
+            grid=both,
+            grid style={gray!25},
+            minor tick num=1,
+            samples=401, domain=-6:6,
+            clip=false,
+        ]
+            \addplot[red, thick] {exp(-abs(x))};
+        \end{axis}
+        \end{tikzpicture}
+    \end{figure}
+
+    \begin{enumerate}[label=(\alph*)]
+
+        \item The following code aims to estimate $1/N$, but it consistently underestimates.  (The estimates are usually around $1.7$.)  Why?
+        \lstinputlisting{code/matlab/monte-carlo/underestimates1.m}
+
+        \item The following code aims to estimate $1/N$, but it
+        consistently underestimates.  (The estimates are usually around
+        $0.52$.)  Why?
+        \lstinputlisting{code/matlab/monte-carlo/underestimates2.m}
+
+        \item Why did the previous two questions not use Markov Chain
+        Monte Carlo?
+
+        \item Does the following code correctly sample points from $R(x)$?
+        \lstinputlisting{code/matlab/monte-carlo/sampling.m}
+
+        \item Assuming we have correctly sampled points from $R(x)$,
+        can we use these samples to estimate $N$?  Explain.
+
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+
+        \item Samples are taken from $\mathcal{U}(-2,2)$, which doesn't
+        cover all density of $R(x)$.
+
+        \item The estimate of $N$ is just the average value of $f$ over
+        the samples.  We need to multiply this average by the ``area'' of
+        the samples.  We do this by taking the mean of $f(x)/P(x)$ instead
+        of just $f(x)$.  Corrected code:
+        \lstinputlisting{code/matlab/monte-carlo/corrected2.m}
+
+        \item MCMC lets us sample points from an arbitrary distribution.
+        In the previous two parts we used \texttt{rand} and \texttt{randn}
+        to sample points from the uniform and Gaussian distributions.  We
+        don't need MCMC to sample from these two distributions as we
+        already have functions to do so.
+
+        \item Yes.
+
+        \item No.  The integral we are trying to estimate is
+        $\int_{\mathbb{R}} \exp(-|x|)\,dx$.  This is not in the form
+        $\int f(x)\,P(x)\,dx$ where $P(x)$ is a properly normalised PDF.
+        If we try to recast our integral in this form,
+        \[
+            \int_{\mathbb{R}} \exp(-|x|)\,dx
+            = \int_{\mathbb{R}} \frac{1}{N}\, N\exp(-|x|)\,dx
+            = \int_{\mathbb{R}} \frac{1}{N}\, R(x)\,dx,
+        \]
+        then $f(x) = 1/N$.  We cannot evaluate this because we do not
+        know $N$.
+
+    \end{enumerate}
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX

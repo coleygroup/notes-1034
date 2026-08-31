@@ -1795,6 +1795,169 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
     There are 8 cells in the grid and we want to find the average concentration for all. \(\Rightarrow \boxed{8 \text{ unknowns}}\)
 \end{solution}
 
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    (*) Using the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm},
+    solve the initial value problem
+    \[
+        \frac{dx}{dt} = -x, \qquad x(0) = x_0.
+    \]
+    \begin{enumerate}[label=(\alph*)]
+
+        \item Derive a linear system whose solution gives $x$ at each
+        grid point.  That is, find an expression for each of $a_i$,
+        $b_i$, $c_i$, and $d_i$.  Use a step size of $\Delta t$.  To
+        obtain a tridiagonal system, use a centered 2nd-order finite
+        difference for the interior points and a backward 1st-order
+        finite difference for the final point.
+
+        \item What practical challenges could we experience if $\Delta t$
+        is too small?
+
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+
+        \item Using the centered second-order finite difference for the
+        time derivative at interior nodes:
+        \[
+            \frac{x_{i+1}-x_{i-1}}{2\Delta t}
+            \approx \left.\frac{dx}{dt}\right|_{x_i} = -x_i.
+        \]
+        Rearranging gives the discrete algebraic equation
+        \[
+            (-1)\,x_{i-1} + (2\Delta t)\,x_i + (1)\,x_{i+1} = 0.
+        \]
+        Our vector of unknowns is
+        \[
+            \mathbf{x} = \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_N
+            \end{pmatrix}.
+        \]
+        From this we get $a_i = -1$, $b_i = 2\Delta t$, and $c_i = 1$,
+        with $a_0 = 0$ because of the boundary conditions.
+
+        % Note: the i=1 equation below is written with x_i rather than
+        % x_1, and the first row of A drops the -1 that was moved to the RHS.
+        For the case $i = 1$ our equation is
+        \[
+            \frac{x_{i+1} - x_0}{2\Delta t} \approx -x_i,
+        \]
+        which rearranges to
+        \[
+            (2\Delta t)\,x_i + (1)\,x_{i+1} = x_0.
+        \]
+        This gives $d_1 = x_0$.
+
+        For the case $i = N$, we use
+        \[
+            \frac{x_N - x_{N-1}}{\Delta t} \approx -x_N,
+        \]
+        which rearranges to
+        \[
+            (-1)\,x_{N-1} + (1 + \Delta t)\,x_N = 0.
+        \]
+
+        Then the linear system $A\mathbf{x} = \mathbf{b}$ has
+        \[
+        A =
+        \begin{pmatrix}
+        2\Delta t & 1          &        &            &               \\
+        -1        & 2\Delta t  & 1      &            &               \\
+                  & \ddots     & \ddots & \ddots     &               \\
+                  &            & -1     & 2\Delta t  & 1             \\
+                  &            &        & -1         & (1+\Delta t)
+        \end{pmatrix},
+        \qquad
+        \mathbf{b} =
+        \begin{pmatrix}
+            x_0 \\[4pt] 0 \\[4pt] \vdots \\[4pt] 0 \\[4pt] 0
+        \end{pmatrix}.
+        \]
+
+        \item Probably there won't be a problem with the number of
+        steps because the scaling is $\mathcal{O}(n)$.  But in the Thomas
+        algorithm, we divide by $b_i$.  If this is too small, we could run
+        into stability issues.
+
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    (*) What is the order of accuracy of the following estimation of the first
+    derivative at a point?  Assume $\Delta x_{i-1} \neq \Delta x_i$, with
+    $\Delta x_{i-1} = x_i - x_{i-1}$ and $\Delta x_i = x_{i+1} - x_i$.
+    What if $\Delta x_{i-1} = \Delta x_i$?
+    \[
+        f'(x_i) \approx
+        \frac{f(x_{i+1}) - f(x_{i-1})}{\Delta x_i + \Delta x_{i-1}}
+    \]
+\end{exercise}
+
+\begin{solution}
+    Let
+    \[
+        h_+ := \Delta x_i = x_{i+1} - x_i, \qquad
+        h_- := \Delta x_{i-1} = x_i - x_{i-1},
+    \]
+    and assume $f$ is sufficiently smooth.  Expanding $f$ about $x_i$:
+    \[
+        \begin{aligned}
+        f(x_{i+1}) &= f(x_i) + h_+ f'(x_i) + \tfrac{h_+^2}{2} f''(x_i)
+            + \tfrac{h_+^3}{6} f^{(3)}(x_i) + \mathcal{O}(h_+^4),\\[4pt]
+        f(x_{i-1}) &= f(x_i) - h_- f'(x_i) + \tfrac{h_-^2}{2} f''(x_i)
+            - \tfrac{h_-^3}{6} f^{(3)}(x_i) + \mathcal{O}(h_-^4).
+        \end{aligned}
+    \]
+    Forming the numerator:
+    \[
+        f(x_{i+1}) - f(x_{i-1})
+        = (h_+{+}h_-)\,f'(x_i)
+        + \tfrac{h_+^2 - h_-^2}{2}\,f''(x_i)
+        + \tfrac{h_+^3 + h_-^3}{6}\,f^{(3)}(x_i)
+        + \mathcal{O}(\max\{h_+^4,h_-^4\}).
+    \]
+    Dividing by $h_+ + h_-$:
+    \[
+        \frac{f(x_{i+1})-f(x_{i-1})}{h_++h_-}
+        = f'(x_i)
+        + \underbrace{\frac{h_+-h_-}{2}}_{\displaystyle=:\,E_1} f''(x_i)
+        + \underbrace{\frac{h_+^3+h_-^3}{6(h_++h_-)}}_{\displaystyle=:\,E_2}
+        f^{(3)}(x_i)
+        + \mathcal{O}(\max\{h_+^3,h_-^3\}).
+    \]
+    Thus the truncation error is
+    \[
+        \mathrm{TE}
+        = \frac{h_+-h_-}{2}\,f''(x_i)
+        + \frac{h_+^3+h_-^3}{6(h_++h_-)}\,f^{(3)}(x_i)
+        + \mathcal{O}(\max\{h_+^3,h_-^3\}),
+    \]
+    and from the leading term:
+    \[
+        \boxed{\;
+        \frac{f(x_{i+1})-f(x_{i-1})}{\Delta x_i+\Delta x_{i-1}}
+        = f'(x_i)
+        + \frac{\Delta x_i - \Delta x_{i-1}}{2}\,f''(x_i)
+        + \mathcal{O}\!\left(\max\{\Delta x_i^2,\,\Delta x_{i-1}^2\}\right).
+        \;}
+    \]
+    Therefore:
+    \begin{itemize}
+        \item \emph{General (unequal spacing):} the scheme is
+        \textbf{first-order accurate} (error $\sim\mathcal{O}(\max\{h_+,h_-\})$)
+        because the leading error contains the factor $(h_+-h_-)/2$.
+
+        \item \emph{Special case ($h_+=h_-=h$):} the $f''$ term vanishes and
+        \[
+            \frac{f(x_{i+1})-f(x_{i-1})}{2h}
+            = f'(x_i) + \frac{h^2}{6}f^{(3)}(x_i) + \mathcal{O}(h^4),
+        \]
+        so the scheme is \textbf{second-order accurate}.
+    \end{itemize}
+\end{solution}
+
+
 
 %%% Local Variables:
 %%% mode: LaTeX
