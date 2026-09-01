@@ -991,21 +991,19 @@ Because the algorithm fires one event at a time, its computational cost is propo
 
 \begin{solution}
     \begin{enumerate}[label=(\alph*)]
+        \item This code attempts to estimate $1/N$ using the following scheme:
+        \[
+            \int_{\mathbb{R}} R(x)\mathrm{d}x = \int_{\mathbb{R}} N \exp(-|x|)\mathrm{d}x = 1
+        \]
+        \[
+            1/N = \int_{\mathbb{R}} \exp(-|x|)\mathrm{d}x = \int_{\mathbb{R}} \frac{\exp(-|x|)}{p(x)}\cdot p(x)\mathrm{d}x
+        \]
+        We will draw samples from $p(x)$ and evaluate $\frac{\exp(-|x|)}{p(x)}$ at those points. Here samples are taken from $p(x) = \mathcal{U}(-2,2)$, but this doesn't cover all density of $R(x)$. So the contributions of the tails to the integral are lost.
 
-        \item Samples are taken from $\mathcal{U}(-2,2)$, which doesn't
-        cover all density of $R(x)$.
-
-        \item The estimate of $N$ is just the average value of $f$ over
-        the samples.  We need to multiply this average by the ``area'' of
-        the samples.  We do this by taking the mean of $f(x)/P(x)$ instead
-        of just $f(x)$.  Corrected code:
+        \item The estimate of $N$ is just the average value of $\exp(-|x|)$ over the samples, but we need to account for the probablility of our samples. We do this by taking the mean of $\frac{\exp(-|x|)}{p(x)}$ instead. Corrected code:
         \lstinputlisting{code/matlab/monte-carlo/corrected2.m}
 
-        \item MCMC lets us sample points from an arbitrary distribution.
-        In the previous two parts we used \texttt{rand} and \texttt{randn}
-        to sample points from the uniform and Gaussian distributions.  We
-        don't need MCMC to sample from these two distributions as we
-        already have functions to do so.
+        \item MCMC lets us sample points from an arbitrary distribution. In the previous two parts we used \texttt{rand} and \texttt{randn} to sample points from the uniform and Gaussian distributions. We don't need MCMC to sample from these two distributions as we already have functions to do so.
 
         \item Yes.
 
@@ -1021,6 +1019,63 @@ Because the algorithm fires one event at a time, its computational cost is propo
         then $f(x) = 1/N$.  We cannot evaluate this because we do not
         know $N$.
 
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 2 Nathan Morgan
+    For each of the integrals below, specify a functional form of $g$ and $f$ that can be used in the following code to approximate the integral value.
+    
+    \lstinputlisting{code/matlab/monte-carlo/mcmc.m}
+
+    As a bonus, also find the integral value by inspection of the integrand. 
+
+    \begin{enumerate}[label=(\alph*)]
+        \item \(I = \int_{\mathbb{R}} x \cdot \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
+        \item \(I = \int_{\mathbb{R}} \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
+        \item \(I = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\) (This is a bit of a trick question, why?)
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item \(g(x) = e^{-x^2},\; f(x)=x\)\\
+        \(g(x)\) doesn't need to be normalized for MCMC. The integral value is 0, due to symmetry of the integrand with respect to the bounds of integration.
+
+        \item \(g(x) = e^{-x^2},\; f(x)=1\)\\
+        The integral value is 1, as the integrand is a PDF.
+        
+        \item This integral is not in the form of an expectation value. We can't use MCMC as is. But if we multiply and divide by a PDF, we can cast this integral as an expectation value.
+        \[
+            I = \int_\mathbb{R} \dfrac{e^{-x^2}}{p(x)} p(x)\mathrm{d}x
+        \]
+        The value of the integral is $\sqrt{\pi}$, as that is the inverse normalization of the standard gaussian distribution.
+
+        As a side note, when choosing $p(x)$, the closer the shape of $p(x)$ matches $|e^{-x^2}|/\int|e^{-x^2}|dx$, the faster the MCMC approximation converges to the integral (i.e., it is better to sample points where our function value is high because those points contribute the most to the integral).
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 2 Nathan Morgan
+    In the Metropolis-Hastings algorithm, we first choose $M$ and then construct $A$. For each of the following choices of $M$, describe what issues we would encounter (if any) and any potential solutions. 
+
+    \begin{enumerate}[label=(\alph*)]
+        \item $M$ is not symmetric, $M(\mathbf{x}^*, \mathbf{x}_i)\neq M(\mathbf{x}_i, \mathbf{x}^*)$
+        \item $M$ is one directional, $M(\mathbf{x}^*, \mathbf{x}_i) = 0.1 \text{ and } M(\mathbf{x}_i, \mathbf{x}^*)=0$
+        \item $M$ is not "irreducible" (can't get to every other $\mathbf{x}^*$ from $\mathbf{x}_i$)
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item This isn't a problem, as by construction our $A$ will account for this asymmetry. If we use a symmetric $M$, then the M-H $A$ simplifies to 
+        \[
+            A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*)}{\pi(\mathbf{x}_i)} \right\}.
+        \]
+
+        \item If $M=0$, we would get a divide by zero error when constructing $A$.
+
+        \item We usually use an $M$ that only makes transitions in a local region (is not irreducible) like $\mathcal{U}(\mathbf{x}_i-c,\mathbf{x}_i+c)$ or $\mathcal{N}(\mathbf{x}_i,c)$. This leads to more accepted transitions and a smoother exploration of the surface. 
+        
+        In this case however, we are not guaranteed to converge to our target distribution because we only take local steps and there could be two regions with nonzero density separated by a region of zero density. One solution is to create multiple chains with different initializations.
     \end{enumerate}
 \end{solution}
 

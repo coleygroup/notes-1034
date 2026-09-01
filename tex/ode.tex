@@ -1957,6 +1957,101 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
     \end{itemize}
 \end{solution}
 
+\begin{exercise} % 2025 Review 3 Nathan Morgan
+    Consider the boundary value problem
+    \[
+        \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
+    \]
+    Since $\mathbf{x}(t_f)$ is determined by $\mathbf{x}(t_0)$ through the ODE, $\mathbf{g}$ can be viewed as a function of $\mathbf{x}(t_0)$ alone. Write $\mathbf{g}(\mathbf{x}(t_0))$ explicitly when the boundary conditions are $x_1(t_0) = 1$ and $x_2(t_f) = 3$. You can use $\mathrm{ode}(\mathbf{f}, \mathbf{x}(t_0), [t_0, t_f])$ to denote the solution of the ODE integrated from $t_0$ to $t_f$ with initial condition $\mathbf{x}(t_0)$
+\end{exercise}
+
+\begin{solution}
+    \[
+        \mathbf{g}(\mathbf{x}(t_0)) =
+        \begin{bmatrix}
+            (\mathbf{x}(t_0))_1 - 1 \\[4pt]
+            \mathrm{ode}(\mathbf{f},\,\mathbf{x}(t_0),\,[t_0,\,t_f]) - 3
+        \end{bmatrix}
+    \]
+\end{solution}
+
+\begin{exercise} % 2025 Review 3 Nathan Morgan
+    Classify each of the following as Dirichlet, Neumann, Robin, or none of these.
+    \begin{enumerate}[label=(\alph*)]
+        \item $\displaystyle x(0)\cdot\left.\frac{dx}{dt}\right|_{t=0} = 1$.
+        \item For the ODE $\dfrac{d^2C}{dx^2} = -r(C)$, the condition $C'(0) = 1$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item None of the three types. The condition is nonlinear since it involves the product of the solution and its derivative.
+        \item Neumann: the value of the first derivative $C'$ is specified at the boundary $x = 0$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 3 Nathan Morgan
+    Implement the shooting method in MATLAB for the general boundary value problem
+    \[
+        \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
+    \]
+    Assume \texttt{f} and \texttt{g} are defined as MATLAB functions and that \texttt{t0}, \texttt{tf}, and an initial guess \texttt{c0} for the initial condition $\mathbf{x}(t_0)$ are available in the workspace.
+\end{exercise}
+
+\begin{solution}
+    \lstinputlisting{code/matlab/ode/shoot.m}
+\end{solution}
+
+\begin{exercise} % 2025 Review 3 Nathan Morgan
+    Let $\mathbf{S} = \dfrac{\partial\mathbf{x}(T)}{\partial\mathbf{c}}$ be the sensitivity matrix of the ODE solution at the final time with respect to the initial condition $\mathbf{c} = \mathbf{x}(t_0)$, for the BVP $\dfrac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x},t)$, $\mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(T)) = \mathbf{0}$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Why is $\mathbf{S}$ useful when applying the shooting method?
+        \item Describe two methods for computing $\mathbf{S}$.
+        \item For a scalar problem, $c = 1$ gives $x(T) = 1.0$ and $c = 1.0001$ gives $x(T) = 1.123$. Compute $\partial x/\partial c$ numerically.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item $\mathbf{S}$ is useful for two reasons. First, it enables computation of the Jacobian of the shooting residual $\mathbf{g}$ with respect to $\mathbf{c}$:
+        \[
+            \mathbf{J} = \nabla_{\mathbf{c}}\bigl(\mathbf{g}(\mathbf{x}(t_0)=\mathbf{c},\,\mathbf{x}(T)(\mathbf{c}))\bigr) = \frac{\partial\mathbf{g}}{\partial\mathbf{c}} + \frac{\partial\mathbf{g}}{\partial\mathbf{x}}\,\mathbf{S}.
+        \]
+        This tells us (to first order) how to update $\mathbf{c}$ to reduce the residual and whether the solution $\mathbf{c}^*$ is locally unique. Second, examining $\mathbf{J}$ at a candidate $\mathbf{c}^*$ can explain why \texttt{fsolve} failed to converge.
+        \item Two methods for computing $\mathbf{S}$:
+        \begin{enumerate}[label=\roman*.]
+            \item \textit{Numerical differentiation}: perturb each component of $\mathbf{c}$, solve the ODE for each perturbation, and estimate each column of $\mathbf{S}$ by finite differences.
+            \item \textit{Sensitivity ODE}: differentiate the ODE with respect to $\mathbf{c}$ to obtain a matrix-valued ODE-IVP for $\mathbf{S}$, solved alongside the original ODE.
+        \end{enumerate}
+        \item Using a forward finite difference:
+        \[
+            \frac{\partial x}{\partial c} \approx \frac{x(T)\big|_{c=1.0001} - x(T)\big|_{c=1}}{1.0001 - 1} = \frac{1.123 - 1.0}{0.0001} = 1{,}230.
+        \]
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 3 Nathan Morgan
+    Using the finite difference table shown, write the 6th-order accurate central difference approximation for $f''(x)$.
+    \begin{table}[h!]
+    \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+        \hline
+        Derivative & Accuracy & -3   & -2    & -1  & 0      & 1   & 2     & 3    \\ \hline
+        2          & 6        & 1/90 & -3/20 & 3/2 & -49/18 & 3/2 & -3/20 & 1/90 \\ \hline
+    \end{tabular}
+    \end{table}
+\end{exercise}
+
+\begin{solution}
+    Reading from the table:
+    \begin{multline*}
+        f''(x) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f(x-3\Delta x) - \frac{3}{20}f(x-2\Delta x) + \frac{3}{2}f(x-\Delta x)\right. \\
+        \left.- \frac{49}{18}f(x) + \frac{3}{2}f(x+\Delta x) - \frac{3}{20}f(x+2\Delta x) + \frac{1}{90}f(x+3\Delta x)\right) + \mathcal{O}\!\left((\Delta x)^6\right)
+    \end{multline*}
+    Equivalently, at grid point $x_i$ with $f_j = f(x_j)$:
+    \[
+        f''(x_i) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f_{i-3} - \frac{3}{20}f_{i-2} + \frac{3}{2}f_{i-1} - \frac{49}{18}f_i + \frac{3}{2}f_{i+1} - \frac{3}{20}f_{i+2} + \frac{1}{90}f_{i+3}\right) + \mathcal{O}\!\left((\Delta x)^6\right)
+    \]
+\end{solution}
 
 
 %%% Local Variables:

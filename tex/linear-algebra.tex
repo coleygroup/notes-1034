@@ -1529,6 +1529,47 @@ Plugging these results back in,
     Gaussian elimination operates on the full dense matrix rather than exploiting the tridiagonal structure. For large systems, storing the dense matrix could take too much memory.
 \end{solution}
 
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    (*) Write a matrix $\mathbf{A}$ that has eigenvalues $0$, $1$, $2$ with corresponding eigenvectors $\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}$, $\begin{bmatrix} -1 \\ 1 \\ -1 \end{bmatrix}$, and $\begin{bmatrix} 1 \\ -1 \\ -1 \end{bmatrix}$.
+\end{exercise}
+
+\begin{solution}
+    Construct the eigenvector matrix $\mathbf{V}$ by placing the eigenvectors as columns:
+    \[
+        \mathbf{V} = \begin{bmatrix} 1 & -1 & 1 \\ 1 & 1 & -1 \\ 1 & -1 & -1 \end{bmatrix}
+    \]
+    The diagonal eigenvalue matrix is:
+    \[
+        \mathbf{D} = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 2 \end{bmatrix}
+    \]
+    To find $\mathbf{A} = \mathbf{V}\mathbf{D}\mathbf{V}^{-1}$, first compute $\mathbf{V}^{-1}$ through Gaussian elimination on the augmented matrix $[\mathbf{V} | \mathbf{I}]$:
+    \[
+        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 1 & 1 & -1 & 0 & 1 & 0 \\ 1 & -1 & -1 & 0 & 0 & 1 \end{array}\right]
+        \xrightarrow{R_2 - R_1, R_3 - R_1}
+        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 0 & 2 & -2 & -1 & 1 & 0 \\ 0 & 0 & -2 & -1 & 0 & 1 \end{array}\right]
+    \]
+    \[
+        \xrightarrow{R_2 / 2, R_3 / (-2)}
+        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 0 & 1 & -1 & -1/2 & 1/2 & 0 \\ 0 & 0 & 1 & 1/2 & 0 & -1/2 \end{array}\right]
+    \]
+    \[
+        \xrightarrow{R_1 + R_2, R_2 + R_3}
+        \left[\begin{array}{ccc|ccc} 1 & 0 & 0 & 1/2 & 1/2 & 0 \\ 0 & 1 & 0 & 0 & 1/2 & -1/2 \\ 0 & 0 & 1 & 1/2 & 0 & -1/2 \end{array}\right]
+    \]
+    Thus:
+    \[
+        \mathbf{V}^{-1} = \begin{bmatrix} 1/2 & 1/2 & 0 \\ 0 & 1/2 & -1/2 \\ 1/2 & 0 & -1/2 \end{bmatrix}
+    \]
+    Computing $\mathbf{V}\mathbf{D}$:
+    \[
+        \mathbf{V}\mathbf{D} = \begin{bmatrix} 1 & -1 & 1 \\ 1 & 1 & -1 \\ 1 & -1 & -1 \end{bmatrix} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 2 \end{bmatrix} = \begin{bmatrix} 0 & -1 & 2 \\ 0 & 1 & -2 \\ 0 & -1 & -2 \end{bmatrix}
+    \]
+    Finally, computing $\mathbf{A} = (\mathbf{V}\mathbf{D})\mathbf{V}^{-1}$:
+    \[
+        \mathbf{A} = \begin{bmatrix} 0 & -1 & 2 \\ 0 & 1 & -2 \\ 0 & -1 & -2 \end{bmatrix} \begin{bmatrix} 1/2 & 1/2 & 0 \\ 0 & 1/2 & -1/2 \\ 1/2 & 0 & -1/2 \end{bmatrix} = \begin{bmatrix} 1 & -1/2 & -1/2 \\ -1 & 1/2 & 1/2 \\ -1 & -1/2 & 3/2 \end{bmatrix}
+    \]
+\end{solution}
+
 
 %%% Local Variables:
 %%% mode: LaTeX

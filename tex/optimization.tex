@@ -2002,6 +2002,141 @@ Finally, when gradient information is unavailable, whether due to noisy function
     Both conditions are satisfied, so $\mathbf{x} = [1.2,\; 1.2,\; 0.6]^\top$ satisfies the first-order necessary conditions and is a potential constrained minimum. Note that these are necessary but not sufficient conditions: we cannot determine from this check alone whether the point is a minimum or a maximum, and checking whether the Hessian is positive definite at this point is not sufficient to make that determination for a constrained problem.
 \end{solution}
 
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    Species A costs \$5 per mole. Species B costs \$3 per mole. We want to minimize the cost of material in a batch reactor.
+    \begin{enumerate}[label=(\alph*)]
+        \item Write the unconstrained minimization problem and explain why it has no finite solution.
+        \item Add the constraint that the total moles must equal 10 and we need at least 5 moles of B. What is the solution? Which constraints are active at the optimum?
+        \item Instead of the constraint $n_B \geq 5$, suppose we require $n_A \geq 5$. What is the new solution? Which constraints are active at the optimum?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    Let $n_A$ and $n_B$ denote the moles of species A and B respectively.
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item The unconstrained problem is:
+        \[
+            \min_{n_A, n_B} f(n) = 5n_A + 3n_B
+        \]
+        This linear objective function has no finite minimum because both variables can be decreased indefinitely without bound. As $n_A \to -\infty$ or $n_B \to -\infty$, the objective approaches $-\infty$.
+        
+        \item B costs the least, so we want to maximize it. The maximum value of $n_B$ given the equality constraint is $n_B = 10$, so the optimum is $n_A = 0$, $n_B = 10$. The equality constraint is active, but the inequality constraint $n_B \geq 5$ is inactive.
+        
+        \item With the constraint $n_A \geq 5$ and the equality $n_A + n_B = 10$, we have $n_B \leq 5$. Now the objective is minimized at $n_B = 5$, giving $n_A = 5$. Both the equality constraint and the inequality constraint $n_A \geq 5$ are active at the optimum.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    Maximize the rate of reaction by adjusting concentration and temperature:
+    \[
+        \max_{c_A, T} r(c_A, T) = c_A \cdot (10 e^{-5/T})
+    \]
+    Reformulate this as a minimization problem. Does a finite minimizer exist? Explain.
+\end{exercise}
+
+\begin{solution}
+    To reformulate as a minimization problem, we minimize the negative of the rate:
+    \[
+        \min_{c_A, T} -r(c_A, T) = -c_A \cdot (10 e^{-5/T})
+    \]
+    Computing the gradient:
+    \[
+        \frac{\partial r}{\partial c_A} = 10 e^{-5/T}, \quad \frac{\partial r}{\partial T} = c_A \cdot 10 \cdot \frac{5}{T^2} e^{-5/T}
+    \]
+    For positive finite values of $c_A$ and $T$, both partial derivatives are strictly positive, so $\nabla(-r)$ never equals zero. The objective function $-r$ decreases without bound as either variable increases toward infinity, meaning there is no finite minimizer. The problem is unbounded below, indicating that additional constraints on concentrations and temperatures are needed to make the problem well-posed.
+\end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    A splitter separates an inlet flow of 3 L/s into two outlet streams such that one split contains twice as much material as the other.
+    \begin{enumerate}[label=(\alph*)]
+        \item Formulate this as a norm minimization problem by defining an error function that captures the constraints.
+        \item Explain why minimizing this error norm is unnecessarily complicated compared to solving the problem directly with linear algebra.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    Let $v_1$ and $v_2$ denote the outlet flow rates. The constraints are $v_1 + v_2 = 3$ and $v_1 = 2v_2$.
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item We can formulate this as minimizing the squared error:
+        \[
+            \min_{v} \left\| \begin{bmatrix} v_1 + v_2 - 3 \\ v_1 - 2v_2 \end{bmatrix} \right\|_2^2
+        \]
+        This is equivalent to minimizing the sum of squared constraint violations.
+        
+        \item This approach is unnecessarily complicated because the constraints form a linear system with a unique solution. Instead of iterative optimization (which requires initial guesses, gradient computations, and convergence checks), we can solve the system directly:
+        \[
+            \begin{bmatrix} 1 & 1 \\ 1 & -2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 3 \\ 0 \end{bmatrix}
+        \]
+        Using linear algebra, we immediately obtain $v_1 = 2$ L/s and $v_2 = 1$ L/s without the overhead of optimization.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    (*) Consider optimization algorithms with step updates of the form $\mathbf{x}_{i+1} = \mathbf{x}_i + \alpha d$ where $d$ is a descent direction.
+    \begin{enumerate}[label=(\alph*)]
+        \item For steepest descent with $d = -\nabla f(\mathbf{x}_i)$, derive the optimal step size $\alpha_{\text{opt}}$ by minimizing a second-order Taylor expansion of $f(\mathbf{x}_i + \alpha d)$.
+        \item Repeat part (a) for Newton's method where $d = -(\nabla^2 f(\mathbf{x}_i))^{-1}\nabla f(\mathbf{x}_i)$. What is the optimal step size?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Using a second-order Taylor expansion:
+        \[
+            f(\mathbf{x}_i + \alpha d) \approx f(\mathbf{x}_i) + \alpha \nabla f(\mathbf{x}_i)^\top d + \tfrac{1}{2}\alpha^2 d^\top \nabla^2 f(\mathbf{x}_i) d
+        \]
+        With $d = -\nabla f(\mathbf{x}_i)$, this becomes:
+        \[
+            \phi(\alpha) = f(\mathbf{x}_i) - \alpha \|\nabla f(\mathbf{x}_i)\|_2^2 + \tfrac{1}{2}\alpha^2 \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)
+        \]
+        Minimizing with respect to $\alpha$:
+        \[
+            \frac{d\phi}{d\alpha} = -\|\nabla f(\mathbf{x}_i)\|_2^2 + \alpha \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i) = 0
+        \]
+        Thus:
+        \[
+            \alpha_{\text{opt}} = \frac{\nabla f(\mathbf{x}_i)^\top \nabla f(\mathbf{x}_i)}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)} = \frac{\|\nabla f(\mathbf{x}_i)\|_2^2}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)}
+        \]
+        
+        \item With $d = -\mathbf{H}^{-1}\mathbf{g}$ where $\mathbf{g} = \nabla f(\mathbf{x}_i)$ and $\mathbf{H} = \nabla^2 f(\mathbf{x}_i)$:
+        \[
+            \phi(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top (\mathbf{H}^{-1})^\top \mathbf{H} \mathbf{H}^{-1} \mathbf{g}
+        \]
+        Since $\mathbf{H}$ is symmetric, $(\mathbf{H}^{-1})^\top = \mathbf{H}^{-1}$, so:
+        \[
+            \phi(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g}
+        \]
+        Minimizing:
+        \[
+            \frac{d\phi}{d\alpha} = -\mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} = 0
+        \]
+        Thus $\alpha_{\text{opt}} = 1$. The Newton step is already optimal to the quadratic approximation when $\mathbf{H} \succ 0$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    True or False? Briefly explain your answer.
+    \begin{enumerate}[label=(\alph*)]
+        \item We can use Newton's method to find the minimum of $f([x_1, x_2]) = \max(x_1, 0) + \max(x_2, -2)$.
+        \item If our function is quadratic (e.g. $f(x) = x_1^2 + 10x_2^2$), using Newton's method will get us to the minimum in a single step.
+        \item We don't need to use Hessian modification if we use the BFGS method to estimate the Hessian.
+        \item If our function is quadratic (e.g. $f(x) = x_1^2 + 10x_2^2$), using the steepest descent algorithm with the optimal step size given by a quadratic approximation, will get us to the minimum in a single step.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item False, Newton's method for optimization requires the derivative of the gradient, but for the $\max$ function, there are points where the second derivative isn't defined.
+        
+        \item True if the function is convex. Newton's method gets us to a stationary point, which may be a maximum or saddle point instead.
+        
+        \item True, BFGS maintains a positive definite approximation of the Hessian by construction.
+        
+        \item False, the quadratic approximation for optimal alpha is only searching in the direction of the negative gradient, which may not be pointing at the minimum.
+    \end{enumerate}
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX
