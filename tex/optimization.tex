@@ -1739,51 +1739,6 @@ Finally, when gradient information is unavailable, whether due to noisy function
 
 \section{Exercises}
 
-\begin{exercise} % 2020 Participation quiz L9
-    (*) Find the roots of
-    \[
-        \lambda x^2 + e^{-x^2} - 1 = 0
-    \]
-    when $\lambda \ll 1$ and $\lambda \gg 1$.
-\end{exercise}
-
-\begin{solution}
-    When \(\lambda = 0\), the only root of \(\lambda x^2 + e^{-x^2} - 1\) is \(x = 0\):
-    \begin{align*}
-        0x^2 + e^{-x^2} - 1 &= 0\\
-        e^{-x^2} - 1 &= 0\\
-        e^{-x^2} &= 1\\
-        -x^2 &= 0\\
-        x &= 0
-    \end{align*}
-    
-    This root is actually a solution of the equation for all \(\lambda\). It is more informative to consider the case where \(0 < \lambda \ll 1\). We cannot balance the terms \(\lambda x^2\) and \(e^{-x^2}\), as both of these terms are positive, but we can balance \(\lambda x^2\) and \(-1\) to obtain \(x = \pm \sqrt{1/\lambda}\) in addition to \(x=0\).
-    \begin{align*}
-        \lambda x^{2} + \cancel{e^{-x^{2}}} - 1 &= 0\\
-        \lambda x^2 - 1 &\approx 0\\
-        \lambda x^2 &\approx 1\\
-        x^2 &\approx \dfrac{1}{\lambda}\\
-        x &\approx \pm \sqrt{\dfrac{1}{\lambda}}
-    \end{align*}
-
-    Because \(\lambda\) is a very small number, we can conclude that \(x\) is a large number. This justifies our neglect of the term \(e^{-x^2}\), which goes to zero as \(x\) increases.
-    \[
-        \lambda \ll 1 \to x=0, x\approx \pm \sqrt{\dfrac{1}{\lambda}}
-    \]
-
-    We can repeat this analysis for \(\lambda \gg 1\); it is still impossible to balance the terms \(\lambda x^2\) and \(e^{-x^2}\), but we can balance \(\lambda x^2\) and \(-1\) to obtain \(x = \pm \sqrt{1/\lambda}\) once again. The difference here is that for large \(\lambda\), \(x\) becomes a very small number, and we can no longer justify dropping the \(e^{-x^2}\) term, which goes to 1 as \(x\) goes to 0. By maintaining the term \(e^{-x^2}\) and letting it go to 1, we can see that 0 is the only valid solution for large \(\lambda\):
-    \begin{align*}
-        \lambda x^{2} + \cancelto{1}{e^{-x^{2}}} - 1 &= 0\\
-        \lambda x^2 + 1 - 1 &\approx 0\\
-        \lambda x^2 &\approx 0\\
-        x^2 &\approx 0\\
-        x &\approx 0
-    \end{align*}
-    \[
-        \lambda \gg 1 \to x=0
-    \]
-\end{solution}
-
 \begin{exercise} % 2020 Participation quiz L10
     Calculate the gradient and Hessian of
     \[
