@@ -1521,6 +1521,36 @@ Plugging these results back in,
     \]
 \end{solution}
 
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    Recall the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm}. A tridiagonal matrix is sparse: of its $n^2$ entries, only $3n-2$ are nonzero. What is the computational complexity of solving a tridiagonal linear system (a) with the Thomas algorithm, which exploits the sparsity, and (b) with standard Gaussian elimination, which treats the matrix as dense?
+\end{exercise}
+
+\begin{solution}
+    (a) The Thomas algorithm eliminates a single subdiagonal entry per row at constant cost, so its complexity is $O(n)$. (b) Standard Gaussian elimination does not exploit the sparsity and costs $O(n^3)$---for large $n$, a steep price for ignoring that almost all entries are already zero.
+\end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    (*) Write a matrix $\mathbf{A}$ that has eigenvalues $0$ and $2$ with corresponding eigenvectors $\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ and $\begin{bmatrix} 1 \\ -1 \end{bmatrix}$.
+\end{exercise}
+
+\begin{solution}
+    Place the eigenvectors in the columns of $\mathbf{V}$ and the eigenvalues on the diagonal of $\mathbf{D}$. By the $2 \times 2$ inverse formula:
+    \[
+        \mathbf{V} = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}, \quad
+        \mathbf{D} = \begin{bmatrix} 0 & 0 \\ 0 & 2 \end{bmatrix}, \quad
+        \mathbf{V}^{-1} = \frac{1}{\det\mathbf{V}} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix}
+                        = \begin{bmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{bmatrix}.
+    \]
+    Then
+    \[
+        \mathbf{A} = (\mathbf{V}\mathbf{D})\mathbf{V}^{-1}
+        = \begin{bmatrix} 0 & 2 \\ 0 & -2 \end{bmatrix}
+          \begin{bmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{bmatrix}
+        = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}.
+    \]
+    One can check that $\mathbf{A}\mathbf{v}_1 = \mathbf{0}$ and $\mathbf{A}\mathbf{v}_2 = 2\mathbf{v}_2$.
+\end{solution}
+
 
 %%% Local Variables:
 %%% mode: LaTeX

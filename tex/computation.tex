@@ -228,6 +228,47 @@ Finally, we briefly mention the concept of \textbf{space complexity}, which meas
 In this course, our primary emphasis will be on time complexity when analyzing algorithms.
 Unless we explicitly mention space complexity, all discussions regarding complexity will pertain to time complexity.
 
+\section{Exercises}
+
+\begin{exercise}\label{ex:thomas-algorithm} % 2025 "Final extra problems" Nathan Morgan
+  The Thomas algorithm allows for efficient solving of linear systems involving tridiagonal matrices,
+  \[
+    \begin{bmatrix}
+    b_1 & c_1    &        &           & 0      \\
+    a_2 & b_2    & c_2    &           &        \\
+        & a_3    & b_3    & \ddots    &        \\
+        &        & \ddots & \ddots    & c_{n-1}\\
+    0   &        &        & a_n       & b_n
+    \end{bmatrix}
+    \begin{bmatrix} x_1 \\ x_2 \\ x_3 \\ \vdots \\ x_n \end{bmatrix}
+    =
+    \begin{bmatrix} d_1 \\ d_2 \\ d_3 \\ \vdots \\ d_n \end{bmatrix}.
+  \]
+  The forward sweep computes updated coefficients (denoted with primes):
+  \[
+    c_i' =
+    \begin{cases}
+    \dfrac{c_i}{b_i}, & i = 1,\\[2.5ex]
+    \dfrac{c_i}{b_i - a_i c_{i-1}'}, & i = 2,3,\dots,n-1,
+    \end{cases}
+    \qquad
+    d_i' =
+    \begin{cases}
+    \dfrac{d_i}{b_i}, & i = 1,\\[2.5ex]
+    \dfrac{d_i - a_i d_{i-1}'}{b_i - a_i c_{i-1}'}, & i = 2,3,\dots,n.
+    \end{cases}
+  \]
+  The solution is then obtained by back substitution:
+  \[
+    x_n = d_n', \qquad x_i = d_i' - c_i'\, x_{i+1}, \quad i = n-1,\, n-2,\,\dots,\,1.
+  \]
+  How does this algorithm scale with the size of the matrix? That is, is it $\mathcal{O}(n)$, $\mathcal{O}(n^2)$, $\mathcal{O}(n^3)$,
+  $\mathcal{O}(n^4)$, etc.?
+\end{exercise}
+
+\begin{solution}
+  We have three `for loops', each of roughly length $n$, so the scaling is $\mathcal{O}(n)$.
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX

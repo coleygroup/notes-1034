@@ -901,7 +901,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    \lstinputlisting{code/matlab/L31_rejection.m}
+    \lstinputlisting{code/matlab/monte-carlo/L31_rejection.m}
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L32
@@ -909,7 +909,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{exercise}
 
 \begin{solution}
-    \lstinputlisting{code/matlab/L32_metropolis.m}
+    \lstinputlisting{code/matlab/monte-carlo/L32_metropolis.m}
 
     \textbf{Note:} In two dimensions
     \[
@@ -937,8 +937,151 @@ Because the algorithm fires one event at a time, its computational cost is propo
 % \begin{solution}
 %     Each event \ce{I + I -> D} removes two \ce{I} and creates one \ce{D}, so after \(k\) events \(\mathbf{x}=(x_I,x_D)=(5-2k,\,k)\); from \((5,0)\) this gives \((5,0)\), \((3,1)\), \((1,2)\).
 
-%     \lstinputlisting{code/matlab/L33_cme.m}
+%     \lstinputlisting{code/matlab/monte-carlo/L33_cme.m}
 % \end{solution}
+
+\begin{exercise} % 2025 "Final extra problems" Nathan Morgan
+    A Slater-type orbital is a PDF that is sometimes used to model atomic orbitals in computational chemistry.  One Slater-type orbital is described by
+    \[
+        R(x) = N\exp(-|x|),
+    \]
+    where $N$ is the normalization constant.  Analytically we know $N = 1/2$.
+
+    \begin{figure}[h!]
+        \centering
+        \begin{tikzpicture}
+        \begin{axis}[
+            width=0.75\linewidth, height=0.35\linewidth,
+            axis lines=middle,
+            xmin=-6.2, xmax=6.2, ymin=-0.06, ymax=1.12,
+            xtick={-6,-4,-2,2,4,6},
+            ytick={0.5,1},
+            grid=both,
+            grid style={gray!25},
+            minor tick num=1,
+            samples=401, domain=-6:6,
+            clip=false,
+        ]
+            \addplot[red, thick] {exp(-abs(x))};
+        \end{axis}
+        \end{tikzpicture}
+    \end{figure}
+
+    \begin{enumerate}[label=(\alph*)]
+
+        \item The following code aims to estimate $1/N$, but it consistently underestimates.  (The estimates are usually around $1.7$.)  Why?
+        \lstinputlisting{code/matlab/monte-carlo/underestimates1.m}
+
+        \item The following code aims to estimate $1/N$, but it
+        consistently underestimates.  (The estimates are usually around
+        $0.52$.)  Why?
+        \lstinputlisting{code/matlab/monte-carlo/underestimates2.m}
+
+        % \item Why did the previous two questions not use Markov Chain
+        % Monte Carlo?
+
+        \item Does the following code correctly sample points from $R(x)$?
+        \lstinputlisting{code/matlab/monte-carlo/sampling.m}
+
+        \item Assuming we have correctly sampled points from $R(x)$,
+        can we use these samples to estimate $N$?  Explain.
+
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item This code attempts to estimate $1/N$ using the following scheme:
+        \[
+            \int_{\mathbb{R}} R(x)\mathrm{d}x = \int_{\mathbb{R}} N \exp(-|x|)\mathrm{d}x = 1
+        \]
+        \[
+            1/N = \int_{\mathbb{R}} \exp(-|x|)\mathrm{d}x = \int_{\mathbb{R}} \frac{\exp(-|x|)}{p(x)}\cdot p(x)\mathrm{d}x
+        \]
+        We will draw samples from $p(x)$ and evaluate $\frac{\exp(-|x|)}{p(x)}$ at those points. Here samples are taken from $p(x) = \mathcal{U}(-2,2)$, but this doesn't cover all density of $R(x)$. So the contributions of the tails to the integral are lost.
+
+        \item The estimate of $N$ is just the average value of $\exp(-|x|)$ over the samples, but we need to account for the probablility of our samples. We do this by taking the mean of $\frac{\exp(-|x|)}{p(x)}$ instead. Corrected code:
+        \lstinputlisting{code/matlab/monte-carlo/corrected2.m}
+
+        % \item MCMC lets us sample points from an arbitrary distribution. In the previous two parts we used \texttt{rand} and \texttt{randn} to sample points from the uniform and Gaussian distributions. We don't need MCMC to sample from these two distributions as we already have functions to do so.
+
+        \item Yes.
+
+        \item No.  The integral we are trying to estimate is
+        $\int_{\mathbb{R}} \exp(-|x|)\,dx$.  This is not in the form
+        $\int f(x)\,P(x)\,dx$ where $P(x)$ is a properly normalised PDF.
+        If we try to recast our integral in this form,
+        \[
+            \int_{\mathbb{R}} \exp(-|x|)\,dx
+            = \int_{\mathbb{R}} \frac{1}{N}\, N\exp(-|x|)\,dx
+            = \int_{\mathbb{R}} \frac{1}{N}\, R(x)\,dx,
+        \]
+        then $f(x) = 1/N$.  We cannot evaluate this because we do not
+        know $N$.
+
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 2 Nathan Morgan
+    Consider the following code:
+
+    \lstinputlisting{code/matlab/monte-carlo/mcmc.m}
+
+    Can we use this code to evaluate the integrals below? For each integral, answer whether it is possible: if so, specify how $f$ and $g$ should be defined; if not, explain why. As a bonus, also find the integral value by inspection of the integrand.
+
+    \begin{enumerate}[label=(\alph*)]
+        \item \(I = \int_{\mathbb{R}} x \cdot \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
+        \item \(I = \int_{\mathbb{R}} \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
+        \item \(I = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Yes: \(g(x) = e^{-x^2},\; f(x)=x\)\\
+        \(g(x)\) doesn't need to be normalized for MCMC. The integral value is 0, due to symmetry of the integrand with respect to the bounds of integration.
+
+        \item Yes: \(g(x) = e^{-x^2},\; f(x)=1\)\\
+        The integral value is 1, as the integrand is a PDF.
+
+        \item No---not as is. This integral is not in the form of an expectation value. But if we multiply and divide by a PDF, we can cast this integral as an expectation value.
+        \[
+            I = \int_\mathbb{R} \dfrac{e^{-x^2}}{p(x)} p(x)\mathrm{d}x
+        \]
+        The value of the integral is $\sqrt{\pi}$, as that is the inverse normalization of the standard gaussian distribution.
+
+        As a side note, when choosing $p(x)$, the closer the shape of $p(x)$ matches $|e^{-x^2}|/\int|e^{-x^2}|dx$, the faster the MCMC approximation converges to the integral (i.e., it is better to sample points where our function value is high because those points contribute the most to the integral).
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2025 Review 2 Nathan Morgan
+    In the Metropolis-Hastings algorithm, we first choose a proposal (transition) distribution $M(\mathbf{x}^*, \mathbf{x}_i)$, which gives the probability of proposing the candidate state $\mathbf{x}^*$ from the current state $\mathbf{x}_i$, and then construct the acceptance probability
+    \[
+        A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*)\, M(\mathbf{x}_i, \mathbf{x}^*)}{\pi(\mathbf{x}_i)\, M(\mathbf{x}^*, \mathbf{x}_i)} \right\},
+    \]
+    where $\pi$ is the target distribution. For each of the following choices of $M$, describe what issues we would encounter (if any) and any potential solutions.
+
+    \begin{enumerate}[label=(\alph*)]
+        \item $M$ is not symmetric, $M(\mathbf{x}^*, \mathbf{x}_i)\neq M(\mathbf{x}_i, \mathbf{x}^*)$
+        % \item $M$ is one directional, $M(\mathbf{x}^*, \mathbf{x}_i) = 0.1 \text{ and } M(\mathbf{x}_i, \mathbf{x}^*)=0$
+        \item $M$ is not "irreducible" (can't get to every other $\mathbf{x}^*$ from $\mathbf{x}_i$)
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item This isn't a problem, as by construction our $A$ will account for this asymmetry. If we use a symmetric $M$, then the M-H $A$ simplifies to 
+        \[
+            A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*)}{\pi(\mathbf{x}_i)} \right\}.
+        \]
+
+        % \item If $M=0$, we would get a divide by zero error when constructing $A$.
+
+        \item We usually use an $M$ that only makes transitions in a local region (is not irreducible) like $\mathcal{U}(\mathbf{x}_i-c,\mathbf{x}_i+c)$ or $\mathcal{N}(\mathbf{x}_i,c)$. This leads to more accepted transitions and a smoother exploration of the surface. 
+        
+        In this case however, we are not guaranteed to converge to our target distribution because we only take local steps and there could be two regions with nonzero density separated by a region of zero density. One solution is to create multiple chains with different initializations.
+    \end{enumerate}
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX

@@ -1552,7 +1552,7 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L28
-    (*) If my prior is
+    If my prior is
     \[
         P_{\mathsf{p}}(p) = \begin{cases}
             2 & 0 < p < 0.5\\
@@ -1589,6 +1589,368 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
 
 \end{solution}
 
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    Let $\mathsf{x} \sim \mathcal{U}(2,5)$. The PDF of $\mathsf{x}$ takes the form
+    \[
+        p_{\mathsf{x}}(x) =
+        \begin{cases}
+            c, & x \in [2, 5], \\
+            0, & \text{otherwise,}
+        \end{cases}
+    \]
+    for some constant $c$. 
+        \begin{enumerate}[label=(\alph*)]
+            \item Find $c$ that makes $p_{\mathsf{x}}$ a valid PDF.
+            \item Find the cumulative distribution function (CDF). Make sure to define it over the entire real line $\mathbb{R}$.
+            \item Calculate the expected value of $\mathsf{x}$.
+            \item Let $\mathsf{y} = \mathsf{x}^{2}$. The PDF of $\mathsf{y}$, obtained via a change of variables, is
+                \[
+                    p_{\mathsf{y}}(y) =
+                    \begin{cases}
+                        \dfrac{1}{6\sqrt{y}}, & y \in [4, 25], \\[4pt]
+                        0,                    & \text{otherwise.}
+                    \end{cases}
+                \]
+                Calculate $\mathbb{E}[\mathsf{y}]$ in two ways: (i)~directly from $p_{\mathsf{y}}(y)$, and (ii)~using $p_{\mathsf{x}}(x)$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \textbf{(a)}
+    Requiring the PDF to integrate to 1 over $\mathbb{R}$:
+    \[
+        \int_{-\infty}^{\infty} p_{\mathsf{x}}(x)\,dx
+        = 1
+        = \int_{-\infty}^{2} 0\,dx
+          + \int_{2}^{5} c\,dx
+          + \int_{5}^{\infty} 0\,dx.
+    \]
+    \[
+        cx\big|_{2}^{5} = 5c - 2c = 3c = 1
+        \quad\Longrightarrow\quad c = \frac{1}{3}.
+    \]
+    Thus
+    \[
+        p_{\mathsf{x}}(x) =
+        \begin{cases}
+            \tfrac{1}{3}, & x \in [2, 5], \\
+            0,            & \text{otherwise.}
+        \end{cases}
+    \]
+
+    \textbf{(b)}
+    For the CDF:
+    \[
+        F_{\mathsf{x}}(x) =
+        \begin{cases}
+            \displaystyle
+                \int_{-\infty}^{2} 0\,dx,
+                & x < 2, \\[10pt]
+            \displaystyle
+                \int_{-\infty}^{2} 0\,dx + \int_{2}^{x} \tfrac{1}{3}\,dx',
+                & x \in [2,5], \\[10pt]
+            \displaystyle
+                \int_{-\infty}^{2} 0\,dx
+                + \int_{2}^{5} \tfrac{1}{3}\,dx'
+                + \int_{5}^{x} 0\,dx,
+                & x > 5,
+        \end{cases}
+    \]
+    which evaluates to
+    \[
+        F_{\mathsf{x}}(x) =
+        \begin{cases}
+            0,              & x < 2,        \\[4pt]
+            \dfrac{x-2}{3}, & x \in [2,5], \\[4pt]
+            1,              & x > 5.
+        \end{cases}
+    \]
+
+    \textbf{(c)}
+    \[
+        \mu_{\mathsf{x}} = \mathbb{E}[\mathsf{x}]
+        = \int_{-\infty}^{\infty} x\, p_{\mathsf{x}}(x)\,dx
+        = \int_{2}^{5} x \cdot \frac{1}{3}\,dx
+        = 3.5.
+    \]
+
+    \textbf{(d)} Note that smaller values of $y$ are more probable: the events $\mathsf{x} \in [2,3]$ and $\mathsf{x} \in [4,5]$ are equally likely, but they map to $\mathsf{y} \in [4,9]$ and $\mathsf{y} \in
+    [16,25]$, which are intervals of different sizes.
+
+    \textit{Method (i) --- using $p_{\mathsf{y}}(y)$:}
+    \[
+        \mathbb{E}[\mathsf{y}]
+        = \int_{4}^{25} y \cdot \frac{1}{6\sqrt{y}}\,dy
+        = \int_{4}^{25} \frac{\sqrt{y}}{6}\,dy
+        = 13.
+    \]
+
+    \textit{Method (ii) --- using $p_{\mathsf{x}}(x)$:}
+    \[
+        \mathbb{E}[\mathsf{y}]
+        = \int_{2}^{5} x^{2} \cdot \frac{1}{3}\,dx
+        = 13.
+    \]
+\end{solution}
+
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    Let the random vector $\boldsymbol{\mathsf{x}}$ be defined by
+    \[
+        \boldsymbol{\mathsf{x}}
+        = \begin{bmatrix} \xi_{1} \\ \xi_{1} + \xi_{2} \end{bmatrix},
+        \qquad
+        \xi_{1},\, \xi_{2}
+        \overset{\mathrm{i.i.d.}}{\sim} \mathcal{N}(0,1).
+    \]
+    \begin{enumerate}[label=(\alph*)]
+        \item Find the covariance matrix of $\boldsymbol{\mathsf{x}}$.
+        \item Using the result of (a), write the joint PDF
+              $p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})$.
+        \item Find the marginal distribution $p_{\mathsf{x}_{2}}(x_{2})$
+              by integrating $x_{1}$ out of the joint PDF.
+        \item Derive the conditional distribution
+              $p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid x_{1})$.
+        \item Using the result of (d) together with
+              $p_{\mathsf{x}_{1}}(x_{1})$, rederive
+              $p_{\mathsf{x}_{2}}(x_{2})$. Check that it matches the
+              result of (c).
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \textbf{(a)} Using $\mathrm{Cov}(\mathsf{a}, \mathsf{a}) = \mathrm{Var}(\mathsf{a})$, $\mathrm{Cov}(\mathsf{a}, \mathsf{a} + \mathsf{b}) = \mathrm{Cov}(\mathsf{a}, \mathsf{a}) + \mathrm{Cov}(\mathsf{a}, \mathsf{b})$, and $\mathrm{Cov}(\xi_{1}, \xi_{2}) = 0$ (independence):
+    \[
+        \mathbf{C}
+        = \begin{bmatrix}
+            \mathrm{Var}(\xi_{1}) &
+                \mathrm{Cov}(\xi_{1},\, \xi_{1}+\xi_{2}) \\
+            \mathrm{Cov}(\xi_{1}+\xi_{2},\, \xi_{1}) &
+                \mathrm{Var}(\xi_{1}+\xi_{2})
+          \end{bmatrix}
+    \]
+    \[
+        = \begin{bmatrix}
+            1 &
+                \mathrm{Var}(\xi_{1}) + \mathrm{Cov}(\xi_{1}, \xi_{2}) \\
+            \mathrm{Var}(\xi_{1}) + \mathrm{Cov}(\xi_{1}, \xi_{2}) &
+                \mathrm{Var}(\xi_{1}) + \mathrm{Var}(\xi_{2})
+          \end{bmatrix}
+        = \begin{bmatrix} 1 & 1+0 \\ 1+0 & 1+1 \end{bmatrix}
+        = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix}.
+    \]
+
+    \textbf{(b)} Therefore $\boldsymbol{\mathsf{x}} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ with $\boldsymbol{\mu} = \begin{bmatrix}0\\0\end{bmatrix}$ and $\boldsymbol{\Sigma} = \begin{bmatrix}1&1\\1&2\end{bmatrix}$.
+    Applying the multivariate Gaussian PDF formula:
+    \begin{multline*}
+        p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})
+        = (2\pi)^{-k/2} \det(\boldsymbol{\Sigma})^{-1/2}
+          \exp\!\left(
+              -\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^{\top}
+              \boldsymbol{\Sigma}^{-1}
+              (\mathbf{x}-\boldsymbol{\mu})
+          \right) \\
+        = \exp\!\left(
+              -\left(
+                  \begin{bmatrix}x_{1}\\x_{2}\end{bmatrix}
+                  - \begin{bmatrix}0\\0\end{bmatrix}
+              \right)^{\!\top}
+              \begin{bmatrix}1&1\\1&2\end{bmatrix}^{-1}
+              \left(
+                  \begin{bmatrix}x_{1}\\x_{2}\end{bmatrix}
+                  - \begin{bmatrix}0\\0\end{bmatrix}
+              \right)\bigg/2
+          \right)
+          \Bigg/
+          \left(
+              2\pi\sqrt{\det\!\begin{bmatrix}1&1\\1&2\end{bmatrix}}
+          \right) \\
+        = \frac{1}{2\pi}
+          \exp\!\left(x_{1}x_{2} - x_{1}^{2} - \frac{x_{2}^{2}}{2}\right).
+    \end{multline*}
+
+    \textbf{(c)}
+    \begin{align*}
+        p_{\mathsf{x}_{2}}(x_{2})
+        &= \int_{-\infty}^{\infty}
+           \frac{1}{2\pi}
+           \exp\!\left(x_{1}x_{2} - x_{1}^{2} - \frac{x_{2}^{2}}{2}\right)
+           dx_{1} \\
+        &= \frac{1}{2\pi}
+           \int_{-\infty}^{\infty}
+           \exp\!\left(-(x_{1} - x_{2}/2)^{2} - x_{2}^{2}/4\right)
+           dx_{1} \\
+        &= \frac{e^{-x_{2}^{2}/4}}{2\pi} \cdot \sqrt{\pi}
+         = \frac{1}{\sqrt{4\pi}}
+           \exp\!\left(-\frac{x_{2}^{2}}{4}\right)
+         = \mathcal{N}(0,\,2).
+    \end{align*}
+
+    \textbf{(d)} If $x_{1}$ is fixed, then $x_{2} = x_{1} + \xi_{2}$ has its mean shifted to $x_{1}$, so $x_{2} \mid x_{1} \sim \mathcal{N}(x_{1}, 1)$; that is,
+    \[
+        p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid x_{1})
+        = \frac{1}{\sqrt{2\pi}}
+          \exp\!\left(-\frac{(x_{2}-x_{1})^{2}}{2}\right).
+    \]
+
+    \textbf{(e)} Therefore
+    \begin{align*}
+        p_{\mathsf{x}_{2}}(x_{2})
+        &= \int_{-\infty}^{\infty}
+           p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid x_{1})\,
+           p_{\mathsf{x}_{1}}(x_{1})\, dx_{1} \\
+        &= \int_{-\infty}^{\infty}
+           \frac{1}{\sqrt{2\pi}}
+           \exp\!\left(-\frac{(x_{2}-x_{1})^{2}}{2}\right)
+           \cdot
+           \frac{1}{\sqrt{2\pi}}
+           \exp\!\left(-\frac{x_{1}^{2}}{2}\right)
+           \, dx_{1} \\
+        &= \frac{1}{2\pi}
+           \int_{-\infty}^{\infty}
+           \exp\!\left(-(x_{1}-x_{2}/2)^{2} - x_{2}^{2}/4\right)
+           dx_{1}
+         = \mathcal{N}(0,\,2),
+    \end{align*}
+    which matches the result of (c).
+\end{solution}
+
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    The PDF of the Erlang distribution with shape parameter $k$ and rate $\lambda$ is
+    \[
+        p_{\mathsf{x}}(x;\, k, \lambda)
+        = \frac{\lambda^{k} x^{k-1} e^{-\lambda x}}{(k-1)!},
+        \qquad x \geq 0.
+    \]
+    Using this fact, calculate
+    \[
+        \int_{0}^{\infty} \frac{32\, x^{4}\, e^{-2x}}{4!}\, dx.
+    \]
+    [Hint: this does not require integration by parts.]
+\end{exercise}
+
+\begin{solution}
+    The integrand is the Erlang PDF with $k = 5$ and $\lambda = 2$:
+    \[
+        \frac{2^{5}\, x^{5-1}\, e^{-2x}}{(5-1)!}
+        = \frac{32\, x^{4}\, e^{-2x}}{4!}.
+    \]
+    Since every PDF integrates to 1 over its support, the value is $1$.
+\end{solution}
+
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    A call center receives an average of $\lambda = 5$ calls per minute. Assuming the time between successive calls follows an exponential distribution, the probability that the $k$-th call arrives by time $x$ is given by the Erlang CDF
+    \[
+        F_{\mathsf{x}}(x;\, k, \lambda)
+        = 1 - e^{-\lambda x}
+          \sum_{n=0}^{k-1} \frac{(\lambda x)^{n}}{n!}.
+    \]
+    Compute $F_{\mathsf{x}}(x = 5\ \mathrm{min},\ k = 10\ \mathrm{calls},\ \lambda = 5\ \mathrm{calls/min})$, i.e.\ the probability that at least 10 calls arrive within 5 minutes. Implement the calculation in MATLAB.
+\end{exercise}
+
+\begin{solution}
+    \[
+        F_{\mathsf{x}}(5;\, 10,\, 5)
+        = 1 - e^{-5 \cdot 5}
+          \sum_{n=0}^{9} \frac{(5 \cdot 5)^{n}}{n!}.
+    \]
+    \lstinputlisting{code/matlab/probability/erlang_cdf.m}
+\end{solution}
+
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    Starting on day $t = 0$, one cake is baked each day. Each day your friend consumes $\tfrac{1}{2}$ of the cake baked that day, $\tfrac{1}{3}$ of the cake baked the previous day, and $\tfrac{1}{6}$ of the cake baked two days ago. The consumption-delay distribution is
+    described by the PMF
+    \[
+        p_{\mathsf{t}}(0) = \tfrac{1}{2}, \quad
+        p_{\mathsf{t}}(1) = \tfrac{1}{3}, \quad
+        p_{\mathsf{t}}(2) = \tfrac{1}{6}.
+    \]
+    Using the discrete convolution $p_{\mathsf{s}}(s) = \sum_{x=0}^{s} p_{\mathsf{x}}(x)\, p_{\mathsf{y}}(s-x)$, find how much cake is eaten on day $t = 0$, day $t = 1$, and every day from $t = 2$ onward. What general relationship does this illustrate between a step function, a PMF, and the CMF?
+\end{exercise}
+
+\begin{solution}
+    \begin{itemize}
+        \item Day $t = 0$: $\tfrac{1}{2}$ cake (from the cake baked that
+              day only).
+        \item Day $t = 1$: $\tfrac{1}{2}$ (from day~1) $+$ $\tfrac{1}{3}$
+              (from day~0) $= \tfrac{5}{6}$ cake.
+        \item Day $t \geq 2$: $\tfrac{1}{2} + \tfrac{1}{3} + \tfrac{1}{6}
+              = 1$ cake.
+    \end{itemize}
+    The daily baking schedule is a unit step function, and each portion of cake is consumed according to the PMF $p_{\mathsf{t}}$. The convolution of a unit step with a PMF yields the CMF, so the total amount eaten per day stabilises at 1 once the full support of $p_{\mathsf{t}}$ has been covered.
+\end{solution}
+
+\begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
+    Let $u(t)$ denote the unit step function,
+    \[
+        u(t) =
+        \begin{cases}
+            1, & t \geq 0, \\
+            0, & t < 0,
+        \end{cases}
+    \]
+    and let $p_{\mathsf{t}}(t)$ be a continuous PDF. Show that the convolution
+    \[
+        (u\,{*}\,p_{\mathsf{t}})(t)
+        = \int_{-\infty}^{\infty} u(\tau)\, p_{\mathsf{t}}(t-\tau)\, d\tau
+    \]
+    equals the CDF $F_{\mathsf{t}}(t)$.
+\end{exercise}
+
+\begin{solution}
+    \[
+        (u\,{*}\,p_{\mathsf{t}})(t)
+        = \int_{-\infty}^{\infty} u(\tau)\, p_{\mathsf{t}}(t-\tau)\, d\tau
+        = \int_{0}^{\infty} p_{\mathsf{t}}(t-\tau)\, d\tau.
+    \]
+    Substituting $x = t - \tau$ (so $dx = -d\tau$, and the limits $\tau = 0, \infty$ map to $x = t, -\infty$):
+    \[
+        (u\,{*}\,p_{\mathsf{t}})(t)
+        = \int_{x=t}^{x=-\infty} p_{\mathsf{t}}(x)\,(-dx)
+        = \int_{-\infty}^{t} p_{\mathsf{t}}(x)\, dx
+        = F_{\mathsf{t}}(t).
+    \]
+\end{solution}
+
+\begin{exercise}
+    Calculate the empirical covariance matrix for this set of measurements.
+    \begin{table}[h!]
+        \centering
+        \begin{tabular}{c|cc}
+            Measurement & $x_1$ & $x_2$ \\
+        \hline
+            1 & 1 & 10 \\
+            2 & 2 & 9 \\
+            3 & 3 & 11 \\
+        \end{tabular}
+    \end{table} 
+\end{exercise}
+
+\begin{solution}
+    \[
+        C_{ij} = \langle x_ix_j\rangle - \langle x_i\rangle \langle x_j\rangle
+    \]\\
+    First we need $\langle x_1 \rangle = 2$ and $\langle x_2 \rangle = 10$. We also need $\langle x_1 x_2 \rangle = 61/3$, $\langle x_1^2 \rangle = 14/3$, $\langle x_2^2 \rangle = 302/3$.
+
+    Then
+    \[
+        C = \begin{bmatrix}
+            14/3 - 2 & 61/3 - 20\\
+            61/3 - 20 & 302/3 - 100
+        \end{bmatrix} =
+        \begin{bmatrix}
+            2/3 & 1/3 \\
+            1/3 & 2/3
+        \end{bmatrix}.
+    \]
+
+    But this formula we used is for population variance. We used the data to estimate the mean, so our variance estimates are biased. So we multiply by $N/(N-1) = 3/2$.
+    \[
+        \boxed{C = \begin{bmatrix}
+            1 & 0.5\\
+            0.5 & 1
+        \end{bmatrix}}
+    \]
+\end{solution}
 
 %%% Local Variables:
 %%% mode: LaTeX
