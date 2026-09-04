@@ -1796,22 +1796,22 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
 \end{solution}
 
 \begin{exercise} % 2025 "Final extra problems" Nathan Morgan
-    (*) Using the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm},
-    solve the initial value problem
+    (*) Consider the following initial value problem:
     \[
         \frac{dx}{dt} = -x, \qquad x(0) = x_0.
     \]
     \begin{enumerate}[label=(\alph*)]
 
         \item Derive a linear system whose solution gives $x$ at each
-        grid point.  That is, find an expression for each of $a_i$,
-        $b_i$, $c_i$, and $d_i$.  Use a step size of $\Delta t$.  To
-        obtain a tridiagonal system, use a centered 2nd-order finite
-        difference for the interior points and a backward 1st-order
-        finite difference for the final point.
+        grid point.  Use a step size of $\Delta t$, a centered
+        2nd-order finite difference for the interior points, and a
+        backward 1st-order finite difference for the final point.
 
-        \item What practical challenges could we experience if $\Delta t$
-        is too small?
+        \item What is the sparsity pattern of the resulting linear
+        system?  Is there a relevant algorithm for solving systems
+        with this structure?  How does the computational complexity
+        scale with $\Delta t$ when the simulation horizon $[0, T]$ is
+        fixed?
 
     \end{enumerate}
 \end{exercise}
@@ -1834,8 +1834,9 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
             \mathbf{x} = \begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_N
             \end{pmatrix}.
         \]
-        From this we get $a_i = -1$, $b_i = 2\Delta t$, and $c_i = 1$,
-        with $a_0 = 0$ because of the boundary conditions.
+        From this we get, in the notation of
+        Exercise~\ref{ex:thomas-algorithm}, $a_i = -1$, $b_i = 2\Delta t$,
+        and $c_i = 1$, with $a_0 = 0$ because of the boundary conditions.
 
         % Note: the i=1 equation below is written with x_i rather than
         % x_1, and the first row of A drops the -1 that was moved to the RHS.
@@ -1875,17 +1876,22 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
         \end{pmatrix}.
         \]
 
-        \item Probably there won't be a problem with the number of
-        steps because the scaling is $\mathcal{O}(n)$.  But in the Thomas
-        algorithm, we divide by $b_i$.  If this is too small, we could run
-        into stability issues.
+        \item The system is tridiagonal: each equation couples $x_i$
+        only to its neighbors $x_{i-1}$ and $x_{i+1}$.  The relevant
+        algorithm is the Thomas algorithm from
+        Exercise~\ref{ex:thomas-algorithm}, which solves a tridiagonal
+        system in $\mathcal{O}(N)$ operations.  With the horizon
+        $[0, T]$ fixed, the number of grid points is $N = T/\Delta t$,
+        so the cost scales as $\mathcal{O}(1/\Delta t)$: halving the
+        step size doubles the work.
 
     \end{enumerate}
 \end{solution}
 
 \begin{exercise} % 2025 "Final extra problems" Nathan Morgan
-    (*) What is the order of accuracy of the following estimation of the first
-    derivative at a point?  Assume $\Delta x_{i-1} \neq \Delta x_i$, with
+    (*) What is the order of accuracy, with respect to
+    $\max(\Delta x_{i-1}, \Delta x_i)$, of the following approximation of the
+    first derivative at a point?  Assume $\Delta x_{i-1} \neq \Delta x_i$, with
     $\Delta x_{i-1} = x_i - x_{i-1}$ and $\Delta x_i = x_{i+1} - x_i$.
     What if $\Delta x_{i-1} = \Delta x_i$?
     \[
@@ -1957,23 +1963,24 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
     \end{itemize}
 \end{solution}
 
-\begin{exercise} % 2025 Review 3 Nathan Morgan
-    Consider the boundary value problem
-    \[
-        \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
-    \]
-    Since $\mathbf{x}(t_f)$ is determined by $\mathbf{x}(t_0)$ through the ODE, $\mathbf{g}$ can be viewed as a function of $\mathbf{x}(t_0)$ alone. Write $\mathbf{g}(\mathbf{x}(t_0))$ explicitly when the boundary conditions are $x_1(t_0) = 1$ and $x_2(t_f) = 3$. You can use $\mathrm{ode}(\mathbf{f}, \mathbf{x}(t_0), [t_0, t_f])$ to denote the solution of the ODE integrated from $t_0$ to $t_f$ with initial condition $\mathbf{x}(t_0)$
-\end{exercise}
-
-\begin{solution}
-    \[
-        \mathbf{g}(\mathbf{x}(t_0)) =
-        \begin{bmatrix}
-            (\mathbf{x}(t_0))_1 - 1 \\[4pt]
-            \mathrm{ode}(\mathbf{f},\,\mathbf{x}(t_0),\,[t_0,\,t_f]) - 3
-        \end{bmatrix}
-    \]
-\end{solution}
+% Commented out per review.
+% \begin{exercise} % 2025 Review 3 Nathan Morgan
+%     Consider the boundary value problem
+%     \[
+%         \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
+%     \]
+%     Since $\mathbf{x}(t_f)$ is determined by $\mathbf{x}(t_0)$ through the ODE, $\mathbf{g}$ can be viewed as a function of $\mathbf{x}(t_0)$ alone. Write $\mathbf{g}(\mathbf{x}(t_0))$ explicitly when the boundary conditions are $x_1(t_0) = 1$ and $x_2(t_f) = 3$. You can use $\mathrm{ode}(\mathbf{f}, \mathbf{x}(t_0), [t_0, t_f])$ to denote the solution of the ODE integrated from $t_0$ to $t_f$ with initial condition $\mathbf{x}(t_0)$
+% \end{exercise}
+%
+% \begin{solution}
+%     \[
+%         \mathbf{g}(\mathbf{x}(t_0)) =
+%         \begin{bmatrix}
+%             (\mathbf{x}(t_0))_1 - 1 \\[4pt]
+%             \mathrm{ode}(\mathbf{f},\,\mathbf{x}(t_0),\,[t_0,\,t_f]) - 3
+%         \end{bmatrix}
+%     \]
+% \end{solution}
 
 \begin{exercise} % 2025 Review 3 Nathan Morgan
     Classify each of the following as Dirichlet, Neumann, Robin, or none of these.
@@ -1990,24 +1997,25 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
     \end{enumerate}
 \end{solution}
 
-\begin{exercise} % 2025 Review 3 Nathan Morgan
-    Implement the shooting method in MATLAB for the general boundary value problem
-    \[
-        \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
-    \]
-    Assume \texttt{f} and \texttt{g} are defined as MATLAB functions and that \texttt{t0}, \texttt{tf}, and an initial guess \texttt{c0} for the initial condition $\mathbf{x}(t_0)$ are available in the workspace.
-\end{exercise}
-
-\begin{solution}
-    \lstinputlisting{code/matlab/ode/shoot.m}
-\end{solution}
+% Commented out per review.
+% \begin{exercise} % 2025 Review 3 Nathan Morgan
+%     Implement the shooting method in MATLAB for the general boundary value problem
+%     \[
+%         \frac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x}, t), \quad \mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(t_f)) = \mathbf{0}.
+%     \]
+%     Assume \texttt{f} and \texttt{g} are defined as MATLAB functions and that \texttt{t0}, \texttt{tf}, and an initial guess \texttt{c0} for the initial condition $\mathbf{x}(t_0)$ are available in the workspace.
+% \end{exercise}
+%
+% \begin{solution}
+%     \lstinputlisting{code/matlab/ode/shoot.m}
+% \end{solution}
 
 \begin{exercise} % 2025 Review 3 Nathan Morgan
     Let $\mathbf{S} = \dfrac{\partial\mathbf{x}(T)}{\partial\mathbf{c}}$ be the sensitivity matrix of the ODE solution at the final time with respect to the initial condition $\mathbf{c} = \mathbf{x}(t_0)$, for the BVP $\dfrac{d\mathbf{x}}{dt} = \mathbf{f}(\mathbf{x},t)$, $\mathbf{g}(\mathbf{x}(t_0), \mathbf{x}(T)) = \mathbf{0}$.
     \begin{enumerate}[label=(\alph*)]
         \item Why is $\mathbf{S}$ useful when applying the shooting method?
         \item Describe two methods for computing $\mathbf{S}$.
-        \item For a scalar problem, $c = 1$ gives $x(T) = 1.0$ and $c = 1.0001$ gives $x(T) = 1.123$. Compute $\partial x/\partial c$ numerically.
+        % \item For a scalar problem, $c = 1$ gives $x(T) = 1.0$ and $c = 1.0001$ gives $x(T) = 1.123$. Compute $\partial x/\partial c$ numerically.
     \end{enumerate}
 \end{exercise}
 
@@ -2023,35 +2031,36 @@ Finally, the finite volume method is closest to a conservation-law viewpoint. Yo
             \item \textit{Numerical differentiation}: perturb each component of $\mathbf{c}$, solve the ODE for each perturbation, and estimate each column of $\mathbf{S}$ by finite differences.
             \item \textit{Sensitivity ODE}: differentiate the ODE with respect to $\mathbf{c}$ to obtain a matrix-valued ODE-IVP for $\mathbf{S}$, solved alongside the original ODE.
         \end{enumerate}
-        \item Using a forward finite difference:
-        \[
-            \frac{\partial x}{\partial c} \approx \frac{x(T)\big|_{c=1.0001} - x(T)\big|_{c=1}}{1.0001 - 1} = \frac{1.123 - 1.0}{0.0001} = 1{,}230.
-        \]
+        % \item Using a forward finite difference:
+        % \[
+        % \frac{\partial x}{\partial c} \approx \frac{x(T)\big|_{c=1.0001} - x(T)\big|_{c=1}}{1.0001 - 1} = \frac{1.123 - 1.0}{0.0001} = 1{,}230.
+        % \]
     \end{enumerate}
 \end{solution}
 
-\begin{exercise} % 2025 Review 3 Nathan Morgan
-    Using the finite difference table shown, write the 6th-order accurate central difference approximation for $f''(x)$.
-    \begin{table}[h!]
-    \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
-        \hline
-        Derivative & Accuracy & -3   & -2    & -1  & 0      & 1   & 2     & 3    \\ \hline
-        2          & 6        & 1/90 & -3/20 & 3/2 & -49/18 & 3/2 & -3/20 & 1/90 \\ \hline
-    \end{tabular}
-    \end{table}
-\end{exercise}
-
-\begin{solution}
-    Reading from the table:
-    \begin{multline*}
-        f''(x) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f(x-3\Delta x) - \frac{3}{20}f(x-2\Delta x) + \frac{3}{2}f(x-\Delta x)\right. \\
-        \left.- \frac{49}{18}f(x) + \frac{3}{2}f(x+\Delta x) - \frac{3}{20}f(x+2\Delta x) + \frac{1}{90}f(x+3\Delta x)\right) + \mathcal{O}\!\left((\Delta x)^6\right)
-    \end{multline*}
-    Equivalently, at grid point $x_i$ with $f_j = f(x_j)$:
-    \[
-        f''(x_i) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f_{i-3} - \frac{3}{20}f_{i-2} + \frac{3}{2}f_{i-1} - \frac{49}{18}f_i + \frac{3}{2}f_{i+1} - \frac{3}{20}f_{i+2} + \frac{1}{90}f_{i+3}\right) + \mathcal{O}\!\left((\Delta x)^6\right)
-    \]
-\end{solution}
+% Commented out per review.
+% \begin{exercise} % 2025 Review 3 Nathan Morgan
+%     Using the finite difference table shown, write the 6th-order accurate central difference approximation for $f''(x)$.
+%     \begin{table}[h!]
+%     \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+%         \hline
+%         Derivative & Accuracy & -3   & -2    & -1  & 0      & 1   & 2     & 3    \\ \hline
+%         2          & 6        & 1/90 & -3/20 & 3/2 & -49/18 & 3/2 & -3/20 & 1/90 \\ \hline
+%     \end{tabular}
+%     \end{table}
+% \end{exercise}
+%
+% \begin{solution}
+%     Reading from the table:
+%     \begin{multline*}
+%         f''(x) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f(x-3\Delta x) - \frac{3}{20}f(x-2\Delta x) + \frac{3}{2}f(x-\Delta x)\right. \\
+%         \left.- \frac{49}{18}f(x) + \frac{3}{2}f(x+\Delta x) - \frac{3}{20}f(x+2\Delta x) + \frac{1}{90}f(x+3\Delta x)\right) + \mathcal{O}\!\left((\Delta x)^6\right)
+%     \end{multline*}
+%     Equivalently, at grid point $x_i$ with $f_j = f(x_j)$:
+%     \[
+%         f''(x_i) = \frac{1}{(\Delta x)^2}\!\left(\frac{1}{90}f_{i-3} - \frac{3}{20}f_{i-2} + \frac{3}{2}f_{i-1} - \frac{49}{18}f_i + \frac{3}{2}f_{i+1} - \frac{3}{20}f_{i+2} + \frac{1}{90}f_{i+3}\right) + \mathcal{O}\!\left((\Delta x)^6\right)
+%     \]
+% \end{solution}
 
 
 %%% Local Variables:

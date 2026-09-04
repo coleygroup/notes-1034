@@ -977,8 +977,8 @@ Because the algorithm fires one event at a time, its computational cost is propo
         $0.52$.)  Why?
         \lstinputlisting{code/matlab/monte-carlo/underestimates2.m}
 
-        \item Why did the previous two questions not use Markov Chain
-        Monte Carlo?
+        % \item Why did the previous two questions not use Markov Chain
+        % Monte Carlo?
 
         \item Does the following code correctly sample points from $R(x)$?
         \lstinputlisting{code/matlab/monte-carlo/sampling.m}
@@ -1003,7 +1003,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
         \item The estimate of $N$ is just the average value of $\exp(-|x|)$ over the samples, but we need to account for the probablility of our samples. We do this by taking the mean of $\frac{\exp(-|x|)}{p(x)}$ instead. Corrected code:
         \lstinputlisting{code/matlab/monte-carlo/corrected2.m}
 
-        \item MCMC lets us sample points from an arbitrary distribution. In the previous two parts we used \texttt{rand} and \texttt{randn} to sample points from the uniform and Gaussian distributions. We don't need MCMC to sample from these two distributions as we already have functions to do so.
+        % \item MCMC lets us sample points from an arbitrary distribution. In the previous two parts we used \texttt{rand} and \texttt{randn} to sample points from the uniform and Gaussian distributions. We don't need MCMC to sample from these two distributions as we already have functions to do so.
 
         \item Yes.
 
@@ -1023,28 +1023,28 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{solution}
 
 \begin{exercise} % 2025 Review 2 Nathan Morgan
-    For each of the integrals below, specify a functional form of $g$ and $f$ that can be used in the following code to approximate the integral value.
-    
+    Consider the following code:
+
     \lstinputlisting{code/matlab/monte-carlo/mcmc.m}
 
-    As a bonus, also find the integral value by inspection of the integrand. 
+    Can we use this code to evaluate the integrals below? For each integral, answer whether it is possible: if so, specify how $f$ and $g$ should be defined; if not, explain why. As a bonus, also find the integral value by inspection of the integrand.
 
     \begin{enumerate}[label=(\alph*)]
         \item \(I = \int_{\mathbb{R}} x \cdot \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
         \item \(I = \int_{\mathbb{R}} \dfrac{e^{-x^2}}{Z}\mathrm{d}x, \quad Z = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)\\[4pt]
-        \item \(I = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\) (This is a bit of a trick question, why?)
+        \item \(I = \int_{\mathbb{R}} e^{-x^2}\mathrm{d}x\)
     \end{enumerate}
 \end{exercise}
 
 \begin{solution}
     \begin{enumerate}[label=(\alph*)]
-        \item \(g(x) = e^{-x^2},\; f(x)=x\)\\
+        \item Yes: \(g(x) = e^{-x^2},\; f(x)=x\)\\
         \(g(x)\) doesn't need to be normalized for MCMC. The integral value is 0, due to symmetry of the integrand with respect to the bounds of integration.
 
-        \item \(g(x) = e^{-x^2},\; f(x)=1\)\\
+        \item Yes: \(g(x) = e^{-x^2},\; f(x)=1\)\\
         The integral value is 1, as the integrand is a PDF.
-        
-        \item This integral is not in the form of an expectation value. We can't use MCMC as is. But if we multiply and divide by a PDF, we can cast this integral as an expectation value.
+
+        \item No---not as is. This integral is not in the form of an expectation value. But if we multiply and divide by a PDF, we can cast this integral as an expectation value.
         \[
             I = \int_\mathbb{R} \dfrac{e^{-x^2}}{p(x)} p(x)\mathrm{d}x
         \]
@@ -1055,11 +1055,15 @@ Because the algorithm fires one event at a time, its computational cost is propo
 \end{solution}
 
 \begin{exercise} % 2025 Review 2 Nathan Morgan
-    In the Metropolis-Hastings algorithm, we first choose $M$ and then construct $A$. For each of the following choices of $M$, describe what issues we would encounter (if any) and any potential solutions. 
+    In the Metropolis-Hastings algorithm, we first choose a proposal (transition) distribution $M(\mathbf{x}^*, \mathbf{x}_i)$, which gives the probability of proposing the candidate state $\mathbf{x}^*$ from the current state $\mathbf{x}_i$, and then construct the acceptance probability
+    \[
+        A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*)\, M(\mathbf{x}_i, \mathbf{x}^*)}{\pi(\mathbf{x}_i)\, M(\mathbf{x}^*, \mathbf{x}_i)} \right\},
+    \]
+    where $\pi$ is the target distribution. For each of the following choices of $M$, describe what issues we would encounter (if any) and any potential solutions.
 
     \begin{enumerate}[label=(\alph*)]
         \item $M$ is not symmetric, $M(\mathbf{x}^*, \mathbf{x}_i)\neq M(\mathbf{x}_i, \mathbf{x}^*)$
-        \item $M$ is one directional, $M(\mathbf{x}^*, \mathbf{x}_i) = 0.1 \text{ and } M(\mathbf{x}_i, \mathbf{x}^*)=0$
+        % \item $M$ is one directional, $M(\mathbf{x}^*, \mathbf{x}_i) = 0.1 \text{ and } M(\mathbf{x}_i, \mathbf{x}^*)=0$
         \item $M$ is not "irreducible" (can't get to every other $\mathbf{x}^*$ from $\mathbf{x}_i$)
     \end{enumerate}
 \end{exercise}
@@ -1071,7 +1075,7 @@ Because the algorithm fires one event at a time, its computational cost is propo
             A(\mathbf{x}^*, \mathbf{x}_i) = \min \left\{ 1, \frac{\pi(\mathbf{x}^*)}{\pi(\mathbf{x}_i)} \right\}.
         \]
 
-        \item If $M=0$, we would get a divide by zero error when constructing $A$.
+        % \item If $M=0$, we would get a divide by zero error when constructing $A$.
 
         \item We usually use an $M$ that only makes transitions in a local region (is not irreducible) like $\mathcal{U}(\mathbf{x}_i-c,\mathbf{x}_i+c)$ or $\mathcal{N}(\mathbf{x}_i,c)$. This leads to more accepted transitions and a smoother exploration of the surface. 
         

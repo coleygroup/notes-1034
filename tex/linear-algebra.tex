@@ -1522,52 +1522,33 @@ Plugging these results back in,
 \end{solution}
 
 \begin{exercise} % 2025 "Final extra problems" Nathan Morgan
-    Recall the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm}. What problem could we experience if we instead used Gaussian elimination to solve a tridiagonal linear system with large matrices?
+    Recall the Thomas algorithm from Exercise~\ref{ex:thomas-algorithm}. A tridiagonal matrix is sparse: of its $n^2$ entries, only $3n-2$ are nonzero. What is the computational complexity of solving a tridiagonal linear system (a) with the Thomas algorithm, which exploits the sparsity, and (b) with standard Gaussian elimination, which treats the matrix as dense?
 \end{exercise}
 
 \begin{solution}
-    Gaussian elimination operates on the full dense matrix rather than exploiting the tridiagonal structure. For large systems, storing the dense matrix could take too much memory.
+    (a) The Thomas algorithm eliminates a single subdiagonal entry per row at constant cost, so its complexity is $O(n)$. (b) Standard Gaussian elimination does not exploit the sparsity and costs $O(n^3)$---for large $n$, a steep price for ignoring that almost all entries are already zero.
 \end{solution}
 
 \begin{exercise} % 2025 Review 1 Nathan Morgan
-    (*) Write a matrix $\mathbf{A}$ that has eigenvalues $0$, $1$, $2$ with corresponding eigenvectors $\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}$, $\begin{bmatrix} -1 \\ 1 \\ -1 \end{bmatrix}$, and $\begin{bmatrix} 1 \\ -1 \\ -1 \end{bmatrix}$.
+    (*) Write a matrix $\mathbf{A}$ that has eigenvalues $0$ and $2$ with corresponding eigenvectors $\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ and $\begin{bmatrix} 1 \\ -1 \end{bmatrix}$.
 \end{exercise}
 
 \begin{solution}
-    Construct the eigenvector matrix $\mathbf{V}$ by placing the eigenvectors as columns:
+    Place the eigenvectors in the columns of $\mathbf{V}$ and the eigenvalues on the diagonal of $\mathbf{D}$. By the $2 \times 2$ inverse formula:
     \[
-        \mathbf{V} = \begin{bmatrix} 1 & -1 & 1 \\ 1 & 1 & -1 \\ 1 & -1 & -1 \end{bmatrix}
+        \mathbf{V} = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}, \quad
+        \mathbf{D} = \begin{bmatrix} 0 & 0 \\ 0 & 2 \end{bmatrix}, \quad
+        \mathbf{V}^{-1} = \frac{1}{\det\mathbf{V}} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix}
+                        = \begin{bmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{bmatrix}.
     \]
-    The diagonal eigenvalue matrix is:
+    Then
     \[
-        \mathbf{D} = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 2 \end{bmatrix}
+        \mathbf{A} = (\mathbf{V}\mathbf{D})\mathbf{V}^{-1}
+        = \begin{bmatrix} 0 & 2 \\ 0 & -2 \end{bmatrix}
+          \begin{bmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{bmatrix}
+        = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}.
     \]
-    To find $\mathbf{A} = \mathbf{V}\mathbf{D}\mathbf{V}^{-1}$, first compute $\mathbf{V}^{-1}$ through Gaussian elimination on the augmented matrix $[\mathbf{V} | \mathbf{I}]$:
-    \[
-        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 1 & 1 & -1 & 0 & 1 & 0 \\ 1 & -1 & -1 & 0 & 0 & 1 \end{array}\right]
-        \xrightarrow{R_2 - R_1, R_3 - R_1}
-        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 0 & 2 & -2 & -1 & 1 & 0 \\ 0 & 0 & -2 & -1 & 0 & 1 \end{array}\right]
-    \]
-    \[
-        \xrightarrow{R_2 / 2, R_3 / (-2)}
-        \left[\begin{array}{ccc|ccc} 1 & -1 & 1 & 1 & 0 & 0 \\ 0 & 1 & -1 & -1/2 & 1/2 & 0 \\ 0 & 0 & 1 & 1/2 & 0 & -1/2 \end{array}\right]
-    \]
-    \[
-        \xrightarrow{R_1 + R_2, R_2 + R_3}
-        \left[\begin{array}{ccc|ccc} 1 & 0 & 0 & 1/2 & 1/2 & 0 \\ 0 & 1 & 0 & 0 & 1/2 & -1/2 \\ 0 & 0 & 1 & 1/2 & 0 & -1/2 \end{array}\right]
-    \]
-    Thus:
-    \[
-        \mathbf{V}^{-1} = \begin{bmatrix} 1/2 & 1/2 & 0 \\ 0 & 1/2 & -1/2 \\ 1/2 & 0 & -1/2 \end{bmatrix}
-    \]
-    Computing $\mathbf{V}\mathbf{D}$:
-    \[
-        \mathbf{V}\mathbf{D} = \begin{bmatrix} 1 & -1 & 1 \\ 1 & 1 & -1 \\ 1 & -1 & -1 \end{bmatrix} \begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 2 \end{bmatrix} = \begin{bmatrix} 0 & -1 & 2 \\ 0 & 1 & -2 \\ 0 & -1 & -2 \end{bmatrix}
-    \]
-    Finally, computing $\mathbf{A} = (\mathbf{V}\mathbf{D})\mathbf{V}^{-1}$:
-    \[
-        \mathbf{A} = \begin{bmatrix} 0 & -1 & 2 \\ 0 & 1 & -2 \\ 0 & -1 & -2 \end{bmatrix} \begin{bmatrix} 1/2 & 1/2 & 0 \\ 0 & 1/2 & -1/2 \\ 1/2 & 0 & -1/2 \end{bmatrix} = \begin{bmatrix} 1 & -1/2 & -1/2 \\ -1 & 1/2 & 1/2 \\ -1 & -1/2 & 3/2 \end{bmatrix}
-    \]
+    One can check that $\mathbf{A}\mathbf{v}_1 = \mathbf{0}$ and $\mathbf{A}\mathbf{v}_2 = 2\mathbf{v}_2$.
 \end{solution}
 
 

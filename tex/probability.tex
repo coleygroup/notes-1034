@@ -1600,10 +1600,9 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
     \]
     for some constant $c$. 
         \begin{enumerate}[label=(\alph*)]
-            \item Find $c$ by normalizing the PDF.
-            \item Find the cumulative distribution function $F_{\mathsf{x}}(x)$.
-            \item Calculate the expected value $\mu_{\mathsf{x}} =
-                \mathbb{E}[\mathsf{x}]$.
+            \item Find $c$ that makes $p_{\mathsf{x}}$ a valid PDF.
+            \item Find the cumulative distribution function (CDF). Make sure to define it over the entire real line $\mathbb{R}$.
+            \item Calculate the expected value of $\mathsf{x}$.
             \item Let $\mathsf{y} = \mathsf{x}^{2}$. The PDF of $\mathsf{y}$, obtained via a change of variables, is
                 \[
                     p_{\mathsf{y}}(y) =
@@ -1695,24 +1694,26 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
 \end{solution}
 
 \begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
-    Let the random vector $\underline{\mathsf{x}}$ be defined by
+    Let the random vector $\boldsymbol{\mathsf{x}}$ be defined by
     \[
-        \underline{\mathsf{x}}(\underline{\xi})
+        \boldsymbol{\mathsf{x}}
         = \begin{bmatrix} \xi_{1} \\ \xi_{1} + \xi_{2} \end{bmatrix},
         \qquad
         \xi_{1},\, \xi_{2}
         \overset{\mathrm{i.i.d.}}{\sim} \mathcal{N}(0,1).
     \]
     \begin{enumerate}[label=(\alph*)]
-        \item Find the covariance matrix $\mathbf{C}$ of
-              $\underline{\mathsf{x}}$.
+        \item Find the covariance matrix of $\boldsymbol{\mathsf{x}}$.
         \item Using the result of (a), write the joint PDF
-              $p_{\underline{\mathsf{x}}}(\mathbf{x})$ in simplified form.
+              $p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})$.
         \item Find the marginal distribution $p_{\mathsf{x}_{2}}(x_{2})$
               by integrating $x_{1}$ out of the joint PDF.
-        \item Rederive $p_{\mathsf{x}_{2}}(x_{2})$ using the conditional
-              distribution $p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid
-              x_{1})$ together with $p_{\mathsf{x}_{1}}(x_{1})$.
+        \item Derive the conditional distribution
+              $p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid x_{1})$.
+        \item Using the result of (d) together with
+              $p_{\mathsf{x}_{1}}(x_{1})$, rederive
+              $p_{\mathsf{x}_{2}}(x_{2})$. Check that it matches the
+              result of (c).
     \end{enumerate}
 \end{exercise}
 
@@ -1738,10 +1739,10 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
         = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix}.
     \]
 
-    \textbf{(b)} Therefore $\underline{\mathsf{x}} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ with $\boldsymbol{\mu} = \begin{bmatrix}0\\0\end{bmatrix}$ and $\boldsymbol{\Sigma} = \begin{bmatrix}1&1\\1&2\end{bmatrix}$.
+    \textbf{(b)} Therefore $\boldsymbol{\mathsf{x}} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ with $\boldsymbol{\mu} = \begin{bmatrix}0\\0\end{bmatrix}$ and $\boldsymbol{\Sigma} = \begin{bmatrix}1&1\\1&2\end{bmatrix}$.
     Applying the multivariate Gaussian PDF formula:
     \begin{multline*}
-        p_{\underline{\mathsf{x}}}(\mathbf{x})
+        p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})
         = (2\pi)^{-k/2} \det(\boldsymbol{\Sigma})^{-1/2}
           \exp\!\left(
               -\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^{\top}
@@ -1784,7 +1785,14 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
          = \mathcal{N}(0,\,2).
     \end{align*}
 
-    \textbf{(d)} If $x_{1}$ is fixed, then $x_{2} = x_{1} + \xi_{2}$ has its mean shifted to $x_{1}$, so $x_{2} \mid x_{1} \sim \mathcal{N}(x_{1}, 1)$. Therefore
+    \textbf{(d)} If $x_{1}$ is fixed, then $x_{2} = x_{1} + \xi_{2}$ has its mean shifted to $x_{1}$, so $x_{2} \mid x_{1} \sim \mathcal{N}(x_{1}, 1)$; that is,
+    \[
+        p_{\mathsf{x}_{2}|\mathsf{x}_{1}}(x_{2} \mid x_{1})
+        = \frac{1}{\sqrt{2\pi}}
+          \exp\!\left(-\frac{(x_{2}-x_{1})^{2}}{2}\right).
+    \]
+
+    \textbf{(e)} Therefore
     \begin{align*}
         p_{\mathsf{x}_{2}}(x_{2})
         &= \int_{-\infty}^{\infty}
@@ -1801,8 +1809,9 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
            \int_{-\infty}^{\infty}
            \exp\!\left(-(x_{1}-x_{2}/2)^{2} - x_{2}^{2}/4\right)
            dx_{1}
-         = \mathcal{N}(0,\,2).
+         = \mathcal{N}(0,\,2),
     \end{align*}
+    which matches the result of (c).
 \end{solution}
 
 \begin{exercise} % 2025 Recitation slides 5 Nathan Morgan
@@ -1812,10 +1821,11 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
         = \frac{\lambda^{k} x^{k-1} e^{-\lambda x}}{(k-1)!},
         \qquad x \geq 0.
     \]
-    What is the value of
+    Using this fact, calculate
     \[
-        \int_{0}^{\infty} \frac{32\, x^{4}\, e^{-2x}}{4!}\, dx\;?
+        \int_{0}^{\infty} \frac{32\, x^{4}\, e^{-2x}}{4!}\, dx.
     \]
+    [Hint: this does not require integration by parts.]
 \end{exercise}
 
 \begin{solution}
@@ -1878,7 +1888,12 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
             0, & t < 0,
         \end{cases}
     \]
-    and let $p_{\mathsf{t}}(t)$ be a continuous PDF. Show that the convolution $(u\,{*}\,p_{\mathsf{t}})(t)$ equals the CDF $F_{\mathsf{t}}(t)$.
+    and let $p_{\mathsf{t}}(t)$ be a continuous PDF. Show that the convolution
+    \[
+        (u\,{*}\,p_{\mathsf{t}})(t)
+        = \int_{-\infty}^{\infty} u(\tau)\, p_{\mathsf{t}}(t-\tau)\, d\tau
+    \]
+    equals the CDF $F_{\mathsf{t}}(t)$.
 \end{exercise}
 
 \begin{solution}
@@ -1897,7 +1912,7 @@ Consider the joint distribution $P_\mathsf{x_1, x_2}(x_1, x_2)$:
 \end{solution}
 
 \begin{exercise}
-    Calculate the covariance matrix for this set of measurements.
+    Calculate the empirical covariance matrix for this set of measurements.
     \begin{table}[h!]
         \centering
         \begin{tabular}{c|cc}
