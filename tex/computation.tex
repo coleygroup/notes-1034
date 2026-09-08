@@ -1,4 +1,8 @@
 \chapter{Introduction to Numerical Methods}
+When we solve a problem numerically, we care about two things: how \emph{accurate} the computed answer is, and how much it \emph{costs} to compute it.
+These two concerns are characterized by \emph{numerical error} and \emph{computational complexity}, the two major topics of this chapter.
+Whenever we discuss an algorithm in this course, we will talk about these two concepts: we introduce them here, and they will reappear in every subsequent topic---linear algebra, nonlinear equations, optimization, statistics, and differential equations.
+
 \section{Numerical Error}
 For most real-world problems, an analytical solution does not exist, so we must resort to numerical methods, which solve problems approximately rather than analytically/symbolically. As we will see later, numerical methods always encounter \textbf{numerical error}: the computed result deviates from the exact one. Understanding the size of this error is essential for judging how much a computed result can be trusted.
 
@@ -139,8 +143,9 @@ When a series of operations is performed, the errors are transferred through the
 For example, as we will see later, when solving a linear system of equations, the relative error can be magnified by a factor of the condition number of the matrix.
 
 \begin{exampleBox}
-  \textbf{Example}:
-  We now illustrate the concept of machine epsilon using a simple MATLAB code example:
+  \textbf{Example}: Predict the output of the following three MATLAB commands: \texttt{eps(1)}, \texttt{1 + eps(1) == 1}, and \texttt{1 + eps(1)/2 == 1}.
+
+  \emph{Solution}:
 \begin{verbatim}
 >> eps(1)
 ans =
@@ -226,7 +231,7 @@ To express computational complexity, we generally use \textbf{big-O notation}. T
 This definition means that for sufficiently large values of $N$, the function $f(N)$ does not grow faster than a constant multiple of $g(N)$. Again, we stress that big-O notation captures the dominant term of $f(N)$ as $N$ approaches infinity, ignoring lower-order terms and constant factors that become insignificant at large scales.
 
 \begin{exampleBox}
-  \textbf{Example}: Consider the following MATLAB function, which finds the maximum of an array \texttt{x} of length $N$. Let's analyze the complexity of this function.
+  \textbf{Example}: Determine the time complexity of the following MATLAB function, which finds the maximum of an array \texttt{x} of length $N$.
 \begin{verbatim}
 function m = array_max(x)
     N = length(x);
@@ -238,11 +243,13 @@ function m = array_max(x)
     end
 end
 \end{verbatim}
-  The function scans the array once, performing one comparison per element, for a total of $N-1$ comparisons. The number of operations grows linearly with the input size, so the time complexity is $O(N)$.
+  \emph{Solution}: The function scans the array once, performing one comparison per element, for a total of $N-1$ comparisons. The number of operations grows linearly with the input size, so the time complexity is $O(N)$.
 \end{exampleBox}
 
 \begin{exampleBox}
-    \textbf{Example}: We consider two algorithms designed to solve the same problem with input size $N$. Algorithm A has a time complexity of $f_A(N) = 5N^2 + 10000$. Algorithm B has a time complexity of $f_B(N) = 2N^3 + N$. We can express the time complexity of each algorithm using big-O notation:
+    \textbf{Example}: Two algorithms are designed to solve the same problem with input size $N$. Algorithm A has a time complexity of $f_A(N) = 5N^2 + 10000$. Algorithm B has a time complexity of $f_B(N) = 2N^3 + N$. Express both in big-O notation, and compare how their operation counts and runtimes grow with $N$.
+
+    \emph{Solution}: In big-O notation,
     \begin{align*}
         f_A(N) &= O(N^2) \\
         f_B(N) &= O(N^3)
@@ -286,6 +293,46 @@ Modern hardware, however, often has the capability to perform many operations in
 For example, consider computing $a\mathbf{x} + \mathbf{y}$ for a scalar $a$ and vectors $\mathbf{x}, \mathbf{y} \in \mathbb{R}^N$: this requires $O(N)$ operations, but each of the $N$ components can be computed independently of the others, so with adequate parallel resources ($N$ processing units) the computation can be completed in $O(1)$ time.
 Such perfect parallelization is not always possible, even with a sufficient amount of parallel computing resources.
 If we want to take the maximum of an array, the comparisons cannot all be performed independently, so the operations must be executed partially in series; parallel computing resources can still reduce the time complexity (to $O(\log N)$ with a tree-structured reduction), but not to $O(1)$.
+\autoref{fig:axpy-reduction} illustrates the contrast between the two cases.
+
+\begin{figure}[!h]
+  \centering
+  \begin{tikzpicture}[scale=.68, every node/.style={font=\footnotesize}]
+    % left: axpy, one independent lane per component
+    \foreach \i in {0,...,3} {
+      \node[draw, rounded corners=1pt, minimum width=40pt, minimum height=14pt]
+        (in\i) at (\i*2.6, 2.3) {$x_{\the\numexpr\i+1\relax},\; y_{\the\numexpr\i+1\relax}$};
+      \node[draw, rounded corners=1pt, minimum width=40pt, minimum height=14pt]
+        (out\i) at (\i*2.6, 0.9) {$a x_{\the\numexpr\i+1\relax} + y_{\the\numexpr\i+1\relax}$};
+      \draw[->, thick] (in\i) -- (out\i);
+    }
+    \node[align=center] at (3.9, -2.5)
+      {$a\mathbf{x}+\mathbf{y}$: all components independent};
+    % right: max reduction, binary tree
+    \begin{scope}[xshift=12.4cm]
+      \foreach \i in {0,...,7} {
+        \node (l\i) at (\i*0.85, 2.3) {$x_{\the\numexpr\i+1\relax}$};
+      }
+      \foreach \j in {0,...,3} {
+        \node[draw, circle, inner sep=1pt] (m\j) at (0.425+\j*1.7, 0.9) {\tiny max};
+        \draw[->] (l\the\numexpr2*\j\relax) -- (m\j);
+        \draw[->] (l\the\numexpr2*\j+1\relax) -- (m\j);
+      }
+      \foreach \k in {0,1} {
+        \node[draw, circle, inner sep=1pt] (n\k) at (1.275+\k*3.4, -0.5) {\tiny max};
+        \draw[->] (m\the\numexpr2*\k\relax) -- (n\k);
+        \draw[->] (m\the\numexpr2*\k+1\relax) -- (n\k);
+      }
+      \node[draw, circle, inner sep=1pt] (r) at (2.975, -1.9) {\tiny max};
+      \draw[->] (n0) -- (r);
+      \draw[->] (n1) -- (r);
+      \node[align=center] at (2.975, -2.5)
+        {$\max$: each level waits for the previous};
+    \end{scope}
+  \end{tikzpicture}
+  \caption{Parallel evaluation of $a\mathbf{x}+\mathbf{y}$ versus a tree-structured reduction for $\max$. Each component of $a\mathbf{x}+\mathbf{y}$ is computed independently, so with $N$ processing units the computation completes in $O(1)$ time. In the reduction, each level depends on the results of the previous one, so even with sufficient parallel resources the time complexity is $O(\log_2 N)$.}
+  \label{fig:axpy-reduction}
+\end{figure}
 
 \section{Exercises}
 
@@ -296,6 +343,7 @@ If we want to take the maximum of an array, the comparisons cannot all be perfor
         \item Every real number between the smallest and largest representable values can be represented exactly in double precision.
         \item If an iterative algorithm running in double precision stops improving at a relative error of about $10^{-16}$, this indicates a bug in the implementation.
         \item An algorithm with $O(N^2)$ time complexity is always faster than an algorithm with $O(N^2 \log N)$ time complexity.
+        \item Running the same function in float32 instead of float64 (without parallelism) speeds it up by a factor that grows with the input size $N$.
         \item In double precision, \texttt{1 + 1e-20 == 1} evaluates to true; this means that \texttt{1e-20} was rounded to zero when it was stored.
     \end{enumerate}
 \end{exercise}
@@ -306,18 +354,19 @@ If we want to take the maximum of an array, the comparisons cannot all be perfor
         \item False. There are only finitely many representable numbers, so most real numbers must be rounded to the nearest representable one.
         \item False. This is the highest accuracy achievable with the double-precision representation of numbers, not a bug.
         \item We cannot tell. Big-O notation describes only the asymptotic growth rate and hides the constant prefactor, which we do not know. For small $N$, or when the prefactor of the $O(N^2)$ algorithm is large, the $O(N^2 \log N)$ algorithm can be faster.
+        \item False. Changing the precision changes only the cost of each elementary operation, not the number of operations performed: the speedup is a constant factor (hardware-dependent, often around $2\times$ from the halved memory traffic), the same for every $N$. The time complexity class is unchanged.
         \item False. \texttt{1e-20} itself is stored without difficulty. The rounding happens in the addition: the exact sum $1 + 10^{-20}$ falls between two representable numbers near $1$, which are separated by about $\epsilon_{\text{mach}}$, so the sum is rounded back to $1$.
     \end{enumerate}
 \end{solution}
 
 \begin{exercise}
     Modern AI models store enormous numbers of parameters, and the choice of number representation directly determines their memory footprint. As a concrete example, consider the Llama-3-70B large language model, which has 70 billion parameters, each stored as a real number.
+    Lowering the precision typically degrades the performance of the model, but the model often remains functional.
+    One might therefore be interested in finding the optimal trade-off between the performance of the model and the memory usage and associated hardware cost.
     \begin{enumerate}[label=(\alph*)]
         \item How much memory is required to store the parameters in float64, float32, and float16 format?
         \item A high-end GPU such as the NVIDIA A100 or H100 provides 80~GB of memory. For each format in (a), can the model parameters fit on a single such GPU?
     \end{enumerate}
-    Lowering the precision typically degrades the performance of the model, but the model often remains functional.
-    One might therefore be interested in finding the optimal trade-off between the performance of the model and the memory usage and associated hardware cost.
 \end{exercise}
 
 \begin{solution}
@@ -356,6 +405,27 @@ If we want to take the maximum of an array, the comparisons cannot all be perfor
 \end{solution}
 
 \begin{exercise}
+    For each pair of functions, determine which one grows faster as $N \to \infty$.
+    \begin{enumerate}[label=(\alph*)]
+        \item $\log N$ versus $N^{0.01}$
+        \item $(\log N)^{100}$ versus $N$
+        \item $N^{100}$ versus $1.01^N$
+        \item $\log N$ versus $\log(N^2)$
+        \item $\log_2 N$ versus $\log_{10} N$
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item $N^{0.01}$
+        \item $N$
+        \item $1.01^N$
+        \item Neither
+        \item Neither
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise}
     Express the time complexity of each expression using big-O notation.
     \begin{enumerate}[label=(\alph*)]
         \item $f(N) = 3N^2 + 100N + 7$
@@ -382,26 +452,20 @@ If we want to take the maximum of an array, the comparisons cannot all be perfor
     \end{enumerate}
 \end{solution}
 
-\begin{exercise}
-    For each pair of functions, determine which one grows faster as $N \to \infty$.
+\begin{exercise} % 2026 conceptual questions
+    An algorithm is often built from several parts. Determine the overall time complexity in each case.
     \begin{enumerate}[label=(\alph*)]
-        \item $\log N$ versus $N^{0.01}$
-        \item $(\log N)^2$ versus $N$
-        \item $(\log N)^{100}$ versus $N$
-        \item $N^{100}$ versus $1.01^N$
-        \item $\log N$ versus $\log(N^2)$
-        \item $\log_2 N$ versus $\log_{10} N$
+        \item The algorithm first runs a preprocessing step that costs $O(N^2)$, and then a main computation that costs $O(N^3)$.
+        \item The algorithm performs $N$ iterations, and each iteration costs $O(N^2)$.
+        \item In general, under what circumstances do the complexities of two parts \emph{add}, and under what circumstances do they \emph{multiply}?
     \end{enumerate}
 \end{exercise}
 
 \begin{solution}
     \begin{enumerate}[label=(\alph*)]
-        \item $N^{0.01}$
-        \item $N$
-        \item $N$
-        \item $1.01^N$
-        \item Neither
-        \item Neither
+        \item $O(N^2 + N^3) = O(N^3)$. The two steps run one after the other, so their costs add, and the dominant term determines the overall complexity.
+        \item $O(N \cdot N^2) = O(N^3)$. Every one of the $N$ iterations performs the full $O(N^2)$ work, so the costs multiply.
+        \item Costs \emph{add} when the parts run sequentially, one after the other, each executed once. Costs \emph{multiply} when the parts are nested, i.e., one part is executed once per unit of work of the other (e.g., a loop body inside a loop).
     \end{enumerate}
 \end{solution}
 
@@ -410,33 +474,33 @@ If we want to take the maximum of an array, the comparisons cannot all be perfor
   The Thomas algorithm allows for efficient solving of linear systems involving tridiagonal matrices,
   \[
     \begin{bmatrix}
-    b_1 & c_1    &        &           & 0      \\
-    a_2 & b_2    & c_2    &           &        \\
-        & a_3    & b_3    & \ddots    &        \\
-        &        & \ddots & \ddots    & c_{n-1}\\
-    0   &        &        & a_n       & b_n
+    a_{11} & a_{12}  &         &            & 0      \\
+    a_{21} & a_{22}  & a_{23}  &            &        \\
+           & a_{32}  & a_{33}  & \ddots     &        \\
+           &         & \ddots  & \ddots     & a_{n-1,n}\\
+    0      &         &         & a_{n,n-1}  & a_{nn}
     \end{bmatrix}
     \begin{bmatrix} x_1 \\ x_2 \\ x_3 \\ \vdots \\ x_n \end{bmatrix}
     =
-    \begin{bmatrix} d_1 \\ d_2 \\ d_3 \\ \vdots \\ d_n \end{bmatrix}.
+    \begin{bmatrix} b_1 \\ b_2 \\ b_3 \\ \vdots \\ b_n \end{bmatrix}.
   \]
   The forward sweep computes updated coefficients (denoted with primes):
   \[
-    c_i' =
+    a_{i,i+1}' =
     \begin{cases}
-    \dfrac{c_i}{b_i}, & i = 1,\\[2.5ex]
-    \dfrac{c_i}{b_i - a_i c_{i-1}'}, & i = 2,3,\dots,n-1,
+    \dfrac{a_{i,i+1}}{a_{ii}}, & i = 1,\\[2.5ex]
+    \dfrac{a_{i,i+1}}{a_{ii} - a_{i,i-1}\, a_{i-1,i}'}, & i = 2,3,\dots,n-1,
     \end{cases}
     \qquad
-    d_i' =
+    b_i' =
     \begin{cases}
-    \dfrac{d_i}{b_i}, & i = 1,\\[2.5ex]
-    \dfrac{d_i - a_i d_{i-1}'}{b_i - a_i c_{i-1}'}, & i = 2,3,\dots,n.
+    \dfrac{b_i}{a_{ii}}, & i = 1,\\[2.5ex]
+    \dfrac{b_i - a_{i,i-1}\, b_{i-1}'}{a_{ii} - a_{i,i-1}\, a_{i-1,i}'}, & i = 2,3,\dots,n.
     \end{cases}
   \]
   The solution is then obtained by back substitution:
   \[
-    x_n = d_n', \qquad x_i = d_i' - c_i'\, x_{i+1}, \quad i = n-1,\, n-2,\,\dots,\,1.
+    x_n = b_n', \qquad x_i = b_i' - a_{i,i+1}'\, x_{i+1}, \quad i = n-1,\, n-2,\,\dots,\,1.
   \]
   \begin{enumerate}[label=(\alph*)]
       \item How many entries of an $n \times n$ tridiagonal matrix can be nonzero? How does the required storage scale with $n$ if only the nonzero entries are stored?
