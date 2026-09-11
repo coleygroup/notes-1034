@@ -325,7 +325,7 @@ The goal of an optimization algorithm is to find a solution, but the notion of s
 \end{figure}
 
 
-In a manner similar to nonlinear equations, existence and uniqueness are not guaranteed. For example, $\min_{x \in \mathbb{R}} (-x)$ has no minimizer (the objective is unbounded below), whereas $\min_{x \in \mathbb{R}} (0\cdot x)$ has infinitely many minimizers.
+In a manner similar to nonlinear equations, existence and uniqueness are not guaranteed. For example, $\min_{x \in \mathbb{R}} (-x)$ has no minimizer (the objective is unbounded below), whereas $\min_{x \in \mathbb{R}} (0\cdot x)$ has infinitely many minimizers. This kind of non-uniqueness shows up in practice whenever the data cannot distinguish between parameter combinations: fitting an Arrhenius expression $k=A\exp(-E_a/RT)$ to rate data over a narrow temperature range often produces a whole ridge of $(A,E_a)$ pairs with nearly identical objective values.
 
 \subsection{Convexity}
 \label{sec:convexity}
@@ -831,7 +831,7 @@ As soon as $\nabla^2 f(\mathbf{x}_k)+\delta_k\mathbf{I}\succ 0$, the direction i
 <0
 \quad\text{whenever}\quad \nabla f(\mathbf{x}_k)\ne \mathbf{0}
 \end{equation}
-The line search then ensures an actual decrease in the objective. When choosing $\delta_k$, we want to keep Newton's fast local behavior, so we aim for a small positive shift.
+The line search then ensures an actual decrease in the objective. When choosing $\delta_k$, we want to keep Newton's fast local behavior, so we aim for a small positive shift. Note that this shift perturbs every eigendirection of the Hessian by the same amount $\delta_k$, including directions that were already well-conditioned and positive, which can needlessly slow convergence along those directions. Production solvers therefore tend to use fixes like modified Cholesky factorization, which adds the minimum perturbation needed to fix only the non-positive-definite directions while leaving the rest of the Hessian untouched.
 
 \subsubsection{Global and Local Convergence}
 With standard line-search safeguards (e.g., sufficient decrease), Newton and modified-Newton iterations produce a sequence for which the gradient norms tend to zero, i.e., global convergence to a stationary point. Once the iterates enter a neighborhood of a nondegenerate minimizer $\mathbf{x}^\ast$ with positive-definite Hessian, the pure Newton method (i.e., $\alpha_k=1$, no modification to the Hessian) is \emph{quadratically convergent}:
@@ -986,6 +986,7 @@ Under standard smoothness assumptions, BFGS with a proper line search enjoys the
 This means BFGS is typically faster than steepest descent and somewhat slower than exact Newton steps, which means it often gives an effective balance between per-iteration cost and speed of convergence. Because of this, it is the default algorithm used by \texttt{fminunc} in MATLAB.
 
 % could mention limited-memory BFGS here
+% For large $N$, even storing the dense $N\times N$ approximation $\mathbf{H}_k$ (or its inverse) built up by BFGS is prohibitive: memory alone costs $O(N^{2})$, which becomes infeasible once $N$ reaches the tens of thousands typical of many machine-learning and process-optimization problems. Limited-memory BFGS (L-BFGS) fixes this by never forming $\mathbf{H}_k$ or $\mathbf{H}_k^{-1}$ explicitly; instead, it keeps only the most recent $m$ (often $5$--$20$) pairs of update vectors $(\Delta\mathbf{x}_k,\Delta\mathbf{g}_k)$ and discards older ones as new pairs arrive. A ``two-loop recursion'' then reconstructs the action of $\mathbf{H}_k^{-1}\nabla f(\mathbf{x}_k)$ directly from these stored pairs, without ever materializing the matrix, at a cost of $O(mN)$ time and memory per iteration instead of $O(N^{2})$. This makes L-BFGS the default large-scale quasi-Newton method in practice: it underlies \texttt{scipy.optimize.minimize(method='L-BFGS-B')} and sits inside many machine-learning and chemical engineering optimization codes.
 
 
 \begin{exampleBox}
@@ -1039,7 +1040,7 @@ and find the step by solving the constrained subproblem
     \min_{\mathbf{p}_k} m_k(\mathbf{p}_k)
     \quad\text{s.t.}\quad \|\mathbf{p}_k\|_2 \le \Delta
 \end{equation}
-Set $\mathbf{x}_{k+1}=\mathbf{x}_k+\mathbf{p}_k$ if the step is accepted.
+Set $\mathbf{x}_{k+1}=\mathbf{x}_k+\mathbf{p}_k$ if the step is accepted. In practice, this subproblem is rarely solved exactly. Standard approaches include the \textbf{dogleg method}, which builds an approximate solution by combining the steepest-descent direction with the full (Newton) step, both truncated to the trust-region boundary if necessary.
 \item Compare the actual and predicted reductions to judge whether the model was accurate on the tried step size:
 \begin{equation}
     \text{actual reduction} = f(\mathbf{x}_k)-f(\mathbf{x}_k+\mathbf{p}_k),\qquad

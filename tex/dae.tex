@@ -286,7 +286,7 @@ Note the dependence on $\dot{g}_2(t)$. If the specified volume signal $g_2(t)$ i
 %     \label{fig:index_noise}
 % \end{figure}
 
-This high index is often a result of poor modeling choices. Physically, how could we possibly force the volume to be \emph{exactly} $g_2(t)$ at all times? A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
+This high index is often a result of poor modeling choices.\footnote{In process modeling specifically, the usual culprits are idealized/perfect controllers, ideal (instantaneous) separation specifications. Each of these effectively imposes an exact algebraic condition on a variable that, physically, is only ever driven \emph{toward} a target with finite dynamics. Commercial process simulators (e.g., gPROMS, Aspen) therefore run automatic structural index-reduction algorithms on the flowsheet model rather than relying on the user to manually reformulate it.} Physically, how could we possibly force the volume to be \emph{exactly} $g_2(t)$ at all times? A more realistic model would implement a controller that adjusts the outlet flow $x_2$ based on the error between the actual volume $x_1$ and the setpoint $g_2$. Such a control implementation should result in a well-behaved index 1 system.
 
 \subsection{Another Example: Calculation of Higher Indices}
 
@@ -519,7 +519,7 @@ The key issue is that an explicit update of $\mathbf{x}$ alone does not enforce 
 \end{align}
 This generally requires a (possibly nonlinear) solve for $\mathbf{y}(t_{i+1})$ only (assuming $\partial \mathbf{g}/\partial \mathbf{y}$ is nonsingular). This method also might lead to drift over many steps unless the projection is done very accurately. 
 
-Remember, the distinction between differential and algebraic states is \emph{not} that we use $\mathbf{f}$ to solve for the differential states and $\mathbf{g}$ for the algebraic ones; the algebraic states might not even appear in the algebraic equations for high-index DAEs! Solving for $\mathbf{y}(t_{i+1})$ will be ill-posed in that case.
+Remember, the distinction between differential and algebraic states is \emph{not} that we use $\mathbf{f}$ to solve for the differential states and $\mathbf{g}$ for the algebraic ones; the algebraic states might not even appear in the algebraic equations for high-index DAEs! Solving for $\mathbf{y}(t_{i+1})$ will be ill-posed in that case. We already saw exactly this in the index-3 example above: the algebraic constraint there was $g = x_3 - \gamma(t)$, which does not involve the algebraic state $x_1$ at all (recall $\partial g/\partial x_1 = 0$), which is precisely why the na\"ive Jacobian test failed and three differentiations were needed to recover $\dot x_1$.
 
 
 % Fully implicit methods go further by making $\mathbf{x}(t_{i+1})$ depend on $\mathbf{y}(t_{i+1})$ as well; in that case the step typically involves a coupled nonlinear solve for both sets of variables.
