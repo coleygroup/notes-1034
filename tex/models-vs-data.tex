@@ -153,11 +153,15 @@ The solution for the optimal parameters, $\boldsymbol{\theta}^*_\text{OLS}$, is 
 \end{equation}
 This is the famous OLS solution for linear regression. The term $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$ is often called the pseudoinverse of $\mathbf{X}$ (when $\mathbf{X}$ has full column rank). We note that if $\mathbf{X}$ is square and invertible, then $\boldsymbol{\theta}^*_\text{OLS} = \mathbf{X}^{-1}\mathbf{y}$, as we would expect.
 
+In practice, one should rarely form and invert $\mathbf{X}^\top\mathbf{X}$ explicitly: doing so squares the condition number of the problem, $\kappa(\mathbf{X}^\top\mathbf{X}) = \kappa(\mathbf{X})^2$, which can turn a mildly ill-conditioned design matrix into a numerically disastrous linear system. Even if solving that linear system through strategies that avoid explicit matrix inversion, this can create rounding errors and numerical imprecision. For all but small, well-conditioned problems, it is numerically preferable to solve for $\boldsymbol{\theta}^*_\text{OLS}$ via a ``QR'' or SVD decomposition of $\mathbf{X}$ directly, which is what standard least-squares routines (e.g., MATLAB's backslash operator or \texttt{lstsq} in NumPy/SciPy) do internally.
+
 \begin{warningBox}
     \textbf{Warning...?}
     Since we have defined $\boldsymbol{\theta}^*_\text{OLS}$ using only the first-order optimality criterion, is there a risk that this solution is not the global minimum, but rather a local minimum or even a maximum? 
     
     Fortunately, the objective function we are minimizing, the sum of squared errors, is a convex function in $\boldsymbol{\theta}$. Taking the derivative of \autoref{ols-sse-deriv} once more, the Hessian is $\mathbf{X}^\top \mathbf{X}$, which is a positive semi-definite matrix. We know this because for any vector $\mathbf{v} \neq \mathbf{0}$, $\mathbf{v}^\top \mathbf{X}^\top \mathbf{X} \mathbf{v} = (\mathbf{X} \mathbf{v})^\top (\mathbf{X} \mathbf{v}) \equiv || \mathbf{Xv} ||_2^2 \ge 0$. Thus, the function is convex, and any stationary point is guaranteed to be a global minimum.
+
+Note, however, that "convex" is not the same as "strictly convex": if $\mathbf{X}$ is rank-deficient---for example, if there are more parameters than independent data directions---then $\mathbf{X}^\top\mathbf{X}$ is singular and the SSE has a whole set of global minimizers rather than a unique $\boldsymbol{\theta}^*_\text{OLS}$. The first-order condition $\mathbf{X}^\top\mathbf{X}\boldsymbol{\theta} = \mathbf{X}^\top\mathbf{y}$ no longer defines a unique value of $\boldsymbol{\theta}$. This is one scenario that motivates the regularization techniques we introduce below.
 \end{warningBox}
 
 \paragraph*{Weighted Least Squares (WLS)}
@@ -179,7 +183,7 @@ This ensures that experiments with low variance (high confidence) have a greater
 \begin{equation*}
     \left[\mathbf{V}_{\boldsymbol{\epsilon}}\right]_{ij} \approx \frac{1}{N} \sum_{n=1}^{N} \big(y_{i,n} - \langle y_i\rangle\big)\big(y_{j,n} - \langle y_j\rangle\big)
 \end{equation*}
-where $y_{i,n}$ is the $n$th measurement of experiment $i$, and $\langle y_i \rangle$ is the mean of all measurements for experiment $i$.
+where $y_{i,n}$ is the $n$th measurement of experiment $i$, and $\langle y_i \rangle$ is the mean of all measurements for experiment $i$.\footnote{Note that this requires estimating $N(N+1)/2$ independent entries of an $N\times N$ covariance matrix. In practice this demands far more replicate experiments than are typically available, so the raw empirical estimate is often itself ill-conditioned or singular unless $N$ is small or a structured covariance model (e.g., diagonal, or a parametric form) is imposed instead.}
 \begin{exampleBox}
     \textbf{Example: OLS vs.\ WLS in the Presence of Heteroscedastic Errors}
     
@@ -227,6 +231,12 @@ L1 regularization, or lasso regression (least absolute shrinkage and selection o
     \label{eq:l1-regularization}
 \end{equation}
 where $||\boldsymbol{\theta}||_1 = \sum_{i=1}^n |\theta_i|$ is the L1 norm of the parameter vector, and $\alpha > 0$ controls the regularization strength. Unlike ridge regression, lasso generally does not have a closed-form solution and typically requires iterative optimization algorithms to solve. Lasso regression is popular in many scientific and engineering applications where interpretability and simplicity of the model are desired.
+
+\begin{definitionBox}
+\textbf{Remark: Bias--Variance Tradeoff and Choosing the Regularization Strength}
+
+Regularization works by deliberately introducing a controlled amount of bias into the parameter estimates in exchange for a (hopefully larger) reduction in their variance; this can lower the expected error on new, unseen data even though it increases the error on the training data itself. This bias--variance tradeoff is exactly what the tuning parameters $\beta$ (ridge) and $\alpha$ (lasso) control. If the values are too small, regularization has no effect; if they are too large, the model is oversimplified. In practice, these tuning parameters are themselves typically chosen using cross-validation, generalized cross-validation, information criteria (AIC/BIC), or heuristics related to how the error changes as a function of hyperparameter value; we will not derive or discuss these methods here, but you should know they exist.
+\end{definitionBox}
 
 \paragraph*{Elastic Net Regularization}
 The elastic net combines both L1 and L2 regularization penalties. It encourages both small parameters (like ridge) and sparsity (like lasso).
@@ -294,6 +304,14 @@ Maximizing a negative quantity is the same as minimizing its positive counterpar
 \end{equation}
 This is precisely the objective function for WLS! So the intuitive method of minimizing the sum of squared errors is equivalent to the more formal method of MLE provided that we assume the experimental noise is independent and Gaussian. This gives a nice probabilistic justification for the widespread use of least-squares methods.
 
+\begin{warningBox}
+\textbf{Two Caveats on This Derivation}
+
+First, this derivation implicitly assumes that the input vector $\mathbf{x}_j$ is known exactly and only the output $y_j$ is corrupted by noise. This is not always true in practice. Flow rates, temperatures, and concentrations used as regressors typically carry their own measurement error too. When the error in the inputs is significant relative to the noise in the outputs, ordinary/weighted least squares is not necessarily the right approach. \textbf{Errors-in-variables regression} (also called \textbf{total least squares}) are terms you can look up if you are interested in learning more.
+
+Second, it is both true and convenient that least squares is equivalent to MLE under Gaussian noise. This is not the only justification for using MLE, however. The Gauss--Markov theorem shows that OLS is the \textbf{Best Linear Unbiased Estimator (BLUE)} under much weaker assumptions of zero-mean, constant-variance (homoscedasticity), uncorrelated errors, with no assumption of normality required.
+\end{warningBox}
+
 \section{Maximum a Posteriori Estimation}
 The MLE approach assumes there is one true parameter set that we are trying to find. By contrast, the Bayesian approach allows for uncertainty in the parameters themselves by treating them as random variables. This lets us incorporate our own prior knowledge or beliefs into the estimation process. While a full Bayesian analysis involves finding the entire posterior distribution $p(\boldsymbol{\theta}|\mathcal{D})$, we often want a single point estimate for the parameters. The Bayesian equivalent of the MLE is the \textbf{maximum a posteriori (MAP)} estimate, which seeks the most probable parameter vector \textit{given the data}. In other words, we find the peak, or mode, of the posterior distribution.
 \begin{equation}
@@ -308,6 +326,12 @@ Since the evidence term $p(\mathcal{D})$ in the denominator does not depend on o
     \boldsymbol{\theta}_{\text{MAP}}^* = \argmax_{\boldsymbol{\theta}} p(\mathcal{D}|\boldsymbol{\theta})p(\boldsymbol{\theta})
 \end{equation}
 The difference between MLE and MAP is just one term, the prior distribution $p(\boldsymbol{\theta})$. MLE maximizes only the likelihood, whereas MAP maximizes the likelihood multiplied by the prior.
+
+\begin{warningBox}
+\textbf{Warning: MAP is Not Reparameterization-Invariant}
+
+One important caveat: the MAP estimate is \textbf{not} invariant to reparameterizations of $\boldsymbol{\theta}$. If the variable is transformed nonlinearly, the mode of the transformed density is generally not located at the transformed location of the original mode. This matters in kinetics, where rate constants $k$ are often given a prior on $\log k$ rather than $k$ itself (since $k$ can span many orders of magnitude): the MAP estimate of $k$ and $\exp(\text{MAP estimate of } \log k)$ are generally \textit{not} the same point, even if we intuitively treat $k$ and $\log k$ as "the same" parameter expressed in two different coordinates.
+\end{warningBox}
 
 \paragraph*{The Role of the Prior}
 The prior distribution $p(\boldsymbol{\theta})$ is our way of encoding beliefs about the parameters \textit{before} observing any data. This knowledge might come from physical laws, previous experiments, or expert opinion. The resulting posterior distribution is a principled compromise between our prior beliefs and the evidence from the new data (\autoref{fig:prior-likelihood-posterior}).
@@ -841,7 +865,7 @@ To report parameter estimates in a format comparable to frequentist confidence i
 \end{equation}
 The interpretation of a Bayesian credible interval is more intuitive than that of a frequentist confidence interval. A 95\% credible interval means there is a 95\% probability (given the data and our model assumptions) that the true parameter value lies within the interval. This is a direct probabilistic statement about the parameters themselves. In contrast, a frequentist 95\% confidence interval means that if we repeated the experiment many times and constructed intervals each time using the same procedure, 95\% of those intervals would contain the true parameter value---a more subtle distinction about the procedure rather than about this particular interval.
 
-Any credible interval $\Omega$ can be used for this calculation, but conventionally we choose regions that contain the highest posterior density. Just as with the frequentist framework, we can also marginalize the joint posterior distribution to isolate the probability distribution for individual parameters. If $\boldsymbol{\theta} = (\theta_1, \theta_2, \ldots, \theta_n)$, the marginal posterior for parameter $\theta_i$ is obtained by integrating over all other parameters:
+Any credible interval $\Omega$ can be used for this calculation, but conventionally we choose regions that contain the highest posterior density. Note that there can be multiple, disconnected highest posterior density regions when the posterior is multimodal. Finding or computing this region in more than one or two dimensions is itself a nontrivial numerical problem and/or ill-posed. In practice, this is usually done using samples from the posterior (e.g., via the Markov chain Monte Carlo methods covered later in the course, \autoref{sec:monte-carlo}) rather than any closed-form calculation. Just as with the frequentist framework, we can also marginalize the joint posterior distribution to isolate the probability distribution for individual parameters. If $\boldsymbol{\theta} = (\theta_1, \theta_2, \ldots, \theta_n)$, the marginal posterior for parameter $\theta_i$ is obtained by integrating over all other parameters:
 \begin{equation}
     p(\theta_i|\mathcal{D}) = \int p(\boldsymbol{\theta}|\mathcal{D})d\boldsymbol{\theta}_{\neq i}
 \end{equation}

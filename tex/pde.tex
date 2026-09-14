@@ -78,7 +78,7 @@ We focus on linear, second-order PDEs in two independent variables (say, $x$ and
 \begin{equation}
     A \frac{\partial^2 c}{\partial x^2} + B \frac{\partial^2 c}{\partial x \partial y} + C \frac{\partial^2 c}{\partial y^2} + D \frac{\partial c}{\partial x} + E \frac{\partial c}{\partial y} + F(x, y) = 0
 \end{equation}
-The classification is determined solely by the coefficients of the highest-order derivatives ($A$, $B$, and $C$) via the discriminant $\Delta = B^2 - 4AC$. (Please be aware that many references write the mixed term as $2B \frac{\partial^2 c}{\partial x \partial y}$; in this case, the discriminant becomes $B^2 - AC$.)
+The classification is determined solely by the coefficients of the highest-order derivatives ($A$, $B$, and $C$) via the discriminant $\Delta = B^2 - 4AC$. (Please be aware that many references write the mixed term as $2B \frac{\partial^2 c}{\partial x \partial y}$; in this case, the discriminant becomes $B^2 - AC$.) Note that this classification is in general a \emph{local}, not global, property: for variable-coefficient or nonlinear PDEs, $A$, $B$, and $C$ (and hence the sign of $\Delta$) can depend on position or on the solution itself, so a single equation can be elliptic in one part of the domain and hyperbolic in another.
 
 \subsection{Elliptic PDEs}
 
@@ -385,7 +385,7 @@ Just as in the ODE case, we saw that FDM for PDEs approximates derivatives direc
 \begin{equation}
     c_{i,j} = \frac{1}{\Delta^2} \int_{(i-1)\Delta}^{i\Delta} \int_{(j-1)\Delta}^{j\Delta} c(x,y) \, dy \, dx
 \end{equation}
-This shift in definition from ``value at a point'' to ``average over a volume'' is what makes FVM particularly suitable for problems where conservation of mass, momentum, or energy is very important. As you might imagine, then, as chemical engineers, we use FVM a lot.
+This shift in definition from ``value at a point'' to ``average over a volume'' is what makes FVM particularly suitable for problems where conservation of mass, momentum, or energy is very important. As you might imagine, then, as chemical engineers, we use FVM a lot. Here's the concrete reason: because FVM balances what flows in and out of each cell exactly, it stays exactly conservative even when a material property like diffusivity or permeability jumps abruptly across an interface---think of a packed bed, a boundary between two phases, or the layers of a composite material---or when the geometry is irregular, like the actual shape of a reactor. A plain finite-difference approximation, which just approximates a derivative at a point, can end up violating the overall mass balance in these situations; FVM cannot, by construction.
 
 \subsubsection{Deriving the Conservation Law}
 
@@ -567,6 +567,12 @@ To remedy this, we must choose a discretization that respects the physics of the
     \frac{c_{i+1}^j - c_i^j}{\Delta t} + u \frac{c_i^j - c_i^{j-1}}{\Delta x} = 0
 \end{equation}
 With this upwind scheme, stability is restored, and the wave propagates in the correct direction. However, while stable, the accuracy is low. The scheme is numerically diffusive (dissipative). This means that it introduces artificial diffusion that smears sharp gradients and reduces peak amplitude over time (\autoref{fig:advection_upwind_diffusion}).
+
+This qualitative statement can be made more precise: substituting Taylor expansions for $c_{i+1}^j,c_i^j$ into the upwind scheme and using the leading-order PDE to eliminate the time derivatives shows that the scheme actually solves, to leading order, an advection-\emph{diffusion} equation $\partial_t c + u\,\partial_x c = D_{\text{num}}\,\partial_{xx} c$ with an added numerical diffusivity
+\begin{equation}
+    D_{\text{num}} = \frac{u\Delta x}{2}\left(1-\alpha\right), \qquad \alpha := \frac{u\Delta t}{\Delta x}
+\end{equation}
+(the Courant number $\alpha$ defined formally in the CFL discussion below). The ``smearing'' is a known function of the grid spacing, time step, and wave speed, and it vanishes only in the limit $\alpha\to 1$.
 
 \begin{figure}[htbp]
     \centering

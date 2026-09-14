@@ -303,10 +303,10 @@ Conditional probability can lead to counterintuitive results when we fail to acc
     
 \end{exampleBox}
     
-The main message to get across here is that when analyzing data, we must carefully consider what variables to condition on. If important conditioning variables are omitted from the analysis, the results can be completely misleading. Always consider what additional information might be relevant to properly interpret probabilistic relationships. Simpson's paradox frequently arises in real-world data analysis, such as patient outcomes in healthcare stratified by demographics.
+The main message to get across here is that when analyzing data, we must carefully consider what variables to condition on. If important conditioning variables are omitted from the analysis, the results can be completely misleading. Always consider what additional information might be relevant to properly interpret probabilistic relationships. Simpson's paradox frequently arises in real-world data analysis, such as patient outcomes in healthcare stratified by demographics. There is a related converse failure mode when conditioning on the \emph{wrong} variable---specifically a ``collider'' (a variable causally downstream of both the thing you're studying and an outcome)---can itself induce a spurious statistical association that wasn't present unconditionally (sometimes called Berkson's paradox, or collider bias).
 
 \subsection{Bayes' Theorem}
-The law of total probability allows us to synthesize the probability of an effect ($D$) from various potential causes ($A, B, C$). But what if we observe the effect and want to infer the cause? For instance, if we find a defective part, what is the probability that it came from Machine A? We are looking to invert the conditional probability from $\Pr(\text{Effect} \mid \text{Cause})$ to $\Pr(\text{Cause} \mid \text{Effect})$. This is the purpose of \textbf{Bayes' theorem}.
+The law of total probability allows us to synthesize the probability of an effect ($D$) from various potential causes ($A, B, C$). But what if we observe the effect and want to infer the cause? For instance, if we find a defective part, what is the probability that it came from Machine A? We are looking to invert the conditional probability from $\Pr(\text{Effect} \mid \text{Cause})$ to $\Pr(\text{Cause} \mid \text{Effect})$. This is the purpose of \textbf{Bayes' theorem}. The frequency-based definition of probability given earlier in this chapter and the ``degree of belief'' language we're about to use are, strictly speaking, two different interpretations of probability---frequentist and Bayesian, respectively. We will use both informally throughout this course.
 
 Bayes' theorem is a direct consequence of the definition of conditional probability. From the multiplication rule, we have two ways of expressing the intersection $A_i \cap B$:
 \begin{align*}
@@ -331,7 +331,7 @@ This formula provides a systematic way to update our beliefs in light of new evi
     \item $\Pr(A_i)$ is the \textbf{prior probability}: our initial belief about the cause before seeing any evidence.
     \item $\Pr(B \mid A_i)$ is the \textbf{likelihood}: the probability of observing the evidence $B$ if the cause $A_i$ were true.
     \item $\Pr(A_i \mid B)$ is the \textbf{posterior probability}: our updated belief about the cause after observing the evidence.
-    \item $\Pr(B)$ is the \textbf{marginal likelihood} of the evidence (also just called the evidence), which serves as a normalization constant.
+    \item $\Pr(B)$ is the \textbf{marginal likelihood} of the evidence (also just called the evidence), which serves as a normalization constant. For high-dimensional continuous parameter spaces this normalizing integral is generally intractable in closed form, which is the computational bottleneck that motivates sampling-based methods (e.g., Markov chain Monte Carlo) covered later in the course.
 \end{itemize}
 We will revisit these ideas in more depth in the context of Bayesian inference later on. For now, we illustrate Bayes' theorem with a couple of examples.
 
@@ -889,6 +889,16 @@ Then, we have
 \end{equation}
 so $\hat{\sigma}^{2}_{\text{unbiased}}$ is an unbiased estimator of the population variance $\sigma^{2}$. The intuition here is that the sample mean $\hat{\mu}_{\mathsf{x}}$ is computed from the same sample and ``uses up'' one degree of freedom: once $N-1$ deviations $\mathsf{x}_i-\hat{\mu}_{\mathsf{x}}$ are fixed, the last one must sum to zero. Dividing by $N-1$ instead of $N$ compensates for this constraint and exactly cancels the downward bias. This is known as Bessel's correction.
 
+\begin{warningBox}
+    \textbf{Warning: The Sample Standard Deviation is \emph{Not} Unbiased.}\quad We just showed that $\hat{\sigma}^2_{\text{unbiased}}$ is an unbiased estimator of $\sigma^2$. Does that mean $\sqrt{\hat{\sigma}^2_{\text{unbiased}}}$, the sample standard deviation, is an unbiased estimator of $\sigma$? No.
+
+    Recall that $\mathbb{E}[g(\mathsf{x})] \neq g(\mathbb{E}[\mathsf{x}])$ in general for nonlinear $g$---the expectation operator only ``passes through'' \emph{linear} functions, and the square root is nonlinear (concave). By Jensen's inequality,
+    \begin{equation}
+        \mathbb{E}\!\left[\sqrt{\hat{\sigma}^2_{\text{unbiased}}}\right] \le \sqrt{\mathbb{E}\!\left[\hat{\sigma}^2_{\text{unbiased}}\right]} = \sigma,
+    \end{equation}
+    with equality only in degenerate cases (e.g., $\hat{\sigma}^2_{\text{unbiased}}$ constant). So the sample standard deviation is (slightly) biased low. More generally, unbiasedness of an estimator $\hat\theta$ for a parameter $\theta$ does \emph{not} imply that $g(\hat\theta)$ is unbiased for $g(\theta)$ when $g$ is nonlinear.
+\end{warningBox}
+
 \begin{exampleBox}
     \textbf{Unbiased Variance Estimator if True Mean is Known}
     What if we know the true mean, $\mu$? Do we still need Bessel's correction? Intuition tells us the answer is no, and the unbiased estimator of the true variance $\sigma^2$ should be
@@ -1067,6 +1077,7 @@ where we define the random variable $\boldsymbol{\mathsf{v}} = (\boldsymbol{\mat
     -\frac{1}{2}\,(\mathbf{x}-\boldsymbol \mu)^\top \mathbf{\Sigma}^{-1}(\mathbf{x}-\boldsymbol \mu)
     \right)
     \end{equation}
+    Note a gap between this formula and what we proved above: the earlier proof only established that $\mathbf{\Sigma}$ is positive \emph{semi}-definite, whereas this PDF requires $\mathbf{\Sigma}$ to be invertible (positive \emph{definite}), since it appears in the denominator and is inverted in the exponent.
     We draw i.i.d.\ samples from each $p_{\boldsymbol{\mathsf{x}}}(\mathbf{x})$ and plot them:
     \begin{center}
       \includegraphics[width=\textwidth]{figs/probability/covariance_panels.pdf}
@@ -1148,7 +1159,7 @@ A related concept is conditional independence. Two random variables $\mathsf{x}_
 \begin{equation}
     p(x_1, x_2 \mid x_3) = p(x_1 \mid x_3)\,p(x_2 \mid x_3)
 \end{equation}
-For example, two noisy temperature sensors placed next to each other are not independent; if one reads high, the other likely will too. But they are \textit{conditionally independent given the true temperature}. Once we know the true temperature, the noise in one sensor reading is independent of the noise in the other.
+For example, two noisy temperature sensors placed next to each other are not independent; if one reads high, the other likely will too. But they are \textit{conditionally independent given the true temperature}. Once we know the true temperature, the noise in one sensor reading is independent of the noise in the other. This assumption that measurement noise from different sensors is conditionally independent given the true underlying state is the key modeling assumption behind multi-sensor data fusion techniques such as the Kalman filter, widely used in process control.
 
 \subsection{Marginalization}
 We might have a high-dimensional joint distribution that describes a large set of random variables but be particularly interested in the distribution of a single component. How do we get the PDF of $\mathsf{x}_1$ alone from a joint PDF? The process is called \textbf{marginalization}. To find the marginal distribution of one variable, we ``integrate out'' the uncertainty in all other variables. This is the continuous version of the law of total probability.

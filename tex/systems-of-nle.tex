@@ -88,7 +88,7 @@ This theorem generalizes the inverse function theorem from single-variable calcu
 \item the function must vanish at the root, and
 \item the Jacobian at that root must be nonsingular.
 \end{enumerate}
-Second, and equally important, we must be careful about what happens when the Jacobian is singular. A singular Jacobian does \emph{not} automatically mean the solution is not locally unique. In this case, uniqueness may or may not hold; it depends on the specific function and the particular root.
+Second, and equally important, we must be careful about what happens when the Jacobian is singular. A singular Jacobian does \emph{not} automatically mean the solution is not locally unique. In this case, uniqueness may or may not hold; it depends on the specific function and the particular root. We will meet this exact ambiguity again in a more dynamic setting: the bifurcation-analysis section (\autoref{sec:bifurcation_analysis}) uses precisely the condition $\det \mathbf{J} = 0$ as its defining criterion for locating turning points, where the number of solutions to a parameterized system changes.
 
 \begin{figure}[H]
 \begin{center}
@@ -188,7 +188,7 @@ There's a deep connection between nonlinear systems and the linear systems we st
 \end{equation}
 (To see this, it's easiest to use the notion of the Jacobian given by \autoref{eq:jacobian_approx}. We can read off the derivative of $\mathbf f$ by looking at how $\mathbf f$ changes under a small increment, and in this case it's simply $\mathbf A$. The \href{https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf}{Matrix Cookbook} is a terrific resource for more complex identities than this.)
 
-The condition for local uniqueness, $\det \mathbf{J}(\mathbf{x}) \neq 0$, becomes $\det \mathbf{A} \neq 0$, which is exactly the condition for $\mathbf{A}$ to be invertible! For systems of linear equations, we know that if $\mathbf{Ax=b}$ has a solution $\mathbf x^*$, that solution is guaranteed to be (locally) unique if $\mathbf{A}$ is nonsingular. So, our theory of nonlinear equations naturally extends our understanding of linear systems.
+The condition for local uniqueness, $\det \mathbf{J}(\mathbf{x}) \neq 0$, becomes $\det \mathbf{A} \neq 0$, which is exactly the condition for $\mathbf{A}$ to be invertible! For systems of linear equations, we know that if $\mathbf{Ax=b}$ has a solution $\mathbf x^*$, that solution is guaranteed to be (locally) unique if $\mathbf{A}$ is nonsingular. So, our theory of nonlinear equations naturally extends our understanding of linear systems. In fact, for the linear case this upgrades to \emph{global} uniqueness: because the Jacobian of a linear map is the map itself, $\mathbf J(\mathbf x)=\mathbf A$ for \emph{every} $\mathbf x$ (not just near $\mathbf x^*$), so the ``ball of radius $r$'' in the local-uniqueness definition can be taken arbitrarily large.
 
 \section{Linearization via Taylor Expansions}
 \label{sec:sne_linearization_taylor}
@@ -308,6 +308,11 @@ In practice, iterative methods cannot run indefinitely. We need criteria to deci
     \end{equation}
     Here, $\varepsilon_R \ge 0$ is a relative tolerance and $\varepsilon_A \ge 0$ is an absolute tolerance. The relative tolerance $\varepsilon_R \|\vect{x}_{k+1}\|_p$ is useful when the magnitude of $\vect{x}_{k+1}$ is large, while the absolute tolerance $\varepsilon_A$ is important when $\vect{x}_{k+1}$ is close to zero. A small difference between successive values of $\mathbf x$ means that $\mathbf x_{k+1}$ nearly satisfies the definition of a fixed point in the iterative map.
 \end{enumerate}
+
+\begin{warningBox}
+    \textbf{Warning: Scale Your Residuals.} A practical complication in ChemE applications is that a single system of equations often mixes physically dissimilar equations---for instance, a mass balance (with residuals of order $1$) and an energy balance (with residuals of order $10^4$ if temperature is in Kelvin and enthalpy in Joules)---in the same vector $\vect{f}(\vect{x})$. An unscaled norm $\|\vect{f}(\vect{x})\|_p$ is then dominated entirely by whichever equation happens to have the largest characteristic magnitude, so a single tolerance $\varepsilon_f$ can be effectively meaningless for the other equations. Practical codes address this by nondimensionalizing or scaling each residual component (e.g., dividing by a characteristic magnitude for that equation, or by its value $|f_i(\vect{x}_0)|$ at the initial guess) before applying a single tolerance.
+\end{warningBox}
+
 Often, a combination of these tests (or others, like a maximum iteration count or detection of NaNs/infs) is used. (When implementing an iterative algorithm from scratch, it is always a good idea to impose a maximum iteration count and raise an error or warning if it is exceeded.)
 
 \subsubsection{Failure Modes of Stopping Criteria}
@@ -481,7 +486,7 @@ This should be quite familiar from previous calculus courses. Geometrically, $x_
     \label{fig:newton_1d}
 \end{figure}
 
-It is worth taking a step back and reminding oneself why a numerical method needs to make this kind of assumption of linearity. When we look at the 1D example in \autoref{fig:newton_1d}, it is easy to think that there must be a better strategy. Recall that we have made no assumptions about the structure of $\mathbf f(\mathbf x)$ and that the algorithm only has the ability to call this function for different values of $\mathbf x$ in search of roots. At each iteration, Newton's method relies on a ``local'' analysis of the function value and its Jacobian to decide where it should search next. But why not also consider the second derivative? Or third derivative? Computing or estimating these can come at great computational cost, and we know that as we get closer to a root and take smaller and smaller steps, the linear term will dominate; however, algorithms using derivatives past the first derivative do exist.
+It is worth taking a step back and reminding oneself why a numerical method needs to make this kind of assumption of linearity. When we look at the 1D example in \autoref{fig:newton_1d}, it is easy to think that there must be a better strategy. Recall that we have made no assumptions about the structure of $\mathbf f(\mathbf x)$ and that the algorithm only has the ability to call this function for different values of $\mathbf x$ in search of roots. At each iteration, Newton's method relies on a ``local'' analysis of the function value and its Jacobian to decide where it should search next. But why not also consider the second derivative? Or third derivative? Computing or estimating these can come at great computational cost, and we know that as we get closer to a root and take smaller and smaller steps, the linear term will dominate; however, algorithms using derivatives past the first derivative do exist (e.g., \textbf{Halley's method}, which uses $f''$ to achieve cubic convergence; in practice, though, computing or estimating a second derivative is itself costly, and the extra order of convergence rarely pays for itself outside special cases).
 
 
 The Newton-Raphson algorithm for systems is summarized below using both the discussed stopping criteria simultaneously.
@@ -637,7 +642,13 @@ This shows that the error $e_k = x_k - x^*$ evolves as
 \begin{equation}
     e_{k+1} \approx \left(1 - \frac{1}{m}\right) e_k
 \end{equation}
-This indicates linear convergence with a convergence factor of $1 - \frac{1}{m}$. Therefore, when $f'(x^*) = 0$ and the root has multiplicity $m \ge 2$, Newton's method converges linearly rather than quadratically.
+This indicates linear convergence with a convergence factor of $1 - \frac{1}{m}$. Therefore, when $f'(x^*) = 0$ and the root has multiplicity $m \ge 2$, Newton's method converges linearly rather than quadratically. This ties directly back to the warning box earlier in the chapter: $f(x)=x^3$ has $x=0$ as a root of multiplicity $m=3$, which is simultaneously why $x=0$ remains the unique root despite $f'(0)=0$ and why Newton's method, started near $x=0$, would only converge to it linearly (with factor $1-\tfrac13 = \tfrac23$) rather than quadratically.
+
+If the multiplicity $m$ is known (or can be estimated numerically, e.g.\ from the observed linear rate $1-1/m$), this degradation is straightforward to fix: the modified iteration
+\begin{equation}
+    x_{k+1} = x_k - m\,\frac{f(x_k)}{f'(x_k)}
+\end{equation}
+restores quadratic convergence, since rescaling by $m$ exactly cancels the $1/m$ factor that otherwise survives in the error recursion above.
 
 
 \textbf{General Case (Multivariate):}
@@ -894,7 +905,7 @@ Looking ahead, other tweaks (trust regions, inexact Newton, etc.) can further im
 \subsection{Calculating the Jacobian} 
 A major challenge in the practical execution of Newton's method comes from its reliance on the Jacobian matrix at each iteration and solving the associated linear system. We have already discussed various methods for the latter. For the former, there are several options to consider. 
 
-Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$.  % TODO: add new content on AD
+Ideally, an analytical form of the Jacobian would be available alongside the function $\mathbf f$ itself. For complex systems, deriving an analytical expression for \(\mat{J}\) can be difficult and error-prone. This includes functions that despite having a continuous first derivative, can contain control flow statements (e.g., if statements, for loops, while loops) which mathematically result in highly complex branching conditionals. But rather than an analytical expression for the Jacobian, we can estimate it at a given value $\mathbf x_k$ using finite differences, or, when we have access to the function's source code, compute it automatically and exactly using automatic differentiation, discussed at the end of this section.
 
 \subsubsection{1D Finite Differences} 
 When an analytical derivative is unavailable, one can approximate it with finite differences. With step size \(\epsilon>0\), the first derivative satisfies
@@ -999,6 +1010,39 @@ end
     \end{lstlisting}
 \end{exampleBox}
 
+\subsubsection{Automatic Differentiation}
+\label{sec:automatic-differentiation}
+
+Symbolic differentiation is a third option for obtaining $\mat J$: apply the rules of calculus (the chain rule, and the known derivatives of elementary functions like $\sin$, $\exp$, powers, etc.) directly to the algebraic expression for $\vect f$, exactly as you would by hand. Software like MATLAB's Symbolic Math Toolbox, Mathematica, or SymPy automates this. The result is an exact, closed-form expression for each derivative, which can then be evaluated to machine precision at any point without truncation error, unlike finite differences.
+
+Symbolic differentiation runs into two practical problems, though. First, repeated application of the chain rule can cause \emph{expression swell}: the symbolic derivative of even a moderately complicated function can be dramatically larger, and more expensive to evaluate, than the function itself. Second, and more fundamentally, many of the functions we actually need to differentiate aren't given as a single algebraic expression at all. We might be evaluating complex computer programs that contain control flow (\texttt{if} statements, \texttt{for}/\texttt{while} loops) that symbolic differentiation has no clean way to handle, since the sequence of operations actually executed can itself depend on the input.
+
+\textbf{Automatic differentiation} (AD) sidesteps both problems. Instead of manipulating a symbolic expression, AD works directly with the sequence of elementary operations (addition, multiplication, $\sin$, $\exp$, \ldots) that the computer actually executes to evaluate $\vect f$ at a specific input. Because every elementary operation has a simple, known derivative, the chain rule can be applied mechanically along the trace to obtain an exact derivative \emph{value} at that input, again to machine precision, without ever constructing (or growing) a symbolic expression. Since AD only ever operates on the trace of what was actually executed, it also handles control flow without requiring any additional considerations. An \texttt{if} statement or a loop that runs a different number of times for a different input is simply differentiated along whichever computational trace that particular input happened to produce.
+
+There are two basic ways to propagate derivative information through the trace: \emph{forward mode} and \emph{reverse mode}.
+
+\begin{exampleBox}
+  \textbf{Example: A computational graph.} Consider $z=f(x_1,x_2)=x_1^2+3x_1x_2+1$. We can decompose this into a sequence of elementary operations, introducing an intermediate variable for each one:
+  \begin{align*}
+    v_1 &= 3x_1, & v_2 &= x_1^2, & v_3 &= v_1 x_2, & v_4 &= v_2+v_3, & z &= v_4+1.
+  \end{align*}
+  Evaluating this sequence at $(x_1,x_2)=(1,2)$ gives $v_1=3$, $v_2=1$, $v_3=6$, $v_4=7$, $z=8$.
+
+  \textbf{Forward mode} propagates a \emph{tangent} $\dot v = \partial v/\partial x_1$ alongside every intermediate variable, seeding $\dot x_1=1$, $\dot x_2=0$, and applying the chain rule to each elementary operation in the same order they were originally evaluated:
+  \begin{align*}
+    \dot v_1 &= 3\dot x_1, & \dot v_2 &= 2x_1\dot x_1, & \dot v_3 &= \dot v_1 x_2+v_1\dot x_2, & \dot v_4 &= \dot v_2+\dot v_3, & \dot z &= \dot v_4.
+  \end{align*}
+  At $(x_1,x_2)=(1,2)$ this gives $\dot v_1=3$, $\dot v_2=2$, $\dot v_3=6$, $\dot v_4=8$, $\dot z=8$---so $\partial z/\partial x_1=8$, matching the analytical result $2x_1+3x_2=8$. One forward pass, costing only a small constant multiple of evaluating $f$ itself, gives one directional derivative---here, the partial derivative with respect to $x_1$.
+
+  \textbf{Reverse mode} instead propagates an \emph{adjoint} $\bar v=\partial z/\partial v$ backward through the graph, seeded at the output with $\bar z=1$, accumulating at each node the derivative of the final output with respect to that node:
+  \begin{align*}
+    \bar v_4 &= \bar z, & \bar v_3&=\bar v_4, & \bar v_2&=\bar v_4, & \bar v_1&=\bar v_3 x_2, & \bar x_1&=3\bar v_1+2x_1\bar v_2, & \bar x_2&=\bar v_3 v_1.
+  \end{align*}
+  At $(x_1,x_2)=(1,2)$ this gives $\bar v_1=2$, $\bar x_1=8$, $\bar x_2=3$---so \emph{one} backward pass recovers \emph{both} $\partial z/\partial x_1=8$ and $\partial z/\partial x_2=3$ simultaneously, again at a cost of only a small constant multiple of evaluating $f$ once.
+\end{exampleBox}
+
+This example illustrates the asymmetry of the two directions. Forward mode costs one pass per \emph{input}; reverse mode costs one pass per \emph{output}. For the Jacobian of a general $\vect f:\mathbb R^N\to\mathbb R^M$, forward mode therefore requires $O(N)$ passes and reverse mode requires $O(M)$ passes. Forward mode will be more efficient when there are few inputs and many outputs, and reverse mode will be more efficient when there are many inputs and few outputs. For Newton's method on a square $N\times N$ system, $M=N$, so neither mode has an asymptotic advantage over the other (or, for that matter, over a finite-difference Jacobian, in terms of the number of passes required). The difference becomes meaningful in the common case of a single scalar output ($M=1$) with many inputs; this is the situation in gradient-based optimization, where $f$ is a scalar objective and $N$, the number of parameters, can be in the millions or billions, especially in modern deep learning models. Reverse mode gets the full gradient $\nabla f$ in one backward pass, independent of $N$. In the machine learning community, reverse-mode AD used to train large neural networks is given the special name of \emph{backpropagation}.
+
 \subsection{Quasi-Newton Methods}
 \label{sec:quasi-newton_methods}
 
@@ -1020,7 +1064,7 @@ Broyden's method maintains an estimate $\mat{B}_k \approx \mat{J}(\vect{x}_k)$ a
   \quad
   \vect{\Delta f}_k = \vect{f}(\vect{x}_{k+1})-\vect{f}(\vect{x}_k)
 \end{equation}
-At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$, exactly like Newton's method. An initial $\mat{B}_0$ can be obtained from a finite-difference approximation to the Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. We will revisit quasi-Newton methods in more detail in the optimization chapter.
+At iteration $k$, we solve the linear system $\mat{B}_k \vect{d}_k = -\vect{f}(\vect{x}_k)$ and update $\vect{x}_{k+1}=\vect{x}_k+\vect{d}_k$, exactly like Newton's method. An initial $\mat{B}_0$ can be obtained from a finite-difference approximation to the Jacobian, after which the rank-one updates avoid repeated full differencing. Under standard smoothness and regularity assumptions, these methods are typically superlinear, and in practice they can greatly reduce per-iteration cost while retaining robust local convergence behavior. The real computational benefit of Broyden's method is its rank-1 structure. Because each update to $\mat B_k$ is an outer product, the Sherman-Morrison formula (recall the discussion of rank-1 updates in the linear algebra chapter) lets us update $\mat B_k^{-1}$ directly in $O(N^2)$ operations, instead of paying the $O(N^3)$ cost of factoring a fresh Jacobian from scratch at every iteration. The downside is that this same rank-1 update tends to fill in $\mat B_k$ densely even when the true Jacobian is sparse. We will revisit quasi-Newton methods in more detail in the optimization chapter.
 
 
 
@@ -1165,6 +1209,7 @@ The next question is how to choose $\mathbf{g}(\mathbf{x})$. The only real requi
 For chemical engineering problems describing physical systems, we often have some simplified model that we know how to solve, and we can use that to construct the homotopy. We will see this soon in the context of the van der Waals equation of state.
 
 \section{Bifurcation Analysis}
+\label{sec:bifurcation_analysis}
 As the homotopy parameter $\lambda$ varies, the number of solutions of
 \[
 \mathbf{h}(\mathbf{x},\lambda)=\mathbf{0}
@@ -1189,6 +1234,14 @@ Near such points, solution branches either turn around in $\lambda$ (turning poi
     \end{bmatrix} = \mathbf{0}
 \end{equation}
 This is itself a nonlinear system that can be solved using Newton's method!
+
+\begin{exampleBox}
+\textbf{Example: Ignition-Extinction in a Nonisothermal CSTR}
+
+The definition above tells us \emph{where} to look for a qualitative change in the solution set ($\det \mathbf{J}_h=0$), but not which kind we've found. Distinguishing a simple turning point from a true branch point requires one more piece of information: how the parameter enters the problem at that singular point. Let $\vect\phi$ span the null space of $\mathbf J_h$ at a singular point $(\mathbf x^*,\lambda^*)$, and let $\vect\psi$ span the null space of $\mathbf J_h^\top$ (the ``left'' null vector). Generically, if $\vect\psi^\top \dfrac{\partial \mathbf h}{\partial\lambda} \neq 0$ at that point---i.e., the parameter derivative is not orthogonal to the left null vector---the singularity is a simple turning point: the branch folds back in $\lambda$ but does not split. If instead $\vect\psi^\top \dfrac{\partial \mathbf h}{\partial \lambda} = 0$, the fold condition fails, and (generically) the point is a true branch point where distinct solution branches cross. We won't derive this rigorously in 10.34, but it's worth knowing that ``singular Jacobian'' by itself doesn't fully classify what's happening.
+
+A classic chemical engineering illustration of a turning point is the multiplicity of steady states in a well-mixed, nonisothermal CSTR running an exothermic reaction. At steady state, the heat generated by reaction (roughly S-shaped in reactor temperature $T$, since it's governed by an Arrhenius rate that saturates once the reactant is depleted) must balance the heat removed by flow and cooling (roughly linear in $T$). For an intermediate feed temperature (or, in dimensionless terms, an intermediate Damk\"ohler number), the generation and removal curves can cross at three temperatures instead of one: a low-temperature ``extinguished'' steady state, an unstable intermediate one, and a high-temperature ``ignited'' one. Treating a parameter such as the feed temperature $\lambda = T_f$ as a continuation parameter and tracing the steady-state temperature $T(\lambda)$ produces exactly the kind of S-shaped curve we saw for the van der Waals equation above. Sweeping $\lambda$ up from a low value, the reactor state jumps discontinuously from the extinguished branch to the ignited one once $\lambda$ passes the \emph{ignition point}; sweeping back down, it does not retrace the same path and instead jumps down at a lower \emph{extinction point}, producing hysteresis. Both the ignition and extinction points are turning points. At each one, $\det \mathbf J_h = 0$ for $\mathbf J_h = \partial h/\partial T$ of the steady-state energy balance $h(T,\lambda)=0$, and the (never physically observed) middle branch is the unstable solution connecting them.
+\end{exampleBox}
 
 \begin{exampleBox}
     \textbf{Example: van der Waals equation via homotopy}
