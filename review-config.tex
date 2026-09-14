@@ -1,0 +1,15 @@
+% Review build (untracked): solutions inline behind exercises, colored red; page watermark.
+\RequirePackage{draftwatermark}
+\SetWatermarkText{REVIEW DRAFT}
+\SetWatermarkScale{0.4}
+\SetWatermarkColor[gray]{0.92}
+\xsimsetup{solution/print=true}
+\def\reviewinlinesolutions{}
+\DeclareExerciseEnvironmentTemplate{review-red}
+  {%
+    \begingroup\color{red}%
+    \GetExerciseHeadingF{\subsection*}
+      {\XSIMmixedcase{\GetExerciseName}\nobreakspace\GetExerciseProperty{counter}}%
+  }
+  {\par\endgroup}
+\xsimsetup{solution/template=review-red}
