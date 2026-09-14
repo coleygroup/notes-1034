@@ -1,10 +1,13 @@
 \chapter{Linear Algebra}
-We will first review some of the main results of linear algebra that will be useful for 10.34. Then, we will move on to some of the applications of linear algebra to numerical methods, and how to numerically solve linear systems. Feel free to skip directly to \Cref{sec:complexity-of-matrix-and-vector-operations} if you are comfortable with the basics of linear algebra.
+Linear algebra is on its own a way to formulate scientific and engineering problems: many physical relationships---mass and energy balances, circuit laws, discretized transport equations---are linear, and expressing them as systems of linear equations makes a vast toolbox of theory and algorithms available.
+More importantly for this course, linear algebra serves as the key building block of the more complicated problems we shall discuss subsequently: solving nonlinear equations, optimization, statistics, and differential equations all reduce, at their computational core, to a sequence of linear-algebraic subproblems.
+In this chapter, we review the key concepts of linear algebra (with which some readers may already be familiar), and then move on to a more in-depth discussion of how to solve systems of linear equations.
 
 \section{Scalars, Vectors, and Matrices}
 \subsection{Scalars}
 \textbf{Scalars} are single numbers, which can be used to represent quantities, like mass, temperature, or time. In linear algebra, we typically work with scalars from a \textbf{field}, which is a set equipped with two operations (addition and multiplication). Commonly used fields---the sets of scalars---include real numbers $ \mathbb{R} $ and complex numbers $ \mathbb{C} $.
 
+\subsubsection*{Real Numbers}
 The set of real numbers, commonly denoted by $ \mathbb{R} $, includes all rational and irrational numbers.
 That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, and irrational numbers like $ \pi $ and $ \sqrt{2} $.
 
@@ -12,19 +15,22 @@ That is, it includes integers like $-1, 0, 1$, fractions like $ \frac{1}{2} $, a
 
 \subsubsection*{Complex Numbers}
 Complex numbers are the numbers that involve imaginary numbers.
-Imaginary numbers can be constructed by using $i=\sqrt{-1}$ as a building block.
+Imaginary numbers can be constructed by using $\iu=\sqrt{-1}$ as a building block.\footnote{Throughout these notes, the imaginary unit is written as $\iu$, matching the course slides; this keeps the plain letter $i$ free for use as an index.}
 Whether this number actually exists or not is not important, but what's important is we can \emph{conceptually define this number}, and with this definition, we can derive so many \emph{useful properties}.
 
 Complex numbers are obtained by combining real numbers and imaginary numbers.
 Conversely, any element in the set of complex numbers $\mathbb{C}$ can be expressed as the combination of real numbers and imaginary numbers, as follows:
 \begin{equation*}
-    z = a + b i, \quad a, b \in \mathbb{R}
+    z = a + b \iu, \quad a, b \in \mathbb{R}
 \end{equation*}
-We also often use the notation $ \operatorname{Re}(z) = a $ and $ \operatorname{Im}(z) = b $ to denote the real and imaginary parts of the complex number $ z $, respectively.
+We also often denote the real and imaginary parts of the complex number $ z $ by
+\begin{equation*}
+    \operatorname{Re}(z) = a, \qquad \operatorname{Im}(z) = b.
+\end{equation*}
 
 The \textbf{complex conjugate} of $ z $ is denoted by $\overline{z}$ and is defined as:
 \begin{equation*}
-  \overline{z} := a - b i
+  \overline{z} := a - b \iu
 \end{equation*}
 For real values, we have absolute values that represent the magnitude of the real number.
 For complex numbers, we can also define a similar notion of magnitude by using the complex conjugate defined above.
@@ -32,13 +38,15 @@ The \textbf{magnitude} (or modulus) of $ z $ is
 \begin{equation*}
   |z| := \sqrt{z \overline{z}}
 \end{equation*}
-The magnitude of a complex number $ z = a + bi $ can be conveniently computed as follows:
+The magnitude of a complex number $ z = a + b\iu $ can be conveniently computed as follows:
 \begin{equation*}
   |z| = \sqrt{a^2 + b^2}.
 \end{equation*}
 
 \begin{exampleBox}
-    \textbf{Example}: For $ z = 3 + 4i $, the conjugate is $ \overline{z} = 3 - 4i $, and the magnitude is $ |z| = \sqrt{3^2 + 4^2} = 5 $.
+    \textbf{Example}: Compute the conjugate and the magnitude of $ z = 3 + 4\iu $.
+
+    \emph{Solution}: The conjugate is $ \overline{z} = 3 - 4\iu $, and the magnitude is $ |z| = \sqrt{3^2 + 4^2} = 5 $.
 \end{exampleBox}
 
 We can visualize complex numbers as points in the complex plane, with the real part on the horizontal axis and the imaginary part on the vertical axis (\autoref{fig:complex-plane}).
@@ -56,7 +64,7 @@ We can visualize complex numbers as points in the complex plane, with the real p
     \def\b{4}       % Imaginary part
 
     % Plot the complex number
-    \draw[fill=blue] (\a, \b) circle[radius=3pt] node[above right] {$z = a + b i$};
+    \draw[fill=blue] (\a, \b) circle[radius=3pt] node[above right] {$z = a + b \iu$};
     \node at (0, 4) [left] {$b$};
     \node at (3, 0) [below] {$a$};
 
@@ -75,12 +83,27 @@ We can visualize complex numbers as points in the complex plane, with the real p
     \label{fig:complex-plane}
 \end{figure}
 
+In the complex plane, a complex number can also be specified by its magnitude $ r = |z| $ and the angle $ \theta $ it makes with the positive real axis.
+The two descriptions are connected through \textbf{Euler's formula},
+\begin{equation*}
+    e^{\iu\theta} = \cos\theta + \iu\sin\theta,
+\end{equation*}
+so any complex number can be written in the polar form $ z = r\, e^{\iu\theta} $.
+This representation is particularly convenient for multiplication: multiplying two complex numbers multiplies their magnitudes and adds their angles.
+
+\begin{exampleBox}
+    \textbf{Example}: Convert $z = 1 + \iu$ to polar form, and $z = 2 e^{\iu\pi/6}$ to rectangular form.
+
+    \emph{Solution}: For $z = 1 + \iu$, compute $r = \sqrt{1^2 + 1^2} = \sqrt{2}$ and $\theta = \arctan(1/1) = \pi/4$, giving $z = \sqrt{2}\, e^{\iu\pi/4}$. For $z = 2 e^{\iu\pi/6}$, compute $a = 2\cos(\pi/6) = \sqrt{3}$ and $b = 2\sin(\pi/6) = 1$, giving $z = \sqrt{3} + \iu$.
+\end{exampleBox}
+
 \subsection{Vectors}
 A \textbf{vector} is a tuple---an ordered list---of scalars; it has magnitude and direction. In $ n $-dimensional space, a vector $ \mathbf{v} $ over the field $ \mathbb{R} $ or $ \mathbb{C} $ is written as
 \begin{equation*}
     \mathbf{v} = (v_1, v_2, \ldots, v_n) = \begin{bmatrix} v_1 \\ v_2 \\ \vdots \\ v_n \end{bmatrix}, \quad v_i \in \mathbb{R} \text{ or } \mathbb{C}
 \end{equation*}
 It is common to write vectors either as tuples (arranged horizontally with comma separators) or as column vectors. We will use both notations interchangeably.
+Unless specified otherwise, all vectors are assumed to be column vectors.
 % SS: TODO: symbol (dimension for vector) is not consistent with the lecture notes. I like lowercase $n$ better, but for now, we should try to make the symbols consistent to reduce the confusion.
 
 The set of $n$-dimensional vectors over the field $ \mathbb{R} $ is denoted by $ \mathbb{R}^n $, and the set of $n$-dimensional vectors over the field $ \mathbb{C} $ is denoted by $ \mathbb{C}^n $.
@@ -88,29 +111,30 @@ The set of all such vectors forms a \textbf{vector space} $ \mathbb{R}^n $ (or $
 Later in \Cref{sec:vector-space}, we will see that $\mathbb{R}^n$ and $\mathbb{C}^n$ form vector spaces, and several useful properties can be derived from the nature of vector spaces.
 
 \subsubsection{Vector Operations}
-\paragraph*{Vector Addition and Scalar Multiplication}
-Two basic arithmetic operations can be defined over the vector space: \emph{addition} and \emph{scalar multiplication}.
+\paragraph*{Vector Addition}
+Two basic arithmetic operations can be defined over the vector space: \emph{addition} and \emph{scalar multiplication}, discussed in this paragraph and the next.
 Vector addition is defined for a pair of vectors with the same dimension.
-Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), their addition is defined as follows:
+Given two vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ (or $ \mathbb{C}^n $), the vector addition $ \mathbf{u} + \mathbf{v} $ is defined as follows:
 \begin{equation*}
   \mathbf{u} + \mathbf{v} = \begin{bmatrix} u_1 + v_1 \\ u_2 + v_2 \\ \vdots \\ u_n + v_n \end{bmatrix}
 \end{equation*}
 That is, the addition is performed entry-wise.
-This operation is commutative and associative. That is,
-\begin{align*}
-  \mathbf{u} + \mathbf{v} &= \mathbf{v} + \mathbf{u} \\
-  (\mathbf{u} + \mathbf{v}) + \mathbf{w} &= \mathbf{u} + (\mathbf{v} + \mathbf{w}),
-\end{align*}
-for any vectors $ \mathbf{u}, \mathbf{v}, \mathbf{w} $ in the same vector space.
-Geometrically, vector addition can be interpreted as a ``tip-to-tail'' construction (see \autoref{fig:vector-operations}).
 
 \begin{warningBox}
-  \textbf{Warning:} Vector addition is only defined for vectors of the same dimension. Attempting to add vectors of different dimensions is undefined. If you attempt to add vectors of different dimensions on a computer (e.g., in MATLAB), you will encounter an error:
+  \textbf{Warning:} Vector addition is only defined for vectors of the same dimension. Vector addition between vectors of different dimensions is not defined. If you attempt to add vectors of different dimensions on a computer (e.g., in MATLAB), you will encounter an error:
 \begin{verbatim}
 >> [1; 2] + [3; 4; 5]
 Arrays have incompatible sizes for this operation.
 \end{verbatim}
 \end{warningBox}
+
+Vector addition satisfies the following properties, for any vectors $ \mathbf{u}, \mathbf{v}, \mathbf{w} $ in the same vector space:
+\begin{itemize}
+    \item commutativity: $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $;
+    \item associativity: $ (\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w}) $.
+\end{itemize}
+
+Geometrically, vector addition can be interpreted as a ``tip-to-tail'' construction (see \autoref{fig:vector-operations}).
 
 \paragraph*{Scalar Multiplication}
 Scalar multiplication is defined for a vector and a scalar.
@@ -139,15 +163,20 @@ You can also combine these two operations.
     a x_1 + b y_1 \\
     a x_2 + b y_2 \\
     \vdots \\
-    a x_N + b y_N
+    a x_n + b y_n
   \end{bmatrix}
 \end{align}
-where $a$ and $b$ are scalar values, and $\mathbf{x}$ and $\mathbf{y}$ are vectors in $\mathbb{R}^N$.
+where $a$ and $b$ are scalar values, and $\mathbf{x}$ and $\mathbf{y}$ are vectors in $\mathbb{R}^n$.
 We don't need to separately define subtraction, since $\mathbf{x}-\mathbf{y}$ is equivalent to \cref{eqn:ax+by} with $a=1$ and $b=-1$.
 
 
+\paragraph*{Closedness}
 We can observe that the result of scalar multiplication, vector addition, and even their combination is \emph{closed} within the vector space where $\mathbf{x}$ and $\mathbf{y}$ live.
-This means that $a\mathbf{x} + b\mathbf{y}$ is in $\mathbb{R}^N$, if $\mathbf{x}$ and $\mathbf{y}$ are in $\mathbb{R}^N$ and $a$ and $b$ are in $\mathbb{R}$.
+That is,
+\begin{equation*}
+    a\mathbf{x} + b\mathbf{y} \in \mathbb{R}^n
+    \quad \text{for all } \mathbf{x}, \mathbf{y} \in \mathbb{R}^n \text{ and } a, b \in \mathbb{R}.
+\end{equation*}
 The same holds true if you replace $\mathbb{R}$ with $\mathbb{C}$.
 This observation is one of the key properties of vector spaces, and we will see more about vector spaces in \Cref{sec:vector-space}.
 
@@ -155,6 +184,7 @@ This observation is one of the key properties of vector spaces, and we will see 
 \begin{align*}
   \mathbf{0} = (0, 0, \dots, 0).
 \end{align*}
+Note that the symbol $\mathbf{0}$ itself does not indicate how many entries the vector has; unless the dimension is clear from the context, we need to specify it explicitly (e.g., $\mathbf{0} \in \mathbb{R}^n$).
 
 
 \subsection{Matrices}
@@ -169,18 +199,50 @@ A \textbf{matrix} is a rectangular array of scalars arranged in rows and columns
     % SS: notation inconsistent with the lecture slides. Fix later.
 \end{equation*}
 % Matrices can represent linear transformations from $ \mathbb{R}^n $ to $ \mathbb{R}^m $. % SS: later
-The notation $ \mathbf{A} \in \mathbb{R}^{m \times n} $ indicates the dimensions of $ \mathbf{A} $ (and the fact that the entries are drawn from $\mathbb{R}$), and the notation $ a_{ij} $ denotes the element in the $ i $-th row and $ j $-th column.
+The notation $ \mathbf{A} \in \mathbb{R}^{m \times n} $ indicates the dimensions of $ \mathbf{A} $ (and the fact that the entries are drawn from $\mathbb{R}$).
+In the equation above, we used the lowercase $ a_{ij} $ to denote the entry in the $ i $-th row and $ j $-th column of $ \mathbf{A} $.
 Additionally, we can think of vectors as matrices with a single column---that is, as $ n \times 1 $ matrices.
 This perspective allows us to treat vectors and matrices in a unified manner.
+Conversely, a matrix can be decomposed into its columns or its rows:
+\begin{equation*}
+    \mathbf{A} =
+    \begin{bmatrix} \mathbf{a}^C_1 & \mathbf{a}^C_2 & \cdots & \mathbf{a}^C_n \end{bmatrix}
+    =
+    \begin{bmatrix} \mathbf{a}^R_1 \\ \mathbf{a}^R_2 \\ \vdots \\ \mathbf{a}^R_m \end{bmatrix},
+\end{equation*}
+where the $ j $-th column $ \mathbf{a}^C_j $ (a column vector with $ m $ entries) and the $ i $-th row $ \mathbf{a}^R_i $ (a row vector with $ n $ entries) of $ \mathbf{A} $ are defined as
+\begin{equation*}
+    \mathbf{a}^C_j = \begin{bmatrix} a_{1j} \\ a_{2j} \\ \vdots \\ a_{mj} \end{bmatrix},
+    \qquad
+    \mathbf{a}^R_i = \begin{bmatrix} a_{i1} & a_{i2} & \cdots & a_{in} \end{bmatrix}.
+\end{equation*}
+In MATLAB, these can be extracted with the indexing syntax \texttt{A(:,j)} and \texttt{A(i,:)}.
 
 \subsubsection{Matrix Operations}
 
 \paragraph*{Matrix Addition and Scalar Multiplication}
-Like vectors, matrices can be added and scaled entry-wise:
-\begin{itemize}
-    \item \textbf{Addition}: $ (\mathbf{A} + \mathbf{B})_{ij} = a_{ij} + b_{ij} $
-    \item \textbf{Scalar Multiplication}: $ (c\mathbf{A})_{ij} = c \cdot a_{ij} $
-\end{itemize}
+Like vectors, matrices can be added and scaled entry-wise.
+Given two matrices $ \mathbf{A}, \mathbf{B} \in \mathbb{R}^{m \times n} $ with the same dimensions, the matrix addition $ \mathbf{A} + \mathbf{B} $ is defined as follows:
+\begin{equation*}
+    \mathbf{A} + \mathbf{B} =
+    \begin{bmatrix}
+        a_{11} + b_{11} & a_{12} + b_{12} & \ldots & a_{1n} + b_{1n} \\
+        a_{21} + b_{21} & a_{22} + b_{22} & \ldots & a_{2n} + b_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        a_{m1} + b_{m1} & a_{m2} + b_{m2} & \ldots & a_{mn} + b_{mn}
+    \end{bmatrix}.
+\end{equation*}
+Similarly, for a scalar $ c \in \mathbb{R} $ (or $ \mathbb{C} $), the scalar multiplication $ c\mathbf{A} $ is defined as follows:
+\begin{equation*}
+    c\mathbf{A} =
+    \begin{bmatrix}
+        c\, a_{11} & c\, a_{12} & \ldots & c\, a_{1n} \\
+        c\, a_{21} & c\, a_{22} & \ldots & c\, a_{2n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        c\, a_{m1} & c\, a_{m2} & \ldots & c\, a_{mn}
+    \end{bmatrix}.
+\end{equation*}
+Entry-wise, $ (\mathbf{A} + \mathbf{B})_{ij} = a_{ij} + b_{ij} $ and $ (c\mathbf{A})_{ij} = c \cdot a_{ij} $.
 
 \paragraph*{Dot Product}
 The \textbf{dot product} (inner product) of vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ is
@@ -207,8 +269,9 @@ The dot product satisfies the following properties:
 \paragraph*{Matrix-Vector Products}
 The product of an $m\times n$ matrix $ \mathbf{A} \in\mathbb{R}^{m\times n}$ and an $n$-dimensional vector $ \mathbf{x} $ is an $m$-dimensional vector $\mathbf{b}\in \mathbb{R}^m $:
 \begin{equation*}
-  b_i = \sum_{j=1}^n a_{ij} x_j.
+  b_i = \sum_{j=1}^n a_{ij} x_j,
 \end{equation*}
+where $b_i$ denotes the $i$-th entry of $\mathbf{b}$.
 Writing out everything explicitly, we have
 \begin{equation*}
   \mathbf{b} = \mathbf{A}\mathbf{x} = \begin{bmatrix}
@@ -218,11 +281,24 @@ Writing out everything explicitly, we have
     a_{m1}x_1 + a_{m2}x_2 + \cdots + a_{mn}x_n
   \end{bmatrix}.
 \end{equation*}
+Using the column and row vector notation introduced above, this product can be interpreted in two ways.
+In the \emph{row form}, each entry of $ \mathbf{b} $ is the dot product of a row of $ \mathbf{A} $ with $ \mathbf{x} $:
+\begin{equation*}
+  \mathbf{b} = \mathbf{A}\mathbf{x}
+  = \begin{bmatrix} \mathbf{a}^R_1\, \mathbf{x} \\ \mathbf{a}^R_2\, \mathbf{x} \\ \vdots \\ \mathbf{a}^R_m\, \mathbf{x} \end{bmatrix}.
+\end{equation*}
+In the \emph{column form}, $ \mathbf{b} $ is a linear combination of the columns of $ \mathbf{A} $ weighted by the entries of $ \mathbf{x} $:
+\begin{equation*}
+  \mathbf{b} = \mathbf{A}\mathbf{x}
+  = x_1 \mathbf{a}^C_1 + x_2 \mathbf{a}^C_2 + \cdots + x_n \mathbf{a}^C_n.
+\end{equation*}
 
-The number of columns in $ \mathbf{A} $ must equal the number of elements in $ \mathbf{x} $ for the product to be defined. Since vectors can be thought of as matrices with one column, matrix-vector multiplication is just a special case of matrix multiplication.
+The number of columns in $ \mathbf{A} $ must equal the dimension of $ \mathbf{x} $ for the product to be defined. Since vectors can be thought of as matrices with one column, matrix-vector multiplication is just a special case of matrix multiplication.
 
 \begin{exampleBox}
-  \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{x} = \begin{bmatrix}5 \\ 6\end{bmatrix} $:
+  \textbf{Example}: Compute $ \mathbf{A}\mathbf{x} $ for $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{x} = \begin{bmatrix}5 \\ 6\end{bmatrix} $.
+
+  \emph{Solution}:
   \begin{equation*}
     \mathbf{A}\mathbf{x} = \begin{bmatrix}1 \cdot 5 + 2 \cdot 6 \\ 3 \cdot 5 + 4 \cdot 6\end{bmatrix} = \begin{bmatrix}17 \\ 39\end{bmatrix}
   \end{equation*}
@@ -242,10 +318,25 @@ Writing out everything explicitly, we have
     a_{m1}b_{11} + a_{m2}b_{21} + \cdots + a_{mn}b_{n1} & \cdots & a_{m1}b_{1p} + a_{m2}b_{2p} + \cdots + a_{mn}b_{np}
   \end{bmatrix}
 \end{equation*}
+The same interpretations apply here: the entry $ c_{ij} $ is the product of the $ i $-th row of $ \mathbf{A} $ and the $ j $-th column of $ \mathbf{B} $, and each column of $ \mathbf{C} $ is a matrix-vector product,
+\begin{equation*}
+  c_{ij} = \mathbf{a}^R_i\, \mathbf{b}^C_j,
+  \qquad
+  \mathbf{c}^C_j = \mathbf{A}\, \mathbf{b}^C_j.
+\end{equation*}
+Decomposing $\mathbf{B}$ into its columns makes the second interpretation visual: matrix multiplication is a collection of matrix-vector products, one per column of $\mathbf{B}$,
+\begin{equation*}
+  \mathbf{A}\mathbf{B}
+  = \mathbf{A} \begin{bmatrix} \mathbf{b}^C_1 & \mathbf{b}^C_2 & \cdots & \mathbf{b}^C_p \end{bmatrix}
+  = \begin{bmatrix} \mathbf{A}\mathbf{b}^C_1 & \mathbf{A}\mathbf{b}^C_2 & \cdots & \mathbf{A}\mathbf{b}^C_p \end{bmatrix},
+\end{equation*}
+so matrix multiplication is a generalization of the matrix-vector product.
 Matrix multiplication is associative and distributive but generally not commutative ($ \mathbf{A}\mathbf{B} \neq \mathbf{B}\mathbf{A} $ in general). Additionally, the number of columns in $ \mathbf{A} $ must equal the number of rows in $ \mathbf{B} $ for the product to be defined.
 
 \begin{exampleBox}
-    \textbf{Example}: Multiply $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{B} = \begin{bmatrix}5 & 6\\7 & 8\end{bmatrix} $:
+    \textbf{Example}: Multiply $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $ and $ \mathbf{B} = \begin{bmatrix}5 & 6\\7 & 8\end{bmatrix} $.
+
+    \emph{Solution}:
     \begin{equation*}
         \mathbf{A}\mathbf{B} = \begin{bmatrix}
             1 \cdot 5 + 2 \cdot 7 & 1 \cdot 6 + 2 \cdot 8 \\
@@ -255,6 +346,15 @@ Matrix multiplication is associative and distributive but generally not commutat
 \end{exampleBox}
 
 The product of two matrices, $ \mathbf{A}\mathbf{B} $, represents the composition of two linear transformations. If matrix $ \mathbf{B} $ transforms a vector $ \mathbf{x} $ into a new vector $ \mathbf{y} = \mathbf{B}\mathbf{x} $, and matrix $ \mathbf{A} $ then transforms $ \mathbf{y} $ into $ \mathbf{z} = \mathbf{A}\mathbf{y} $, the product matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ is the single matrix that represents the entire transformation from $ \mathbf{x} $ to $ \mathbf{z} $ directly ($ \mathbf{z} = \mathbf{C}\mathbf{x} $). This is why the order of multiplication matters; applying transformation $ \mathbf{A} $ then $ \mathbf{B} $ is generally not the same as applying $ \mathbf{B} $ then $ \mathbf{A} $.
+
+\begin{warningBox}
+    \textbf{Warning:} As with vector addition, all of the matrix multiplication operations discussed here require compatible dimensions: $ \mathbf{A}\mathbf{B} $ is defined only when the number of columns of $ \mathbf{A} $ equals the number of rows of $ \mathbf{B} $. For example, $ \mathbf{A} \in \mathbb{R}^{2 \times 3} $ and $ \mathbf{B} \in \mathbb{R}^{3 \times 4} $ can be multiplied as $ \mathbf{A}\mathbf{B} \in \mathbb{R}^{2 \times 4} $ (the inner dimensions, 3 and 3, match), but the product $ \mathbf{B}\mathbf{A} $ is simply not defined mathematically (the inner dimensions are now 4 and 2). If you attempt such a product on a computer (e.g., in MATLAB), you will encounter an error:
+\begin{verbatim}
+>> ones(3, 4) * ones(2, 3)
+Error using *
+Incorrect dimensions for matrix multiplication.
+\end{verbatim}
+\end{warningBox}
 
   
 % SS: revisit this later. Probably we want to bring this up later.
@@ -272,15 +372,15 @@ The outer product of vectors satisfies the following properties:
     \item $ \mathbf{u} \otimes (\mathbf{v} + \mathbf{w}) = \mathbf{u} \otimes \mathbf{v} + \mathbf{u} \otimes \mathbf{w} $
     \item $ c (\mathbf{v} \otimes \mathbf{u}) = (c \mathbf{v}) \otimes \mathbf{u} = \mathbf{v} \otimes (c \mathbf{u}) $
 \end{itemize}
-If $\mathbf{u} \neq \mathbf{0}$ and $\mathbf{v} \neq \mathbf{0}$, then $\mathbf{u} \otimes \mathbf{v}$ always has matrix rank 1 since the columns of the outer product are all proportional to $\mathbf{u}$. As we will see later, this property has important implications for efficiently updating the inverse of a matrix under a rank-1 perturbation (the Sherman-Morrison formula).
-
+There is no need to memorize these properties (or those of the dot product above): they are immediate consequences of the definition of matrix multiplication.
 To emphasize, the outer product constructs a matrix from the product of two vectors, while the inner product (dot product) constructs a scalar from the product of two vectors.
 
 \paragraph*{Transpose of a Matrix}
 The \textbf{transpose} of $ \mathbf{A} $, denoted $ \mathbf{A}^\top $, is obtained by swapping rows with columns:
 \begin{equation*}
-  (\mathbf{A}^\top)_{ij} = a_{ji}.
+  (\mathbf{A}^\top)_{ij} = a_{ji},
 \end{equation*}
+where $(\mathbf{A}^\top)_{ij}$ denotes the $(i,j)$-th entry of $\mathbf{A}^\top$.
 Writing out everything explicitly, we have
 \begin{equation*}
   \mathbf{A} = \begin{bmatrix} 
@@ -296,12 +396,17 @@ Writing out everything explicitly, we have
     a_{1n} & a_{2n} & \ldots & a_{mn} 
   \end{bmatrix}.
 \end{equation*}
-The transpose satisfies $ (\mathbf{A}^\top)^\top = \mathbf{A} $ and $ (\mathbf{A} + \mathbf{B})^\top = \mathbf{A}^\top + \mathbf{B}^\top $.
-
-In addition, the transpose of a product reverses order: $(\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top \mathbf{A}^\top$ whenever the product is defined.
+The transpose satisfies the following properties:
+\begin{itemize}
+    \item $ (\mathbf{A}^\top)^\top = \mathbf{A} $ (transposing twice recovers the original matrix);
+    \item $ (\mathbf{A} + \mathbf{B})^\top = \mathbf{A}^\top + \mathbf{B}^\top $ (the transpose of a sum is the sum of the transposes);
+    \item $ (\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top \mathbf{A}^\top $ whenever the product is defined (the transpose of a product reverses the order).
+\end{itemize}
 
 \begin{exampleBox}
-    \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $, $ \mathbf{A}^\top = \begin{bmatrix}1 & 3\\2 & 4\end{bmatrix} $
+    \textbf{Example}: Find $ \mathbf{A}^\top $ for $ \mathbf{A} = \begin{bmatrix}1 & 2\\3 & 4\end{bmatrix} $.
+
+    \emph{Solution}: $ \mathbf{A}^\top = \begin{bmatrix}1 & 3\\2 & 4\end{bmatrix} $.
 \end{exampleBox}
 
 \paragraph*{Trace of a Matrix}
@@ -324,12 +429,22 @@ The trace also satisfies the following properties:
 \item $ \operatorname{tr}(\mathbf{AB}) = \operatorname{tr}(\mathbf{BA}) $
 \end{itemize}
 
-\begin{optionalBox}
-As a generalization of the last property mentioned above, we note that the trace is invariant under \textbf{cyclic permutations}, meaning that for any square matrices $ \mathbf{A}, \mathbf{B}, \mathbf{C} $ such that the product $ \mathbf{ABC} $ is defined, we have $ \operatorname{tr}(\mathbf{ABC}) = \operatorname{tr}(\mathbf{CAB}) = \operatorname{tr}(\mathbf{BCA}) $. However, note that this property does not hold for arbitrary permutations (e.g., $ \operatorname{tr}(\mathbf{ACB}) \neq \operatorname{tr}(\mathbf{ABC}) $).
-\end{optionalBox}
+As a generalization of the last property, the trace is invariant under \textbf{cyclic permutations}: for any square matrices $ \mathbf{A}, \mathbf{B}, \mathbf{C} $ such that the product $ \mathbf{ABC} $ is defined, $ \operatorname{tr}(\mathbf{ABC}) = \operatorname{tr}(\mathbf{CAB}) = \operatorname{tr}(\mathbf{BCA}) $. This does not extend to arbitrary permutations.
 
 \begin{exampleBox}
-    \textbf{Example}: For $ \mathbf{A} = \begin{bmatrix}2 & -1\\4 & 3\end{bmatrix} $, $ \operatorname{tr}(\mathbf{A}) = 2 + 3 = 5 $.
+    \textbf{Example}: For
+    $ \mathbf{A} = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} $,
+    $ \mathbf{B} = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix} $,
+    $ \mathbf{C} = \begin{bmatrix} 2 & 0 \\ 1 & 1 \end{bmatrix} $,
+    compute the trace of each cyclic permutation $ \mathbf{ABC}, \mathbf{CAB}, \mathbf{BCA} $ and of the non-cyclic permutation $ \mathbf{ACB} $.
+
+    \emph{Solution}: The cyclic permutations give $ \operatorname{tr}(\mathbf{ABC}) = \operatorname{tr}(\mathbf{CAB}) = \operatorname{tr}(\mathbf{BCA}) = 8 $, while the non-cyclic permutation gives $ \operatorname{tr}(\mathbf{ACB}) = 12 $.
+\end{exampleBox}
+
+\begin{exampleBox}
+    \textbf{Example}: Compute $ \operatorname{tr}(\mathbf{A}) $ for $ \mathbf{A} = \begin{bmatrix}2 & -1\\4 & 3\end{bmatrix} $.
+
+    \emph{Solution}: $ \operatorname{tr}(\mathbf{A}) = 2 + 3 = 5 $.
 \end{exampleBox}
 
 \subsubsection{Special Matrices}
@@ -338,14 +453,16 @@ As a generalization of the last property mentioned above, we note that the trace
     \begin{equation*}
         \mathbf{0} = \begin{bmatrix}0 & 0 & \ldots & 0\\0 & 0 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 0\end{bmatrix}
     \end{equation*}
+    As with the zero vector, the dimensions of $ \mathbf{0} $ should be inferred from the context; otherwise, they need to be specified (e.g., $ \mathbf{0} \in \mathbb{R}^{m \times n} $).
     \item \textbf{Identity Matrix} $ \mathbf{I} $: Square matrix with ones on the diagonal and zeros elsewhere; acts as multiplicative identity ($ \mathbf{A}\mathbf{I} = \mathbf{I}\mathbf{A} = \mathbf{A} $).
     \begin{equation*}
         \mathbf{I} = \begin{bmatrix}1 & 0 & \ldots & 0\\0 & 1 & \ldots & 0\\ \vdots & \vdots & \ddots & \vdots\\0 & 0 & \ldots & 1\end{bmatrix}
     \end{equation*}
+    The same goes for the identity matrix: the dimension of $ \mathbf{I} $ should be inferred from the context; otherwise, it needs to be specified (e.g., $ \mathbf{I} \in \mathbb{R}^{n \times n} $).
     \item \textbf{Symmetric Matrix}: $ \mathbf{A} = \mathbf{A}^\top $.
     \item \textbf{Positive Semi-Definite Matrix}: Symmetric and satisfies $ \mathbf{x}^\top \mathbf{A} \mathbf{x} \geq 0 $ for all $ \mathbf{x} \neq \mathbf{0} $. This is denoted $ \mathbf{A} \succeq 0 $. Also common is the notion of a positive definite matrix, which requires strict positivity ($ \mathbf{x}^\top \mathbf{A} \mathbf{x} > 0 $ for all $ \mathbf{x} \neq \mathbf{0} $, denoted $ \mathbf{A} \succ 0 $).
     \item \textbf{Diagonal Matrix}: All off-diagonal entries are zero.
-    \item \textbf{Triangular Matrix}: All entries above or below the main diagonal are zero.
+    \item \textbf{Triangular Matrix}: A matrix is \textbf{lower triangular} if all entries above the main diagonal are zero, and \textbf{upper triangular} if all entries below the main diagonal are zero.
 \end{itemize}
 
 
@@ -353,27 +470,27 @@ As a generalization of the last property mentioned above, we note that the trace
 \label{sec:complexity-of-matrix-and-vector-operations}
 We must understand the computational costs of basic matrix and vector operations in order to develop efficient numerical algorithms. Let's explore three fundamental operations---dot product, matrix-vector multiplication, and matrix-matrix multiplication---and analyze their computational complexities by counting the number of required multiplications and additions.
 
-\textbf{Dot Product}\quad For two vectors $ \mathbf{x}, \mathbf{y} \in \mathbb{R}^N $, the dot product $ \mathbf{y}^\top \mathbf{x} $ is calculated by multiplying corresponding elements and summing the results:
+\textbf{Dot Product}\quad For two vectors $ \mathbf{x}, \mathbf{y} \in \mathbb{R}^n $, the dot product $ \mathbf{y}^\top \mathbf{x} $ is calculated by multiplying corresponding elements and summing the results:
 \begin{equation*}
-    \mathbf{y}^\top \mathbf{x} = \sum_{i=1}^{N} y_i x_i
+    \mathbf{y}^\top \mathbf{x} = \sum_{i=1}^{n} y_i x_i
 \end{equation*}
-This operation involves $ N $ multiplications (one for each pair $ y_i x_i $) and $ N - 1 $ additions (to sum the $ N $ products). The computational complexity is therefore $ O(N + N - 1) = O(N) $.
+This operation involves $ n $ multiplications (one for each pair $ y_i x_i $) and $ n - 1 $ additions (to sum the $ n $ products). The computational complexity is therefore $ O(n + n - 1) = O(n) $.
 
-\textbf{Matrix-Vector Multiplication}\quad Given a matrix $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and a vector $ \mathbf{x} \in \mathbb{R}^N $, the product $ \mathbf{A}\mathbf{x} $ results in a vector $ \mathbf{b} \in \mathbb{R}^M $:
+\textbf{Matrix-Vector Multiplication}\quad Given a matrix $ \mathbf{A} \in \mathbb{R}^{m \times n} $ and a vector $ \mathbf{x} \in \mathbb{R}^n $, the product $ \mathbf{A}\mathbf{x} $ results in a vector $ \mathbf{b} \in \mathbb{R}^m $:
 \begin{equation*}
-    b_i = \sum_{j=1}^{N} A_{ij} x_j, \quad \text{for } i = 1, 2, \dots, M
+    b_i = \sum_{j=1}^{n} a_{ij} x_j, \quad \text{for } i = 1, 2, \dots, m
 \end{equation*}
-For each of the $ M $ rows, there are $ N $ multiplications (each element $ A_{ij} $ is multiplied by $ x_j $) and $ N - 1 $ additions (to sum the products for each $ b_i $). Therefore, the total number of operations is $ O(MN + M(N - 1)) = O(MN) $.
+In the row form, computing $\mathbf{b}$ amounts to $m$ dot products, one per entry of $\mathbf{b}$: each costs $O(n)$, so the total is $O(mn)$. (Counting element-wise gives the same result: each entry requires $n$ multiplications and $n-1$ additions.)
 
-\textbf{Matrix-Matrix Multiplication}\quad When multiplying two matrices $ \mathbf{A} \in \mathbb{R}^{M \times N} $ and $ \mathbf{B} \in \mathbb{R}^{N \times P} $, the resulting matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ has dimensions $ M \times P $:
+\textbf{Matrix-Matrix Multiplication}\quad When multiplying two matrices $ \mathbf{A} \in \mathbb{R}^{m \times n} $ and $ \mathbf{B} \in \mathbb{R}^{n \times p} $, the resulting matrix $ \mathbf{C} = \mathbf{A}\mathbf{B} $ has dimensions $ m \times p $:
 \begin{equation*}
-    C_{ik} = \sum_{j=1}^{N} A_{ij} B_{jk}, \quad \text{for } i = 1, 2, \dots, M \text{ and } k = 1, 2, \dots, P
+    c_{ik} = \sum_{j=1}^{n} a_{ij} b_{jk}, \quad \text{for } i = 1, 2, \dots, m \text{ and } k = 1, 2, \dots, p
 \end{equation*}
-For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are $ N $ multiplications (each $ A_{ij} $ multiplied by $ B_{jk} $) and $ N - 1 $ additions (to sum the products for each $ C_{ik} $). So we get $MNP$ multiplications and $MP(N-1)$ additions and hence an overall complexity of $O(MNP)$.
+By the column decomposition, computing $\mathbf{C}$ amounts to $p$ matrix-vector products, one per column of $\mathbf{B}$: each costs $O(mn)$, so the total is $O(mnp)$. (Counting element-wise gives the same result: each of the $mp$ entries requires $n$ multiplications and $n-1$ additions.)
 
 
 \begin{exampleBox}
-    \textbf{Example}: To make these concepts more tangible, let's consider multiplying two small matrices:
+    \textbf{Example}: Count the number of scalar operations needed to compute the product of two $3 \times 3$ matrices:
     \begin{equation*}
         \mathbf{A} = \begin{bmatrix}
         a_{11} & a_{12} & a_{13} \\
@@ -387,7 +504,7 @@ For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are 
         \end{bmatrix}, \quad
         \mathbf{C} = \mathbf{A}\mathbf{B}
     \end{equation*}
-    The resulting matrix $ \mathbf{C} \in \mathbb{R}^{3\times 3} $ will have elements:
+    \emph{Solution}: The resulting matrix $ \mathbf{C} \in \mathbb{R}^{3\times 3} $ has elements:
     \begin{align*}
         c_{11} & = a_{11}b_{11} + a_{12}b_{21} + a_{13}b_{31} \\
         c_{12} & = a_{11}b_{12} + a_{12}b_{22} + a_{13}b_{32} \\
@@ -396,10 +513,11 @@ For each element $ C_{ik} $ (there are $ M \times P $ such elements), there are 
     \end{align*}
     We see that each element of $ \mathbf{C} $ requires 3 multiplications and 2 additions. And since $ \mathbf{C} $ has 9 elements, the total number of operations is $ 9 \cdot (3 + 2) = 45 $. 
     
-    But wait, isn't the complexity of matrix-matrix multiplication $ O(MNP) $? And in this case $M = N = P = 3$, so shouldn't we have $3^3 = 27$ operations? No! That is not how big-O notation works. Big-O notation is NOT a precise count of operations but rather an upper bound on the growth rate of the number of operations as the size of the matrices grows.
+    But wait, isn't the complexity of matrix-matrix multiplication $ O(mnp) $? And in this case $m = n = p = 3$, so shouldn't we have $3^3 = 27$ operations? No! That is not how big-O notation works. Big-O notation is NOT a precise count of operations but rather an upper bound on the growth rate of the number of operations as the size of the matrices grows.
 \end{exampleBox}
 
-It is worth mentioning (this is not necessary to know for 10.34) that, in reality, the computational complexity of matrix-matrix multiplication is not exactly cubic. A lot of research has been done to optimize matrix-matrix multiplication due to its extreme importance in the field of optimization and machine learning. For square $N\times N$ matrices, the fastest known algorithms run in $O(N^{\omega})$ time, where, as of 2026, the record is $\omega < 2.371177$ (this upper bound is from \href{https://arxiv.org/abs/2608.16884}{this paper}, which improved on the previous record of $\omega < 2.371339$ from \href{https://arxiv.org/abs/2404.16349}{this one}). Very roughly, these bounds come from the Coppersmith-Winograd line of ideas: view matrix multiply as a tensor and look for low-rank decompositions. One recent twist is to allow more asymmetry between the three dimensions (don't force two to behave identically); similar tricks help with rectangular cases, too. Another, used in the 2026 record, is to attack the resulting enormous optimization problems with modern nonlinear solvers and even AI-assisted search (DeepMind's AlphaEvolve). But these bounds are galactic algorithms, meaning the constants (for big O) are huge, so real code sticks to near-cubic methods with blocking, cache-friendly layouts, vectorization, and parallelism. Strassen's method ($O(N^{\log_2 7})\!\approx O(N^{2.8074})$) sometimes shows up for very large $N$, but most production matrix multiplication is effectively $O(N^3)$, so you should stick with $O(N^3)$ as a rule of thumb.
+\subsubsection*{State-of-the-Art Matrix Multiplication (Optional)}
+In reality, the computational complexity of matrix-matrix multiplication is not exactly cubic. A lot of research has been done to optimize matrix-matrix multiplication due to its extreme importance in the field of optimization and machine learning. For square $n\times n$ matrices, the fastest known algorithms run in $O(n^{\omega})$ time, where, as of 2026, the record is $\omega < 2.371177$ \cite{dupont2026matmul}, which improved on the previous record of $\omega < 2.371339$ \cite{alman2024asymmetry}. Very roughly, these bounds come from the Coppersmith-Winograd line of ideas: view matrix multiply as a tensor and look for low-rank decompositions. One recent twist is to allow more asymmetry between the three dimensions (don't force two to behave identically); similar tricks help with rectangular cases, too. Another, used in the 2026 record, is to attack the resulting enormous optimization problems with modern nonlinear solvers and even AI-assisted search (DeepMind's AlphaEvolve). But these bounds are galactic algorithms, meaning the constants (for big O) are huge, so real code sticks to near-cubic methods with blocking, cache-friendly layouts, vectorization, and parallelism. Strassen's method is the oldest of these ideas: partition the matrices into $2 \times 2$ blocks; the naive block multiplication needs 8 block products, but a clever rearrangement computes the result with only 7 (at the cost of extra additions), and applying the trick recursively gives $O(n^{\log_2 7}) \approx O(n^{2.8074})$. It sometimes shows up in practice for very large $n$, but most production matrix multiplication is effectively $O(n^3)$, so you should stick with $O(n^3)$ as a rule of thumb.
 
 
 \subsubsection*{Optimizing Computations in Complex Expressions}
@@ -439,44 +557,45 @@ This requires two matrix-matrix multiplications and one matrix-vector multiplica
     In this case, performing the matrix-matrix multiplication first is slightly more efficient in terms of number of floating point operations required (the amount of additions is the same in either case: 99,999). It avoids creating the huge intermediate vector ($\mathbf{d} \in \mathbb{R}^{1000}$) and instead creates a much smaller intermediate vector ($\mathbf{C} \in \mathbb{R}^{1 \times 100}$). So we can indeed see that the optimal order depends entirely on the dimensions of all matrices in the chain. Actually, finding this optimal order is a classic computer science problem known as the matrix chain ordering problem (you can read its \href{https://en.wikipedia.org/wiki/Matrix_chain_multiplication}{Wikipedia page} if you're curious!).
 \end{warningBox}
 
-\textbf{Diagonal Matrices}\quad Suppose $ \mathbf{D} \in \mathbb{R}^{N \times N} $ is a diagonal matrix and $\mathbf{x}\in \mathbb{R}^N$, and you need to compute $ \mathbf{y} = \mathbf{D}\mathbf{x} $. Using standard matrix multiplication, this operation would be $ O(N^2) $. But since only the diagonal elements $ D_{ii} $ are non-zero, we only need to perform $ N $ multiplications (one multiplication per diagonal element) and zero additions, meaning the computational complexity can be reduced to $ O(N) $.
+\textbf{Diagonal Matrices}\quad Suppose $ \mathbf{D} \in \mathbb{R}^{n \times n} $ is a diagonal matrix and $\mathbf{x}\in \mathbb{R}^n$, and you need to compute $ \mathbf{y} = \mathbf{D}\mathbf{x} $. Using standard matrix multiplication, this operation would be $ O(n^2) $. But since only the diagonal elements $ D_{ii} $ are non-zero, we only need to perform $ n $ multiplications (one multiplication per diagonal element) and zero additions, meaning the computational complexity can be reduced to $ O(n) $.
 
 \textbf{Sparse Matrices}\quad Sparse matrices (which are \textit{very} common in scientific applications!) are matrices for which most elements are zero. They are stored in a way that only the non-zero elements are explicitly represented (in MATLAB, this is never automatically done for you---you must use the \verb|sparse| function yourself to convert from dense to sparse format). Commonly, we must multiply a sparse matrix with a dense vector, which means that the result is the dot product of each sparse row of the matrix with the dense vector. This requires significantly fewer operations than a full matrix-vector multiplication (since we do not need to actually multiply anything with zero).
 
 \textbf{Symmetric Matrices}\quad
-Symmetric matrices are matrices that are equal to their own transpose: $ \mathbf{A} = \mathbf{A}^\top $. For a symmetric matrix $ \mathbf{A} \in \mathbb{R}^{N\times N} $, a natural question to ask is: can we halve the work in $\mathbf{y}=\mathbf{A}\mathbf{x}$ by only touching one triangle?  You \emph{can} store just one triangle (saving about half the memory), but you \emph{cannot} cut the arithmetic in half. To see why, write out the updates if you traverse only the upper triangle, and you'll find that the number of operations needed still comes out to $O(N^2)$. Where symmetry really shines is in factorizations/solves.
+Symmetric matrices are matrices that are equal to their own transpose: $ \mathbf{A} = \mathbf{A}^\top $. For a symmetric matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, a natural question to ask is: can we halve the work in $\mathbf{y}=\mathbf{A}\mathbf{x}$ by only touching one triangle?  You \emph{can} store just one triangle (saving about half the memory), but you \emph{cannot} cut the arithmetic in half. To see why, write out the updates if you traverse only the upper triangle, and you'll find that the number of operations needed still comes out to $O(n^2)$. Where symmetry really shines is in factorizations/solves.
 
 
 \section{Vector and Matrix Norms}
 
 \subsection{Norms of Vectors}
-A \textbf{norm} is a function that assigns a non-negative length or size to vectors. The most common norms are:
+A \textbf{norm} is a function that assigns a non-negative length or size to vectors.
+The most commonly used family of norms is the \textbf{$p$-norm}, defined for $p \geq 1$ as
+\begin{equation*}
+    \|\mathbf{v}\|_p = \left( \sum_{i=1}^n |v_i|^p \right)^{1/p}.
+\end{equation*}
+Several special cases are used so frequently that they have their own names:
 \begin{itemize}
-    \item \textbf{1-Norm}:
+    \item \textbf{1-Norm} ($p = 1$; also called the Manhattan norm):
     \begin{equation*}
         \|\mathbf{v}\|_1 = \sum_{i=1}^n |v_i|
     \end{equation*}
-    \item \textbf{2-Norm} (Euclidean norm):
+    \item \textbf{2-Norm} ($p = 2$; Euclidean norm):
     \begin{equation*}
         \|\mathbf{v}\|_2 = \sqrt{\sum_{i=1}^n v_i^2} = \sqrt{\mathbf{v}^\top \mathbf{v}}
     \end{equation*}
-    \item \textbf{Infinity Norm}:
+    \item \textbf{Infinity Norm} (the limit $p \to \infty$; also called the maximum norm):
     \begin{equation*}
         \|\mathbf{v}\|_\infty = \max_{1 \leq i \leq n} |v_i|
     \end{equation*}
-    \item \textbf{p-Norm}:
-    \begin{equation*}
-        \|\mathbf{v}\|_p = \left( \sum_{i=1}^n |v_i|^p \right)^{1/p}
-    \end{equation*}
 \end{itemize}
-We note that the 1-norm, 2-norm, and infinity norm are special cases of the p-norm. The 2-norm is the most commonly used norm in practice. These norms satisfy:
+These norms satisfy the following properties:
 
 \noindent
 \begin{minipage}[t]{0.48\textwidth}
     \vspace{-0.4cm}
     \begin{itemize}
-        \item $ \|\mathbf{v}\| \geq 0 $ and $ \|\mathbf{v}\| = 0 $ if and only if $ \mathbf{v} = \mathbf{0} $.
-        \item $ \|\alpha \mathbf{v}\| = |\alpha| \|\mathbf{v}\| $ for scalar $ \alpha $.
+        \item Positive definiteness: $ \|\mathbf{v}\| \geq 0 $, and $ \|\mathbf{v}\| = 0 $ if and only if $ \mathbf{v} = \mathbf{0} $.
+        \item Absolute homogeneity: $ \|\alpha \mathbf{v}\| = |\alpha| \|\mathbf{v}\| $ for scalar $ \alpha $.
         \item Triangle inequality: $ \|\mathbf{u} + \mathbf{v}\| \leq \|\mathbf{u}\| + \|\mathbf{v}\| $.
     \end{itemize}
 \end{minipage}
@@ -492,7 +611,9 @@ We note that the 1-norm, 2-norm, and infinity norm are special cases of the p-no
 \end{minipage}
 
 \begin{exampleBox}
-    \textbf{Example}: For $ \mathbf{v} = \begin{bmatrix}3 \\ -4\end{bmatrix} $:
+    \textbf{Example}: Compute the 1-, 2-, and $\infty$-norms of $ \mathbf{v} = \begin{bmatrix}3 \\ -4\end{bmatrix} $.
+
+    \emph{Solution}:
     \begin{align*}
         \|\mathbf{v}\|_1 &= |3| + |-4| = 7, \\
         \|\mathbf{v}\|_2 &= \sqrt{3^2 + (-4)^2} = 5, \\
@@ -533,7 +654,7 @@ Several matrix norms are commonly used. Below, we take a look at a few of these 
     \begin{equation*}
         \|\mathbf{A}\|_2 = \sigma_{\max}(\mathbf{A})
     \end{equation*}
-    where $ \sigma_{\max}(\mathbf{A}) $ denotes the largest singular value of $ \mathbf{A} $. The 2-norm measures the maximum stretching factor of $ \mathbf{A} $ in any direction, corresponding to the largest singular value. It is closely related to the concept of eigenvalues and provides a precise measure of the matrix's action on vectors in terms of scaling.
+    where $ \sigma_{\max}(\mathbf{A}) $ denotes the largest singular value of $ \mathbf{A} $ (singular values are introduced in \Cref{sec:singular-values}). The 2-norm measures the maximum stretching factor of $ \mathbf{A} $ in any direction, corresponding to the largest singular value. It is closely related to the concept of eigenvalues and provides a precise measure of the matrix's action on vectors in terms of scaling.
     
     \item \textbf{Infinity Norm (Maximum Row Sum)}:
     \begin{equation*}
@@ -561,105 +682,151 @@ Linear systems arise in many scientific and engineering applications (even in se
     \mathbf{A}\mathbf{x} = \mathbf{b}
     \label{eq:linear-system}
 \end{equation}
-where $ \mathbf{A} \in \mathbb{R}^{M \times N} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^N $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^M $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for any possible $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($M=N$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=N$). Otherwise, the system may have no solution or infinitely many solutions. If $M\ne N$, we typically seek a least-squares ($M>N$) or minimum-norm ($M<N$) solution.
+where $ \mathbf{A} \in \mathbb{R}^{m \times n} $ is a known coefficient matrix, $ \mathbf{x} \in \mathbb{R}^n $ is the vector of unknowns, and $ \mathbf{b} \in \mathbb{R}^m $ is a known vector. The goal is to find $ \mathbf{x} $ that satisfies this equation. We know from linear algebra that this linear system has a unique solution for any possible $\mathbf{b}$ if and only if $ \mathbf{A} $ is square ($m=n$) and has full rank (i.e., $\operatorname{rank}(\mathbf{A})=n$). Otherwise, the system may have no solution or infinitely many solutions. If $m\ne n$, we typically seek a least-squares ($m>n$) or minimum-norm ($m<n$) solution.
 
-
-\subsection{Condition Number}
-Before looking at specific direct and iterative methods, we introduce the notion of the \textbf{condition number} of a matrix $\mathbf{A}$, denoted $\kappa(\mathbf{A})$, which helps us understand the sensitivity of a linear system to perturbations and numerical errors. We hope that for our linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, small perturbations in $\mathbf{b}$ will lead to small changes in $\mathbf{x}$. Such a system is said to be well-conditioned. However, if small perturbations in $\mathbf{b}$ lead to large changes in $\mathbf{x}$, the system is said to be ill-conditioned. The meaning of ``small'' and ``large'' changes depending on the context (e.g., it could be relative or absolute). The condition number quantifies this sensitivity.
-
-To define the condition number, we consider a linear system $ \mathbf{A}\mathbf{x} = \mathbf{b} $ with an exact solution $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $. If we add a small perturbation (error) $\delta\mathbf{b}$ to $\mathbf{b}$, then the solution vector $\mathbf{x}$ will also change by some amount $\delta\mathbf{x}$ (which we think of as the error in $\mathbf{x}$ since the original perturbation is assumed to represent an error) so that the linear system remains satisfied:
+To build intuition, consider a simple mass balance.
+Two streams are mixed to produce $10$~kg/s of product.
+Stream 1 carries a mass fraction $0.2$ of species A, and stream 2 carries $0.6$; the product must carry $0.5$.
+\begin{center}
+\begin{tikzpicture}[x=1cm, y=0.9cm]
+    \draw[->, thick] (0,1.6) -- (2.4,1.0);
+    \node[above] at (0.9,1.45) {\small stream 1: $x_1$~kg/s, $20\%$ A};
+    \draw[->, thick] (0,-0.6) -- (2.4,0.0);
+    \node[below] at (0.9,-0.5) {\small stream 2: $x_2$~kg/s, $60\%$ A};
+    \draw[thick] (2.4,-0.2) rectangle (3.8,1.2);
+    \node at (3.1,0.5) {\small mixer};
+    \draw[->, thick] (3.8,0.5) -- (6.4,0.5);
+    \node[above] at (5.1,0.6) {\small product: $10$~kg/s, $50\%$ A};
+\end{tikzpicture}
+\end{center}
+Denoting the unknown flow rates of the two streams by $x_1$ and $x_2$, the total and species mass balances read
+\begin{align*}
+    x_1 + x_2 &= 10 \\
+    0.2\, x_1 + 0.6\, x_2 &= 5,
+\end{align*}
+or, in the matrix form of \cref{eq:linear-system},
 \begin{equation*}
-    \mathbf{A}\left(\mathbf{x} + \delta\mathbf{x}\right) = \mathbf{b} + \delta\mathbf{b}
-    \implies 
-    \delta\mathbf{x} = \mathbf{A}^{-1}\delta\mathbf{b}
+    \mathbf{A} = \begin{bmatrix} 1 & 1 \\ 0.2 & 0.6 \end{bmatrix},
+    \qquad
+    \mathbf{b} = \begin{bmatrix} 10 \\ 5 \end{bmatrix}.
 \end{equation*}
-Taking the $p$-norm of both sides, we have
+This system can be viewed in two ways.
+In the \textbf{row view}, each row of $\mathbf{A}$ is one balance equation,
 \begin{equation*}
-    \|\delta\mathbf{x}\|_p = \|\mathbf{A}^{-1}\delta\mathbf{b}\|_p \leq \|\mathbf{A}^{-1}\|_p \|\delta\mathbf{b}\|_p
+    \mathbf{a}^R_1\, \mathbf{x} = \begin{bmatrix} 1 & 1 \end{bmatrix} \mathbf{x} = 10,
+    \qquad
+    \mathbf{a}^R_2\, \mathbf{x} = \begin{bmatrix} 0.2 & 0.6 \end{bmatrix} \mathbf{x} = 5,
 \end{equation*}
-where the inequality follows from the submultiplicative property of matrix norms. We also have $\|\mathbf{b}\|_p = \|\mathbf{A}\mathbf{x}\|_p \le \|\mathbf{A}\|_p \, \|\mathbf{x}\|_p$, hence $\|\mathbf{x}\|_p \ge \|\mathbf{b}\|_p/\|\mathbf{A}\|_p$. Dividing the two inequalities, we arrive at an expression for the relative error in the solution:
+each defining a line in the $(x_1, x_2)$ plane, and the solution is the point where the two lines intersect (\autoref{fig:row-column-view}, left).
+In the \textbf{column view}, the same system reads
 \begin{equation*}
-    \frac{\|\delta\mathbf{x}\|_p}{\|\mathbf{x}\|_p} \leq \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \frac{\|\delta\mathbf{b}\|_p}{\|\mathbf{b}\|_p}
+    x_1 \mathbf{a}^C_1 + x_2 \mathbf{a}^C_2 = \mathbf{b},
+    \qquad
+    \mathbf{a}^C_1 = \begin{bmatrix} 1 \\ 0.2 \end{bmatrix},
+    \quad
+    \mathbf{a}^C_2 = \begin{bmatrix} 1 \\ 0.6 \end{bmatrix},
 \end{equation*}
-This motivates the definition of the condition number of $\mathbf{A}$ as
-\begin{equation*}
-    \kappa_p(\mathbf{A}) = \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p
-\end{equation*}
-where we add a subscript $p$ on $\kappa$ to denote the norm used and to emphasize that its value depends on the choice of norm (but the qualitative behavior is the same across norms). If $\mathbf{A}$ is singular, $\kappa_p(\mathbf{A}) = \infty$. We note that clearly $\kappa_p(\mathbf{A}) \geq 1$ since $\|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \geq \|\mathbf{A} \mathbf{A}^{-1}\|_p = \|\mathbf{I}\|_p = 1$. Moreover, a matrix with a large condition number (an ``ill-conditioned'' matrix) indicates that the linear system is more sensitive to perturbations and numerical errors, while a matrix with a small condition number (a ``well-conditioned'' matrix) indicates greater numerical robustness. As a practical rule of thumb for backward-stable solvers (e.g., Gaussian elimination with partial pivoting), the number of correct digits $\approx$ (working-precision digits) $-\log_{10}\kappa(\mathbf{A})$, and the relative forward error is typically $O(\kappa(\mathbf{A})\,\varepsilon_{\mathrm{mach}})$. A small residual $\|\mathbf{r}\| = \|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|$ does not guarantee a small error when $\kappa(\mathbf{A})$ is large; roughly,
-\[ \frac{\|\hat{\mathbf{x}}-\mathbf{x}\|}{\|\mathbf{x}\|} \lesssim \kappa(\mathbf{A})\,\frac{\|\mathbf{r}\|}{\|\mathbf{b}\|}. \]
+where each column collects the contributions of one unit of a stream (one unit of flow together with its species content); solving the system means finding the combination of the columns that reproduces the target $\mathbf{b}$ (\autoref{fig:row-column-view}, right).
+Here, the solution is $x_1 = 2.5$ and $x_2 = 7.5$~kg/s.
 
-Let's take a look at the condition number for the 2-norm specifically. Here, the condition number is
-\begin{equation*}
-    \kappa_2(\mathbf{A}) = \|\mathbf{A}\|_2 \|\mathbf{A}^{-1}\|_2 = \frac{\sigma_{\text{max}}(\mathbf{A})}{\sigma_{\text{min}}(\mathbf{A})}
-\end{equation*}
-where $\sigma_{\text{max}}(\mathbf{A})$ and $\sigma_{\text{min}}(\mathbf{A})$ are the largest and smallest singular values of $\mathbf{A}$, respectively. For $\mathbf{A} \succ 0$,\footnote{If $\mathbf{A}$ is normal ($\mathbf{A}\mathbf{A}^* = \mathbf{A}^*\mathbf{A}$) over $\mathbb{C}$, then $\sigma_i(\mathbf{A}) = |\lambda_i(\mathbf{A})|$ and $\kappa_2(\mathbf{A}) = \max_i |\lambda_i(\mathbf{A})|/\min_i |\lambda_i(\mathbf{A})|$.} this is equivalent to
-\begin{equation*}
-    \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})}
-\end{equation*}
-where $\lambda_{\text{max}}(\mathbf{A})$ and $\lambda_{\text{min}}(\mathbf{A})$ are the largest and smallest eigenvalues of $\mathbf{A}$, respectively.
+\begin{figure}[H]
+    \centering
+    $\begin{bmatrix} 1 & 1 \\ 0.2 & 0.6 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 10 \\ 5 \end{bmatrix}$\\[0.8em]
+    \begin{tikzpicture}[x=0.38cm, y=0.38cm]
+        \draw[->] (0,0) -- (12,0) node[right] {$x_1$};
+        \draw[->] (0,0) -- (0,12) node[above] {$x_2$};
+        \draw[green!60!black, thick] (0,10) -- (10,0) node[below, pos=0.92, sloped] {\small $x_1 + x_2 = 10$};
+        \draw[orange, thick] (0,8.33) -- (11,4.67) node[below, pos=0.75, sloped] {\small $0.2 x_1 + 0.6 x_2 = 5$};
+        \filldraw[blue] (2.5,7.5) circle (3pt) node[above right] {\small $(2.5,\ 7.5)$};
+    \end{tikzpicture}
+    \hspace{0.8cm}
+    \begin{tikzpicture}[x=0.38cm, y=0.70cm]
+        \draw[->] (0,0) -- (12,0) node[right] {$b_1$};
+        \draw[->] (0,0) -- (0,6.5) node[above] {$b_2$};
+        \draw[->, green!60!black, dashed, thick] (0,0) -- (2.5,0.5) node[below right] {\small $x_1 \mathbf{a}^C_1$};
+        \draw[->, orange, dashed, thick] (2.5,0.5) -- (10,5) node[midway, above left] {\small $x_2 \mathbf{a}^C_2$};
+        \draw[->, blue, very thick] (0,0) -- (10,5) node[pos=0.8, below right] {\small $\mathbf{b}$};
+    \end{tikzpicture}
+    \caption{The same linear system, viewed from two perspectives. Row view (left): each balance equation is a line in the $(x_1, x_2)$ plane, and the solution is their intersection. Column view (right): in the $(b_1, b_2)$ plane of attainable products, the solution synthesizes the target $\mathbf{b}$ from the two column ``ingredients'' laid tip to tail, $\mathbf{b} = x_1 \mathbf{a}^C_1 + x_2 \mathbf{a}^C_2$.}
+    \label{fig:row-column-view}
+\end{figure}
 
-\textbf{Preconditioning}\quad When solving linear systems numerically, we often encounter ill-conditioned matrices. One way to mitigate the effects of ill-conditioning is through \textbf{preconditioning}. Preconditioning transforms $ \mathbf{A}\mathbf{x} = \mathbf{b} $ into a system with more favorable spectral properties. Common forms are left $(\mathbf{P}^{-1}\mathbf{A})\mathbf{x} = \mathbf{P}^{-1}\mathbf{b}$, right $\ \mathbf{A}(\mathbf{P}^{-1}\mathbf{y}) = \mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1}\mathbf{y}$, and symmetric $\ \mathbf{P}^{-1/2}\mathbf{A}\mathbf{P}^{-1/2}\mathbf{z} = \mathbf{P}^{-1/2}\mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1/2}\mathbf{z}$. Examples include Jacobi (diagonal), incomplete LU/Cholesky (ILU/IC), and algebraic multigrid (AMG). The goal is to cluster eigenvalues and reduce the effective condition number to accelerate and stabilize iterative methods.
+A solution does not always exist, and when it exists, it need not be unique.
+In the example, suppose the two streams carry the \emph{same} mass fraction, say $0.5$, so that the two columns become parallel (equivalently, one row becomes a multiple of the other).
+A product with fraction $0.5$ can then be blended in infinitely many ways: the two lines in the row view coincide, and in the column view, $\mathbf{b}$ lies on the line spanned by the two parallel columns.
+Any other target fraction, however, is impossible: the two lines are parallel and never intersect, and $\mathbf{b}$ lies off the line spanned by the columns (\autoref{fig:column-degenerate}).
 
-Even simpler than preconditioning is \textbf{scaling} (often called equilibration), which rescales rows and/or columns to reduce element-wise dynamic range and improve pivoting. A common heuristic is to equalize row/column $\infty$-norms. This helps numerics and pivoting but does not magically fix ill-conditioning rooted in the model; think nondimensionalization and consistent units (ChemE context: Pa vs bar, mol vs kmol).
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[x=0.38cm, y=0.70cm]
+        \draw[->] (0,0) -- (12,0) node[right] {$b_1$};
+        \draw[->] (0,0) -- (0,6.9) node[above] {$b_2$};
+        \draw[dashed, gray, thick] (0,0) -- (11.5,5.75) node[pos=0.97, below right] {\small span of the columns};
+        \draw[->, blue, very thick] (0,0) -- (10,5) node[pos=0.82, below right] {\small $\mathbf{b}$: infinitely many blends};
+        \draw[->, red, very thick] (0,0) -- (8.4,6) node[pos=0.9, above left] {\small $\mathbf{b}'$: unreachable};
+    \end{tikzpicture}
+    \caption{The degenerate case in the column view: when both streams carry the same mass fraction, the two columns point along the same line. A target on that line ($\mathbf{b}$) can be synthesized in infinitely many ways; a target off the line ($\mathbf{b}'$) cannot be reached.}
+    \label{fig:column-degenerate}
+\end{figure}
 
-\begin{exampleBox}
-    \textbf{Example:} Consider the matrix
-    \begin{equation*}
-        \mathbf{A} = \begin{bmatrix}
-        10^{14} & 0 \\
-        0 & 10^{-9}
-        \end{bmatrix}
-    \end{equation*}
-    The condition number of this matrix with respect to the 2-norm is
-    \begin{equation*}
-        \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})} = \frac{10^{14}}{10^{-9}} = 10^{23}
-    \end{equation*}
-    which means that $\mathbf{A}$ is severely ill-conditioned. Such a high condition number implies that even tiny perturbations in $\mathbf{b}$ can lead to enormous errors in the computed solution $\mathbf{x}$.
-
-    To mitigate this issue, we can apply scaling by rescaling the rows of $\mathbf{A}$ to reduce the condition number. Specifically, we divide each row by the maximum absolute value in that row. For matrix $\mathbf{A}$, the scaling factors for the rows are $10^{14}$ and $10^{-9}$, respectively. We define a diagonal scaling matrix $\mathbf{D}$ as
-    \begin{equation*}
-    \mathbf{D} = \begin{bmatrix}
-    10^{-14} & 0 \\
-    0 & 10^{9}
-    \end{bmatrix}
-    \end{equation*}
-    Applying the scaling, we obtain the scaled matrix $\mathbf{A}_{\text{scaled}}$:
-    \begin{equation*}
-    \mathbf{A}_{\text{scaled}} = \mathbf{D} \mathbf{A} = \begin{bmatrix}
-    10^{-14} & 0 \\
-    0 & 10^{9}
-    \end{bmatrix} \begin{bmatrix}
-    10^{14} & 0 \\
-    0 & 10^{-9}
-    \end{bmatrix} = \begin{bmatrix}
-    1 & 0 \\
-    0 & 1
-    \end{bmatrix}
-    \end{equation*}
-    The left-scaling forms the equivalent system $\mathbf{D}\mathbf{A}\mathbf{x} = \mathbf{D}\mathbf{b}$ (same solution $\mathbf{x}$). Here, because $\mathbf{A}$ is diagonal, $\mathbf{D}\mathbf{A} = \mathbf{I}$. In general, equilibration reduces dynamic range and can reduce $\kappa$, but need not drive it to 1.
-
-    The condition number of the scaled matrix is now
-    \begin{equation*}
-        \kappa_2(\mathbf{A}_{\text{scaled}}) = \frac{\lambda_{\text{max}}(\mathbf{A}_{\text{scaled}})}{\lambda_{\text{min}}(\mathbf{A}_{\text{scaled}})} = \frac{1}{1} = 1
-    \end{equation*}
-    which means that $\mathbf{A}_{\text{scaled}}$ is perfectly conditioned. This dramatic reduction shows how scaling can improve numerical behavior in favorable cases (in this case, $\mathbf{A}$ is diagonal, so $\mathbf{D} = \mathbf{A}^{-1}$ is an exact preconditioner, hence the perfect condition number). In general, scaling is often helpful for stability and pivoting, but it does not eliminate all ill-conditioning.
-\end{exampleBox}
-
-\begin{warningBox}
-    \textbf{Warning:} Preconditioning/scaling improves the matrix the algorithm sees (e.g., reduces $\kappa(P^{-1}A)$), which speeds and stabilizes iterations, but it \emph{doesn't change the intrinsic sensitivity} of the original mapping $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$ to perturbations in $b$. So it helps the solver's numerics, not the problem's conditioning.
-\end{warningBox}
-
+We conclude by setting the baseline for the rest of this chapter: a system of linear equations may have zero, one, or infinitely many solutions.
+We are now interested in characterizing under what circumstances each case holds and, when a unique solution exists, how to find it numerically.
 
 
 \section{Invertibility and Determinants}
+\subsection{Inverse of a Matrix}
+Conceptually, the inverse of a matrix is an operator that reverses the linear transformation performed by the original matrix $ \mathbf{A} $. If $ \mathbf{A} $ transforms a vector $ \mathbf{x} $ into $ \mathbf{y} $, then its inverse transforms $ \mathbf{y} $ back to the original vector $ \mathbf{x} $.
+
+Formally, a square matrix $ \mathbf{A} $ is \textbf{invertible} (or \textbf{non-singular}) if there exists a matrix $ \mathbf{B} $ such that
+\begin{equation*}
+    \mathbf{A}\mathbf{B} = \mathbf{B}\mathbf{A} = \mathbf{I},
+\end{equation*}
+where $ \mathbf{I} $ is the identity matrix. Such a matrix $ \mathbf{B} $, when it exists, is unique; it is called the \emph{inverse} of $ \mathbf{A} $, and we denote it by $ \mathbf{A}^{-1} $. This property is analogous to a number and its reciprocal (e.g., $ 5 \cdot 5^{-1} = 1 $).
+
+
+This ``undoing'' capability is fundamental for solving systems of linear equations. A system represented as $ \mathbf{A}\mathbf{x} = \mathbf{b} $ can be solved for the unknown vector $ \mathbf{x} $ by applying the inverse: $ \mathbf{A}^{-1}\mathbf{A}\mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $, which simplifies to $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $.
+
+The inverse satisfies the following properties, whenever the inverses involved exist:
+\begin{itemize}
+    \item $(\mathbf{A}\mathbf{B})^{-1} = \mathbf{B}^{-1}\mathbf{A}^{-1}$ (as with the transpose, the order is reversed);
+    \item $(\mathbf{A}^\top)^{-1} = (\mathbf{A}^{-1})^\top$.
+\end{itemize}
+For a $2\times 2$ matrix, the inverse can be calculated directly:
+\begin{equation*}
+    \text{If } \mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \text{ then } \mathbf{A}^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}, \quad \text{provided } ad-bc \neq 0
+\end{equation*}
+While the $2 \times 2$ formula is simple, computing the inverse for a general $n \times n$ matrix is a numerically intensive task. In practice, one typically avoids computing the inverse explicitly. For problems like solving $\mathbf{A}\mathbf{x} = \mathbf{b}$, it is both more efficient and more numerically stable to solve the system directly using matrix factorization or other methods instead, which we will discuss in more detail later.
+
 \subsection{Determinant}
 For a square matrix $ \mathbf{A} \in \mathbb{R}^{n\times n} $, the \textbf{determinant} $ \det(\mathbf{A}) $ is a scalar value that can tell us a lot about the matrix's properties. Geometrically, it represents the signed volume-scaling factor of the linear transformation described by $ \mathbf{A} $. If $ |\det(\mathbf{A})| = 2 $, the transformation doubles the volume of a region, while if $ |\det(\mathbf{A})| = 0.5 $, it halves the volume. The sign of the determinant tells us whether the transformation preserves or reverses orientation. A positive determinant means the orientation is preserved, while a negative determinant means it's flipped (think of it as turning a shape ``inside-out'' like a reflection). If $ \det(\mathbf{A}) = 0 $, the transformation collapses the space into a lower dimension (e.g., squashing a 2D square into a line segment). When this happens, information is lost, and you can't reverse the transformation.
-This offers insight into the fact that a matrix is \textbf{invertible if and only if its determinant is non-zero}.
+\begin{theoremBox}
+\begin{theorem}[Determinant and invertibility]
+A square matrix $\mathbf{A}$ is invertible if and only if $\det(\mathbf{A}) \neq 0$.
+\end{theorem}
+\end{theoremBox}
 
+Formally, the determinant can be defined recursively.
+For $n = 1$, $\det(\begin{bmatrix} a \end{bmatrix}) = a$.
+For $n \geq 2$, let the \emph{minor} $M_{ij}$ denote the determinant of the $(n-1) \times (n-1)$ submatrix obtained by deleting row $i$ and column $j$ of $\mathbf{A}$; then, for \emph{any} choice of row $i$,
+\begin{equation*}
+    \det(\mathbf{A}) = \sum_{j=1}^{n} (-1)^{i+j}\, a_{ij}\, M_{ij},
+\end{equation*}
+which is called the \emph{Laplace expansion} along row $i$.
+Although this formula appears to depend on the choice of the row $i$, every choice gives the same value, so the definition is unambiguous; the same value is even obtained by expanding along any \emph{column}.
+We will see this freedom put to use in the exercises, where expanding along the row or column with the most zeros simplifies the computation.
 
-The determinant has several important properties, including $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $, the multiplicative property $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $, and the fact that for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $.
+The determinant has several important properties:
+\begin{itemize}
+    \item $ \det(\mathbf{A}^\top) = \det(\mathbf{A}) $;
+    \item $ \det(\mathbf{AB}) = \det(\mathbf{A})\det(\mathbf{B}) $ (the multiplicative property);
+    \item for an invertible matrix, $ \det(\mathbf{A}^{-1}) = 1 / \det(\mathbf{A}) $;
+    \item if $ \mathbf{A} $ is diagonal or triangular, $ \det(\mathbf{A}) = a_{11} a_{22} \cdots a_{nn} $, the product of the diagonal entries (repeatedly expand along the first row or column);
+    \item the determinant is linear in each row (and each column) separately; in particular, multiplying a single row by $c$ multiplies the determinant by $c$;
+    \item swapping two rows (or two columns) flips the sign of the determinant;
+    \item adding a multiple of one row to another row leaves the determinant unchanged (which is why Gaussian elimination can be used to compute determinants).
+\end{itemize}
 
-For a $2\times 2$ matrix, the formula is
+For a $2\times 2$ matrix, the definition reduces to
 \begin{equation*}
     \det\!\left(\begin{bmatrix} a & b \\ c & d \end{bmatrix}\right) = ad - bc
 \end{equation*}
@@ -667,34 +834,24 @@ For a $3\times 3$ matrix, one common method is cofactor expansion along the firs
 \begin{align*}
     \det\!\left(\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}\right) &= a \det\!\left(\begin{bmatrix} e & f \\ h & i \end{bmatrix}\right) - b \det\!\left(\begin{bmatrix} d & f \\ g & i \end{bmatrix}\right) + c \det\!\left(\begin{bmatrix} d & e \\ g & h \end{bmatrix}\right) \\ &= a(ei - fh) - b(di - fg) + c(dh - eg)
 \end{align*}
-The determinant of a general $n \times n$ matrix can be defined recursively via Laplace expansion, which expresses it as a signed sum of the entries of any chosen row or column times the determinants of their $(n-1) \times (n-1)$ minors. This recursion reduces ultimately to the $2 \times 2$ case. However, in practice, Laplace expansion is only used for small matrices; large determinants are almost always computed using Gaussian elimination or LU decomposition instead.
-
-
-\subsection{Inverse of a Matrix}
-Conceptually, the inverse of a matrix, denoted $ \mathbf{A}^{-1} $, is an operator that reverses the linear transformation performed by the original matrix $ \mathbf{A} $. If $ \mathbf{A} $ transforms a vector $ \mathbf{x} $ into $ \mathbf{y} $ (i.e., $ \mathbf{y} = \mathbf{A}\mathbf{x} $), then its inverse $ \mathbf{A}^{-1} $ transforms $ \mathbf{y} $ back to the original vector $ \mathbf{x} $ (i.e., $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{y} $).
-
-Formally, a square matrix $ \mathbf{A} $ is \textbf{invertible} (or \textbf{non-singular}) if there exists a matrix $ \mathbf{A}^{-1} $ such that:
-\begin{equation*}
-    \mathbf{A}\mathbf{A}^{-1} = \mathbf{A}^{-1}\mathbf{A} = \mathbf{I}
-\end{equation*}
-where $ \mathbf{I} $ is the identity matrix. This property is analogous to a number and its reciprocal (e.g., $ 5 \cdot 5^{-1} = 1 $).
-
-A matrix is invertible if and only if its determinant is non-zero ($ \det(\mathbf{A}) \neq 0 $). If the determinant is zero, the matrix is singular, meaning its transformation is irreversible because it collapses the space into a lower dimension (e.g., mapping a 2D plane onto a line), and the original vector cannot be uniquely recovered.
-
-This ``undoing'' capability is fundamental for solving systems of linear equations. A system represented as $ \mathbf{A}\mathbf{x} = \mathbf{b} $ can be solved for the unknown vector $ \mathbf{x} $ by applying the inverse: $ \mathbf{A}^{-1}\mathbf{A}\mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $, which simplifies to $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $.
-
-Important properties of inverses include $(\mathbf{A}\mathbf{B})^{-1} = \mathbf{B}^{-1}\mathbf{A}^{-1}$ (note the reversed order) and $(\mathbf{A}^\top)^{-1} = (\mathbf{A}^{-1})^\top$. For a $2\times 2$ matrix, the inverse can be calculated directly:
-\begin{equation*}
-    \text{If } \mathbf{A} = \begin{bmatrix} a & b \\ c & d \end{bmatrix}, \text{ then } \mathbf{A}^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}, \quad \text{provided } ad-bc \neq 0
-\end{equation*}
-While the $2 \times 2$ formula is simple, computing the inverse for a general $n \times n$ matrix is a numerically intensive task. In practice, one typically avoids computing the inverse explicitly. For problems like solving $\mathbf{A}\mathbf{x} = \mathbf{b}$, it is both more efficient and more numerically stable to solve the system directly using matrix factorization or other methods instead, which we will discuss in more detail later.
-
-
+In practice, Laplace expansion is only used for small matrices; large determinants are almost always computed using Gaussian elimination or LU decomposition instead.
 
 
 \section{Existence and Uniqueness of Solutions}
 
-\subsection{Linear Combinations and Span} % SS: probably we should explain this later, after introducing the vector space.
+\subsection{Vector Spaces}\label{sec:vector-space}
+A \textbf{vector space} is a set of vectors equipped with two operations, vector addition and scalar multiplication, that is \emph{closed} under both: adding two vectors in the set, or multiplying one by a scalar, yields another vector in the set.
+The space $\mathbb{R}^n$, with the operations defined earlier in this chapter, is the primary example.
+A subset of a vector space that is itself closed under the same two operations is called a \textbf{subspace}.
+For example, a line or a plane through the origin is a subspace of $\mathbb{R}^3$, while a line that misses the origin is not: closedness requires the set to contain $0 \cdot \mathbf{v} = \mathbf{0}$.
+
+\paragraph*{Closedness under Linear Combinations}
+The two closedness requirements can be stated as one: for any vectors $ \mathbf{u}, \mathbf{v} $ in the space and any scalars $ c, d $, the combination $ c\mathbf{u} + d\mathbf{v} $ is again in the space.
+(Taking $ c = d = 1 $ recovers closedness under vector addition, and taking $ d = 0 $ recovers closedness under scalar multiplication.)
+The familiar arithmetic properties of the two operations---commutativity, associativity, and distributivity, as listed earlier in this chapter---continue to hold.
+Closedness under linear combinations is the essential feature of a vector space, and the concepts that follow---span, linear independence, basis, and dimension---are all built on it.
+
+\paragraph*{Linear Combinations and Span}
 A \textbf{linear combination} of vectors $ \mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_k $ is an expression of the form:
 \begin{equation*}
     \mathbf{w} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k
@@ -705,10 +862,12 @@ where $ c_1, c_2, \ldots, c_k $ are scalars. The set of all possible linear comb
 \end{equation*}
 
 \begin{exampleBox}
-    \textbf{Example}: Consider vectors $ \mathbf{v}_1 = \begin{bmatrix}1 \\ 0\end{bmatrix} $ and $ \mathbf{v}_2 = \begin{bmatrix}0 \\ 1\end{bmatrix} $ in $ \mathbb{R}^2 $. Their span is the entire $ \mathbb{R}^2 $ plane since any vector $ \mathbf{w} = \begin{bmatrix}w_1 \\ w_2\end{bmatrix} $ can be written as $ w_1 \mathbf{v}_1 + w_2 \mathbf{v}_2 $
+    \textbf{Example}: What is the span of the vectors $ \mathbf{v}_1 = \begin{bmatrix}1 \\ 0\end{bmatrix} $ and $ \mathbf{v}_2 = \begin{bmatrix}0 \\ 1\end{bmatrix} $ in $ \mathbb{R}^2 $?
+
+    \emph{Solution}: Their span is the entire $ \mathbb{R}^2 $ plane since any vector $ \mathbf{w} = \begin{bmatrix}w_1 \\ w_2\end{bmatrix} $ can be written as $ w_1 \mathbf{v}_1 + w_2 \mathbf{v}_2 $
 \end{exampleBox}
 
-\subsection{Linear Independence and Basis}
+\paragraph*{Linear Independence and Basis}
 Vectors $ \mathbf{v}_1, \ldots, \mathbf{v}_k $ are \textbf{linearly independent} if the only solution to
 \begin{equation*}
     c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_k \mathbf{v}_k = \mathbf{0}
@@ -724,51 +883,34 @@ A set of vectors that is linearly independent and spans the vector space is call
 % \end{equation*}
 % It acts as the additive identity: $ \mathbf{v} + \mathbf{0} = \mathbf{v} $.
 
-\subsection{The Unit Vectors}
+\paragraph*{The Unit Vectors}
 The \textbf{unit vectors} in $ \mathbb{R}^n $ are:
 \begin{equation*}
     \mathbf{e}_i = \begin{bmatrix}0 \\ \vdots \\ 1 \\ \vdots \\ 0\end{bmatrix}, \quad \text{where } (\mathbf{e}_{i})_j = \begin{cases} 1 & \text{if } i = j \\ 0 & \text{otherwise} \end{cases}
 \end{equation*}
 The unit vectors form a basis for $ \mathbb{R}^n $, meaning any vector $ \mathbf{v} $ can be written as a linear combination of the unit vectors.
 \begin{exampleBox}
-    \textbf{Example}: In $ \mathbb{R}^3 $, the unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
-\end{exampleBox}
+    \textbf{Example}: Write down the unit vectors of $ \mathbb{R}^3 $.
 
-\subsection{Properties of Vector Spaces}\label{sec:vector-space}
-For all $ \mathbf{u}, \mathbf{v}, \mathbf{w} \in \mathbb{R}^n $ and scalars $ c, d \in \mathbb{R} $, the following hold:
-\begin{enumerate}
-    \item $ \mathbf{u} + \mathbf{v} = \mathbf{v} + \mathbf{u} $ (commutativity)
-    \item $ (\mathbf{u} + \mathbf{v}) + \mathbf{w} = \mathbf{u} + (\mathbf{v} + \mathbf{w}) $ (associativity)
-    \item $ \mathbf{v} + \mathbf{0} = \mathbf{v} $ (additive identity)
-    \item $ \mathbf{v} + (-\mathbf{v}) = \mathbf{0} $ (additive inverse)
-    \item $ c(d\mathbf{v}) = (cd)\mathbf{v} $ (associativity of scalar multiplication)
-    \item $ (c + d)\mathbf{v} = c\mathbf{v} + d\mathbf{v} $ (distributivity over scalars)
-    \item $ c(\mathbf{v} + \mathbf{w}) = c\mathbf{v} + c\mathbf{w} $ (distributivity over vectors)
-    \item $ 1\mathbf{v} = \mathbf{v} $ (multiplicative identity)
-\end{enumerate}
+    \emph{Solution}: The unit vectors are $ \mathbf{e}_1 = \begin{bmatrix}1 \\ 0 \\ 0\end{bmatrix} $, $ \mathbf{e}_2 = \begin{bmatrix}0 \\ 1 \\ 0\end{bmatrix} $, and $ \mathbf{e}_3 = \begin{bmatrix}0 \\ 0 \\ 1\end{bmatrix} $.
+\end{exampleBox}
 
 \subsection{Orthogonality}
 Vectors $ \mathbf{u}, \mathbf{v} \in \mathbb{R}^n $ are \textbf{orthogonal} if $ \mathbf{u}^\top \mathbf{v} = 0 $. A set of vectors is \textbf{orthonormal} if vectors are mutually orthogonal and each has unit norm. A square matrix $ \mathbf{Q} $ is \textbf{orthogonal} if $ \mathbf{Q}^\top \mathbf{Q} = \mathbf{Q}\mathbf{Q}^\top = \mathbf{I} $, which implies $ \mathbf{Q}^{-1} = \mathbf{Q}^\top $ and that $ \|\mathbf{Q}\mathbf{x}\|_2 = \|\mathbf{x}\|_2 $ for all $ \mathbf{x} $.
 
-
-
 \subsection{The four fundamental subspaces}
 We next formalize when a linear system has a solution and when that solution is unique. When needed, we denote by $\mathbf{A}_i^c$ the $i$-th column and by $\mathbf{A}_i^r$ the $i$-th row.
 
-\begin{warningBox}
-    \textbf{Note on Notation:} From this point on, we write $\mathbf{A}\in\mathbb{R}^{N\times M}$, meaning $N$ rows and $M$ columns---the opposite of the $\mathbf{A}\in\mathbb{R}^{M\times N}$ convention used earlier in this chapter (e.g., \autoref{eq:linear-system}), where $M$ denoted the number of rows/equations and $N$ the number of columns/unknowns. There is no single universal convention for which letter denotes rows versus columns; different textbooks (and, as you can see, even different sections of these notes!) make different choices. As a numerical methods student, you should be comfortable reading a matrix's dimensions directly from context (or from code, e.g., \texttt{size(A)} in MATLAB) rather than relying on a fixed mapping from variable names to rows and columns.
-\end{warningBox}
-
-For a matrix $\mathbf{A}\in\mathbb{R}^{N\times M}$ there are four canonical subspaces:
+For a matrix $\mathbf{A}\in\mathbb{R}^{m\times n}$ there are four canonical subspaces:
 \begin{enumerate}
-    \item \textbf{Column space (range):} $\displaystyle \mathcal{R}(\mathbf{A})=\operatorname{span}\{\mathbf{A}_1^c,\dots,\mathbf{A}_M^c\}\subseteq\mathbb{R}^N$
-    \item \textbf{Null space (kernel):} $\displaystyle \mathcal{N}(\mathbf{A})=\{\mathbf{x}\in\mathbb{R}^M:\ \mathbf{A}\mathbf{x}=\mathbf{0}\}$;
-    \item \textbf{Row space:} $\displaystyle \mathcal{R}(\mathbf{A}^{\top})=\operatorname{span}\{\mathbf{A}_1^r,\dots,\mathbf{A}_N^r\}\subseteq\mathbb{R}^M$
-    \item \textbf{Left null space:} $\displaystyle \mathcal{N}(\mathbf{A}^{\top})=\{\mathbf{y}\in\mathbb{R}^N:\ \mathbf{A}^{\top}\mathbf{y}=\mathbf{0}\}$
+    \item \textbf{Column space (range):} $\displaystyle \mathcal{R}(\mathbf{A})=\operatorname{span}\{\mathbf{a}^C_1,\dots,\mathbf{a}^C_M\}\subseteq\mathbb{R}^m$
+    \item \textbf{Null space (kernel):} $\displaystyle \mathcal{N}(\mathbf{A})=\{\mathbf{x}\in\mathbb{R}^n:\ \mathbf{A}\mathbf{x}=\mathbf{0}\}$;
+    \item \textbf{Row space:} $\displaystyle \mathcal{R}(\mathbf{A}^{\top})=\operatorname{span}\{\mathbf{a}^R_1,\dots,\mathbf{a}^R_N\}\subseteq\mathbb{R}^n$
+    \item \textbf{Left null space:} $\displaystyle \mathcal{N}(\mathbf{A}^{\top})=\{\mathbf{y}\in\mathbb{R}^m:\ \mathbf{A}^{\top}\mathbf{y}=\mathbf{0}\}$
 \end{enumerate}
 These subspaces organize the two core questions for a system $\mathbf{A}\mathbf{x}=\mathbf{b}$: \emph{existence} (is $\mathbf{b}$ achievable?) and \emph{uniqueness} (if achievable, is the achiever $\mathbf{x}$ unique?). 
 
-Think of $\mathbf{A}:\mathbb{R}^M\to\mathbb{R}^N$ as a machine that takes an input vector $\mathbf{x}$ and produces an output $\mathbf{b}=\mathbf{A}\mathbf{x}$. The set of all outputs the machine can possibly produce is the \emph{column space} $\mathcal{R}(\mathbf{A})$. Directions in input space that the machine completely ignores (they map to $\mathbf{0}$) form the \emph{null space} $\mathcal{N}(\mathbf{A})$. Thus:
+Think of $\mathbf{A}:\mathbb{R}^n\to\mathbb{R}^m$ as a machine that takes an input vector $\mathbf{x}$ and produces an output $\mathbf{b}=\mathbf{A}\mathbf{x}$. The set of all outputs the machine can possibly produce is the \emph{column space} $\mathcal{R}(\mathbf{A})$. Directions in input space that the machine completely ignores (they map to $\mathbf{0}$) form the \emph{null space} $\mathcal{N}(\mathbf{A})$. Thus:
 \[
 \text{existence is about }\mathbf{b}\in\mathcal{R}(\mathbf{A}),\qquad
 \text{uniqueness is about }\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}
@@ -781,15 +923,15 @@ The four subspaces come in orthogonal pairs:
 \]
 Consequently,
 \[
-\mathbb{R}^N=\mathcal{R}(\mathbf{A})\oplus \mathcal{N}(\mathbf{A}^{\top}),
+\mathbb{R}^m=\mathcal{R}(\mathbf{A})\oplus \mathcal{N}(\mathbf{A}^{\top}),
 \qquad
-\mathbb{R}^M=\mathcal{R}(\mathbf{A}^{\top})\oplus \mathcal{N}(\mathbf{A})
+\mathbb{R}^n=\mathcal{R}(\mathbf{A}^{\top})\oplus \mathcal{N}(\mathbf{A})
 \]
-In words, this means that for an $N\times M$ matrix $\mathbf{A}$, every vector in $\mathbb{R}^N$ can be written uniquely as a sum of something in the column space $\mathcal R(\mathbf{A})$ and something in the left null space $\mathcal N(\mathbf{A}^\top)$. Likewise, every vector in $\mathbb{R}^M$ splits uniquely into a part in the row space $\mathcal R(\mathbf{A}^\top)$ and a part in the null space $\mathcal N(\mathbf{A})$. As a dimension check this yields
+In words, this means that for an $m\times n$ matrix $\mathbf{A}$, every vector in $\mathbb{R}^m$ can be written uniquely as a sum of something in the column space $\mathcal R(\mathbf{A})$ and something in the left null space $\mathcal m(\mathbf{A}^\top)$. Likewise, every vector in $\mathbb{R}^n$ splits uniquely into a part in the row space $\mathcal R(\mathbf{A}^\top)$ and a part in the null space $\mathcal m(\mathbf{A})$. As a dimension check this yields
 \[
-\dim\mathcal{R}(\mathbf{A})+\dim\mathcal{N}(\mathbf{A}^{\top})=N
+\dim\mathcal{R}(\mathbf{A})+\dim\mathcal{N}(\mathbf{A}^{\top})=m
 \qquad
-\dim\mathcal{R}(\mathbf{A}^{\top})+\dim\mathcal{N}(\mathbf{A})=M
+\dim\mathcal{R}(\mathbf{A}^{\top})+\dim\mathcal{N}(\mathbf{A})=n
 \]
 It is also a basic fact that row rank equals column rank:
 \[
@@ -799,72 +941,81 @@ It is also a basic fact that row rank equals column rank:
 \]
 
 \begin{theoremBox}
-\textbf{Theorem (existence via the column space):} A solution to $\mathbf{A}\mathbf{x}=\mathbf{b}$ exists for a given $\mathbf{b}$ if and only if $\mathbf{b}\in\mathcal{R}(\mathbf{A})$.
-
-\textit{Proof.}\; Using the column view,
+\begin{theorem}[Existence via the column space]
+A solution to $\mathbf{A}\mathbf{x}=\mathbf{b}$ exists for a given $\mathbf{b}$ if and only if $\mathbf{b}\in\mathcal{R}(\mathbf{A})$.
+\end{theorem}
+\begin{proof}
+Using the column view,
 \[
-\mathbf{A}\mathbf{x}=\sum_{i=1}^{M}x_i\,\mathbf{A}_i^c
+\mathbf{A}\mathbf{x}=\sum_{i=1}^{n}x_i\,\mathbf{a}^C_i
 \]
 If $\mathbf{b}\in\mathcal{R}(\mathbf{A})$, then by definition there exist coefficients $x_i$ so that the sum equals $\mathbf{b}$, hence a solution exists. Conversely, if $\mathbf{A}\mathbf{x}=\mathbf{b}$ for some $\mathbf{x}$, then $\mathbf{b}$ is a linear combination of the columns of $\mathbf{A}$, so $\mathbf{b}\in\mathcal{R}(\mathbf{A})$.
+\end{proof}
 
 \end{theoremBox}
 
-We can also look at things geometrically. The column space is a subspace (a line/plane/higher-dimensional flat) inside $\mathbb{R}^N$. Asking for a solution is asking whether $\mathbf{b}$ lies \emph{on} that flat. If not, there is no exact solution; if yes, there is at least one.
+We can also look at things geometrically. The column space is a subspace (a line/plane/higher-dimensional flat) inside $\mathbb{R}^m$. Asking for a solution is asking whether $\mathbf{b}$ lies \emph{on} that flat. If not, there is no exact solution; if yes, there is at least one.
 
 \begin{exampleBox}
-\textbf{Example (existence).} Let
+\textbf{Example (existence)}: Let
 \[
 \mathbf{A}=\begin{bmatrix}1&0&0\\ 0&0&0\\ 0&0&0\end{bmatrix},\quad
 \mathbf{b}_1=\begin{bmatrix}1\\0\\0\end{bmatrix},\quad
 \mathbf{b}_2=\begin{bmatrix}0\\1\\0\end{bmatrix}.
 \]
-The column space is $\mathcal{R}(\mathbf{A})=\operatorname{span}\{(1,0,0)^{\top}\}$, a $1$-dimensional line in $\mathbb{R}^3$. Thus $\mathbf{b}_1$ lies on that line, so solutions exist (e.g., $x_1=1$ and $x_2,x_3$ arbitrary). The vector $\mathbf{b}_2$ lies off the line, so no solution exists.
+For which of $\mathbf{b}_1$ and $\mathbf{b}_2$ does the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ have a solution?
+
+\emph{Solution}: The column space is $\mathcal{R}(\mathbf{A})=\operatorname{span}\{(1,0,0)^{\top}\}$, a $1$-dimensional line in $\mathbb{R}^3$. Thus $\mathbf{b}_1$ lies on that line, so solutions exist (e.g., $x_1=1$ and $x_2,x_3$ arbitrary). The vector $\mathbf{b}_2$ lies off the line, so no solution exists.
 \end{exampleBox}
 
 \subsection{Consistency via the left null space (Fredholm alternative)}
 The system $\mathbf{A}\mathbf{x}=\mathbf{b}$ is solvable if and only if $\mathbf{b}\perp \mathcal{N}(\mathbf{A}^{\top})$; equivalently, $\mathbf{b}\in\mathcal{R}(\mathbf{A})$. In practice this gives a test: if $\{\mathbf{y}_1,\dots,\mathbf{y}_k\}$ is a basis of $\mathcal{N}(\mathbf{A}^{\top})$, then $\mathbf{A}\mathbf{x}=\mathbf{b}$ is consistent precisely when $\mathbf{y}_j^{\top}\mathbf{b}=0$ for all $j$.
 
 \begin{theoremBox}
-\textbf{Theorem (Uniqueness via the null space):} If a solution to $\mathbf{A}\mathbf{x}=\mathbf{b}$ exists, it is unique if and only if $\dim\mathcal{N}(\mathbf{A})=0$ (equivalently, $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$).
-
-\textit{Proof ($\Leftarrow$).}\; If $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$ and $\mathbf{A}\mathbf{x}=\mathbf{A}\mathbf{y}=\mathbf{b}$, then $\mathbf{A}(\mathbf{x}-\mathbf{y})=\mathbf{0}$, hence $\mathbf{x}-\mathbf{y}=\mathbf{0}$ and $\mathbf{x}=\mathbf{y}$.
-
-\textit{Proof ($\Rightarrow$).}\; Suppose a solution exists and is unique. If there were a nonzero $\mathbf{x}^{H}\in\mathcal{N}(\mathbf{A})$, then for any particular solution $\mathbf{x}^{P}$, the vector $\mathbf{x}^{P}+\mathbf{x}^{H}$ would be a distinct solution, a contradiction.
+\begin{theorem}[Uniqueness via the null space]
+If a solution to $\mathbf{A}\mathbf{x}=\mathbf{b}$ exists, it is unique if and only if $\dim\mathcal{N}(\mathbf{A})=0$ (equivalently, $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$).
+\end{theorem}
+\begin{proof}
+($\Leftarrow$) If $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$ and $\mathbf{A}\mathbf{x}=\mathbf{A}\mathbf{y}=\mathbf{b}$, then $\mathbf{A}(\mathbf{x}-\mathbf{y})=\mathbf{0}$, hence $\mathbf{x}-\mathbf{y}=\mathbf{0}$ and $\mathbf{x}=\mathbf{y}$.
+($\Rightarrow$) Suppose a solution exists and is unique. If there were a nonzero $\mathbf{x}^{H}\in\mathcal{N}(\mathbf{A})$, then for any particular solution $\mathbf{x}^{P}$, the vector $\mathbf{x}^{P}+\mathbf{x}^{H}$ would be a distinct solution, a contradiction.
+\end{proof}
 \end{theoremBox}
 
 \begin{exampleBox}
-\textbf{Example (uniqueness with $M<N$):} Consider
+\textbf{Example (uniqueness with $n<m$):} Consider
 \[
 \mathbf{A}=\begin{bmatrix}
 1&0\\ 1&0\\ 1&0\\ 0&1
 \end{bmatrix}\in\mathbb{R}^{4\times 2}.
 \]
-The columns are $\mathbf{c}_1=(1,1,1,0)^{\top}$ and $\mathbf{c}_2=(0,0,0,1)^{\top}$, which are linearly independent. Hence $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$ and any consistent system has a unique solution. Concretely, a right-hand side $\mathbf{b}=(b_1,b_2,b_3,b_4)^{\top}$ is in $\mathcal{R}(\mathbf{A})$ iff $b_1=b_2=b_3$; when this holds, the unique solution is $x_1=b_1$ and $x_2=b_4$.
+Which right-hand sides $\mathbf{b}$ make the system $\mathbf{A}\mathbf{x} = \mathbf{b}$ consistent, and is the solution then unique?
+
+\emph{Solution}: The columns are $\mathbf{c}_1=(1,1,1,0)^{\top}$ and $\mathbf{c}_2=(0,0,0,1)^{\top}$, which are linearly independent. Hence $\mathcal{N}(\mathbf{A})=\{\mathbf{0}\}$ and any consistent system has a unique solution. Concretely, a right-hand side $\mathbf{b}=(b_1,b_2,b_3,b_4)^{\top}$ is in $\mathcal{R}(\mathbf{A})$ iff $b_1=b_2=b_3$; when this holds, the unique solution is $x_1=b_1$ and $x_2=b_4$.
 \end{exampleBox}
 
-\subsection{Rank and nullity} The rank and nullity of $\mathbf{A}\in\mathbb{R}^{N\times M}$ are
+\subsection{Rank and nullity} The rank and nullity of $\mathbf{A}\in\mathbb{R}^{m\times n}$ are
 \[
 \operatorname{rank}(\mathbf{A})=\dim\mathcal{R}(\mathbf{A}),
 \qquad
 \operatorname{nullity}(\mathbf{A})=\dim\mathcal{N}(\mathbf{A}).
 \]
-Always, $\operatorname{rank}(\mathbf{A})\le \min\{M,N\}$. We say that $\mathbf{A}$ has full column rank if $\operatorname{rank}(\mathbf{A})=M$ and full row rank if $\operatorname{rank}(\mathbf{A})=N$.
+Always, $\operatorname{rank}(\mathbf{A})\le \min\{n,m\}$. We say that $\mathbf{A}$ has full column rank if $\operatorname{rank}(\mathbf{A})=n$ and full row rank if $\operatorname{rank}(\mathbf{A})=m$.
 
 \begin{theoremBox}
 \textbf{Rank--nullity theorem:}
-For every $\mathbf{A}\in\mathbb{R}^{N\times M}$,
+For every $\mathbf{A}\in\mathbb{R}^{m\times n}$,
 \[
-\operatorname{rank}(\mathbf{A})+\operatorname{nullity}(\mathbf{A})=M
+\operatorname{rank}(\mathbf{A})+\operatorname{nullity}(\mathbf{A})=n
 \]
 \end{theoremBox}
-An immediate consequence of the rank-nullity theorem is that if $M>N$ (more variables than equations), then $\operatorname{rank}(\mathbf{A})\le N$ so $\operatorname{nullity}(\mathbf{A})\ge M-N>0$. Thus, whenever a solution exists, it cannot be unique. Conversely, if $N>M$ (more equations than variables), uniqueness (when consistent) is possible exactly when $\mathbf{A}$ has full column rank $M$, but solvability for \emph{every} $\mathbf{b}\in\mathbb{R}^N$ is impossible since that would require rank $N>M$.
+An immediate consequence of the rank-nullity theorem is that if $n>m$ (more variables than equations), then $\operatorname{rank}(\mathbf{A})\le m$ so $\operatorname{nullity}(\mathbf{A})\ge n-m>0$. Thus, whenever a solution exists, it cannot be unique. Conversely, if $m>n$ (more equations than variables), uniqueness (when consistent) is possible exactly when $\mathbf{A}$ has full column rank $n$, but solvability for \emph{every} $\mathbf{b}\in\mathbb{R}^m$ is impossible since that would require rank $m>n$.
 
-\subsection{Square case and invertibility} When $\mathbf{A}\in\mathbb{R}^{N\times N}$, the following are equivalent for a square system:
+\subsection{Square case and invertibility} When $\mathbf{A}\in\mathbb{R}^{n\times n}$, the following are equivalent for a square system:
 \begin{itemize}
-    \item for every $\mathbf{b}\in\mathbb{R}^N$ there exists a \emph{unique} solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$
+    \item for every $\mathbf{b}\in\mathbb{R}^n$ there exists a \emph{unique} solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$
     \item $\mathbf{A}$ is invertible
     \item $\det(\mathbf{A})\neq 0$
-    \item $\operatorname{rank}(\mathbf{A})=N$
+    \item $\operatorname{rank}(\mathbf{A})=n$
     \item $\dim\mathcal{N}(\mathbf{A})=0$
 \end{itemize}
 Each statement enforces both existence (full row rank) and uniqueness (full column rank), which coincide in the square case.
@@ -890,7 +1041,7 @@ Back substitution is a method for solving linear systems of equations that are i
 where $ a_{ij} $ are the elements of the upper triangular matrix $ \mathbf{A} \in \mathbb{R}^{n \times n} $, $ b_i $ are the elements of the vector $ \mathbf{b} $, and $ x_i $ are the unknowns we are solving for. Notice that the formula for $ x_k $ for some $k < n$ relies on the values of $ x_{k+1}, x_{k+2}, \dots, x_n $, which is why we must work backwards.
 
 \begin{exampleBox}
-    \textbf{Example}: Consider the following linear system:
+    \textbf{Example}: Solve the following upper triangular linear system:
     \begin{equation*}
         \begin{bmatrix}
         1 & 2 & 3 \\
@@ -905,7 +1056,7 @@ where $ a_{ij} $ are the elements of the upper triangular matrix $ \mathbf{A} \i
         1 \\ 13 \\ 6
         \end{bmatrix}
     \end{equation*}
-    Let's work backwards naively to gain some intuition. The last equation is $ 6x_3 = 6 $, so $ x_3 = 6/6 = 1 $. The second-to-last equation is $ 4x_2 + 5(1) = 13 $, so $ x_2 = (13 - 5)/4 = 2 $. Finally, the first equation is $ x_1 + 2(2) + 3(1) = 1 $, so $ x_1 = 1 - 4 - 3 = -6 $. Therefore, the solution to the system is $ x_1 = -6 $, $ x_2 = 2 $, and $ x_3 = 1 $.
+    \emph{Solution}: Let's work backwards naively to gain some intuition. The last equation is $ 6x_3 = 6 $, so $ x_3 = 6/6 = 1 $. The second-to-last equation is $ 4x_2 + 5(1) = 13 $, so $ x_2 = (13 - 5)/4 = 2 $. Finally, the first equation is $ x_1 + 2(2) + 3(1) = 1 $, so $ x_1 = 1 - 4 - 3 = -6 $. Therefore, the solution to the system is $ x_1 = -6 $, $ x_2 = 2 $, and $ x_3 = 1 $.
 
     We can also just directly apply the formula for back substitution (note that the formula is the exact same as the naive/intuitive approach given above, just written in a way that generalizes to larger systems):
     \begin{align*}
@@ -932,7 +1083,7 @@ After eliminating the first column below the pivot, the process moves to the nex
 Once the matrix is upper triangular, we can use back substitution to solve for the unknowns.
 
 \begin{exampleBox}
-    \textbf{Example}: Consider the following linear system:
+    \textbf{Example}: Use Gaussian elimination to bring the following system to upper triangular form:
     \begin{equation*}
         \begin{bmatrix}
             0 & 2 & 1 \\
@@ -953,7 +1104,7 @@ Once the matrix is upper triangular, we can use back substitution to solve for t
             2 & 1 & 3 &\aug& 6
         \end{bmatrix}
     \end{equation*}
-    The first pivot element is $ a_{11} = 0 $. Since $ a_{11} = 0 $, we perform a row swap with a lower row that has a non-zero entry in the first column. Here, $ a_{21} = 1 \neq 0 $, so we swap Row 1 ($ R_1 $) with Row 2 ($ R_2 $):
+    \emph{Solution}: The first pivot element is $ a_{11} = 0 $. Since $ a_{11} = 0 $, we perform a row swap with a lower row that has a non-zero entry in the first column. Here, $ a_{21} = 1 \neq 0 $, so we swap Row 1 ($ R_1 $) with Row 2 ($ R_2 $):
     \begin{equation*}
         R_1 \leftrightarrow R_2
     \end{equation*}
@@ -1036,6 +1187,90 @@ multiplications and subtractions (each). This results in an overall computationa
 Therefore, the overall computational complexity of solving a linear system with $n$ equations and $n$ unknowns using Gaussian elimination and back substitution is $ O(n^3) $. This is a very important result to keep in mind when working with large linear systems, as the computational cost grows cubically with the size of the system.
 
 
+\subsection{Condition Number}
+Before looking at specific direct and iterative methods, we introduce the notion of the \textbf{condition number} of a matrix $\mathbf{A}$, denoted $\kappa(\mathbf{A})$, which helps us understand the sensitivity of a linear system to perturbations and numerical errors. We hope that for our linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$, small perturbations in $\mathbf{b}$ will lead to small changes in $\mathbf{x}$. Such a system is said to be well-conditioned. However, if small perturbations in $\mathbf{b}$ lead to large changes in $\mathbf{x}$, the system is said to be ill-conditioned. The meaning of ``small'' and ``large'' changes depending on the context (e.g., it could be relative or absolute). The condition number quantifies this sensitivity.
+
+To define the condition number, we consider a linear system $ \mathbf{A}\mathbf{x} = \mathbf{b} $ with an exact solution $ \mathbf{x} = \mathbf{A}^{-1}\mathbf{b} $. If we add a small perturbation (error) $\delta\mathbf{b}$ to $\mathbf{b}$, then the solution vector $\mathbf{x}$ will also change by some amount $\delta\mathbf{x}$ (which we think of as the error in $\mathbf{x}$ since the original perturbation is assumed to represent an error) so that the linear system remains satisfied:
+\begin{equation*}
+    \mathbf{A}\left(\mathbf{x} + \delta\mathbf{x}\right) = \mathbf{b} + \delta\mathbf{b}
+    \implies 
+    \delta\mathbf{x} = \mathbf{A}^{-1}\delta\mathbf{b}
+\end{equation*}
+Taking the $p$-norm of both sides, we have
+\begin{equation*}
+    \|\delta\mathbf{x}\|_p = \|\mathbf{A}^{-1}\delta\mathbf{b}\|_p \leq \|\mathbf{A}^{-1}\|_p \|\delta\mathbf{b}\|_p
+\end{equation*}
+where the inequality follows from the submultiplicative property of matrix norms. We also have $\|\mathbf{b}\|_p = \|\mathbf{A}\mathbf{x}\|_p \le \|\mathbf{A}\|_p \, \|\mathbf{x}\|_p$, hence $\|\mathbf{x}\|_p \ge \|\mathbf{b}\|_p/\|\mathbf{A}\|_p$. Dividing the two inequalities, we arrive at an expression for the relative error in the solution:
+\begin{equation*}
+    \frac{\|\delta\mathbf{x}\|_p}{\|\mathbf{x}\|_p} \leq \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \frac{\|\delta\mathbf{b}\|_p}{\|\mathbf{b}\|_p}
+\end{equation*}
+This motivates the definition of the condition number of $\mathbf{A}$ as
+\begin{equation*}
+    \kappa_p(\mathbf{A}) = \|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p
+\end{equation*}
+where we add a subscript $p$ on $\kappa$ to denote the norm used and to emphasize that its value depends on the choice of norm (but the qualitative behavior is the same across norms). If $\mathbf{A}$ is singular, $\kappa_p(\mathbf{A}) = \infty$. We note that clearly $\kappa_p(\mathbf{A}) \geq 1$ since $\|\mathbf{A}\|_p \|\mathbf{A}^{-1}\|_p \geq \|\mathbf{A} \mathbf{A}^{-1}\|_p = \|\mathbf{I}\|_p = 1$. Moreover, a matrix with a large condition number (an ``ill-conditioned'' matrix) indicates that the linear system is more sensitive to perturbations and numerical errors, while a matrix with a small condition number (a ``well-conditioned'' matrix) indicates greater numerical robustness. As a practical rule of thumb for backward-stable solvers (e.g., Gaussian elimination with partial pivoting), the number of correct digits $\approx$ (working-precision digits) $-\log_{10}\kappa(\mathbf{A})$, and the relative forward error is typically $O(\kappa(\mathbf{A})\,\varepsilon_{\mathrm{mach}})$. A small residual $\|\mathbf{r}\| = \|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|$ does not guarantee a small error when $\kappa(\mathbf{A})$ is large; roughly,
+\[ \frac{\|\hat{\mathbf{x}}-\mathbf{x}\|}{\|\mathbf{x}\|} \lesssim \kappa(\mathbf{A})\,\frac{\|\mathbf{r}\|}{\|\mathbf{b}\|}. \]
+
+Let's take a look at the condition number for the 2-norm specifically. Here, the condition number is
+\begin{equation*}
+    \kappa_2(\mathbf{A}) = \|\mathbf{A}\|_2 \|\mathbf{A}^{-1}\|_2 = \frac{\sigma_{\text{max}}(\mathbf{A})}{\sigma_{\text{min}}(\mathbf{A})}
+\end{equation*}
+where $\sigma_{\text{max}}(\mathbf{A})$ and $\sigma_{\text{min}}(\mathbf{A})$ are the largest and smallest singular values of $\mathbf{A}$ (see \Cref{sec:singular-values}), respectively. For $\mathbf{A} \succ 0$,\footnote{If $\mathbf{A}$ is normal ($\mathbf{A}\mathbf{A}^* = \mathbf{A}^*\mathbf{A}$) over $\mathbb{C}$, then $\sigma_i(\mathbf{A}) = |\lambda_i(\mathbf{A})|$ and $\kappa_2(\mathbf{A}) = \max_i |\lambda_i(\mathbf{A})|/\min_i |\lambda_i(\mathbf{A})|$.} this is equivalent to
+\begin{equation*}
+    \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})}
+\end{equation*}
+where $\lambda_{\text{max}}(\mathbf{A})$ and $\lambda_{\text{min}}(\mathbf{A})$ are the largest and smallest eigenvalues of $\mathbf{A}$, respectively.
+
+One way to mitigate the effects of ill-conditioning is \emph{preconditioning}, which transforms the system into an equivalent one with better spectral properties; we discuss it together with the iterative methods at the end of this chapter.
+
+Even simpler than preconditioning is \textbf{scaling} (often called equilibration), which rescales rows and/or columns to reduce element-wise dynamic range and improve pivoting. A common heuristic is to equalize row/column $\infty$-norms. This helps numerics and pivoting but does not magically fix ill-conditioning rooted in the model; think nondimensionalization and consistent units (ChemE context: Pa vs bar, mol vs kmol).
+
+\begin{exampleBox}
+    \textbf{Example}: Compute the 2-norm condition number of the matrix
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix}
+        10^{14} & 0 \\
+        0 & 10^{-9}
+        \end{bmatrix}
+    \end{equation*}
+    and investigate how row scaling affects it.
+
+    \emph{Solution}: The condition number with respect to the 2-norm is
+    \begin{equation*}
+        \kappa_2(\mathbf{A}) = \frac{\lambda_{\text{max}}(\mathbf{A})}{\lambda_{\text{min}}(\mathbf{A})} = \frac{10^{14}}{10^{-9}} = 10^{23}
+    \end{equation*}
+    which means that $\mathbf{A}$ is severely ill-conditioned. Such a high condition number implies that even tiny perturbations in $\mathbf{b}$ can lead to enormous errors in the computed solution $\mathbf{x}$.
+
+    To mitigate this issue, we can apply scaling by rescaling the rows of $\mathbf{A}$ to reduce the condition number. Specifically, we divide each row by the maximum absolute value in that row. For matrix $\mathbf{A}$, the scaling factors for the rows are $10^{14}$ and $10^{-9}$, respectively. We define a diagonal scaling matrix $\mathbf{D}$ as
+    \begin{equation*}
+    \mathbf{D} = \begin{bmatrix}
+    10^{-14} & 0 \\
+    0 & 10^{9}
+    \end{bmatrix}
+    \end{equation*}
+    Applying the scaling, we obtain the scaled matrix $\mathbf{A}_{\text{scaled}}$:
+    \begin{equation*}
+    \mathbf{A}_{\text{scaled}} = \mathbf{D} \mathbf{A} = \begin{bmatrix}
+    10^{-14} & 0 \\
+    0 & 10^{9}
+    \end{bmatrix} \begin{bmatrix}
+    10^{14} & 0 \\
+    0 & 10^{-9}
+    \end{bmatrix} = \begin{bmatrix}
+    1 & 0 \\
+    0 & 1
+    \end{bmatrix}
+    \end{equation*}
+    The left-scaling forms the equivalent system $\mathbf{D}\mathbf{A}\mathbf{x} = \mathbf{D}\mathbf{b}$ (same solution $\mathbf{x}$). Here, because $\mathbf{A}$ is diagonal, $\mathbf{D}\mathbf{A} = \mathbf{I}$. In general, equilibration reduces dynamic range and can reduce $\kappa$, but need not drive it to 1.
+
+    The condition number of the scaled matrix is now
+    \begin{equation*}
+        \kappa_2(\mathbf{A}_{\text{scaled}}) = \frac{\lambda_{\text{max}}(\mathbf{A}_{\text{scaled}})}{\lambda_{\text{min}}(\mathbf{A}_{\text{scaled}})} = \frac{1}{1} = 1
+    \end{equation*}
+    which means that $\mathbf{A}_{\text{scaled}}$ is perfectly conditioned. This dramatic reduction shows how scaling can improve numerical behavior in favorable cases (in this case, $\mathbf{A}$ is diagonal, so $\mathbf{D} = \mathbf{A}^{-1}$ is an exact preconditioner, hence the perfect condition number). In general, scaling is often helpful for stability and pivoting, but it does not eliminate all ill-conditioning.
+\end{exampleBox}
+
+
 \section{Eigenvalues and Eigenvectors}
 A linear transformation, represented by a matrix $\mathbf{A}$, acts on vectors, typically changing both their directions and magnitudes.
 However, for many square matrices, there exist special non-zero vectors called \textbf{eigenvectors} whose direction is unchanged by the transformation. When multiplied by the matrix, these vectors are simply scaled: stretched, shrunk, and/or flipped.
@@ -1070,8 +1305,9 @@ Solving the characteristic polynomial is practical for small, textbook examples.
 Once an eigenvalue $\lambda_i$ is found, the corresponding eigenvector(s) $\mathbf{v}_i$ are found by solving the linear system $(\mathbf{A} - \lambda_i \mathbf{I})\mathbf{v}_i = 0$, which is equivalent to finding the null space of $(\mathbf{A} - \lambda_i \mathbf{I})$.
 
 \begin{exampleBox}
-    \textbf{Example (finding eigenvalues and eigenvectors):}
-    Let $\mathbf{A} = \begin{bmatrix} -2 & 1 \\ 1 & -2 \end{bmatrix}$.
+    \textbf{Example (finding eigenvalues and eigenvectors)}: Find the eigenvalues and eigenvectors of $\mathbf{A} = \begin{bmatrix} -2 & 1 \\ 1 & -2 \end{bmatrix}$.
+
+    \emph{Solution}:
 
     \textbf{1. Find Eigenvalues:}
     Solve $\det(\mathbf{A} - \lambda \mathbf{I}) = 0$:
@@ -1091,6 +1327,19 @@ Once an eigenvalue $\lambda_i$ is found, the corresponding eigenvector(s) $\math
 \subsection{Multiplicity and Diagonalizability}
 
 The number of times an eigenvalue appears as a root of the characteristic polynomial is its \textbf{algebraic multiplicity}. The number of linearly independent eigenvectors for that eigenvalue is its \textbf{geometric multiplicity}. For any eigenvalue, $1 \le \text{geometric multiplicity} \le \text{algebraic multiplicity}$. A matrix is called \textbf{defective} if for some eigenvalue its geometric multiplicity is less than its algebraic multiplicity; equivalently, it does not have \(n\) linearly independent eigenvectors. A matrix with a ``complete set'' of eigenvectors (geometric = algebraic multiplicity for all eigenvalues) is \textbf{diagonalizable}.
+
+\begin{exampleBox}
+    \textbf{Example}: The matrices
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix} 2 & 1 \\ 0 & 2 \end{bmatrix},
+        \qquad
+        \mathbf{B} = \begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix}
+    \end{equation*}
+    both have the single eigenvalue $\lambda = 2$ with algebraic multiplicity 2. Find the geometric multiplicity of $\lambda$ for each.
+
+    \emph{Solution}: For $\mathbf{A}$, the eigenvector equation $(\mathbf{A} - 2\mathbf{I})\mathbf{v} = \mathbf{0}$ reads $v_2 = 0$, so the eigenvectors span only one direction: the geometric multiplicity is 1, and $\mathbf{A}$ is defective.
+    For $\mathbf{B}$, every nonzero vector is an eigenvector: the geometric multiplicity is 2, and $\mathbf{B}$ is diagonalizable (it is already diagonal).
+\end{exampleBox}
 
 \subsection{Eigendecomposition}
 If an $n \times n$ matrix $\mathbf{A}$ is diagonalizable, it has $n$ linearly independent eigenvectors $\{\mathbf{v}_1, \dots, \mathbf{v}_n\}$. We can bundle these into a matrix $\mathbf{W} = [\mathbf{v}_1 | \dots | \mathbf{v}_n]$ and the corresponding eigenvalues into a diagonal matrix $\mathbf{\Lambda}$. The eigenvalue equation for all eigenvectors can be written compactly as:
@@ -1117,9 +1366,31 @@ This decomposition reveals the fundamental behavior of $\mathbf{A}$ as a simple 
 \end{theoremBox}
 
 
+\subsection{Singular Values}\label{sec:singular-values}
+Eigenvalues are defined only for square matrices.
+A closely related concept that applies to any matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ is the \textbf{singular values}, defined as
+\begin{equation*}
+    \sigma_i(\mathbf{A}) = \sqrt{\lambda_i(\mathbf{A}^\top \mathbf{A})}, \quad i = 1, 2, \dots, n,
+\end{equation*}
+where $\lambda_i(\mathbf{A}^\top \mathbf{A})$ denotes the $i$-th eigenvalue of $\mathbf{A}^\top \mathbf{A}$.
+Since $\mathbf{A}^\top \mathbf{A}$ is symmetric and positive semi-definite, its eigenvalues are real and non-negative, so the singular values are well defined.
+They are conventionally ordered as $\sigma_1 \geq \sigma_2 \geq \cdots \geq \sigma_n \geq 0$, and we write $\sigma_{\max}(\mathbf{A}) = \sigma_1$ and $\sigma_{\min}(\mathbf{A}) = \sigma_n$.
+Geometrically, the singular values measure how much the multiplication with $\mathbf{A}$ can stretch a vector: $\sigma_{\max}(\mathbf{A})$ and $\sigma_{\min}(\mathbf{A})$ are the largest and smallest factors by which the length of a vector can be scaled.
+This is why the singular values appear in the matrix 2-norm, $\|\mathbf{A}\|_2 = \sigma_{\max}(\mathbf{A})$, and in the 2-norm condition number, $\kappa_2(\mathbf{A}) = \sigma_{\max}(\mathbf{A})/\sigma_{\min}(\mathbf{A})$.
+
+More generally, every matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ of rank $r$ admits an economy-sized \textbf{singular value decomposition} (SVD),
+\begin{equation*}
+    \mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^\top,
+    \qquad \mathbf{U} \in \mathbb{R}^{m \times r}, \quad \boldsymbol{\Sigma} \in \mathbb{R}^{r \times r}, \quad \mathbf{V} \in \mathbb{R}^{n \times r},
+\end{equation*}
+where the columns of $\mathbf{U}$ and $\mathbf{V}$ are orthonormal ($\mathbf{U}^\top\mathbf{U} = \mathbf{V}^\top\mathbf{V} = \mathbf{I}$) and are called the left and right \emph{singular vectors}, and $\boldsymbol{\Sigma}$ carries the singular values $\sigma_1 \geq \cdots \geq \sigma_r > 0$ on its diagonal.
+The decomposition can be computed through eigendecompositions: the columns of $\mathbf{V}$ are the eigenvectors of $\mathbf{A}^\top\mathbf{A}$, the columns of $\mathbf{U}$ are the eigenvectors of $\mathbf{A}\mathbf{A}^\top$, and $\sigma_i = \sqrt{\lambda_i(\mathbf{A}^\top\mathbf{A})}$ (in MATLAB, \texttt{[U, S, V] = svd(A, 'econ')}).
+Keeping only the $t < r$ largest singular values gives the \emph{truncated SVD}, $\mathbf{A} \approx \mathbf{U}_t \boldsymbol{\Sigma}_t \mathbf{V}_t^\top$, where $\mathbf{U}_t$ and $\mathbf{V}_t$ collect the first $t$ columns of $\mathbf{U}$ and $\mathbf{V}$; this is the best rank-$t$ approximation of $\mathbf{A}$, and the storage drops from $mn$ numbers to $(m + n + 1)\, t$.
+The SVD is used across numerical practice: principal component analysis, low-rank approximation and data compression, and least-squares problems via the pseudoinverse.
+
 \section{Numerical Solution of Linear Systems: Iterative Methods}
 \label{sec:num_sol_linear_iterative}
-Iterative methods attempt to solve linear systems ($\mathbf{A}\mathbf{x} = \mathbf{b}$) by generating a sequence of improving approximate solutions. They do not require Gaussian elimination and generally scale better for large systems. However, even with infinite precision, iterative methods can only obtain an approximate solution in a finite number of steps\footnote{Actually, some iterative methods, like CG on SPD, are finite-termination in exact arithmetic, but we aren't going to cover that in this course.}. We cover Jacobi and Gauss-Seidel iteration, two of the most common iterative methods, in this course. But one more extremely popular method deserves at least a mention: the conjugate gradient method.\footnote{A good resource for this is Prof. Jonathan Shewchuk's guide \textit{An Introduction to the Conjugate Gradient Method Without the Agonizing Pain}.\autocite{shewchuk1994}}
+Iterative methods attempt to solve linear systems ($\mathbf{A}\mathbf{x} = \mathbf{b}$) by generating a sequence of improving approximate solutions. They do not require Gaussian elimination and generally scale better for large systems. However, even with infinite precision, iterative methods can only obtain an approximate solution in a finite number of steps\footnote{Actually, some iterative methods, like CG on SPD, are finite-termination in exact arithmetic, but we aren't going to cover that in this course.}. In this chapter, we cover Jacobi and Gauss-Seidel iteration, two of the most common iterative methods. The conjugate gradient method, and the broader class of \emph{Krylov subspace methods} to which it belongs, will be covered in the part of the course on partial differential equations.\footnote{A good resource for this is Prof. Jonathan Shewchuk's guide \textit{An Introduction to the Conjugate Gradient Method Without the Agonizing Pain}.\autocite{shewchuk1994}}
 
 \subsection{Jacobi Iteration}
 Jacobi iteration is an iterative method for solving linear systems. Let's build some intuition for this method before giving the matrix form of the update formula. Suppose we have the linear system
@@ -1146,28 +1417,28 @@ If this equation is satisfied, then the $i$-th equation of the linear system is 
 \end{equation*}
 This defines the iterative map
 \begin{equation*}
-    \mathbf{D}\mathbf{x}^{(i+1)} = -\mathbf{R}\mathbf{x}^{(i)} + \mathbf{b}
+    \mathbf{D}\mathbf{x}^{(k+1)} = -\mathbf{R}\mathbf{x}^{(k)} + \mathbf{b}
 \end{equation*}
 Assuming that $\mathbf{D}$ is nonsingular, this can be equivalently written as
 \begin{equation*}
-    \mathbf{x}^{(i+1)} = -\mathbf{D}^{-1}(\mathbf{R}\mathbf{x}^{(i)} - \mathbf{b})
+    \mathbf{x}^{(k+1)} = -\mathbf{D}^{-1}(\mathbf{R}\mathbf{x}^{(k)} - \mathbf{b})
 \end{equation*}
-This formulation allows us to compute the next approximation $\mathbf{x}^{(i+1)}$ based on the current approximation $\mathbf{x}^{(i)}$. Note how this is the \textit{exact} same formula as the one we derived earlier for the $i$-th variable in the linear system, just written in matrix form so that we can update all variables simultaneously!
+This formulation allows us to compute the next approximation $\mathbf{x}^{(k+1)}$ based on the current approximation $\mathbf{x}^{(k)}$. Note how this is the \textit{exact} same formula as the one we derived earlier for the $i$-th variable in the linear system, just written in matrix form so that we can update all variables simultaneously!
 
 As a quick note on notation, many sources commonly split the matrix $\mathbf{A}$ into the sum of a lower triangular matrix $\mathbf{L}$, a diagonal matrix $\mathbf{D}$, and an upper triangular matrix $\mathbf{U}$ (i.e., $\mathbf{A} = \mathbf{L} + \mathbf{D} + \mathbf{U}$). The Jacobi method is then written as
 \begin{equation*}
-    \mathbf{x}^{(i+1)} = -\mathbf{D}^{-1}(\mathbf{L} + \mathbf{U})\mathbf{x}^{(i)} + \mathbf{D}^{-1}\mathbf{b}
+    \mathbf{x}^{(k+1)} = -\mathbf{D}^{-1}(\mathbf{L} + \mathbf{U})\mathbf{x}^{(k)} + \mathbf{D}^{-1}\mathbf{b}
 \end{equation*}
 This is mathematically equivalent to the formulation we have presented here; don't be confused if you see this alternate notation.
 
-\textbf{Computational Complexity}\quad Each iteration of the Jacobi method involves diagonal matrix inversion, matrix-vector multiplications, and vector updates. Specifically, computing $\mathbf{R}\mathbf{x}^{(i)}$ requires $O(n^2)$ operations for an $n \times n$ matrix $\mathbf{A}$, and the subsequent vector operations also scale quadratically. Inverting a diagonal matrix is trivial and requires only $n$ divisions. Therefore, the computational complexity of each Jacobi iteration is $O(n^2)$.
+\textbf{Computational Complexity}\quad Each iteration of the Jacobi method involves diagonal matrix inversion, matrix-vector multiplications, and vector updates. Specifically, computing $\mathbf{R}\mathbf{x}^{(k)}$ requires $O(n^2)$ operations for an $n \times n$ matrix $\mathbf{A}$, and the subsequent vector operations also scale quadratically. Inverting a diagonal matrix is trivial and requires only $n$ divisions. Therefore, the computational complexity of each Jacobi iteration is $O(n^2)$.
 
 \subsection{Convergence of Jacobi Iteration}
-We have seen that we can generate a sequence of improving approximations $\{\mathbf{x}^{(i)}\}$ to the solution of a linear system using the Jacobi method. But how do we know that this sequence converges at all, and if it converges, that it converges to the true solution $\mathbf{x}^\star$? Convergence is not generally guaranteed for iterative methods, let alone convergence to the true solution.
+We have seen that we can generate a sequence of improving approximations $\{\mathbf{x}^{(k)}\}$ to the solution of a linear system using the Jacobi method. But how do we know that this sequence converges at all, and if it converges, that it converges to the true solution $\mathbf{x}^\star$? Convergence is not generally guaranteed for iterative methods, let alone convergence to the true solution.
 
-\textbf{Convergence to the Correct Solution}\quad We claim that if the Jacobi sequence $\{\mathbf{x}^{(i)}\}$ converges, it indeed converges to the correct solution. To see this, we take the limit on both sides of the iterative equation:
+\textbf{Convergence to the Correct Solution}\quad We claim that if the Jacobi sequence $\{\mathbf{x}^{(k)}\}$ converges, it indeed converges to the correct solution. To see this, we take the limit on both sides of the iterative equation:
 \begin{align*}
-    \lim_{i \to \infty} \mathbf{x}^{(i+1)} & = \lim_{i \to \infty} -\mathbf{D}^{-1}(\mathbf{R}\mathbf{x}^{(i)} - \mathbf{b}) \\
+    \lim_{k \to \infty} \mathbf{x}^{(k+1)} & = \lim_{k \to \infty} -\mathbf{D}^{-1}(\mathbf{R}\mathbf{x}^{(k)} - \mathbf{b}) \\
     \mathbf{x}^\star &= -\mathbf{D}^{-1}(\mathbf{R}\mathbf{x}^\star - \mathbf{b})
 \end{align*}
 Rearranging terms gives
@@ -1182,27 +1453,27 @@ Thus, the limit $\mathbf{x}^\star$ satisfies the original system, so convergence
 \begin{equation*}
     \mathbf{A x}^\star = \mathbf{b} \iff \mathbf{x}^\star = -\mathbf{D}^{-1}\left(\mathbf{R}\mathbf{x}^\star - \mathbf{b}\right)
 \end{equation*}
-which means that the error at the $(i+1)$-th iteration is given by (note: the symbol $\mydef$ means ``defined as'')
+which means that the error at the $(k+1)$-th iteration is given by (note: the symbol $\mydef$ means ``defined as'')
 \begin{align*}
-    \mathbf{e}^{(i+1)} \mydef \mathbf{x}^{(i+1)} - \mathbf{x}^* &= -\mathbf{D}^{-1}\mathbf{R}\left(\mathbf{x}^{(i)} - \mathbf{x}^\star\right) \\
-    &= -\mathbf{D}^{-1}\mathbf{R}\mathbf{e}^{(i)}
+    \mathbf{e}^{(k+1)} \mydef \mathbf{x}^{(k+1)} - \mathbf{x}^* &= -\mathbf{D}^{-1}\mathbf{R}\left(\mathbf{x}^{(k)} - \mathbf{x}^\star\right) \\
+    &= -\mathbf{D}^{-1}\mathbf{R}\mathbf{e}^{(k)}
 \end{align*}
-Notice how this equation is set up; the error at the $(i+1)$-th iteration is a scaled version of the error at the preceding iteration. So if our initial guess is $\mathbf{x}^{(0)}$, we can keep applying this formula up to the $i$-th iteration to get
+Notice how this equation is set up; the error at the $(k+1)$-th iteration is a scaled version of the error at the preceding iteration. So if our initial guess is $\mathbf{x}^{(0)}$, we can keep applying this formula up to the $i$-th iteration to get
 \begin{equation*}
-    \mathbf{e}^{(i)} = \left( -\mathbf{D}^{-1}\mathbf{R} \right)^i \mathbf{e}^{(0)}
+    \mathbf{e}^{(k)} = \left( -\mathbf{D}^{-1}\mathbf{R} \right)^k \mathbf{e}^{(0)}
 \end{equation*}
 This is a very powerful result. To see why, let's use the eigendecomposition\footnote{If the matrix is not diagonalizable, analogous bounds via Jordan form or induced norms still give that $\rho<1$ is necessary and sufficient for linear convergence.} of $-\mathbf{D}^{-1}\mathbf{R}$ to write
 \begin{align*}
-    \mathbf{e}^{(i)} &=  \left( -\mathbf{D}^{-1}\mathbf{R} \right)^i \mathbf{e}^{(0)} & \\
-    &= \left(\mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}\right)^i \mathbf{e}^{(0)} &\text{(eigendecomposition)} \\
+    \mathbf{e}^{(k)} &=  \left( -\mathbf{D}^{-1}\mathbf{R} \right)^k \mathbf{e}^{(0)} & \\
+    &= \left(\mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}\right)^k \mathbf{e}^{(0)} &\text{(eigendecomposition)} \\
     &= \left(\mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}\right)\left(\mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}\right)\cdots\left(\mathbf{W} \boldsymbol{\Lambda} \mathbf{W}^{-1}\right) \mathbf{e}^{(0)} &\text{(expand power)}\\
     &= \mathbf{W} \boldsymbol{\Lambda} \left(\mathbf{W}^{-1}\mathbf{W}\right)\cdots \boldsymbol{\Lambda} \left(\mathbf{W}^{-1}\mathbf{W}\right) \boldsymbol{\Lambda} \mathbf{W}^{-1}\mathbf{e}^{(0)} &\text{(exploit associativity)} \\
     &= \mathbf{W} \boldsymbol{\Lambda} \left(\mathbf{I}\right)\cdots \boldsymbol{\Lambda} \left(\mathbf{I}\right) \boldsymbol{\Lambda} \mathbf{W}^{-1} \mathbf{e}^{(0)} &\text{(definition of inverse)} \\
-    &= \mathbf{W} \boldsymbol{\Lambda}^i \mathbf{W}^{-1} \mathbf{e}^{(0)} &
+    &= \mathbf{W} \boldsymbol{\Lambda}^k \mathbf{W}^{-1} \mathbf{e}^{(0)} &
 \end{align*}
 Thus, if any of the eigenvalues of $-\mathbf{D}^{-1}\mathbf{R}$ have magnitude greater than 1, the error will grow with $i$, and the Jacobi method will not converge. On the other hand, if all the eigenvalues have magnitude less than 1, the error will decay with $i$, and the Jacobi method will converge. And if any eigenvalues have magnitude equal to 1, the error will either remain constant or oscillate. In linear algebraic terms, this is captured by the notion of the \textbf{spectral radius} $\rho$ of $-\mathbf{D}^{-1}\mathbf{R}$, which is the maximum magnitude of the eigenvalues of $-\mathbf{D}^{-1}\mathbf{R}$. Indeed, since we also know that convergence implies correctness, we have that
 \begin{equation*}
-    \rho(-\mathbf{D}^{-1}\mathbf{R}) < 1 \implies \|\mathbf{x}^{(i)} - \mathbf{x}^\star\|_p \to 0 \quad \text{as } i \to \infty
+    \rho(-\mathbf{D}^{-1}\mathbf{R}) < 1 \implies \|\mathbf{x}^{(k)} - \mathbf{x}^\star\|_p \to 0 \quad \text{as } k \to \infty
 \end{equation*}
 or, in words, the Jacobi method converges to the correct solution if the spectral radius of $-\mathbf{D}^{-1}\mathbf{R}$ is less than 1.
 
@@ -1213,11 +1484,11 @@ The most natural question to ask is when the spectral radius of $-\mathbf{D}^{-1
 
 \textbf{Rate of Convergence}\quad The speed at which the Jacobi iteration converges to the solution $\mathbf{x}^\star$ is characterized by the spectral radius $\alpha = \rho(-\mathbf{D}^{-1}\mathbf{R})$. The error after $i$ iterations can be approximated as
 \begin{equation*}
-    \|\mathbf{x}^{(i)} - \mathbf{x}^\star\|_p \approx O(\alpha^i) \|\mathbf{x}_0 - \mathbf{x}^\star\|_p
+    \|\mathbf{x}^{(k)} - \mathbf{x}^\star\|_p \approx O(\alpha^k) \|\mathbf{x}^{(0)} - \mathbf{x}^\star\|_p
 \end{equation*}
 Here, $\alpha$ is referred to as the \textbf{rate of convergence}. To achieve a desired accuracy $\epsilon$, the number of iterations required satisfies
 \begin{equation*}
-    \frac{\|\mathbf{x}^{(i)} - \mathbf{x}^\star\|_p}{\|\mathbf{x}_0 - \mathbf{x}^\star\|_p} \leq \epsilon 
+    \frac{\|\mathbf{x}^{(k)} - \mathbf{x}^\star\|_p}{\|\mathbf{x}^{(0)} - \mathbf{x}^\star\|_p} \leq \epsilon 
     \quad\implies\quad 
     i \geq \frac{\log(\epsilon)}{\log(\alpha)}
 \end{equation*}
@@ -1295,7 +1566,14 @@ When is $\rho(\mathbf{G}) < 1$? If the matrix $\mathbf{A}$ is strictly diagonall
 \begin{equation*}
     |a_{ii}| > \sum_{j \neq i} |a_{ij}| \quad \forall i
 \end{equation*}
-then the spectral radius $\rho(\mathbf{G}) < 1$, ensuring convergence of the Gauss-Seidel method. Additionally, if $\mathbf{A}$ is symmetric positive definite, convergence is also guaranteed.
+then the spectral radius $\rho(\mathbf{G}) < 1$, ensuring convergence of the Gauss-Seidel method.
+
+Diagonal dominance is only a \emph{sufficient} condition for convergence, not a necessary one.
+For example,
+\begin{equation*}
+    \mathbf{A} = \begin{bmatrix} 1 & 2 \\ 0 & 1 \end{bmatrix}
+\end{equation*}
+is not diagonally dominant (in the first row, $1 < 2$), yet Jacobi iteration converges: the iteration matrix is $\begin{bmatrix} 0 & -2 \\ 0 & 0 \end{bmatrix}$, whose spectral radius is $0$. Additionally, if $\mathbf{A}$ is symmetric positive definite, convergence is also guaranteed.
 
 \textbf{Rate of Convergence}\quad The rate at which Gauss-Seidel iteration converges is determined by the spectral radius $\alpha = \rho(\mathbf{G})$. The error after $k$ iterations can be approximated by
 \begin{equation*}
@@ -1310,7 +1588,7 @@ In practice, Gauss-Seidel is preferred over Jacobi when faster convergence is de
 \subsection{Condition Number and Convergence Rate}
 To understand the impact of the condition number on the convergence rate of iterative methods, we consider the Richardson method, an iterative method defined by the update rule
 \begin{equation*}
-    \mathbf{x}^{(i+1)} = \mathbf{x}^{(i)} + \omega (\mathbf{b} - \mathbf{A}\mathbf{x}^{(i)})
+    \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega (\mathbf{b} - \mathbf{A}\mathbf{x}^{(k)})
 \end{equation*}
 where $\omega$ is a relaxation parameter. The choice of $\omega$ strongly affects the convergence behavior of the method. Assuming that $\mathbf{A}$ is symmetric positive definite, the optimal convergence rate for the Richardson method is achieved with the choice
 \begin{equation*}
@@ -1320,15 +1598,189 @@ With this optimal $\omega$, the spectral radius of the iteration matrix $\mathbf
 \begin{equation*}
     \rho(\mathbf{I} - \omega_{\text{opt}} \mathbf{A}) = \frac{\kappa(\mathbf{A}) - 1}{\kappa(\mathbf{A}) + 1}
 \end{equation*}
-This expression shows that the spectral radius---and consequently the convergence rate---is directly related to the condition number $\kappa(\mathbf{A})$. Specifically, a smaller $\kappa(\mathbf{A})$ leads to a smaller spectral radius, resulting in faster convergence of the iterative method. Conversely, a large condition number implies that the spectral radius is closer to one, which can significantly slow down convergence.
+This expression shows that the spectral radius---and consequently the convergence rate---is directly related to the condition number $\kappa(\mathbf{A})$. Specifically, a smaller $\kappa(\mathbf{A})$ leads to a smaller spectral radius, resulting in faster convergence of the iterative method. Conversely, a large condition number implies that the spectral radius is closer to one, which can significantly slow down convergence (\autoref{fig:richardson-convergence}).
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}
+    \begin{semilogyaxis}[
+        width=0.72\textwidth, height=0.45\textwidth,
+        xlabel={iteration $k$}, ylabel={relative error},
+        legend pos=south west, grid=both, grid style={gray!20},
+        xmin=0, xmax=60,
+    ]
+        \addplot[blue, thick] coordinates { (0,1.0000e+00) (4,4.4813e-01) (8,2.0082e-01) (12,8.9991e-02) (16,4.0327e-02) (20,1.8072e-02) (24,8.0983e-03) (28,3.6291e-03) (32,1.6263e-03) (36,7.2878e-04) (40,3.2658e-04) (44,1.4635e-04) (48,6.5583e-05) (52,2.9389e-05) (56,1.3170e-05) (60,5.9019e-06) };
+        \addlegendentry{$\kappa = 10$}
+        \addplot[orange, thick] coordinates { (0,1.0000e+00) (4,9.2311e-01) (8,8.5214e-01) (12,7.8662e-01) (16,7.2614e-01) (20,6.7031e-01) (24,6.1877e-01) (28,5.7120e-01) (32,5.2728e-01) (36,4.8674e-01) (40,4.4932e-01) (44,4.1477e-01) (48,3.8288e-01) (52,3.5344e-01) (56,3.2627e-01) (60,3.0118e-01) };
+        \addlegendentry{$\kappa = 100$}
+        \addplot[red, thick] coordinates { (0,1.0000e+00) (4,9.9203e-01) (8,9.8413e-01) (12,9.7629e-01) (16,9.6851e-01) (20,9.6079e-01) (24,9.5313e-01) (28,9.4554e-01) (32,9.3800e-01) (36,9.3053e-01) (40,9.2312e-01) (44,9.1576e-01) (48,9.0846e-01) (52,9.0123e-01) (56,8.9404e-01) (60,8.8692e-01) };
+        \addlegendentry{$\kappa = 1000$}
+    \end{semilogyaxis}
+    \end{tikzpicture}
+    \caption{Convergence of the Richardson method with the optimal $\omega$ on diagonal test matrices with eigenvalues spread evenly in $[1, \kappa]$, for three condition numbers. The initial error is taken along the slowest eigendirection (the worst case), so the error contracts by exactly $\rho = (\kappa - 1)/(\kappa + 1)$ per iteration: the lines are straight on the logarithmic axis and become flatter as $\kappa$ grows.}
+    \label{fig:richardson-convergence}
+\end{figure}
 
 This relationship (not the literal equation, but the idea we just talked about) between the condition number and the convergence rate is not unique to the Richardson method but holds generally for a wide class of iterative methods, including Jacobi and Gauss-Seidel iterations. Therefore, we should make sure that the coefficient matrix $\mathbf{A}$ is well-conditioned in order to achieve efficiency and reliability of these iterative solvers. If $\kappa(\mathbf{A})$ is large, it may be beneficial to precondition the system to reduce the condition number and improve the convergence rate of the iterative method.
+
+\textbf{Preconditioning}\quad When solving linear systems numerically, we often encounter ill-conditioned matrices. One way to mitigate the effects of ill-conditioning is through \textbf{preconditioning}. Preconditioning transforms $ \mathbf{A}\mathbf{x} = \mathbf{b} $ into a system with more favorable spectral properties. Common forms are left $(\mathbf{P}^{-1}\mathbf{A})\mathbf{x} = \mathbf{P}^{-1}\mathbf{b}$, right $\ \mathbf{A}(\mathbf{P}^{-1}\mathbf{y}) = \mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1}\mathbf{y}$, and symmetric $\ \mathbf{P}^{-1/2}\mathbf{A}\mathbf{P}^{-1/2}\mathbf{z} = \mathbf{P}^{-1/2}\mathbf{b}$ with $\mathbf{x}=\mathbf{P}^{-1/2}\mathbf{z}$. Examples include Jacobi (diagonal), incomplete LU/Cholesky (ILU/IC), and algebraic multigrid (AMG). The goal is to cluster eigenvalues and reduce the effective condition number to accelerate and stabilize iterative methods.
+
+\begin{warningBox}
+    \textbf{Warning:} Preconditioning/scaling improves the matrix the algorithm sees (e.g., reduces $\kappa(P^{-1}A)$), which speeds and stabilizes iterations, but it \emph{doesn't change the intrinsic sensitivity} of the original mapping $\mathbf{x}=\mathbf{A}^{-1}\mathbf{b}$ to perturbations in $b$. So it helps the solver's numerics, not the problem's conditioning.
+\end{warningBox}
+
+The Jacobi, Gauss-Seidel, and Richardson iterations presented here are the simplest members of a much larger family.
+In modern practice, \textbf{Krylov subspace methods}, such as the conjugate gradient (CG) method for symmetric positive definite systems and GMRES for general systems, are the workhorses of large-scale iterative linear algebra; they build increasingly accurate solutions from repeated matrix-vector products and combine naturally with preconditioning.
+We will cover them in the part of the course on the numerical solution of partial differential equations, where the linear systems are large, sparse, and structured---iterative methods at their best.
 
 \begin{warningBox}
     \textbf{Warning}: While a lower condition number generally promotes faster convergence, it is important to recognize that not all matrices can be easily preconditioned to achieve a desirable condition number. Additionally, some iterative methods may exhibit different sensitivities to the condition number, so the choice of method should consider both the properties of $\mathbf{A}$ and the specific requirements of the problem at hand.
 \end{warningBox}
 
 \section{Exercises}
+
+% TODO (SS, 2026-09-12): add more T/F subproblems covering the eigenvalue section and the direct/iterative linear-solver sections (currently thin relative to §2.1–2.5).
+\begin{exercise} % 2026 conceptual questions
+    True or False? Briefly explain your answer; if the statement is false, you may simply provide a counterexample.
+    \begin{enumerate}[label=(\alphalphenum*)]
+        \item The product of two complex numbers is never a real number unless both of them are real.
+        \item If both $\mathbf{A}\mathbf{B}$ and $\mathbf{B}\mathbf{A}$ are defined, then $\mathbf{A}$ and $\mathbf{B}$ must be square matrices.
+        \item If $\mathbf{A}$ and $\mathbf{B}$ are diagonal matrices of the same dimensions, then $\mathbf{A}\mathbf{B} = \mathbf{B}\mathbf{A}$.
+        \item For $\mathbf{u} \in \mathbb{R}^m$ and $\mathbf{v} \in \mathbb{R}^n$ with $m \neq n$, the outer product $\mathbf{u}\mathbf{v}^\top$ is not defined.
+        \item There exist matrices $\mathbf{A}$ and $\mathbf{B}$ for which $(\mathbf{A}\mathbf{B})^\top = \mathbf{A}^\top\mathbf{B}^\top$.
+        \item If $\operatorname{tr}(\mathbf{A}\mathbf{B}) = 0$, then $\operatorname{tr}(\mathbf{A}) = 0$ or $\operatorname{tr}(\mathbf{B}) = 0$.
+        \item If $\|\mathbf{v}\|_1 \leq 1$, then $\|\mathbf{v}\|_2 \leq 1$; but the converse fails for some $\mathbf{v} \in \mathbb{R}^n$ with $n \geq 2$.
+        \item Suppose $\|\mathbf{A}\|_\infty = 0.5$. Then $\|\mathbf{A}\mathbf{x}\|_\infty$ can be made greater than $\|\mathbf{x}\|_\infty$ by choosing a sufficiently large $\mathbf{x}$.
+        \item A linear system with more unknowns than equations has either no solution or infinitely many solutions---exactly one solution is impossible.
+        \item $\det(2\mathbf{A}) = 2\det(\mathbf{A})$ for every $\mathbf{A} \in \mathbb{R}^{n \times n}$.
+        \item If $\det(\mathbf{A}) = 0$, then $\mathbf{A}\mathbf{x}=\mathbf{b}$ always has no solution.
+        \item The set of unit vectors $\{\mathbf{v} \in \mathbb{R}^n : \|\mathbf{v}\|_2 = 1\}$ is a subspace of $\mathbb{R}^n$.
+        \item For $\mathbf{b} \neq \mathbf{0}$, the set of solutions of $\mathbf{A}\mathbf{x} = \mathbf{b}$ is a subspace of $\mathbb{R}^n$.
+        \item A subspace of a subspace of $\mathbb{R}^n$ is itself a subspace of $\mathbb{R}^n$.
+        \item Three vectors in $\mathbb{R}^2$ always span $\mathbb{R}^2$.
+        \item Three vectors in $\mathbb{R}^2$ can be linearly independent.
+        \item Any set of mutually orthogonal vectors is linearly independent.
+        \item If the columns of a square matrix are orthonormal, then its rows are orthonormal as well.
+        \item For any (possibly rectangular) matrix $\mathbf{A}$: if $\mathbf{A}\mathbf{x}=\mathbf{0}$ has only the trivial solution $\mathbf{x}=\mathbf{0}$, then $\mathbf{A}\mathbf{x}=\mathbf{b}$ has a solution for every $\mathbf{b}$.
+        \item Let $\mathbf{A}$ be square. If $\mathbf{A}\mathbf{x}=\mathbf{b}$ has a solution for a particular $\mathbf{b}$, then $\mathbf{A}^\top\mathbf{x}=\mathbf{b}$ also has a solution.
+        \item Let $\mathbf{A}$ be square. If $\mathbf{A}\mathbf{x}=\mathbf{b}$ has a solution for \emph{every} $\mathbf{b}$, then $\mathbf{A}^\top\mathbf{x}=\mathbf{c}$ has a solution for every $\mathbf{c}$.
+        \item $\operatorname{rank}(\mathbf{A}^\top\mathbf{A}) = \operatorname{rank}(\mathbf{A})$ for every $\mathbf{A} \in \mathbb{R}^{m \times n}$.
+        \item Gaussian elimination costs $O(n^3)$, so solving $\mathbf{A}\mathbf{X} = \mathbf{B}$ with $k$ right-hand sides costs $O(n^3 k)$.
+        \item Let $\hat{\mathbf{x}}$ be an approximate solution of $\mathbf{A}\mathbf{x}=\mathbf{b}$, where $\mathbf{A}$ is invertible, $\mathbf{b} \neq \mathbf{0}$, and $\mathbf{x}^\star = \mathbf{A}^{-1}\mathbf{b}$. If the relative residual satisfies $\|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|/\|\mathbf{b}\| \leq 10^{-10}$, then the relative error satisfies $\|\hat{\mathbf{x}}-\mathbf{x}^\star\|/\|\mathbf{x}^\star\| \leq 10^{-10}$.
+        \item Eigenvectors corresponding to distinct eigenvalues are linearly independent; consequently, a matrix with $n$ distinct eigenvalues is diagonalizable.
+        \item For every square matrix, the singular values are equal to the absolute values of the eigenvalues.
+        \item If $\mathbf{A}$ is strictly diagonally dominant, Jacobi iteration converges regardless of the initial guess.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alphalphenum*)]
+        \item False. For example, $(1+\iu)(1-\iu) = 2$. In fact, $z\overline{z} = a^2 + b^2 = |z|^2$ is real for \emph{every} complex number $z$; this is how the magnitude of a complex number is defined.
+        \item False. It suffices that the dimensions are compatible both ways: for $\mathbf{A} \in \mathbb{R}^{2\times3}$ and $\mathbf{B} \in \mathbb{R}^{3\times2}$, the product $\mathbf{A}\mathbf{B}$ is $2\times2$ and $\mathbf{B}\mathbf{A}$ is $3\times3$, yet neither matrix is square.
+        \item True. Although matrix multiplication is generally not commutative, diagonal matrices are an exception: both products are diagonal with entries $a_{ii} b_{ii}$.
+        \item False. The outer product is defined for any pair of vectors and gives an $m \times n$ matrix; only the inner product requires equal dimensions.
+        \item True. In general the transpose reverses the order, $(\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top\mathbf{A}^\top$, so the identity fails for most pairs; but it does hold in special cases, e.g., $\mathbf{A} = \mathbf{B} = \mathbf{I}$, or whenever $\mathbf{A}^\top$ and $\mathbf{B}^\top$ commute.
+        \item False. Take $\mathbf{A} = \begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix}$ and $\mathbf{B} = \begin{bmatrix} 0 & 0 \\ 0 & 1 \end{bmatrix}$: then $\mathbf{A}\mathbf{B} = \mathbf{0}$, so $\operatorname{tr}(\mathbf{A}\mathbf{B}) = 0$, yet $\operatorname{tr}(\mathbf{A}) = \operatorname{tr}(\mathbf{B}) = 1$.
+        \item True. The first claim follows from the general ordering $\|\mathbf{v}\|_2 \leq \|\mathbf{v}\|_1$: indeed, $\|\mathbf{v}\|_1^2 = \left(\sum_{i=1}^n |v_i|\right)^2 = \sum_{i=1}^n v_i^2 + \sum_{i \neq j} |v_i|\,|v_j| \geq \|\mathbf{v}\|_2^2$. The converse fails: for $\mathbf{v} = \frac{1}{\sqrt{2}}\begin{bmatrix} 1 \\ 1 \end{bmatrix}$, we have $\|\mathbf{v}\|_2 = 1$ but $\|\mathbf{v}\|_1 = \sqrt{2} > 1$. (More generally, $\|\mathbf{v}\|_\infty \leq \|\mathbf{v}\|_2 \leq \|\mathbf{v}\|_1$ holds for every vector, while the reverse inequalities hold only up to dimension-dependent factors.)
+        \item False. The induced norm bounds the amplification for \emph{every} vector: $\|\mathbf{A}\mathbf{x}\|_\infty \leq \|\mathbf{A}\|_\infty \|\mathbf{x}\|_\infty = 0.5\, \|\mathbf{x}\|_\infty$. Choosing a larger $\mathbf{x}$ does not help: both sides scale linearly ($\|\mathbf{A}(c\mathbf{x})\|_\infty = |c|\, \|\mathbf{A}\mathbf{x}\|_\infty$), so the amplification ratio depends only on the direction of $\mathbf{x}$, not its magnitude.
+        \item True. If $\mathbf{b}$ is not in the column space, there is no solution. If a solution exists, then with more unknowns than equations ($n > m$), $\operatorname{rank}(\mathbf{A}) \leq m < n$, so the nullity is positive and infinitely many solutions exist. A unique solution would require a trivial null space, which is impossible here.
+        \item False. Scaling the matrix scales \emph{every row}, and each row contributes a factor: $\det(2\mathbf{A}) = 2^n \det(\mathbf{A})$. The statement holds only for $n = 1$.
+        \item False. If $\mathbf{b}$ lies in the column space of $\mathbf{A}$, the system has (infinitely many) solutions; a zero determinant rules out a \emph{unique} solution for \emph{every} $\mathbf{b}$, not the existence of a solution for a particular $\mathbf{b}$.
+        \item False. The set is not closed under either operation: the sum of two unit vectors is generally not a unit vector, a scalar multiple $c\mathbf{v}$ with $|c| \neq 1$ is not a unit vector, and the set does not contain $\mathbf{0}$.
+        \item False. The set does not contain $\mathbf{0}$ (since $\mathbf{A}\mathbf{0} = \mathbf{0} \neq \mathbf{b}$), and it is not closed under addition: if $\mathbf{A}\mathbf{x} = \mathbf{A}\mathbf{y} = \mathbf{b}$, then $\mathbf{A}(\mathbf{x} + \mathbf{y}) = 2\mathbf{b} \neq \mathbf{b}$. (For $\mathbf{b} = \mathbf{0}$, the solution set \emph{is} a subspace: the null space.)
+        \item True. Closedness under the two operations is inherited: the smaller set is closed, and its vectors live in $\mathbb{R}^n$.
+        \item False. All three vectors can lie on a single line (e.g., three multiples of the same vector), in which case they span only that line.
+        \item False. At most two vectors in $\mathbb{R}^2$ can be linearly independent: a third is always a linear combination of an independent pair (the dimension of the space caps the count).
+        \item False as stated: the zero vector is orthogonal to every vector, so a set containing $\mathbf{0}$ is mutually orthogonal but linearly dependent. For \emph{nonzero} mutually orthogonal vectors, the statement is true: taking the dot product of $\sum_i c_i \mathbf{v}_i = \mathbf{0}$ with $\mathbf{v}_j$ leaves $c_j \|\mathbf{v}_j\|_2^2 = 0$, so every $c_j = 0$.
+        \item True. Orthonormal columns of a square matrix mean $\mathbf{Q}^\top\mathbf{Q} = \mathbf{I}$, so $\mathbf{Q}^{-1} = \mathbf{Q}^\top$; then $\mathbf{Q}\mathbf{Q}^\top = \mathbf{I}$ as well, which says exactly that the rows are orthonormal.
+        \item False. A trivial null space guarantees \emph{uniqueness}, not \emph{existence}. For a square matrix it implies both (invertibility), but for a tall matrix with more equations than unknowns, the columns cannot span the whole space, so there are right-hand sides $\mathbf{b}$ with no solution; see the example in the existence and uniqueness section.
+        \item False. Solvability depends on which subspace $\mathbf{b}$ lies in: $\mathbf{A}\mathbf{x}=\mathbf{b}$ requires $\mathbf{b}$ to be in the column space of $\mathbf{A}$, while $\mathbf{A}^\top\mathbf{x}=\mathbf{b}$ requires $\mathbf{b}$ to be in the column space of $\mathbf{A}^\top$ (the row space of $\mathbf{A}$), and these are different subspaces in general. For $\mathbf{A} = \begin{bmatrix} 0 & 1 \\ 0 & 0 \end{bmatrix}$ and $\mathbf{b} = \begin{bmatrix} 1 \\ 0 \end{bmatrix}$, the system $\mathbf{A}\mathbf{x}=\mathbf{b}$ is solved by $\mathbf{x} = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$, while $\mathbf{A}^\top\mathbf{x} = \begin{bmatrix} 0 \\ x_1 \end{bmatrix}$ can never equal $\mathbf{b}$.
+        \item True. Solvability for every $\mathbf{b}$ means $\operatorname{rank}(\mathbf{A}) = n$, i.e., $\mathbf{A}$ is invertible; then $\mathbf{A}^\top$ is invertible as well (its rank equals that of $\mathbf{A}$), so the transposed system is solvable (in fact, uniquely) for every $\mathbf{c}$.
+        \item True. The two matrices have the same null space: if $\mathbf{A}\mathbf{x}=\mathbf{0}$, then $\mathbf{A}^\top\mathbf{A}\mathbf{x}=\mathbf{0}$; conversely, if $\mathbf{A}^\top\mathbf{A}\mathbf{x}=\mathbf{0}$, then $\mathbf{x}^\top\mathbf{A}^\top\mathbf{A}\mathbf{x} = \|\mathbf{A}\mathbf{x}\|_2^2 = 0$, so $\mathbf{A}\mathbf{x}=\mathbf{0}$. Both matrices have $n$ columns, so equal nullity implies equal rank by the rank-nullity theorem.
+        \item False. The elimination itself needs to be performed only once, at cost $O(n^3)$; each additional right-hand side then requires only the substitution steps, at cost $O(n^2)$. The total is $O(n^3 + k n^2)$, much less than $O(n^3 k)$.
+        \item False. The two are related through the condition number: from $\hat{\mathbf{x}}-\mathbf{x}^\star = \mathbf{A}^{-1}(\mathbf{A}\hat{\mathbf{x}}-\mathbf{b})$ and $\|\mathbf{b}\| \leq \|\mathbf{A}\|\,\|\mathbf{x}^\star\|$, we obtain $\|\hat{\mathbf{x}}-\mathbf{x}^\star\|/\|\mathbf{x}^\star\| \leq \kappa(\mathbf{A})\,\|\mathbf{b}-\mathbf{A}\hat{\mathbf{x}}\|/\|\mathbf{b}\|$, and this bound is attainable. So for an ill-conditioned matrix with $\kappa(\mathbf{A}) \geq 10^{10}$, the relative error can be of order one despite the tiny relative residual.
+        \item True on both counts. If eigenvectors with distinct eigenvalues were dependent, applying $\mathbf{A}$ to a shortest dependency relation and subtracting $\lambda$ times it would produce a shorter one, a contradiction. With $n$ distinct eigenvalues, the $n$ independent eigenvectors form a complete set, so the matrix is diagonalizable.
+        \item False. This holds for normal matrices (e.g., symmetric ones), but not in general. For $\mathbf{A} = \begin{bmatrix} 0 & 1 \\ 0 & 0 \end{bmatrix}$, both eigenvalues are $0$, while $\mathbf{A}^\top\mathbf{A} = \begin{bmatrix} 0 & 0 \\ 0 & 1 \end{bmatrix}$ gives singular values $1$ and $0$.
+        \item True. Strict diagonal dominance guarantees that the spectral radius of the iteration matrix is less than 1, so the error contracts from \emph{any} starting point. The initial guess affects only how many iterations are needed, not whether the method converges.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Prove the following properties stated in this chapter.
+    \begin{enumerate}[label=(\alph*)]
+        \item $(\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top\mathbf{A}^\top$, whenever the product is defined.
+        \item $\operatorname{tr}(\mathbf{A}\mathbf{B}) = \operatorname{tr}(\mathbf{B}\mathbf{A})$, for $\mathbf{A} \in \mathbb{R}^{m \times n}$ and $\mathbf{B} \in \mathbb{R}^{n \times m}$.
+        \item The triangle inequality for the 1-norm: $\|\mathbf{u} + \mathbf{v}\|_1 \leq \|\mathbf{u}\|_1 + \|\mathbf{v}\|_1$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Comparing entries: $\bigl((\mathbf{A}\mathbf{B})^\top\bigr)_{ij} = (\mathbf{A}\mathbf{B})_{ji} = \sum_k a_{jk} b_{ki} = \sum_k (\mathbf{B}^\top)_{ik} (\mathbf{A}^\top)_{kj} = (\mathbf{B}^\top\mathbf{A}^\top)_{ij}$.
+        \item Writing out both traces as double sums: $\operatorname{tr}(\mathbf{A}\mathbf{B}) = \sum_{i=1}^m \sum_{k=1}^n a_{ik} b_{ki} = \sum_{k=1}^n \sum_{i=1}^m b_{ki} a_{ik} = \operatorname{tr}(\mathbf{B}\mathbf{A})$; the two expressions contain exactly the same terms, summed in a different order.
+        \item Apply the scalar triangle inequality entry by entry: $\|\mathbf{u} + \mathbf{v}\|_1 = \sum_i |u_i + v_i| \leq \sum_i \bigl(|u_i| + |v_i|\bigr) = \|\mathbf{u}\|_1 + \|\mathbf{v}\|_1$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Let $\mathbf{A} \in \mathbb{R}^{m \times n}$ be sparse, and let $\mathbf{x} \in \mathbb{R}^n$. In each case, express the computational complexity in terms of the matrix dimensions and $k$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Suppose each \emph{row} of $\mathbf{A}$ has at most $k$ nonzero entries. What is the computational complexity of the product $\mathbf{A}\mathbf{x}$ if the multiplications with zero entries are skipped?
+        \item Now suppose instead that each \emph{column} of $\mathbf{A}$ has at most $k$ nonzero entries. What is the complexity of $\mathbf{A}\mathbf{x}$?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item In the row view, each entry $b_i = \mathbf{a}^R_i\, \mathbf{x}$ requires at most $k$ multiplications and $k-1$ additions, so the total cost over the $m$ rows is $O(mk)$, compared to $O(mn)$ for a dense matrix.
+        \item In the column view, $\mathbf{A}\mathbf{x} = \sum_{j=1}^n x_j\, \mathbf{a}^C_j$, and each column contributes at most $k$ nonzero terms, so the total cost is $O(nk)$. The two viewpoints give the same kind of saving: in both cases the cost is proportional to the total number of nonzero entries of $\mathbf{A}$, regardless of how they are distributed.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Numerical linear algebra software is built on a standardized set of building blocks known as the \emph{basic linear algebra subprograms} (BLAS), organized into three levels: Level 1 for vector operations, Level 2 for matrix-vector operations, and Level 3 for matrix-matrix operations.
+    Analyze the computational complexity of the following BLAS operations.
+    In the descriptions below, $\leftarrow$ denotes \emph{assignment}: the expression on the right is computed and its result overwrites the variable on the left.
+    \begin{enumerate}[label=(\alph*)]
+        \item \texttt{ger} (Level 2, the \emph{rank-1 update}): $\mathbf{A} \leftarrow \mathbf{A} + \alpha\, \mathbf{x}\mathbf{y}^\top$, for $\mathbf{A} \in \mathbb{R}^{m \times n}$, $\mathbf{x} \in \mathbb{R}^m$, $\mathbf{y} \in \mathbb{R}^n$, and a scalar $\alpha$.
+        \item \texttt{syrk} (Level 3, the \emph{symmetric rank-$k$ update}): $\mathbf{C} \leftarrow \mathbf{C} + \mathbf{A}\mathbf{A}^\top$, for $\mathbf{A} \in \mathbb{R}^{m \times n}$ and symmetric $\mathbf{C} \in \mathbb{R}^{m \times m}$.
+        \item \texttt{trsm} (Level 3, the \emph{triangular solve with multiple right-hand sides}): solve $\mathbf{L}\mathbf{X} = \mathbf{B}$ for $\mathbf{X}$, where $\mathbf{L} \in \mathbb{R}^{n \times n}$ is lower triangular and $\mathbf{B} \in \mathbb{R}^{n \times p}$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item The outer product $\mathbf{x}\mathbf{y}^\top$ has $mn$ entries $x_i y_j$; scaling by $\alpha$ and adding to $\mathbf{A}$ costs a constant number of operations per entry, so the total is $O(mn)$.
+        \item The product $\mathbf{A}\mathbf{A}^\top$ dominates: as a generic matrix-matrix product ($p = m$), the cost is $O(m^2 n)$; the accumulation adds only $O(m^2)$. Since the update preserves symmetry ($(\mathbf{C} + \mathbf{A}\mathbf{A}^\top)^\top = \mathbf{C} + \mathbf{A}\mathbf{A}^\top$ when $\mathbf{C}$ is symmetric), only the $m(m+1)/2$ entries on and above the diagonal need to be computed, which halves the operation count---exactly what \texttt{syrk} exploits---although the complexity class remains $O(m^2 n)$.
+        \item Each column of $\mathbf{X}$ solves one triangular system $\mathbf{L}\, \mathbf{x}^C_j = \mathbf{b}^C_j$ by forward substitution, which (like back substitution) costs $O(n^2)$. With $p$ right-hand sides, the total is $O(n^2 p)$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Write MATLAB code that generates (a) a random $n \times n$ symmetric matrix, (b) a random $n \times n$ symmetric positive definite matrix, and (c) a random $n \times n$ symmetric positive semi-definite matrix that is \emph{not} positive definite, (d) a random $n \times n$ matrix with rank at most $k$, for a given $k < n$, and (e) a random \emph{symmetric} $n \times n$ matrix with rank at most $k$. In each case, the code must return a different (random) matrix every time it is run. [Hint for (b)--(e): consider products of random factors, as in the previous exercise.]
+\end{exercise}
+
+\begin{solution}
+    (a) Symmetrize a random matrix:
+    \lstinputlisting{code/matlab/linear-algebra/rand_symmetric.m}
+    The result is symmetric since $(\mathbf{A} + \mathbf{A}^\top)^\top = \mathbf{A}^\top + \mathbf{A}$.
+
+    (b) One option is
+    \lstinputlisting{code/matlab/linear-algebra/rand_spd.m}
+    The matrix $\mathbf{M}$ is symmetric by the previous exercise, and it is positive definite since $\mathbf{x}^\top \mathbf{M} \mathbf{x} = \|\mathbf{A}^\top\mathbf{x}\|_2^2 + \|\mathbf{x}\|_2^2 > 0$ for every $\mathbf{x} \neq \mathbf{0}$. ($\mathbf{A}\mathbf{A}^\top$ alone is positive definite whenever $\mathbf{A}$ is nonsingular, which for a random matrix happens with probability 1; adding the identity removes the need for this caveat.)
+
+    (c) Make the factor rank-deficient by using fewer columns than rows, e.g.,
+    \lstinputlisting{code/matlab/linear-algebra/rand_psd.m}
+    Then $\mathbf{x}^\top \mathbf{M} \mathbf{x} = \|\mathbf{A}^\top\mathbf{x}\|_2^2 \geq 0$, so $\mathbf{M}$ is positive semi-definite, but $\operatorname{rank}(\mathbf{M}) \leq n-1 < n$, so there is a nonzero $\mathbf{x}$ with $\mathbf{M}\mathbf{x} = \mathbf{0}$ and hence $\mathbf{x}^\top \mathbf{M} \mathbf{x} = 0$: the matrix is not positive definite.
+
+    (d) Multiply two random factors with inner dimension $k$:
+    \lstinputlisting{code/matlab/linear-algebra/rand_lowrank.m}
+    The rank of a product is at most the rank of each factor, and each factor has rank at most $k$, so $\operatorname{rank}(\mathbf{M}) \leq k$ (with probability 1, the rank is exactly $k$).
+
+    (e) Multiply a random factor by its own transpose:
+    \lstinputlisting{code/matlab/linear-algebra/rand_sym_lowrank.m}
+    The result is symmetric, $(\mathbf{B}\mathbf{B}^\top)^\top = \mathbf{B}\mathbf{B}^\top$, and its rank is at most $\operatorname{rank}(\mathbf{B}) \leq k$.
+\end{solution}
 
 \begin{exercise} % 2020 Participation quiz L1
     Compute the 1-, 2-, and $\infty$-norms of $\mathbf{v}=[1, 1,-1,2,-3]$. 
@@ -1350,7 +1802,6 @@ This relationship (not the literal equation, but the idea we just talked about) 
         \vert\vert\mathbf{v}\vert\vert_\infty = 3.
     \]
 \end{solution}
-
 
 \begin{exercise} % 2020 Participation quiz L2
     Compute $\det(\mathbf{A})$ where
@@ -1398,41 +1849,6 @@ Plugging these results back in,
     \]
 \end{solution}
 
-\begin{exercise} % 2020 Participation quiz L3
-    Solve the following system via Gaussian Elimination:
-    \[
-        \begin{bmatrix}3&1&0\\1&1&-1\\2&0&1\end{bmatrix}\mathbf{x}
-        = \begin{bmatrix}1\\1\\1\end{bmatrix}.
-    \]
-\end{exercise}
-
-\begin{solution}
-    The Gaussian elimination steps:
-    \begin{itemize}
-        \item $R_2 \leftarrow R_2 - \tfrac{1}{3}R_1$
-        \item $R_3 \leftarrow R_3 - \tfrac{2}{3}R_1$
-        \item $R_3 \leftarrow R_3 + R_2$
-    \end{itemize}
-
-    This results in:
-    \[
-        \begin{bmatrix}
-            3 & 1 & 0 \\
-            0 & 2/3 & -1\\
-            0 & 0 & 0
-        \end{bmatrix}
-        \mathbf{x}
-        = \begin{bmatrix}
-            1 \\ 2/3 \\ 1
-        \end{bmatrix}.
-    \]
-    The last row of the reduced coefficient matrix is all zeros. Writing this last row out in equation form we have:
-    \[
-        0 x_1+ 0 x_2 + 0 x_3 = 1.
-    \]
-    There are no values of $\mathbf{x}$ that can make this true. \textbf{There is no solution to this system of equations.}
-\end{solution}
-
 \begin{exercise} % 2020 Participation quiz L4
     What is the dimension of the column space of
     \[
@@ -1468,57 +1884,171 @@ Plugging these results back in,
     Note that there are other ways to find the dimension of the column space. You could also look at the columns of $\mathbf{A}$ and determine how many are linearly independent. This is feasible for this simple matrix. We can easily see that column 2 is $3 \times C1$ and column 3 is $C1+C4$. C1 and C4 are not linear combinations of each other. This means that only C1 and C4 are independent so the column space has dimension 2.
 \end{solution}
 
-\begin{exercise} % 2020 Participation quiz L5
-    Find the eigenvalues of $\mathbf{A} = \begin{bmatrix} 3 & 0 & 2 \\ 0 & 1 & 0 \\ -1 & 0 & 3 \end{bmatrix}$.
+\begin{exercise} % 2026 conceptual questions
+    Answer using the rank-nullity theorem and the existence and uniqueness results of this chapter.
+    \begin{enumerate}[label=(\alph*)]
+        \item Let $\mathbf{A} \in \mathbb{R}^{4 \times 6}$ with $\operatorname{rank}(\mathbf{A}) = 4$. What is the nullity of $\mathbf{A}$?
+        \item For the same $\mathbf{A}$, does $\mathbf{A}\mathbf{x} = \mathbf{b}$ have a solution for every $\mathbf{b} \in \mathbb{R}^4$? Can a solution ever be unique?
+        \item Now let $\mathbf{B} \in \mathbb{R}^{5 \times 3}$ with $\operatorname{rank}(\mathbf{B}) = 3$. Does $\mathbf{B}\mathbf{x} = \mathbf{c}$ have a solution for every $\mathbf{c} \in \mathbb{R}^5$? If a solution exists, is it unique?
+    \end{enumerate}
 \end{exercise}
 
 \begin{solution}
-    Find roots of $\det (\mathbf{A} - \lambda \mathbf{I})$:
-    \[
-    \det\begin{bmatrix} 3-\lambda & 0 & 2 \\ 0 & 1-\lambda & 0 \\ -1 & 0 & 3-\lambda \end{bmatrix} = 0
-    \]
-    Applying Laplace's expansion formula:
-    \[
-    (3-\lambda)\det\begin{bmatrix} 1-\lambda & 0 \\ 0 & 3-\lambda \end{bmatrix} + (-1)\det\begin{bmatrix} 0 & 2 \\ 1-\lambda & 0 \end{bmatrix} = 0
-    \]
-    \[
-    (3-\lambda)^2(1-\lambda) + 2(1-\lambda) = 0
-    \]
-    \[
-        \Rightarrow \quad \boxed{
-            \begin{aligned}
-                \lambda_1 &= 1\\
-                \lambda_{2,3} &= 3 \pm \sqrt{2}\,i
-            \end{aligned}
-        }
-    \]
+    \begin{enumerate}[label=(\alph*)]
+        \item By the rank-nullity theorem, $\operatorname{nullity}(\mathbf{A}) = 6 - \operatorname{rank}(\mathbf{A}) = 2$.
+        \item Yes: $\operatorname{rank}(\mathbf{A}) = 4$ equals the number of rows (full row rank), so the column space is all of $\mathbb{R}^4$ and every $\mathbf{b}$ is reachable. No solution is ever unique: the nullity is $2 > 0$, so any solution can be shifted by a nonzero null-space vector.
+        \item No: the columns of $\mathbf{B}$ span only a 3-dimensional subspace of $\mathbb{R}^5$, so most right-hand sides $\mathbf{c}$ are not reachable. When a solution does exist, it is unique: $\operatorname{rank}(\mathbf{B}) = 3$ equals the number of columns (full column rank), so the nullity is $0$ and the null space is trivial.
+    \end{enumerate}
 \end{solution}
 
-\begin{exercise} % 2020 Participation quiz L6
-    Compute the singular values of $\mathbf{A} = \begin{bmatrix} 3 & 1 \\ 0 & 3 \\ 1 & 0 \end{bmatrix}$.
+\begin{exercise} % 2026 conceptual questions
+    Let $\mathbf{A} \in \mathbb{R}^{m \times n}$ have full column rank, $\operatorname{rank}(\mathbf{A}) = n \leq m$.
+    \begin{enumerate}[label=(\alph*)]
+        \item What do we know about the existence and uniqueness of solutions of $\mathbf{A}\mathbf{x} = \mathbf{b}$?
+        \item Find all solutions of $\mathbf{A}\mathbf{x} = \mathbf{0}$.
+        \item Suppose $\mathbf{b} = \alpha\, \mathbf{a}^C_1$ for some scalar $\alpha$. Find all solutions of $\mathbf{A}\mathbf{x} = \mathbf{b}$.
+    \end{enumerate}
 \end{exercise}
 
 \begin{solution}
-    Singular values are the square roots of the eigenvalues of $\mathbf{A}^T\mathbf{A}$. 
-    
-    \(\Rightarrow\) find solutions of $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{I}) = 0$
+    \begin{enumerate}[label=(\alph*)]
+        \item Uniqueness is guaranteed whenever a solution exists: by rank-nullity, the nullity is $n - n = 0$. Existence is not guaranteed when $m > n$: the columns span only an $n$-dimensional subspace of $\mathbb{R}^m$, so most right-hand sides are unreachable. (When $m = n$, the matrix is invertible and a unique solution exists for every $\mathbf{b}$.)
+        \item Only the trivial solution $\mathbf{x} = \mathbf{0}$, since the null space is trivial.
+        \item This $\mathbf{b}$ lies in the column space by construction, so a solution exists: $\mathbf{x} = (\alpha, 0, \dots, 0)^\top$. By (a), it is the unique one.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Vector spaces need not consist of column vectors. A polynomial of degree at most $k$, $p(x) = c_0 + c_1 x + \cdots + c_k x^k$, can be represented by its coefficient vector $\mathbf{c} = (c_0, c_1, \dots, c_k) \in \mathbb{R}^{k+1}$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Derive the matrix $\mathbf{D} \in \mathbb{R}^{(k+1) \times (k+1)}$ that represents first-order differentiation: if $\mathbf{c}$ represents $p$, then $\mathbf{D}\mathbf{c}$ represents $p'$. (Write it out for $k = 3$.)
+        \item What is the meaning of $\mathbf{D}^j$? What is $\mathbf{D}^{k+1}$?
+        \item Is there a matrix representing integration, i.e., an inverse of $\mathbf{D}$?
+        \item Are the even polynomials (only even powers) and the odd polynomials (only odd powers) subspaces of this vector space?
+        \item Is the set of polynomials that have $x = 3$ as a root a subspace of this vector space?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Differentiation maps $c_i x^i$ to $i\, c_i x^{i-1}$, so the coefficient of $x^{i-1}$ in $p'$ is $i\, c_i$: the matrix has the entries $1, 2, \dots, k$ on its superdiagonal and zeros elsewhere. For $k = 3$,
+        \begin{equation*}
+            \mathbf{D} = \begin{bmatrix} 0 & 1 & 0 & 0 \\ 0 & 0 & 2 & 0 \\ 0 & 0 & 0 & 3 \\ 0 & 0 & 0 & 0 \end{bmatrix}.
+        \end{equation*}
+        \item $\mathbf{D}^j$ represents the $j$-th derivative. $\mathbf{D}^{k+1} = \mathbf{0}$: differentiating a polynomial of degree at most $k$ more than $k$ times yields zero, so $\mathbf{D}$ is \emph{nilpotent}.
+        \item No. $\mathbf{D}$ is singular: its first column is zero (the derivative of a constant is zero), so $\det(\mathbf{D}) = 0$ and the null space contains all constant polynomials. Differentiation destroys the constant term, and no matrix can recover it; this is the matrix version of the arbitrary constant of integration.
+        \item Yes, both. Each set contains the zero polynomial and is closed under addition and scalar multiplication (sums and multiples of even polynomials are even, and likewise for odd). In coefficient form, they are the subspaces with zero entries in the odd (respectively even) positions.
+        \item Yes. If $p(3) = 0$ and $q(3) = 0$, then $(p + q)(3) = 0$ and $(cp)(3) = 0$, so the set is closed under both operations (and it contains the zero polynomial).
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    The \emph{Gram-Schmidt process} turns linearly independent vectors $\mathbf{a}_1, \dots, \mathbf{a}_k \in \mathbb{R}^n$ into orthonormal vectors $\mathbf{q}_1, \dots, \mathbf{q}_k$ spanning the same space: each $\mathbf{a}_j$ is stripped of its components along the previously constructed directions and then normalized,
+    \begin{equation*}
+        \mathbf{v}_j = \mathbf{a}_j - \sum_{i=1}^{j-1} (\mathbf{q}_i^\top \mathbf{a}_j)\, \mathbf{q}_i,
+        \qquad
+        \mathbf{q}_j = \mathbf{v}_j / \|\mathbf{v}_j\|_2.
+    \end{equation*}
+    \begin{enumerate}[label=(\alph*)]
+        \item Complete the following MATLAB function by filling in the blank marked \texttt{???}.
+        \lstinputlisting{code/matlab/linear-algebra/gram_schmidt_fill.m}
+        \item Analyze the computational complexity of the process in terms of $n$ and $k$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item The blank subtracts the component of the current column along an already-built direction:
+        \lstinputlisting{code/matlab/linear-algebra/gram_schmidt.m}
+        \item Processing column $j$ requires $j-1$ inner products and $j-1$ vector updates, each costing $O(n)$, plus one $O(n)$ normalization. Summing over $j = 1, \dots, k$ gives $\sum_j O(nj) = O(nk^2)$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L3
+    Solve the following system via Gaussian Elimination:
     \[
-    \det\begin{bmatrix} 10-\lambda & 3 \\ 3 & 10-\lambda \end{bmatrix} = 0 \iff (10-\lambda)^2 - 9 = 0
+        \begin{bmatrix}3&1&0\\1&1&-1\\2&0&1\end{bmatrix}\mathbf{x}
+        = \begin{bmatrix}1\\1\\1\end{bmatrix}.
     \]
+\end{exercise}
+
+\begin{solution}
+    The Gaussian elimination steps:
+    \begin{itemize}
+        \item $R_2 \leftarrow R_2 - \tfrac{1}{3}R_1$
+        \item $R_3 \leftarrow R_3 - \tfrac{2}{3}R_1$
+        \item $R_3 \leftarrow R_3 + R_2$
+    \end{itemize}
+
+    This results in:
     \[
-        \Rightarrow\quad
-        \begin{aligned}
-            \lambda_1 &= 13\\
-            \lambda_2 &= 7
-        \end{aligned}
-        \quad\Rightarrow\quad
-        \boxed{
-            \begin{aligned}
-                \sigma_1 &= \sqrt{13}\\
-                \sigma_2 &= \sqrt{7}
-            \end{aligned}
-        }
+        \begin{bmatrix}
+            3 & 1 & 0 \\
+            0 & 2/3 & -1\\
+            0 & 0 & 0
+        \end{bmatrix}
+        \mathbf{x}
+        = \begin{bmatrix}
+            1 \\ 2/3 \\ 1
+        \end{bmatrix}.
     \]
+    The last row of the reduced coefficient matrix is all zeros. Writing this last row out in equation form we have:
+    \[
+        0 x_1+ 0 x_2 + 0 x_3 = 1.
+    \]
+    There are no values of $\mathbf{x}$ that can make this true. \textbf{There is no solution to this system of equations.}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Solve the linear system $\mathbf{A}\mathbf{x} = \mathbf{b}$ with the \emph{arrow-structured} matrix
+    \begin{equation*}
+        \mathbf{A} =
+        \begin{bmatrix}
+            4 & 1 & 1 & 1 & 1 \\
+            1 & 2 & 0 & 0 & 0 \\
+            1 & 0 & 2 & 0 & 0 \\
+            1 & 0 & 0 & 2 & 0 \\
+            1 & 0 & 0 & 0 & 2
+        \end{bmatrix},
+        \qquad
+        \mathbf{b} =
+        \begin{bmatrix}
+            8 \\ 3 \\ 3 \\ 3 \\ 3
+        \end{bmatrix}.
+    \end{equation*}
+    [Hint: applying Gaussian elimination in the given order destroys the sparsity---eliminating the first column fills in the whole matrix. Consider reordering the equations and unknowns so that the dense row and column come \emph{last}, and then eliminate.]
+\end{exercise}
+
+\begin{solution}
+    Reorder the unknowns and equations as $(x_2, x_3, x_4, x_5, x_1)$; the system becomes
+    \begin{equation*}
+        \begin{bmatrix}
+            2 & 0 & 0 & 0 & 1 \\
+            0 & 2 & 0 & 0 & 1 \\
+            0 & 0 & 2 & 0 & 1 \\
+            0 & 0 & 0 & 2 & 1 \\
+            1 & 1 & 1 & 1 & 4
+        \end{bmatrix}
+        \begin{bmatrix}
+            x_2 \\ x_3 \\ x_4 \\ x_5 \\ x_1
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            3 \\ 3 \\ 3 \\ 3 \\ 8
+        \end{bmatrix},
+    \end{equation*}
+    with the arrow now pointing down-right.
+    Eliminating with this ordering causes \emph{no fill-in}: subtracting $\tfrac{1}{2}$ of each of the first four rows from the last row only touches the last row, giving
+    \begin{equation*}
+        \left( 4 - 4 \cdot \tfrac{1}{2} \right) x_1 = 8 - 4 \cdot \tfrac{3}{2}
+        \quad\Longrightarrow\quad
+        2 x_1 = 2
+        \quad\Longrightarrow\quad
+        x_1 = 1,
+    \end{equation*}
+    and back substitution gives $2 x_i + x_1 = 3$, i.e., $x_i = 1$ for $i = 2, \dots, 5$.
+    The solution is $\mathbf{x} = (1, 1, 1, 1, 1)$.
+    The lesson: for sparse matrices, the \emph{ordering} of the eliminations determines how much fill-in occurs, and a good reordering can reduce the work dramatically (here, to $O(n)$).
 \end{solution}
 
 \begin{exercise} % 2025 "Final extra problems" Nathan Morgan
@@ -1529,8 +2059,120 @@ Plugging these results back in,
     (a) The Thomas algorithm eliminates a single subdiagonal entry per row at constant cost, so its complexity is $O(n)$. (b) Standard Gaussian elimination does not exploit the sparsity and costs $O(n^3)$---for large $n$, a steep price for ignoring that almost all entries are already zero.
 \end{solution}
 
+\begin{exercise} % 2026 conceptual questions
+    In the primal-dual interior-point method for linear programming (discussed in the optimization chapter), each iteration requires solving the so-called KKT system
+    \begin{equation*}
+        \begin{bmatrix} \mathbf{D} & \mathbf{A}^\top \\ \mathbf{A} & \mathbf{0} \end{bmatrix}
+        \begin{bmatrix} \Delta\mathbf{x} \\ \Delta\mathbf{y} \end{bmatrix}
+        =
+        \begin{bmatrix} \mathbf{r}_1 \\ \mathbf{r}_2 \end{bmatrix},
+    \end{equation*}
+    where $\mathbf{D} \in \mathbb{R}^{n \times n}$ is diagonal with positive entries, $\mathbf{A} \in \mathbb{R}^{m \times n}$, and $m < n$.
+    \begin{enumerate}[label=(\alph*)]
+        \item What are the dimensions of the KKT system, and what is the complexity of solving it directly with dense Gaussian elimination?
+        \item Show that eliminating $\Delta\mathbf{x}$ reduces the system to the \emph{normal equations} $(\mathbf{A}\mathbf{D}^{-1}\mathbf{A}^\top)\, \Delta\mathbf{y} = \mathbf{A}\mathbf{D}^{-1}\mathbf{r}_1 - \mathbf{r}_2$.
+        \item What is the complexity of the normal-equation route (forming the $m \times m$ matrix, solving, and recovering $\Delta\mathbf{x}$)? Compare with (a) when $m \ll n$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item The system is $(n+m) \times (n+m)$, so a dense direct solve costs $O((n+m)^3)$.
+        \item The first block row reads $\mathbf{D}\Delta\mathbf{x} + \mathbf{A}^\top\Delta\mathbf{y} = \mathbf{r}_1$; since $\mathbf{D}$ is diagonal with positive entries, it is invertible, and $\Delta\mathbf{x} = \mathbf{D}^{-1}(\mathbf{r}_1 - \mathbf{A}^\top\Delta\mathbf{y})$. Substituting into the second block row $\mathbf{A}\Delta\mathbf{x} = \mathbf{r}_2$ gives $\mathbf{A}\mathbf{D}^{-1}\mathbf{r}_1 - \mathbf{A}\mathbf{D}^{-1}\mathbf{A}^\top\Delta\mathbf{y} = \mathbf{r}_2$, which rearranges to the normal equations.
+        \item Applying $\mathbf{D}^{-1}$ costs $O(n)$ (it is diagonal); forming the $m \times m$ matrix $\mathbf{A}\mathbf{D}^{-1}\mathbf{A}^\top$ costs $O(m^2 n)$; solving costs $O(m^3)$; and recovering $\Delta\mathbf{x}$ costs $O(mn)$. The total is $O(m^2 n + m^3)$. When $m \ll n$, this is far cheaper than the direct solve of (a): the cost grows only linearly in the large dimension $n$, instead of cubically.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    The \emph{Cholesky factorization} decomposes a symmetric matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ as $\mathbf{A} = \mathbf{L}\mathbf{L}^\top$, where $\mathbf{L}$ is lower triangular.
+    The algorithm computes the entries of $\mathbf{L}$ column by column: for $j = 1, 2, \dots, n$,
+    \begin{equation*}
+        l_{jj} = \sqrt{a_{jj} - \sum_{k=1}^{j-1} l_{jk}^2},
+        \qquad
+        l_{ij} = \frac{1}{l_{jj}} \left( a_{ij} - \sum_{k=1}^{j-1} l_{ik} l_{jk} \right), \quad i = j+1, \dots, n.
+    \end{equation*}
+    \begin{enumerate}[label=(\alph*)]
+        \item What is the failure mode of this algorithm? Provide an example of a $2 \times 2$ symmetric matrix $\mathbf{A}$ for which the algorithm fails.
+        \item Suppose the algorithm succeeds, with $l_{jj} > 0$ for all $j$. What does this tell us about the invertibility of $\mathbf{A}$?
+        \item What does it tell us about the eigenvalues of $\mathbf{A}$?
+        \item How can this algorithm be used to check whether a given symmetric matrix is positive definite?
+        \item Suppose the algorithm fails for $\mathbf{A}$, and we want to find $\delta > 0$ such that $\mathbf{A} + \delta \mathbf{I}$ is positive definite. Design an algorithm that finds such a $\delta$ using the Cholesky factorization.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item The square root of a non-positive number: the algorithm breaks down when $a_{jj} - \sum_{k=1}^{j-1} l_{jk}^2 \leq 0$ (the subsequent divisions by $l_{jj}$ are then impossible as well). It can be shown that the algorithm succeeds if and only if $\mathbf{A}$ is positive definite. For example, for $\mathbf{A} = \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}$, the first column gives $l_{11} = 1$ and $l_{21} = 2$, but then $l_{22} = \sqrt{1 - 2^2} = \sqrt{-3}$, and the algorithm fails. (Indeed, the eigenvalues of this matrix are $3$ and $-1$, so it is not positive definite.)
+        \item $\mathbf{A}$ is invertible: using the multiplicative property, $\det(\mathbf{L}^\top) = \det(\mathbf{L})$, and the triangular-determinant property, $\det(\mathbf{A}) = \det(\mathbf{L})\det(\mathbf{L}^\top) = \left( \prod_{j=1}^n l_{jj} \right)^2 > 0$.
+        \item Since $\mathbf{L}$ is invertible, we have $\mathbf{x}^\top \mathbf{A} \mathbf{x} = \mathbf{x}^\top \mathbf{L}\mathbf{L}^\top \mathbf{x} = \|\mathbf{L}^\top \mathbf{x}\|_2^2 > 0$ for every $\mathbf{x} \neq \mathbf{0}$, which is exactly the definition of a positive definite matrix: $\mathbf{A}$ is positive definite. Thus, the eigenvalues are all positive: choosing $\mathbf{x}$ to be an eigenvector with $\mathbf{A}\mathbf{x} = \lambda \mathbf{x}$ gives $\mathbf{x}^\top \mathbf{A} \mathbf{x} = \lambda \|\mathbf{x}\|_2^2 > 0$, so $\lambda > 0$.
+        \item Simply attempt the factorization: since the algorithm succeeds if and only if the matrix is positive definite, success \emph{is} the certificate, and failure (a non-positive square-root argument) shows the matrix is not positive definite. This is the standard practical test, and it is much cheaper than computing all eigenvalues.
+        \item The eigenvalues of $\mathbf{A} + \delta\mathbf{I}$ are $\lambda_i + \delta$, so the shifted matrix is positive definite as soon as $\delta > -\lambda_{\min}$. Using the test from (d): start with some $\delta_0 > 0$; attempt the factorization of $\mathbf{A} + \delta \mathbf{I}$; if it fails, double $\delta$ and try again, returning the first $\delta$ for which the factorization succeeds. The doubling exceeds $-\lambda_{\min}$ after finitely many attempts. (This trial-and-error strategy is used in practice, for example, to modify Hessians in Newton-type optimization methods.)
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L5
+    For $\mathbf{A} = \begin{bmatrix} 3 & 0 & 2 \\ 0 & 1 & 0 \\ -1 & 0 & 3 \end{bmatrix}$:
+    \begin{enumerate}[label=(\alph*)]
+        \item Find the eigenvalues of $\mathbf{A}$.
+        \item Find an eigenvector associated with each eigenvalue.
+        \item Are these eigenvectors unique?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item
+        Find roots of $\det (\mathbf{A} - \lambda \mathbf{I})$:
+        \[
+        \det\begin{bmatrix} 3-\lambda & 0 & 2 \\ 0 & 1-\lambda & 0 \\ -1 & 0 & 3-\lambda \end{bmatrix} = 0
+        \]
+        Applying Laplace's expansion formula:
+        \[
+        (3-\lambda)\det\begin{bmatrix} 1-\lambda & 0 \\ 0 & 3-\lambda \end{bmatrix} + (-1)\det\begin{bmatrix} 0 & 2 \\ 1-\lambda & 0 \end{bmatrix} = 0
+        \]
+        \[
+        (3-\lambda)^2(1-\lambda) + 2(1-\lambda) = 0
+        \]
+        \[
+            \Rightarrow \quad \boxed{
+                \begin{aligned}
+                    \lambda_1 &= 1\\
+                    \lambda_{2,3} &= 3 \pm \sqrt{2}\,\iu
+                \end{aligned}
+            }
+        \]
+        \item For $\lambda_1 = 1$: solving $(\mathbf{A} - \mathbf{I})\mathbf{v} = \mathbf{0}$ forces $v_1 = v_3 = 0$, so $\mathbf{v}_1 = (0, 1, 0)^\top$. For $\lambda_{2,3} = 3 \pm \sqrt{2}\,\iu$: the second row of $\mathbf{A} - \lambda\mathbf{I}$ forces $v_2 = 0$, and the first row, $\mp\sqrt{2}\,\iu\, v_1 + 2 v_3 = 0$, gives $\mathbf{v}_{2,3} = (\sqrt{2}, 0, \pm\iu)^\top$. (One can check $\mathbf{A}\mathbf{v}_{2,3} = (3 \pm \sqrt{2}\,\iu)\, \mathbf{v}_{2,3}$.)
+        \item No: any nonzero scalar multiple of an eigenvector (including a complex multiple) is again an eigenvector for the same eigenvalue. Since all three eigenvalues here are distinct, each eigenvector is unique only \emph{up to scaling}---the eigen\emph{directions} are determined, the vectors are not.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    For
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 2 & 1 \\ 0 & 0 & 2 \end{bmatrix},
+    \end{equation*}
+    \begin{enumerate}[label=(\alph*)]
+        \item Determine $\operatorname{rank}(\mathbf{A} - \lambda \mathbf{I})$ for every $\lambda \in \mathbb{R}$.
+        \item More generally, suppose $\lambda$ is an eigenvalue of $\mathbf{B} \in \mathbb{R}^{n \times n}$ with geometric multiplicity $g$. What is $\operatorname{rank}(\mathbf{B} - \lambda \mathbf{I})$? Does the algebraic multiplicity enter?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Since $\mathbf{A}$ is triangular, $\det(\mathbf{A} - \lambda\mathbf{I}) = (1-\lambda)(2-\lambda)^2$, so the eigenvalues are $1$ and $2$ (the latter with algebraic multiplicity 2). There are three cases.
+    \begin{itemize}
+        \item $\lambda \notin \{1, 2\}$: $\det(\mathbf{A} - \lambda\mathbf{I}) \neq 0$, so $\mathbf{A} - \lambda\mathbf{I}$ is invertible and the rank is $3$.
+        \item $\lambda = 1$: $\mathbf{A} - \mathbf{I} = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{bmatrix}$ has two linearly independent rows, so the rank is $2$.
+        \item $\lambda = 2$: $\mathbf{A} - 2\mathbf{I} = \begin{bmatrix} -1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 0 & 0 \end{bmatrix}$ also has rank $2$.
+    \end{itemize}
+    Note that at $\lambda = 2$, the rank drops only by 1 even though the eigenvalue has algebraic multiplicity 2: the nullity of $\mathbf{A} - 2\mathbf{I}$ is the \emph{geometric} multiplicity, which is 1 here, so the matrix is defective (not diagonalizable).
+        \item By definition, the geometric multiplicity is the dimension of the eigenspace, which is the nullity of $\mathbf{B} - \lambda\mathbf{I}$. By the rank-nullity theorem, $\operatorname{rank}(\mathbf{B} - \lambda\mathbf{I}) = n - g$. The algebraic multiplicity does not enter; as (a) shows, it can exceed the rank drop.
+    \end{enumerate}
+\end{solution}
+
 \begin{exercise} % 2025 Review 1 Nathan Morgan
     (*) Write a matrix $\mathbf{A}$ that has eigenvalues $0$ and $2$ with corresponding eigenvectors $\begin{bmatrix} 1 \\ 1 \end{bmatrix}$ and $\begin{bmatrix} 1 \\ -1 \end{bmatrix}$.
+    Is such a matrix unique?
 \end{exercise}
 
 \begin{solution}
@@ -1549,6 +2191,168 @@ Plugging these results back in,
         = \begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}.
     \]
     One can check that $\mathbf{A}\mathbf{v}_1 = \mathbf{0}$ and $\mathbf{A}\mathbf{v}_2 = 2\mathbf{v}_2$.
+
+    Yes, the matrix is unique: the two eigenvectors are linearly independent, so they form a basis of $\mathbb{R}^2$, and the two eigenpair conditions specify $\mathbf{A}\mathbf{v}$ for every basis vector---which determines $\mathbf{A}\mathbf{v}$ for every $\mathbf{v}$ by linearity, and hence determines $\mathbf{A}$.
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Not every matrix is diagonalizable, but every matrix admits a \emph{Jordan decomposition},
+    \begin{equation*}
+        \mathbf{A} = \mathbf{P}\mathbf{J}\mathbf{P}^{-1},
+    \end{equation*}
+    where $\mathbf{P}$ is invertible and $\mathbf{J}$ is a block-diagonal matrix built from \emph{Jordan blocks}, which carry an eigenvalue $\lambda$ on the diagonal and ones directly above it. Consider the $2 \times 2$ Jordan block
+    \begin{equation*}
+        \mathbf{J} = \begin{bmatrix} \lambda & 1 \\ 0 & \lambda \end{bmatrix}.
+    \end{equation*}
+    \begin{enumerate}[label=(\alph*)]
+        \item Compute $\mathbf{J}^2$ and $\mathbf{J}^3$, and find the general pattern for $\mathbf{J}^k$.
+        \item Suppose $|\lambda| < 1$ strictly. Does $\mathbf{J}^k$ converge to $\mathbf{0}$ as $k \to \infty$?
+        \item Now suppose $|\lambda| = 1$. Does $\mathbf{J}^k$ remain bounded? Compare with a \emph{diagonalizable} matrix whose eigenvalues all satisfy $|\lambda_i| \leq 1$, and draw a conclusion about the convergence condition $\rho < 1$ for iterative methods.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item $\mathbf{J}^2 = \begin{bmatrix} \lambda^2 & 2\lambda \\ 0 & \lambda^2 \end{bmatrix}$, $\mathbf{J}^3 = \begin{bmatrix} \lambda^3 & 3\lambda^2 \\ 0 & \lambda^3 \end{bmatrix}$, and in general
+        \begin{equation*}
+            \mathbf{J}^k = \begin{bmatrix} \lambda^k & k\lambda^{k-1} \\ 0 & \lambda^k \end{bmatrix},
+        \end{equation*}
+        which follows by induction: the top-right entry of $\mathbf{J}^{k+1} = \mathbf{J}^k \mathbf{J}$ is $\lambda^k \cdot 1 + k\lambda^{k-1} \cdot \lambda = (k+1)\lambda^k$.
+        \item Yes. Both $\lambda^k \to 0$ and $k\lambda^{k-1} \to 0$: the exponential decay of $\lambda^{k-1}$ dominates the linear growth of the factor $k$.
+        \item No. The off-diagonal entry has magnitude $k$, which grows without bound, even though no eigenvalue exceeds 1 in magnitude. A diagonalizable matrix with $|\lambda_i| \leq 1$ has bounded powers ($\mathbf{A}^k = \mathbf{W}\boldsymbol{\Lambda}^k\mathbf{W}^{-1}$ with bounded $\boldsymbol{\Lambda}^k$). The conclusion: for defective matrices, marginal eigenvalues ($|\lambda| = 1$) are not safe, and the convergence condition for iterative methods must be the \emph{strict} inequality $\rho < 1$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2020 Participation quiz L6
+    For $\mathbf{A} = \begin{bmatrix} 3 & 1 \\ 0 & 3 \\ 1 & 0 \end{bmatrix}$:
+    \begin{enumerate}[label=(\alph*)]
+        \item Compute the singular values of $\mathbf{A}$.
+        \item Find $\|\mathbf{A}\|_2$. [Do not compute it from the definition; use the singular values from (a).]
+        \item Find $\operatorname{tr}(\mathbf{A}\mathbf{A}^\top)$. [Again, do not compute the product explicitly; use the singular values from (a).]
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item
+        Singular values are the square roots of the eigenvalues of $\mathbf{A}^T\mathbf{A}$. 
+    
+        \(\Rightarrow\) find solutions of $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{I}) = 0$
+        \[
+        \det\begin{bmatrix} 10-\lambda & 3 \\ 3 & 10-\lambda \end{bmatrix} = 0 \iff (10-\lambda)^2 - 9 = 0
+        \]
+        \[
+            \Rightarrow\quad
+            \begin{aligned}
+                \lambda_1 &= 13\\
+                \lambda_2 &= 7
+            \end{aligned}
+            \quad\Rightarrow\quad
+            \boxed{
+                \begin{aligned}
+                    \sigma_1 &= \sqrt{13}\\
+                    \sigma_2 &= \sqrt{7}
+                \end{aligned}
+            }
+        \]
+        \item The matrix 2-norm is the largest singular value: $\|\mathbf{A}\|_2 = \sigma_{\max}(\mathbf{A}) = \sqrt{13}$.
+        \item The trace of $\mathbf{A}\mathbf{A}^\top$ is the sum of the squared singular values: $\operatorname{tr}(\mathbf{A}\mathbf{A}^\top) = \sigma_1^2 + \sigma_2^2 = 13 + 7 = 20$. (Both $\mathbf{A}\mathbf{A}^\top$ and $\mathbf{A}^\top\mathbf{A}$ have the $\sigma_i^2$ as their nonzero eigenvalues, and the trace is the sum of the eigenvalues.)
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Let $\mathbf{A} \in \mathbb{R}^{n \times n}$ have the singular value decomposition $\mathbf{A} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^\top$, and construct
+    \begin{equation*}
+        \mathbf{B} = \mathbf{U}(\boldsymbol{\Sigma} + \mathbf{I})\mathbf{V}^\top,
+    \end{equation*}
+    which shifts every singular value up by 1. What is $\|\mathbf{B}\|_2$?
+\end{exercise}
+
+\begin{solution}
+    Since $\mathbf{U}$ and $\mathbf{V}$ are orthogonal and $\boldsymbol{\Sigma} + \mathbf{I}$ is diagonal with decreasing non-negative entries $\sigma_i + 1$, the expression $\mathbf{U}(\boldsymbol{\Sigma} + \mathbf{I})\mathbf{V}^\top$ is itself a valid singular value decomposition. The singular values of $\mathbf{B}$ are therefore $\sigma_i(\mathbf{A}) + 1$, and $\|\mathbf{B}\|_2 = \sigma_{\max}(\mathbf{B}) = \sigma_{\max}(\mathbf{A}) + 1$.
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Give an example of a $2 \times 2$ symmetric matrix $\mathbf{A}$ for which both Jacobi iteration and Gauss-Seidel iteration fail to converge for a generic initial guess, and explain why they fail. [Hint: recall that convergence is governed by the spectral radius of the iteration matrix.]
+\end{exercise}
+
+\begin{solution}
+    One example is the (not diagonally dominant) matrix
+    \begin{equation*}
+        \mathbf{A} = \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}.
+    \end{equation*}
+    For Jacobi, the iteration matrix is
+    \begin{equation*}
+        -\mathbf{D}^{-1}\mathbf{R} = \begin{bmatrix} 0 & -2 \\ -2 & 0 \end{bmatrix},
+    \end{equation*}
+    with eigenvalues $\pm 2$, so the spectral radius is $2 > 1$.
+    For Gauss-Seidel, the iteration matrix is
+    \begin{equation*}
+        -(\mathbf{D} + \mathbf{L})^{-1}\mathbf{U} = \begin{bmatrix} 0 & -2 \\ 0 & 4 \end{bmatrix},
+    \end{equation*}
+    with eigenvalues $0$ and $4$, so the spectral radius is $4 > 1$.
+    In both cases, the error is multiplied by the iteration matrix at every step, so any error component along an eigenvector with $|\lambda| > 1$ grows without bound: both methods diverge for a generic initial guess.
+    (This is the same indefinite matrix for which the Cholesky factorization fails.)
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    Consider solving the tridiagonal system of Exercise~\ref{ex:thomas-algorithm} with an iterative method instead of the Thomas algorithm: starting from a guess $\mathbf{x}^{(0)}$, sweep
+    \begin{equation*}
+        x_i^{(k+1)} = \frac{b_i - a_{i,i-1}\, x_{i-1}^{(k)} - a_{i,i+1}\, x_{i+1}^{(k)}}{a_{ii}},
+        \qquad i = 1, \dots, n,
+    \end{equation*}
+    with $x_0 = x_{n+1} = 0$ understood.
+    \begin{enumerate}[label=(\alph*)]
+        \item Which of the iterative methods of this chapter is this?
+        \item What is the computational cost of one sweep?
+        \item Derive a sufficient condition on the coefficients for convergence.
+        \item The Thomas algorithm solves the system exactly in $O(n)$ operations. When could the iteration nevertheless be preferable?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Jacobi iteration: each equation is solved for its diagonal unknown using only values from the previous iterate.
+        \item $O(n)$: each of the $n$ updates involves a constant number of operations (two multiplications, two subtractions, one division).
+        \item By the sufficient condition for Jacobi convergence, strict diagonal dominance suffices: $|a_{ii}| > |a_{i,i-1}| + |a_{i,i+1}|$ for every $i$.
+        \item The direct method wins on serial operation count, but the Jacobi sweep is fully parallelizable (all $n$ updates are independent), while the Thomas recurrences are inherently sequential. With many processors, or with a good initial guess (for example, warm-starting from the solution of a nearby system) so that only a few sweeps are needed, the iteration can win in wall-clock time.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 conceptual questions
+    A polynomial $p(x)$ that approximates $1/x$ on an interval containing all eigenvalues of a symmetric matrix $\mathbf{A}$ can be used as a \emph{polynomial preconditioner}: the matrix $p(\mathbf{A})$, obtained by substituting $\mathbf{A}$ into the polynomial, then approximates $\mathbf{A}^{-1}$.
+    In this exercise, we work with the explicit degree-2 polynomial
+    \begin{equation*}
+        p(x) = 1 + (1-x) + (1-x)^2,
+    \end{equation*}
+    so that $p(\mathbf{A}) = 3\mathbf{I} - 3\mathbf{A} + \mathbf{A}^2$.
+    Expanding, $p(x) = 3 - 3x + x^2$, and a short calculation shows that
+    \begin{equation*}
+        1 - x\, p(x) = (1-x)^3,
+    \end{equation*}
+    so if $|1-x| \leq \rho$ for some $\rho < 1$, then $\left|p(x) - \frac{1}{x}\right| = \frac{|1-x|^3}{x} \leq \frac{\rho^3}{x}$: the polynomial approximates $1/x$ with an error proportional to the \emph{cube} of the distance from $x$ to $1$.
+    A preconditioner is only ever applied to vectors, $\mathbf{z} = p(\mathbf{A})\mathbf{v}$; the matrix $p(\mathbf{A})$ itself is never formed.
+    \begin{enumerate}[label=(\alph*)]
+        \item Show that a similar approximation error holds for matrices: for a diagonalizable $\mathbf{A} = \mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^{-1}$, the eigenvalues of the error matrix $p(\mathbf{A}) - \mathbf{A}^{-1}$ are $-(1-\lambda_i)^3/\lambda_i$; hence $p(\mathbf{A}) \approx \mathbf{A}^{-1}$ whenever every eigenvalue of $\mathbf{A}$ satisfies $|1-\lambda_i| \leq \rho$ for some $\rho < 1$.
+        \item The following function computes $\mathbf{z} = p(\mathbf{A})\mathbf{v}$. Since it only involves products with vectors, its cost was expected to scale \emph{quadratically} with $n$ for $\mathbf{A} \in \mathbb{R}^{n \times n}$ --- but a timing experiment shows the cost growing \emph{cubically}. Find what is wrong, explain why the cost is cubic, and correct the code so that it scales quadratically.
+        \lstinputlisting{code/matlab/linear-algebra/poly_precond_bad.m}
+        \item Using the function from (b), implement the preconditioned iteration
+        \begin{equation*}
+            \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + p(\mathbf{A})\bigl(\mathbf{b} - \mathbf{A}\mathbf{x}^{(k)}\bigr)
+        \end{equation*}
+        for solving $\mathbf{A}\mathbf{x} = \mathbf{b}$, starting from $\mathbf{x}^{(0)} = \mathbf{0}$ and stopping when the relative residual falls below a tolerance.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item Powers pass through the eigendecomposition: $\mathbf{A}^2 = \mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^{-1}\mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^{-1} = \mathbf{V}\boldsymbol{\Lambda}^2\mathbf{V}^{-1}$, so $p(\mathbf{A}) = \mathbf{V}\bigl(3\mathbf{I} - 3\boldsymbol{\Lambda} + \boldsymbol{\Lambda}^2\bigr)\mathbf{V}^{-1} = \mathbf{V}\, p(\boldsymbol{\Lambda})\, \mathbf{V}^{-1}$, and $\mathbf{A}^{-1} = \mathbf{V}\boldsymbol{\Lambda}^{-1}\mathbf{V}^{-1}$. Therefore $p(\mathbf{A}) - \mathbf{A}^{-1} = \mathbf{V}\bigl(p(\boldsymbol{\Lambda}) - \boldsymbol{\Lambda}^{-1}\bigr)\mathbf{V}^{-1}$, whose eigenvalues are the diagonal entries $p(\lambda_i) - 1/\lambda_i = -(1-\lambda_i)^3/\lambda_i$ by the scalar identity above. With $|1-\lambda_i| \leq \rho < 1$, every eigenvalue of the error matrix is at most $\rho^3/\lambda_i$ in magnitude: $p(\mathbf{A})$ is a good approximation of $\mathbf{A}^{-1}$ whenever all eigenvalues of $\mathbf{A}$ are close to $1$.
+        \item MATLAB evaluates \texttt{A * A * v} from left to right, as \texttt{(A * A) * v}: the matrix $\mathbf{A}^2$ is formed explicitly---a matrix-matrix product costing $O(n^3)$---before it is applied to $\mathbf{v}$. The fix is to apply $\mathbf{A}$ to the vector twice, $\mathbf{A}^2\mathbf{v} = \mathbf{A}(\mathbf{A}\mathbf{v})$, so that only matrix-vector products, at $O(n^2)$ each, are performed:
+        \lstinputlisting{code/matlab/linear-algebra/poly_precond.m}
+        \item Each step applies $p(\mathbf{A})$ to the current residual using the function from (b):
+        \lstinputlisting{code/matlab/linear-algebra/precond_solve.m}
+        The error satisfies $\mathbf{e}^{(k+1)} = \bigl(\mathbf{I} - p(\mathbf{A})\mathbf{A}\bigr)\mathbf{e}^{(k)}$, and by part (a) the eigenvalues of $\mathbf{I} - p(\mathbf{A})\mathbf{A}$ are $(1-\lambda_i)^3$. So if $|1-\lambda_i| \leq \rho < 1$ for all $i$, the error contracts by a factor of at least $\rho^3$ per iteration---each step is worth three plain Richardson steps ($\omega = 1$), at the cost of three matrix-vector products per iteration: two inside $p(\mathbf{A})$ and one for the residual.
+    \end{enumerate}
 \end{solution}
 
 
