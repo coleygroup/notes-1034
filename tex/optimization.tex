@@ -1739,7 +1739,148 @@ When decision variables must take discrete values, we enter the world of integer
 Finally, when gradient information is unavailable, whether due to noisy function evaluations, discontinuities, or computational constraints, gradient-free methods become necessary. The Nelder-Mead simplex algorithm is one example of such a method, using only function values at a collection of points to guide the search toward better solutions.
 
 \section{Exercises}
+% Exercises are ordered to follow the sections of this chapter.
 
+ In the solutions below, a paragraph marked \emph{Side note} gives additional context. It is not part of what a complete answer requires.
+
+% ---- Review: collected true/false ----
+\begin{exercise} % 2026 Sungho Shin - collected true/false problems;
+                % the two black parts (Newton on a max function; BFGS needs no
+                % Hessian modification) come from 2025 Review 1 Nathan Morgan
+    \label{ex:tf-optimization}
+    True or False? Briefly explain your answers. For a statement that is false, it is enough to give a counterexample.
+    \begin{enumerate}[label=(\alph*)]
+        \item  The Hessian $\nabla^2 f(\mathbf{x})$ of a twice continuously differentiable function $f: \mathbb{R}^N \to \mathbb{R}$ is always positive semi-definite.
+        \item  The maximization problem
+        \[
+            \max_{\mathbf{x}} \; f(\mathbf{x}) \quad \text{subject to} \quad c(\mathbf{x}) \le 0
+        \]
+        can be equivalently solved as the minimization problem
+        \[
+            \min_{\mathbf{x}} \; -f(\mathbf{x}) \quad \text{subject to} \quad -c(\mathbf{x}) \le 0.
+        \]
+        \item  Let $\mathbf{F}: \mathbb{R}^N \to \mathbb{R}^M$ be a smooth function. The two problems
+        \[
+            \min_{\mathbf{x}} \; \|\mathbf{F}(\mathbf{x})\|_2
+            \qquad \text{and} \qquad
+            \min_{\mathbf{x}} \; \|\mathbf{F}(\mathbf{x})\|_2^2
+        \]
+        have the same set of solutions.
+        \item  A global minimum always has a better (strictly lower) objective value than a local minimum.
+        \item  Any optimization problem has at least one local optimum.
+        \item  A local maximum cannot be a local minimum.
+        \item  The union $A \cup B$ of two convex sets $A$ and $B$ is a convex set.
+        \item  The intersection $A \cap B$ of two convex sets $A$ and $B$ is a convex set.
+        \item  The sum of two convex functions is a convex function.
+        \item  The product of two convex functions is a convex function.
+        \item  Consider the equality-constrained problem
+        \[
+            \min_{\mathbf{x}} \; f(\mathbf{x}) \quad \text{subject to} \quad c(\mathbf{x}) = 0,
+        \]
+        where $f: \mathbb{R}^N \to \mathbb{R}$ is a convex function and $c: \mathbb{R}^N \to \mathbb{R}$ is a convex function. Then this is a convex optimization problem.
+        \item  When minimizing a smooth function using gradient descent with a fixed, pre-specified step size, the objective function value improves (decreases) at every iteration.
+        \item  Consider gradient descent at an iterate $\mathbf{x}_k$ with $\nabla f(\mathbf{x}_k) \neq \mathbf{0}$ and search direction $\mathbf{d}_k = -\nabla f(\mathbf{x}_k)$, and suppose the step size is chosen by exactly minimizing the objective function along the search direction:
+        \[
+            \alpha^* = \argmin_{\alpha \ge 0} \; f(\mathbf{x}_k + \alpha \mathbf{d}_k).
+        \]
+        Then, at the optimal step size $\alpha^*$, the function $f$ is at a local minimum, i.e., $\mathbf{x}_k + \alpha^* \mathbf{d}_k$ is a local minimum of $f$.
+        \item We can use Newton's method to find the minimum of $f([x_1, x_2]) = \max(x_1, 0) + \max(x_2, -2)$.
+        \item  Consider minimizing a twice continuously differentiable function $f: \mathbb{R}^N \to \mathbb{R}$, and suppose the current iterate $\mathbf{x}_k$ satisfies $\nabla f(\mathbf{x}_k) \neq \mathbf{0}$. We take the step
+        \[
+            \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{d}_k, \qquad \mathbf{d}_k = -\big(\nabla^2 f(\mathbf{x}_k)\big)^{-1} \nabla f(\mathbf{x}_k),
+        \]
+        where $\nabla^2 f(\mathbf{x}_k)$ is invertible. Then, for a sufficiently small step size $\alpha_k > 0$, the objective function is guaranteed to improve, i.e., $f(\mathbf{x}_{k+1}) < f(\mathbf{x}_k)$.
+        \item  In the same setting as the previous part, suppose instead we take the quasi-Newton (BFGS) step
+        \[
+            \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{d}_k, \qquad \mathbf{d}_k = -\mathbf{H}_k^{-1} \nabla f(\mathbf{x}_k),
+        \]
+        where $\mathbf{H}_k \succ \mathbf{0}$ is the BFGS approximation of the Hessian, and $\alpha_k$ is chosen by a backtracking line search with a sufficient-decrease (Armijo) condition. Then the objective function is guaranteed to improve, i.e., $f(\mathbf{x}_{k+1}) < f(\mathbf{x}_k)$.
+        \item We don't need to use Hessian modification if we use the BFGS method to estimate the Hessian.
+        \item  Consider minimizing a finite-sum objective
+        \[
+            f(\mathbf{x}) = \sum_{j=1}^{M} f_j(\mathbf{x}),
+        \]
+        where each $f_j$ is smooth, using stochastic gradient descent: at each iteration, sample an index $j_k$ uniformly at random and update
+        \[
+            \mathbf{x}_{k+1} = \mathbf{x}_k - \alpha_k \nabla f_{j_k}(\mathbf{x}_k).
+        \]
+        Then the iterates converge linearly to a local minimum of $f$.
+        \item  In the same finite-sum setting as the previous part, consider applying a Newton step to a single randomly sampled objective term:
+        \[
+            \mathbf{x}_{k+1} = \mathbf{x}_k - \big(\nabla^2 f_{j_k}(\mathbf{x}_k)\big)^{-1} \nabla f_{j_k}(\mathbf{x}_k).
+        \]
+        Then the iterates converge quadratically to a local minimum of $f$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item  False. The Hessian reflects the local curvature of the function and can be indefinite or negative definite. For example, $f(x) = -x^2$ has Hessian $f''(x) = -2 < 0$ everywhere, and $f(\mathbf{x}) = x_1^2 - x_2^2$ has Hessian $\nabla^2 f(\mathbf{x}) = \begin{bmatrix} 2 & 0 \\ 0 & -2 \end{bmatrix}$, which is indefinite.
+
+        \emph{Side note.} The Hessian is positive semi-definite for all $\mathbf{x}$ if and only if $f$ is convex; for a general function, positive semi-definiteness is only guaranteed at a local minimum (the second-order necessary condition).
+        \item  False. Negating the objective is correct: maximizing $f$ is equivalent to minimizing $-f$, and the maximizer coincides with the minimizer. However, the constraint must be left unchanged, since the feasible set must stay the same. Negating the constraint to $-c(\mathbf{x}) \le 0$ (i.e., $c(\mathbf{x}) \ge 0$) generally defines a different feasible set. The correct equivalent problem is
+        \[
+            \min_{\mathbf{x}} \; -f(\mathbf{x}) \quad \text{subject to} \quad c(\mathbf{x}) \le 0.
+        \]
+        \item  True. Since $\|\mathbf{F}(\mathbf{x})\|_2 \ge 0$ for all $\mathbf{x}$ and the map $t \mapsto t^2$ is strictly increasing on $[0, \infty)$, we have $\|\mathbf{F}(\mathbf{x}_1)\|_2 \le \|\mathbf{F}(\mathbf{x}_2)\|_2$ if and only if $\|\mathbf{F}(\mathbf{x}_1)\|_2^2 \le \|\mathbf{F}(\mathbf{x}_2)\|_2^2$, so the two objectives order the points of $\mathbb{R}^N$ identically and have the same minimizers (local and global).
+
+        \emph{Side note.} The two formulations are not equally convenient numerically, however: $\|\mathbf{F}(\mathbf{x})\|_2 = \sqrt{\sum_{i=1}^M F_i(\mathbf{x})^2}$ is not differentiable at points where $\mathbf{F}(\mathbf{x}) = \mathbf{0}$, which is exactly where the solution of a well-fit problem lies, whereas the squared objective is smooth with gradient $2 \nabla \mathbf{F}(\mathbf{x})^\top \mathbf{F}(\mathbf{x})$. This is why least-squares problems are always posed with the square.
+        \item  False. A global minimum is itself a local minimum, so the two can coincide; for example, for a convex function, any local minimum is also a global minimum. In general, the objective value at a global minimum is less than \emph{or equal to} the value at any local minimum, and ties are possible even between distinct points (e.g., $f(x) = \sin x$ attains the same value at every one of its local minima, each of which is a global minimum).
+        \item  False. An optimization problem may have no local optimum at all. For example, $\min_{x \in \mathbb{R}} x$ is unbounded below and has no minimum, and $\min_{x} e^{x}$ is bounded below (by 0) but the infimum is never attained, so no local (or global) minimum exists. A constrained problem can also be infeasible, in which case there is no optimum either.
+        \item  False. A point can be a local maximum and a local minimum at the same time: the definitions require $f(\bar{\mathbf{x}}) \ge f(\mathbf{x})$ (respectively $f(\bar{\mathbf{x}}) \le f(\mathbf{x})$) for all $\mathbf{x}$ in a neighborhood of $\bar{\mathbf{x}}$, and both can hold simultaneously if $f$ is constant near $\bar{\mathbf{x}}$. For example, for a constant function $f(\mathbf{x}) = 1$, every point is both a local maximum and a local minimum (indeed, a global maximum and a global minimum).
+        \item  False. Take the two unit disks $A = \{\mathbf{x} \in \mathbb{R}^2 : \|\mathbf{x} - (-2,0)^\top\|_2 \le 1\}$ and $B = \{\mathbf{x} \in \mathbb{R}^2 : \|\mathbf{x} - (2,0)^\top\|_2 \le 1\}$, each of which is convex. The points $(-2,0)^\top \in A$ and $(2,0)^\top \in B$ both lie in $A \cup B$, but their midpoint $(0,0)^\top$ lies in neither, so the union is not convex.
+
+        \emph{Side note.} A union of convex sets is convex only in special cases, such as when one of the sets contains the other.
+        \item  True. Let $\mathbf{x}_1, \mathbf{x}_2 \in A \cap B$ and $\lambda \in [0,1]$. Since $\mathbf{x}_1, \mathbf{x}_2 \in A$ and $A$ is convex, $\lambda \mathbf{x}_1 + (1-\lambda)\mathbf{x}_2 \in A$; the same argument applied to $B$ gives $\lambda \mathbf{x}_1 + (1-\lambda)\mathbf{x}_2 \in B$. Hence the point lies in $A \cap B$, which is therefore convex.
+
+        \emph{Side note.} The argument never uses that there are only two sets, so an intersection of \emph{any} number of convex sets is convex. This is the reason the feasible set of a convex optimization problem is convex: it is the intersection of the sets defined by the individual constraints, one per constraint.
+        \item  True. For convex $g$ and $h$ and any $\mathbf{x}_1, \mathbf{x}_2$ and $\lambda \in [0,1]$, applying the definition of convexity to $g$ and $h$ separately and adding the two inequalities shows that $g + h$ satisfies the definition of convexity.
+        \item  False. For example, $g(x) = x^2$ and $h(x) = (x-1)^2$ are both convex, but their product is
+        \[
+            p(x) = x^2 (x-1)^2 = x^4 - 2x^3 + x^2,
+            \qquad
+            p''(x) = 12x^2 - 12x + 2.
+        \]
+        At $x = 1/2$ we get $p''(1/2) = 3 - 6 + 2 = -1 < 0$, so the second-order characterization of convexity fails and $p$ is not convex.
+        \item  False. A convex optimization problem requires the feasible set to be convex, and the feasible set $\{\mathbf{x} : c(\mathbf{x}) = 0\}$ of an equality constraint need not be convex even when $c$ is a convex function. For example, $c(\mathbf{x}) = x_1^2 + x_2^2 - 2$ is convex, but the feasible set $\{\mathbf{x} : x_1^2 + x_2^2 = 2\}$ is a circle, which is not convex (the segment between the feasible points $(1,1)^\top$ and $(-1,-1)^\top$ leaves the set).
+
+        \emph{Side note.} This is why convex optimization problems require equality constraints to be \emph{linear (affine)}: then the feasible set is an affine set (e.g., a hyperplane), which is convex.
+        \item  False. If the step size is too large relative to the curvature of the function, a gradient descent step can overshoot and \emph{increase} the objective. For example, for $f(x) = x^2$ with step size $\alpha = 1.1$ and $x_0 = 1$, the update $x_1 = x_0 - \alpha f'(x_0) = 1 - 2.2 = -1.2$ gives $f(x_1) = 1.44 > f(x_0) = 1$, and the iterates diverge.
+
+        \emph{Side note.} Descent is guaranteed only when the step size is sufficiently small relative to the curvature; this is why practical implementations use a line search (e.g., backtracking with a sufficient-decrease condition) rather than a fixed step size.
+        \item  False. The optimal step size $\alpha^*$ minimizes only the \emph{one-dimensional restriction} $\phi(\alpha) = f(\mathbf{x}_k + \alpha \mathbf{d}_k)$ of $f$ along the search direction, not $f$ itself. The optimality condition for the line search is
+        \[
+            \phi'(\alpha^*) = \nabla f(\mathbf{x}_k + \alpha^* \mathbf{d}_k)^\top \mathbf{d}_k = 0,
+        \]
+        which says that the gradient at the new point is \emph{orthogonal} to the search direction, not that it is zero. Unless the gradient happens to vanish there, the new point is not a stationary point of $f$, and hence not a local minimum.
+
+        \emph{Side note.} For example, for $f(\mathbf{x}) = x_1^2 + 10x_2^2$, an exact line search from a generic starting point does not land on the minimizer; the gradient at the new point is nonzero (and orthogonal to the previous direction), which is what produces the characteristic zig-zag path of steepest descent.
+        \item False, Newton's method for optimization requires the derivative of the gradient, but for the $\max$ function, there are points where the second derivative isn't defined.
+        \item  False. For small $\alpha_k$, the change in the objective is governed by the directional derivative
+        \[
+            \nabla f(\mathbf{x}_k)^\top \mathbf{d}_k = -\nabla f(\mathbf{x}_k)^\top \big(\nabla^2 f(\mathbf{x}_k)\big)^{-1} \nabla f(\mathbf{x}_k),
+        \]
+        which is guaranteed to be negative only when the Hessian is positive definite. If the Hessian is not positive definite, the step $\mathbf{d}_k$ may be an \emph{ascent} direction, and even an arbitrarily small step increases $f$. For example, for $f(x) = -x^2$ at $x_k = 1$: $f'(x_k) = -2$, $f''(x_k) = -2$, so $d_k = -(-2)/(-2) = -1$ and $f'(x_k)\, d_k = 2 > 0$; every step size $\alpha_k \in (0, 1)$ \emph{increases} $f$, as the iterate moves toward the maximizer at $x = 0$.
+
+        \emph{Side note.} This reflects that this step seeks stationary points, which may be maxima or saddle points.
+        \item  True. Since $\mathbf{H}_k \succ \mathbf{0}$, we have
+        \[
+            \nabla f(\mathbf{x}_k)^\top \mathbf{d}_k = -\nabla f(\mathbf{x}_k)^\top \mathbf{H}_k^{-1} \nabla f(\mathbf{x}_k) < 0,
+        \]
+        so $\mathbf{d}_k$ is always a descent direction. The backtracking line search then terminates with a step size $\alpha_k > 0$ satisfying the sufficient-decrease condition, which guarantees $f(\mathbf{x}_{k+1}) < f(\mathbf{x}_k)$.
+
+        \emph{Side note.} This is a key advantage of BFGS: it maintains a positive definite Hessian approximation by construction.
+        \item True, BFGS maintains a positive definite approximation of the Hessian by construction.
+        \item  False. The sampled gradient $\nabla f_{j_k}$ is a \emph{noisy} estimate of the full gradient $\nabla f$: even at a minimizer $\mathbf{x}^*$ of $f$ (where $\nabla f(\mathbf{x}^*) = \mathbf{0}$), the individual terms generally have $\nabla f_j(\mathbf{x}^*) \neq \mathbf{0}$. With a fixed step size, the iterates therefore do not converge but fluctuate in a neighborhood of $\mathbf{x}^*$ whose size scales with the step size; convergence requires diminishing step sizes, and the resulting rate is \emph{sublinear} --- slower than the linear rate of full-gradient steepest descent.
+
+        \emph{Side note.} The appeal of stochastic gradient descent is not its convergence rate but its per-iteration cost: each step touches only one term instead of all $M$.
+        \item  False. Newton's quadratic convergence is a property of the deterministic Newton method applied to the objective being minimized, near a nondegenerate minimizer. The step shown is a Newton step for the single sampled term $f_{j_k}$: it drives the iterate toward a stationary point of $f_{j_k}$, not of the sum $f$. Since the minimizers of the individual terms generally differ from the minimizer of $f$, the iteration hops between the different terms' targets and, in general, does not converge to a minimizer of $f$ at all, let alone quadratically.
+
+        \emph{Side note.} Using the curvature of a single term does not remove the sampling noise; the noise, not the lack of curvature information, is what limits the convergence of stochastic methods.
+    \end{enumerate}
+\end{solution}
+
+% ---- Preliminaries: gradients, Hessians, Taylor expansions ----
 \begin{exercise} % 2020 Participation quiz L10
     Calculate the gradient and Hessian of
     \[
@@ -1768,6 +1909,266 @@ Finally, when gradient information is unavailable, whether due to noisy function
     \]
 \end{solution}
 
+\begin{exercise} % 2026 Sungho Shin
+    
+    Let $f: \mathbb{R}^N \to \mathbb{R}$ be twice continuously differentiable, and suppose we store its Hessian $\nabla^2 f(\mathbf{x})$ as a dense $N \times N$ array.
+    \begin{enumerate}[label=(\alph*)]
+        \item Using a property of the Hessian, propose a way to reduce the number of entries that have to be stored. How many entries does your scheme need?
+        \item Does this improve the storage complexity in big-O notation?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item The Hessian is \emph{symmetric}: for a twice continuously differentiable function the mixed partials are equal, $\frac{\partial^2 f}{\partial x_i \partial x_j} = \frac{\partial^2 f}{\partial x_j \partial x_i}$, so $\nabla^2 f(\mathbf{x}) = \nabla^2 f(\mathbf{x})^\top$. Every off-diagonal entry therefore appears twice, and it is enough to store the diagonal together with one triangle:
+        \[
+            N + \frac{N(N-1)}{2} = \frac{N(N+1)}{2} \quad \text{entries, instead of } N^2.
+        \]
+        \item No. Expanding, $\frac{N(N+1)}{2} = \frac{1}{2}N^2 + \frac{1}{2}N$, which is still $O(N^2)$: big-O describes the growth rate and discards both the constant factor $\tfrac{1}{2}$ and the lower-order term. The saving is real, roughly halving the memory, but it does not change how the requirement scales with $N$.
+
+        \emph{Side note.} Changing the complexity itself requires structure, not symmetry. In Exercise~\ref{ex:sparse-hessian} the Hessian has only $O(N)$ nonzero entries, and storing just those brings the requirement down to $O(N)$.
+    \end{enumerate}
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Write the second-order Taylor expansion of
+    \[
+        f(\mathbf{x}) = x_1^2 x_2 + e^{x_2}, \qquad \mathbf{x} \in \mathbb{R}^2,
+    \]
+    about the point $\mathbf{x}^* = (1, 0)^\top$.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The second-order Taylor expansion about $\mathbf{x}^*$ is
+    \[
+        f(\mathbf{x}) = f(\mathbf{x}^*) + \nabla f(\mathbf{x}^*)^\top(\mathbf{x}-\mathbf{x}^*) + \frac{1}{2} (\mathbf{x}-\mathbf{x}^*)^\top \nabla^2 f(\mathbf{x}^*) (\mathbf{x}-\mathbf{x}^*) + O(\|\mathbf{x}-\mathbf{x}^*\|^3).
+    \]
+    The gradient and Hessian are
+    \[
+        \nabla f(\mathbf{x}) = \begin{bmatrix} 2x_1 x_2 \\ x_1^2 + e^{x_2} \end{bmatrix},
+        \qquad
+        \nabla^2 f(\mathbf{x}) = \begin{bmatrix} 2x_2 & 2x_1 \\ 2x_1 & e^{x_2} \end{bmatrix}.
+    \]
+    Evaluating at $\mathbf{x}^* = (1,0)^\top$ gives $f(\mathbf{x}^*) = 1$,
+    \[
+        \nabla f(\mathbf{x}^*) = \begin{bmatrix} 0 \\ 2 \end{bmatrix},
+        \qquad
+        \nabla^2 f(\mathbf{x}^*) = \begin{bmatrix} 0 & 2 \\ 2 & 1 \end{bmatrix}.
+    \]
+    Therefore,
+    \[
+        f(\mathbf{x}) = 1 + 2x_2 + 2(x_1 - 1)x_2 + \frac{1}{2} x_2^2 + O(\|\mathbf{x}-\mathbf{x}^*\|^3).
+    \]
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    \label{ex:sparse-hessian}
+    
+    Consider the function
+    \[
+        f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_{i+1} - x_i)^2 + \sum_{i=1}^{N} e^{x_i}, \qquad \mathbf{x} \in \mathbb{R}^N.
+    \]
+    \begin{enumerate}[label=(\alph*)]
+        \item Evaluate the Hessian $\nabla^2 f(\mathbf{x})$.
+        \item How many nonzero entries does the Hessian have? What is the storage complexity of storing the Hessian in a sparse format (where only the nonzero entries are stored), and how does it compare to storing it as a dense matrix?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item Each term $(x_{i+1} - x_i)^2$ involves only the pair $(x_i, x_{i+1})$: it contributes $2$ to the diagonal entries $H_{ii}$ and $H_{i+1,i+1}$ and $-2$ to the off-diagonal entries $H_{i,i+1} = H_{i+1,i}$. Each term $e^{x_i}$ contributes $e^{x_i}$ to $H_{ii}$. The Hessian is therefore tridiagonal:
+        \[
+            H_{ij} =
+            \begin{cases}
+                2 + e^{x_i} & i = j \in \{1, N\}, \\
+                4 + e^{x_i} & i = j \in \{2, \dots, N-1\}, \\
+                -2 & |i - j| = 1, \\
+                0 & \text{otherwise}.
+            \end{cases}
+        \]
+        \item The nonzero entries are the $N$ diagonal entries and the $2(N-1)$ entries on the first sub- and super-diagonals, for a total of $3N - 2$. Storing the Hessian in a sparse format therefore requires $O(N)$ storage, compared to $O(N^2)$ for a dense matrix.
+
+        \emph{Side note.} Because $f$ is a sum of terms that each involve only a few variables, the Hessian is sparse, and exploiting this sparsity is what makes large-scale problems (large $N$) tractable in practice.
+    \end{enumerate}
+    
+\end{solution}
+
+
+% ---- Foundations of optimization: formulation, classification, convexity ----
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    Species A costs \$5 per mole. Species B costs \$3 per mole. We want to minimize the cost of material in a batch reactor.
+    \begin{enumerate}[label=(\alph*)]
+        \item Write the unconstrained minimization problem. Does it have a solution? If so, provide one; if not, explain why. [Hint: ``unconstrained'' means we do not even consider the nonnegativity of the amounts.]
+        \item Add the constraint that the total moles must equal 10 and we need at least 5 moles of B. What is the solution? Which constraints are active at the optimum? Sketch the objective gradient and the constraints to explain where the solution is located.
+        \item Instead of the constraint $n_B \geq 5$, suppose we require $n_A \geq 5$. What is the new solution? Which constraints are active at the optimum?
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    Let $n_A$ and $n_B$ denote the moles of species A and B respectively.
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item The unconstrained problem is:
+        \[
+            \min_{n_A, n_B} f(n) = 5n_A + 3n_B
+        \]
+        No solution exists. Suppose $(n_A^\star, n_B^\star)$ were a solution; then $(n_A^\star - 1, n_B^\star)$ is also feasible (there are no constraints---not even nonnegativity) and has a strictly lower objective, contradicting optimality. The objective can thus be decreased without bound.
+
+        \item B costs the least, so we want to maximize it. The maximum value of $n_B$ given the equality constraint is $n_B = 10$, so the optimum is $n_A = 0$, $n_B = 10$. The equality constraint is active, but the inequality constraint $n_B \geq 5$ is inactive. In the sketch below, the feasible set is the segment of the line $n_A + n_B = 10$ with $n_B \geq 5$; since $f$ decreases in the direction $-\nabla f$, the solution is the endpoint of the segment farthest in that direction, $(n_A, n_B) = (0, 10)$.
+        \begin{center}
+        \begin{tikzpicture}[scale=0.42]
+            \draw[->] (0,0) -- (11.5,0) node[right] {$n_A$};
+            \draw[->] (0,0) -- (0,11.5) node[above] {$n_B$};
+            \draw[green!60!black, thick] (0,10) -- (10,0) node[below right, pos=0.6] {$n_A + n_B = 10$};
+            \draw[orange, dashed, thick] (0,5) -- (11,5) node[above, pos=0.85] {$n_B = 5$};
+            \draw[blue, ultra thick] (0,10) -- (5,5) node[above right, pos=0.6] {feasible set};
+            \draw[red, ->, thick] (7,7.5) -- +(1.47,0.88) node[right] {$\nabla f = [5,\, 3]^\top$};
+            \filldraw[blue] (0,10) circle (3.5pt) node[right=5pt] {optimum};
+        \end{tikzpicture}
+        \end{center}
+        
+        \item With the constraint $n_A \geq 5$ and the equality $n_A + n_B = 10$, we have $n_B \leq 5$. Now the objective is minimized at $n_B = 5$, giving $n_A = 5$. Both the equality constraint and the inequality constraint $n_A \geq 5$ are active at the optimum.
+    \end{enumerate}
+\end{solution}
+
+% Commented out: somewhat redundant to the preceding exercise (existence of an unconstrained minimizer).
+% \begin{exercise} % 2025 Review 1 Nathan Morgan
+%     Maximize the rate of reaction by adjusting concentration and temperature:
+%     \[
+%         \max_{c_A, T} r(c_A, T) = c_A \cdot (10 e^{-5/T})
+%     \]
+%     Reformulate this as a minimization problem. Does a finite minimizer exist? Explain.
+% \end{exercise}
+%
+% \begin{solution}
+%     To reformulate as a minimization problem, we minimize the negative of the rate:
+%     \[
+%         \min_{c_A, T} -r(c_A, T) = -c_A \cdot (10 e^{-5/T})
+%     \]
+%     Computing the gradient:
+%     \[
+%         \frac{\partial r}{\partial c_A} = 10 e^{-5/T}, \quad \frac{\partial r}{\partial T} = c_A \cdot 10 \cdot \frac{5}{T^2} e^{-5/T}
+%     \]
+%     For positive finite values of $c_A$ and $T$, both partial derivatives are strictly positive, so $\nabla(-r)$ never equals zero. The objective function $-r$ decreases without bound as either variable increases toward infinity, meaning there is no finite minimizer. The problem is unbounded below, indicating that additional constraints on concentrations and temperatures are needed to make the problem well-posed.
+% \end{solution}
+
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    A splitter separates an inlet flow of 3 L/s into two outlet streams such that one split contains twice as much material as the other.
+    \begin{enumerate}[label=(\alph*)]
+        \item Formulate this as a norm minimization problem by defining an error function that captures the constraints.
+        \item Is the solution of this norm minimization problem the same as the solution of the corresponding linear-algebra problem? Explain why.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    Let $v_1$ and $v_2$ denote the outlet flow rates. The constraints are $v_1 + v_2 = 3$ and $v_1 = 2v_2$.
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item We can formulate this as minimizing the squared error:
+        \[
+            \min_{v} \left\| \begin{bmatrix} v_1 + v_2 - 3 \\ v_1 - 2v_2 \end{bmatrix} \right\|_2^2
+        \]
+        This is equivalent to minimizing the sum of squared constraint violations.
+        
+        \item Yes. The constraints form a square linear system with a unique solution:
+        \[
+            \begin{bmatrix} 1 & 1 \\ 1 & -2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 3 \\ 0 \end{bmatrix}
+            \quad\Rightarrow\quad v_1 = 2 \text{ L/s},\; v_2 = 1 \text{ L/s}.
+        \]
+        The error function is zero exactly at this solution and positive everywhere else, so the minimizer of the error norm coincides with the solution of the linear system.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Classify each of the following optimization problems as a linear program (LP), a nonlinear program (NLP), a mixed-integer linear program (MILP), or a mixed-integer nonlinear program (MINLP). Briefly justify your answers.
+    \begin{enumerate}[label=(\alph*)]
+        \item $\displaystyle \min_{x_1, x_2} \; 3x_1 + 2x_2 \quad \text{subject to} \quad x_1 + x_2 \ge 4, \quad x_1 - x_2 \le 2, \quad x_1, x_2 \ge 0$
+        \item $\displaystyle \min_{x_1, x_2} \; (x_1 - 1)^2 + x_2^2 \quad \text{subject to} \quad x_1^2 + x_2^2 \le 4$
+        \item $\displaystyle \min_{x_1, x_2, y} \; 5x_1 + 4x_2 + 10y \quad \text{subject to} \quad x_1 + x_2 \ge 3, \quad x_1 \le 6y, \quad x_1, x_2 \ge 0, \quad y \in \{0, 1\}$
+        \item $\displaystyle \min_{x, y} \; (x - 2)^2 + 3y \quad \text{subject to} \quad x \le 5y, \quad x \ge 0, \quad y \in \{0, 1\}$
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item LP: the objective and all constraints are linear, and all variables are continuous.
+        \item NLP: the variables are continuous, but the objective and the constraint are nonlinear (quadratic).
+        \item MILP: the objective and constraints are linear, and the problem mixes continuous variables ($x_1, x_2$) with a binary variable ($y$).
+        \item MINLP: the objective is nonlinear (quadratic in $x$), and the problem mixes a continuous variable ($x$) with a binary variable ($y$).
+    \end{enumerate}
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    For each of the following sets, determine whether it is a convex set; for each of the following functions, determine whether it is a convex function. Briefly justify your answers.
+    \begin{enumerate}[label=(\alph*)]
+        \item $\{\mathbf{x} \in \mathbb{R}^2 : x_1^2 + x_2^2 = 1\}$
+        \item $\{\mathbf{x} \in \mathbb{R}^2 : x_2 \ge x_1^2\}$
+        \item $\{x \in \mathbb{R} : x^2 \ge 1\}$
+        \item $f(x) = x^3$, for $x \in \mathbb{R}$
+        \item $f(\mathbf{x}) = x_1 x_2$, for $\mathbf{x} \in \mathbb{R}^2$
+        \item $f(\mathbf{x}) = \max\{g(\mathbf{x}), h(\mathbf{x})\}$, where $g$ and $h$ are convex functions on $\mathbb{R}^N$
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item Not convex. This is the unit circle (only the boundary, not the disk): the segment between $(1,0)$ and $(-1,0)$ passes through the origin, which is not in the set.
+        \item Convex. This is the region above the parabola $x_2 = x_1^2$. Since $x_1^2$ is a convex function, for any two points in the set the line segment between them stays above the parabola. (In general, the region above the graph of a convex function, its \emph{epigraph}, is a convex set.)
+        \item Not convex. The set is $(-\infty, -1] \cup [1, \infty)$: the segment between $-1$ and $1$ leaves the set (e.g., $0$ is not in the set).
+        \item Not convex. $f''(x) = 6x < 0$ for $x < 0$, so the second-order condition fails on part of the domain ($f$ is convex only when restricted to $x \ge 0$).
+        \item Not convex. The Hessian is $\nabla^2 f(\mathbf{x}) = \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix}$, with eigenvalues $\pm 1$, so it is indefinite. For example, along the line $x_2 = -x_1$, $f(\mathbf{x}) = -x_1^2$ is concave.
+        \item Convex. For any $\mathbf{x}_1, \mathbf{x}_2$ and $\lambda \in [0,1]$,
+        \[
+            f(\lambda \mathbf{x}_1 + (1-\lambda)\mathbf{x}_2) = \max\{g(\lambda \mathbf{x}_1 + (1-\lambda)\mathbf{x}_2),\, h(\lambda \mathbf{x}_1 + (1-\lambda)\mathbf{x}_2)\} \le \lambda f(\mathbf{x}_1) + (1-\lambda) f(\mathbf{x}_2),
+        \]
+        where the inequality uses convexity of $g$ and $h$ together with $g \le f$ and $h \le f$ at the endpoints. The pointwise maximum of convex functions is convex.
+    \end{enumerate}
+    
+\end{solution}
+
+
+% ---- Optimality conditions for unconstrained problems ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    For each of the following functions $f: \mathbb{R}^2 \to \mathbb{R}$ and points $\bar{\mathbf{x}}$, determine whether $\bar{\mathbf{x}}$ is a local minimum, a local maximum, a saddle point, or none of these. Justify your answers using the gradient and the Hessian.
+    \begin{enumerate}[label=(\alph*)]
+        \item $f(\mathbf{x}) = x_1^2 - 2x_1 + 4x_2^2$, \quad $\bar{\mathbf{x}} = (1, 0)^\top$
+        \item $f(\mathbf{x}) = -x_1^2 + 2x_1 x_2 - 2x_2^2$, \quad $\bar{\mathbf{x}} = (0, 0)^\top$
+        \item $f(\mathbf{x}) = x_1^2 + 4x_1 x_2 + x_2^2$, \quad $\bar{\mathbf{x}} = (0, 0)^\top$
+        \item $f(\mathbf{x}) = x_1^2 + x_2^2 - 2x_2$, \quad $\bar{\mathbf{x}} = (0, 0)^\top$
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item Local minimum. $\nabla f(\mathbf{x}) = (2x_1 - 2, 8x_2)^\top = \mathbf{0}$ at $\bar{\mathbf{x}} = (1,0)^\top$, so $\bar{\mathbf{x}}$ is a stationary point. The Hessian $\nabla^2 f = \begin{bmatrix} 2 & 0 \\ 0 & 8 \end{bmatrix}$ is positive definite, so $\bar{\mathbf{x}}$ is a (strict) local minimum.
+        \item Local maximum. $\nabla f(\mathbf{x}) = (-2x_1 + 2x_2, 2x_1 - 4x_2)^\top = \mathbf{0}$ at $\bar{\mathbf{x}} = (0,0)^\top$. The Hessian $\nabla^2 f = \begin{bmatrix} -2 & 2 \\ 2 & -4 \end{bmatrix}$ has negative trace ($-6$) and positive determinant ($8 - 4 = 4$), so both eigenvalues are negative: the Hessian is negative definite and $\bar{\mathbf{x}}$ is a (strict) local maximum.
+        \item Saddle point. $\nabla f(\mathbf{x}) = (2x_1 + 4x_2, 4x_1 + 2x_2)^\top = \mathbf{0}$ at $\bar{\mathbf{x}} = (0,0)^\top$. The Hessian $\nabla^2 f = \begin{bmatrix} 2 & 4 \\ 4 & 2 \end{bmatrix}$ has eigenvalues $6$ and $-2$ (determinant $4 - 16 = -12 < 0$), so it is indefinite: $\bar{\mathbf{x}}$ is a saddle point ($f$ increases along $(1,1)^\top$ and decreases along $(1,-1)^\top$).
+        \item None of these. $\nabla f(\mathbf{x}) = (2x_1, 2x_2 - 2)^\top$, so $\nabla f(\bar{\mathbf{x}}) = (0, -2)^\top \neq \mathbf{0}$: $\bar{\mathbf{x}}$ is not a stationary point, and therefore cannot be a local minimum, local maximum, or saddle point. (The only stationary point of this function is $(0,1)^\top$.)
+    \end{enumerate}
+    
+\end{solution}
+
+
+% ---- Algorithms for unconstrained optimization ----
 \begin{exercise} % 2020 Participation quiz L11
     Estimate the path taken by the steepest-descent method with large and small step sizes.
 
@@ -1828,6 +2229,216 @@ Finally, when gradient information is unavailable, whether due to noisy function
     \end{tikzpicture}
 \end{solution}
 
+\begin{exercise} % 2025 Review 1 Nathan Morgan
+    (*) Consider optimization algorithms with step updates of the form $\mathbf{x}_{i+1} = \mathbf{x}_i + \alpha d$ where $d$ is a descent direction. To choose the step size $\alpha$, we model the objective along the step by its second-order Taylor expansion:
+    \[
+        m(\alpha) = f(\mathbf{x}_i) + \alpha \nabla f(\mathbf{x}_i)^\top d + \tfrac{1}{2}\alpha^2 d^\top \nabla^2 f(\mathbf{x}_i)\, d.
+    \]
+    Suppose we design the algorithm treating this model as exact; that is, we choose the optimal step size $\alpha_{\text{opt}}$ that minimizes $m(\alpha)$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Derive $\alpha_{\text{opt}}$ for steepest descent, where $d = -\nabla f(\mathbf{x}_i)$.
+        \item Derive $\alpha_{\text{opt}}$ for Newton's method, where $d = -(\nabla^2 f(\mathbf{x}_i))^{-1}\nabla f(\mathbf{x}_i)$.
+    \end{enumerate}
+\end{exercise}
+
+\begin{solution}
+    \begin{enumerate}[label=(\alph*)]
+        \item With $d = -\nabla f(\mathbf{x}_i)$, the model becomes:
+        \[
+            m(\alpha) = f(\mathbf{x}_i) - \alpha \|\nabla f(\mathbf{x}_i)\|_2^2 + \tfrac{1}{2}\alpha^2 \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)
+        \]
+        Minimizing with respect to $\alpha$:
+        \[
+            \frac{dm}{d\alpha} = -\|\nabla f(\mathbf{x}_i)\|_2^2 + \alpha \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i) = 0
+        \]
+        Thus:
+        \[
+            \alpha_{\text{opt}} = \frac{\nabla f(\mathbf{x}_i)^\top \nabla f(\mathbf{x}_i)}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)} = \frac{\|\nabla f(\mathbf{x}_i)\|_2^2}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)}
+        \]
+        
+        \item With $d = -\mathbf{H}^{-1}\mathbf{g}$ where $\mathbf{g} = \nabla f(\mathbf{x}_i)$ and $\mathbf{H} = \nabla^2 f(\mathbf{x}_i)$:
+        \[
+            m(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top (\mathbf{H}^{-1})^\top \mathbf{H} \mathbf{H}^{-1} \mathbf{g}
+        \]
+        Since $\mathbf{H}$ is symmetric, $(\mathbf{H}^{-1})^\top = \mathbf{H}^{-1}$, so:
+        \[
+            m(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g}
+        \]
+        Minimizing:
+        \[
+            \frac{dm}{d\alpha} = -\mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} = 0
+        \]
+        Thus $\alpha_{\text{opt}} = 1$. The Newton step is already optimal to the quadratic approximation when $\mathbf{H} \succ 0$.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider the convex quadratic optimization problem
+    \[
+        \min_{\mathbf{x} \in \mathbb{R}^N} \; f(\mathbf{x}) = \frac{1}{2} \mathbf{x}^\top \mathbf{A} \mathbf{x} - \mathbf{b}^\top \mathbf{x},
+    \]
+    where $\mathbf{A} \in \mathbb{R}^{N \times N}$ is symmetric positive definite, with eigenvalues $0 < \lambda_{\min} \le \dots \le \lambda_{\max}$, and $\mathbf{b} \in \mathbb{R}^N$. We minimize $f$ by gradient descent with a fixed step size $\omega > 0$.
+    \begin{enumerate}[label=(\alph*)]
+        \item Write the gradient descent iteration, and show that it is exactly the Richardson iteration (\Cref{sec:condition-number-convergence-rate}) applied to a linear system. What is that linear system?
+        \item Let $\mathbf{e}_k = \mathbf{x}_k - \mathbf{x}^*$ be the error at iteration $k$, where $\mathbf{x}^*$ is the minimizer. Derive the recursion satisfied by $\mathbf{e}_k$, and state the condition under which the iteration converges for every starting point. For which step sizes $\omega > 0$ does gradient descent converge?
+        \item Express the spectral radius of the iteration matrix in terms of $\omega$, $\lambda_{\min}$, and $\lambda_{\max}$, and find the step size $\omega_{\text{opt}}$ that minimizes it.
+        \item Express the resulting convergence rate in terms of the condition number $\kappa(\mathbf{A})$. What happens as $\kappa(\mathbf{A}) \to \infty$, and roughly how many iterations are needed to reduce the error by a factor of $\epsilon$?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item The gradient is $\nabla f(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$, so gradient descent with fixed step size $\omega$ reads
+        \[
+            \mathbf{x}_{k+1} = \mathbf{x}_k - \omega \nabla f(\mathbf{x}_k) = \mathbf{x}_k - \omega (\mathbf{A}\mathbf{x}_k - \mathbf{b}) = \mathbf{x}_k + \omega (\mathbf{b} - \mathbf{A}\mathbf{x}_k),
+        \]
+        which is exactly the Richardson iteration with relaxation parameter $\omega$. Because $\mathbf{A} \succ \mathbf{0}$, the function $f$ is strictly convex and its unique minimizer is the stationary point $\nabla f(\mathbf{x}^*) = \mathbf{0}$, i.e., the solution of
+        \[
+            \mathbf{A}\mathbf{x}^* = \mathbf{b}.
+        \]
+        Minimizing a convex quadratic and solving a symmetric positive definite linear system are therefore the same problem, and gradient descent on the former is the Richardson method on the latter.
+        \item Since $\mathbf{A}\mathbf{x}^* = \mathbf{b}$, the minimizer is a fixed point: $\mathbf{x}^* = \mathbf{x}^* + \omega(\mathbf{b} - \mathbf{A}\mathbf{x}^*)$. Subtracting this from the iteration in (a),
+        \[
+            \mathbf{e}_{k+1} = (\mathbf{x}_k - \mathbf{x}^*) - \omega(\mathbf{A}\mathbf{x}_k - \mathbf{A}\mathbf{x}^*) = (\mathbf{I} - \omega \mathbf{A})\, \mathbf{e}_k,
+            \qquad \text{so} \qquad
+            \mathbf{e}_k = (\mathbf{I} - \omega\mathbf{A})^k \mathbf{e}_0.
+        \]
+        The error tends to zero for every $\mathbf{e}_0$ if and only if $\rho(\mathbf{I} - \omega\mathbf{A}) < 1$. Since $\mathbf{A}$ is symmetric, $\mathbf{I} - \omega\mathbf{A}$ has the same eigenvectors as $\mathbf{A}$ and eigenvalues $1 - \omega\lambda_i$, so the requirement is $|1 - \omega \lambda_i| < 1$, i.e., $0 < \omega \lambda_i < 2$, for every $i$. The binding case is the largest eigenvalue, so gradient descent converges precisely for
+        \[
+            0 < \omega < \frac{2}{\lambda_{\max}}.
+        \]
+        (Compare the part of Exercise~\ref{ex:tf-optimization} on gradient descent with a fixed step size, where too large a step makes the objective increase.)
+        \item The spectral radius is
+        \[
+            \rho(\omega) = \max_i |1 - \omega \lambda_i| = \max\big( |1 - \omega\lambda_{\min}|,\; |1 - \omega\lambda_{\max}| \big),
+        \]
+        because $\lambda \mapsto 1 - \omega\lambda$ is decreasing, so the extreme values over the eigenvalues are attained at $\lambda_{\min}$ and $\lambda_{\max}$. Each term is a V-shaped (piecewise linear) function of $\omega$, with vertices at $\omega = 1/\lambda_{\min}$ and $\omega = 1/\lambda_{\max}$ respectively, so their maximum is minimized where the decreasing branch of the first meets the increasing branch of the second:
+        \[
+            1 - \omega\lambda_{\min} = \omega\lambda_{\max} - 1
+            \quad \Longrightarrow \quad
+            \omega_{\text{opt}} = \frac{2}{\lambda_{\min} + \lambda_{\max}}.
+        \]
+        \item Substituting $\omega_{\text{opt}}$ into either branch,
+        \[
+            \rho(\omega_{\text{opt}}) = 1 - \frac{2\lambda_{\min}}{\lambda_{\min} + \lambda_{\max}} = \frac{\lambda_{\max} - \lambda_{\min}}{\lambda_{\max} + \lambda_{\min}} = \frac{\kappa(\mathbf{A}) - 1}{\kappa(\mathbf{A}) + 1},
+        \]
+        where the last step divides numerator and denominator by $\lambda_{\min}$ and uses $\kappa(\mathbf{A}) = \lambda_{\max}/\lambda_{\min}$ for a symmetric positive definite matrix. As $\kappa(\mathbf{A}) \to \infty$ we get $\rho \to 1$, and convergence becomes arbitrarily slow. Quantitatively, the error contracts by a factor $\rho$ per iteration, so reducing it by a factor $\epsilon$ requires about $\log(1/\epsilon) / \log(1/\rho)$ iterations; since $\rho = (\kappa-1)/(\kappa+1) \approx 1 - 2/\kappa$ for large $\kappa$, this is roughly
+        \[
+            \frac{\kappa(\mathbf{A})}{2} \log\frac{1}{\epsilon}
+        \]
+        iterations, growing linearly with the condition number.
+
+        \emph{Side note.} This is the precise version of the statement that gradient descent is slow on ill-conditioned problems (long, narrow valleys), and it is the same condition number that governs the convergence of iterative methods for linear systems.
+    \end{enumerate}
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Recall from Exercise~\ref{ex:cholesky} that the Cholesky factorization of a symmetric matrix succeeds if and only if that matrix is positive definite, so simply attempting the factorization is a cheap test for positive definiteness. In MATLAB, the two-output form \texttt{[L, p] = chol(A, 'lower')} performs exactly this test without raising an error: it returns \texttt{p = 0} when \texttt{A} is positive definite, and \texttt{p > 0} otherwise.
+
+    Below is a MATLAB implementation of a modified Newton method for $\min_{\mathbf{x}} f(\mathbf{x})$, with two blanks marked \texttt{???}.
+    \lstinputlisting{code/matlab/optimization/newton_fill.m}
+    \begin{enumerate}[label=(\alph*)]
+        \item Why must the matrix \texttt{H + delta*eye(n)} used in the linear solve be positive definite?
+        \item A student proposes deleting the \texttt{while} loop and simply setting \texttt{delta = 1e-3} at every iteration. What is wrong with this?
+        \item Fill in the first blank, which decides when the shift is large enough.
+        \item Fill in the second blank, which decides which of the two statuses is reported. Explain why the two reports differ: what can be concluded about \texttt{x} in each case?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item So that the search direction \texttt{d} is guaranteed to be a descent direction. Writing $\mathbf{B} = \mathbf{H} + \delta\mathbf{I}$, the line \texttt{d = L'\textbackslash(L\textbackslash(-g))} solves $\mathbf{B}\mathbf{d} = -\mathbf{g}$, so
+        \[
+            \mathbf{g}^\top \mathbf{d} = -\mathbf{g}^\top \mathbf{B}^{-1} \mathbf{g},
+        \]
+        which is negative for every $\mathbf{g} \neq \mathbf{0}$ if and only if $\mathbf{B}^{-1} \succ \mathbf{0}$, i.e., if and only if $\mathbf{B} \succ \mathbf{0}$. Without this, the backtracking line search may fail to find any step that decreases $f$. The Hessian $\nabla^2 f(\mathbf{x})$ itself need not be positive definite away from a minimizer, which is exactly why the modification is needed.
+        \item A fixed shift is both insufficient and harmful.
+
+        It does not achieve what the modification is for. The eigenvalues of $\mathbf{H} + \delta\mathbf{I}$ are $\lambda_i(\mathbf{H}) + \delta$, so $\mathbf{B} \succ \mathbf{0}$ requires $\delta > -\lambda_{\min}(\mathbf{H})$. Whenever the Hessian has an eigenvalue less than or equal to $-10^{-3}$, the shifted matrix is still not positive definite and \texttt{d} need not be a descent direction, which is precisely the situation the modification exists to handle. No fixed choice of $\delta$ works at every iteration, because $\lambda_{\min}(\mathbf{H})$ changes from iteration to iteration and is not bounded below in general.
+
+        It also does harm when it is not needed. Near a minimizer the Hessian is positive definite and no modification is required; using $\mathbf{H} + \delta\mathbf{I}$ there means the step is no longer the true Newton step, which degrades the local convergence from quadratic to linear.
+
+        Finally, it destroys the certificate of part (d): with $\delta > 0$ at every iteration, the algorithm can never report that it has found a local minimum.
+
+        The loop in the code avoids all three problems: the shift is zero whenever $\mathbf{H}$ is already positive definite, and otherwise it is doubled until it is provably large enough.
+        \item The first blank is \texttt{p == 0}, which holds exactly when the Cholesky factorization succeeded, i.e., when \texttt{H + delta*eye(n)} is positive definite. Since the eigenvalues of $\mathbf{H} + \delta\mathbf{I}$ are $\lambda_i(\mathbf{H}) + \delta$, the shifted matrix is positive definite as soon as $\delta > -\lambda_{\min}(\mathbf{H})$, so the doubling terminates after finitely many attempts. Note that the factorization is not wasted work: the factor \texttt{L} of the successful attempt is reused in the line \texttt{d = L'\textbackslash(L\textbackslash(-g))}, which costs $O(n^2)$ for two triangular solves instead of a fresh $O(n^3)$ solve.
+        \item The second blank is \texttt{delta == 0}.
+
+        Reaching that branch at all means \texttt{norm(g) <= tol}, i.e., $\nabla f(\mathbf{x}) \approx \mathbf{0}$: the first-order necessary condition holds, so \texttt{x} is (to within the tolerance) a stationary point. That by itself does not distinguish a minimum from a maximum or a saddle point, which is all the second status claims.
+
+        The stronger conclusion needs curvature, and the modification loop has already computed it. If \texttt{delta} is still $0$, the Cholesky factorization of \texttt{H} itself succeeded, which happens if and only if $\nabla^2 f(\mathbf{x}) \succ \mathbf{0}$. Together with $\nabla f(\mathbf{x}) = \mathbf{0}$ this is exactly the second-order \emph{sufficient} condition, so \texttt{x} is a strict local minimum. If instead \texttt{delta > 0}, the factorization of \texttt{H} failed, the Hessian is not positive definite, and \texttt{x} may well be a saddle point; only the first-order statement can be made.
+
+        Two remarks. First, the shift was introduced for a purely algorithmic reason, to guarantee a descent direction, but it doubles as a certificate of second-order optimality at no extra cost: the algorithm never needs to compute an eigenvalue to classify its own answer. Second, this is why the modification loop is placed \emph{before} the convergence test rather than after it, as would be more natural: the test needs \texttt{delta}. (As always with a finite tolerance, the conclusions are approximate: the gradient is only small, not exactly zero.)
+    \end{enumerate}
+    The completed code:
+    \lstinputlisting{code/matlab/optimization/newton.m}
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    A student writes the following MATLAB function for the unconstrained problem $\min_{\mathbf{x}} f(\mathbf{x})$ and calls it Newton's method:
+    \lstinputlisting{code/matlab/optimization/frozen_newton.m}
+    Run on a problem where Newton's method is known to converge quadratically, and started close to the solution, the algorithm is observed to converge, but only \emph{linearly}: the error is seen to contract by a roughly constant factor at every iteration, instead of the number of correct digits doubling.
+
+    Explain why the convergence is not quadratic.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The Hessian is evaluated once, at $\mathbf{x}_0$, and then frozen, whereas Newton's method evaluates it at the \emph{current} iterate. Newton's quadratic convergence comes from that re-evaluation: as the iterates approach $\mathbf{x}^*$, the Hessian used in the step approaches $\nabla^2 f(\mathbf{x}^*)$, the first-order term in the error cancels, and only a term of order $\|\mathbf{e}_k\|^2$ is left. With a frozen Hessian there is no such cancellation, so the error is multiplied by a fixed matrix at every step, which is linear convergence.
+
+    \emph{Side note.} Writing $\mathbf{H}_0 = \nabla^2 f(\mathbf{x}_0)$ and expanding the gradient about $\mathbf{x}^*$, where $\nabla f(\mathbf{x}^*) = \mathbf{0}$, gives $\mathbf{g}_k = \nabla^2 f(\mathbf{x}^*)\, \mathbf{e}_k + O(\|\mathbf{e}_k\|^2)$, so the update $\mathbf{x}_{k+1} = \mathbf{x}_k - \mathbf{H}_0^{-1}\mathbf{g}_k$ satisfies
+    \[
+        \mathbf{e}_{k+1} = \left( \mathbf{I} - \mathbf{H}_0^{-1} \nabla^2 f(\mathbf{x}^*) \right) \mathbf{e}_k + O(\|\mathbf{e}_k\|^2),
+    \]
+    with asymptotic rate $\rho\left( \mathbf{I} - \mathbf{H}_0^{-1} \nabla^2 f(\mathbf{x}^*) \right)$. The linear term vanishes only when $\mathbf{H}_0 = \nabla^2 f(\mathbf{x}^*)$; for a quadratic objective the Hessian is constant, so there the two algorithms coincide and both converge in a single step.
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider minimizing the function
+    \[
+        f(\mathbf{x}) = \sum_{j=1}^{M} \left( \mathbf{a}_j^\top \mathbf{x} - b_j \right)^2, \qquad \mathbf{x} \in \mathbb{R}^N,
+    \]
+    where each $\mathbf{a}_j \in \mathbb{R}^N$ is a dense vector and $b_j \in \mathbb{R}$, and the number of terms $M$ need not equal $N$.
+    \begin{enumerate}[label=(\alph*)]
+        \item What is the computational complexity of performing one gradient descent step $\mathbf{x}_{k+1} = \mathbf{x}_k - \alpha_k \nabla f(\mathbf{x}_k)$ (with a given step size $\alpha_k$)?
+        \item What is the computational complexity of performing one Newton step, i.e., solving $\nabla^2 f(\mathbf{x}_k)\, \mathbf{d}_k = -\nabla f(\mathbf{x}_k)$ and setting $\mathbf{x}_{k+1} = \mathbf{x}_k + \mathbf{d}_k$?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item $O(MN)$. The gradient is
+        \[
+            \nabla f(\mathbf{x}) = \sum_{j=1}^{M} 2 \left( \mathbf{a}_j^\top \mathbf{x} - b_j \right) \mathbf{a}_j.
+        \]
+        For each of the $M$ terms, computing the residual $\mathbf{a}_j^\top \mathbf{x} - b_j$ costs $O(N)$ (a dot product) and accumulating the scaled vector $2(\mathbf{a}_j^\top \mathbf{x} - b_j)\, \mathbf{a}_j$ costs another $O(N)$, for $O(MN)$ in total. The update $\mathbf{x}_k - \alpha_k \nabla f(\mathbf{x}_k)$ adds only $O(N)$, so one gradient descent step costs $O(MN)$.
+        \item $O(MN^2 + N^3)$. The Hessian is
+        \[
+            \nabla^2 f(\mathbf{x}) = \sum_{j=1}^{M} 2\, \mathbf{a}_j \mathbf{a}_j^\top,
+        \]
+        and forming it costs $O(N^2)$ per outer product, i.e., $O(MN^2)$ in total. Solving the $N \times N$ linear system $\nabla^2 f(\mathbf{x}_k)\, \mathbf{d}_k = -\nabla f(\mathbf{x}_k)$ by Gaussian elimination costs $O(N^3)$. One Newton step therefore costs $O(MN^2 + N^3)$, compared to $O(MN)$ for a gradient descent step.
+
+        \emph{Side note.} This is the classic trade-off: a Newton step is far more expensive, but Newton's method typically converges in far fewer iterations.
+    \end{enumerate}
+    
+\end{solution}
+
+
+% ---- Constrained optimization ----
 \begin{exercise} % 2020 Participation quiz L12
     Identify the solution to the constrained
     optimization problem
@@ -1997,153 +2608,173 @@ Finally, when gradient information is unavailable, whether due to noisy function
     Both conditions are satisfied, so $\mathbf{x} = [1.2,\; 1.2,\; 0.6]^\top$ satisfies the first-order necessary conditions and is a potential constrained minimum. Note that these are necessary but not sufficient conditions: we cannot determine from this check alone whether the point is a minimum or a maximum, and checking whether the Hessian is positive definite at this point is not sufficient to make that determination for a constrained problem.
 \end{solution}
 
-\begin{exercise} % 2025 Review 1 Nathan Morgan
-    Species A costs \$5 per mole. Species B costs \$3 per mole. We want to minimize the cost of material in a batch reactor.
-    \begin{enumerate}[label=(\alph*)]
-        \item Write the unconstrained minimization problem. Does it have a solution? If so, provide one; if not, explain why. [Hint: ``unconstrained'' means we do not even consider the nonnegativity of the amounts.]
-        \item Add the constraint that the total moles must equal 10 and we need at least 5 moles of B. What is the solution? Which constraints are active at the optimum? Sketch the objective gradient and the constraints to explain where the solution is located.
-        \item Instead of the constraint $n_B \geq 5$, suppose we require $n_A \geq 5$. What is the new solution? Which constraints are active at the optimum?
-    \end{enumerate}
-\end{exercise}
-
-\begin{solution}
-    Let $n_A$ and $n_B$ denote the moles of species A and B respectively.
+\begin{exercise} % 2026 Sungho Shin
     
-    \begin{enumerate}[label=(\alph*)]
-        \item The unconstrained problem is:
-        \[
-            \min_{n_A, n_B} f(n) = 5n_A + 3n_B
-        \]
-        No solution exists. Suppose $(n_A^\star, n_B^\star)$ were a solution; then $(n_A^\star - 1, n_B^\star)$ is also feasible (there are no constraints---not even nonnegativity) and has a strictly lower objective, contradicting optimality. The objective can thus be decreased without bound.
-
-        \item B costs the least, so we want to maximize it. The maximum value of $n_B$ given the equality constraint is $n_B = 10$, so the optimum is $n_A = 0$, $n_B = 10$. The equality constraint is active, but the inequality constraint $n_B \geq 5$ is inactive. In the sketch below, the feasible set is the segment of the line $n_A + n_B = 10$ with $n_B \geq 5$; since $f$ decreases in the direction $-\nabla f$, the solution is the endpoint of the segment farthest in that direction, $(n_A, n_B) = (0, 10)$.
-        \begin{center}
-        \begin{tikzpicture}[scale=0.42]
-            \draw[->] (0,0) -- (11.5,0) node[right] {$n_A$};
-            \draw[->] (0,0) -- (0,11.5) node[above] {$n_B$};
-            \draw[green!60!black, thick] (0,10) -- (10,0) node[below right, pos=0.6] {$n_A + n_B = 10$};
-            \draw[orange, dashed, thick] (0,5) -- (11,5) node[above, pos=0.85] {$n_B = 5$};
-            \draw[blue, ultra thick] (0,10) -- (5,5) node[above right, pos=0.6] {feasible set};
-            \draw[red, ->, thick] (7,7.5) -- +(1.47,0.88) node[right] {$\nabla f = [5,\, 3]^\top$};
-            \filldraw[blue] (0,10) circle (3.5pt) node[right=5pt] {optimum};
-        \end{tikzpicture}
-        \end{center}
-        
-        \item With the constraint $n_A \geq 5$ and the equality $n_A + n_B = 10$, we have $n_B \leq 5$. Now the objective is minimized at $n_B = 5$, giving $n_A = 5$. Both the equality constraint and the inequality constraint $n_A \geq 5$ are active at the optimum.
-    \end{enumerate}
-\end{solution}
-
-% Commented out: somewhat redundant to the preceding exercise (existence of an unconstrained minimizer).
-% \begin{exercise} % 2025 Review 1 Nathan Morgan
-%     Maximize the rate of reaction by adjusting concentration and temperature:
-%     \[
-%         \max_{c_A, T} r(c_A, T) = c_A \cdot (10 e^{-5/T})
-%     \]
-%     Reformulate this as a minimization problem. Does a finite minimizer exist? Explain.
-% \end{exercise}
-%
-% \begin{solution}
-%     To reformulate as a minimization problem, we minimize the negative of the rate:
-%     \[
-%         \min_{c_A, T} -r(c_A, T) = -c_A \cdot (10 e^{-5/T})
-%     \]
-%     Computing the gradient:
-%     \[
-%         \frac{\partial r}{\partial c_A} = 10 e^{-5/T}, \quad \frac{\partial r}{\partial T} = c_A \cdot 10 \cdot \frac{5}{T^2} e^{-5/T}
-%     \]
-%     For positive finite values of $c_A$ and $T$, both partial derivatives are strictly positive, so $\nabla(-r)$ never equals zero. The objective function $-r$ decreases without bound as either variable increases toward infinity, meaning there is no finite minimizer. The problem is unbounded below, indicating that additional constraints on concentrations and temperatures are needed to make the problem well-posed.
-% \end{solution}
-
-\begin{exercise} % 2025 Review 1 Nathan Morgan
-    A splitter separates an inlet flow of 3 L/s into two outlet streams such that one split contains twice as much material as the other.
-    \begin{enumerate}[label=(\alph*)]
-        \item Formulate this as a norm minimization problem by defining an error function that captures the constraints.
-        \item Is the solution of this norm minimization problem the same as the solution of the corresponding linear-algebra problem? Explain why.
-    \end{enumerate}
-\end{exercise}
-
-\begin{solution}
-    Let $v_1$ and $v_2$ denote the outlet flow rates. The constraints are $v_1 + v_2 = 3$ and $v_1 = 2v_2$.
-    
-    \begin{enumerate}[label=(\alph*)]
-        \item We can formulate this as minimizing the squared error:
-        \[
-            \min_{v} \left\| \begin{bmatrix} v_1 + v_2 - 3 \\ v_1 - 2v_2 \end{bmatrix} \right\|_2^2
-        \]
-        This is equivalent to minimizing the sum of squared constraint violations.
-        
-        \item Yes. The constraints form a square linear system with a unique solution:
-        \[
-            \begin{bmatrix} 1 & 1 \\ 1 & -2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 3 \\ 0 \end{bmatrix}
-            \quad\Rightarrow\quad v_1 = 2 \text{ L/s},\; v_2 = 1 \text{ L/s}.
-        \]
-        The error function is zero exactly at this solution and positive everywhere else, so the minimizer of the error norm coincides with the solution of the linear system.
-    \end{enumerate}
-\end{solution}
-
-\begin{exercise} % 2025 Review 1 Nathan Morgan
-    (*) Consider optimization algorithms with step updates of the form $\mathbf{x}_{i+1} = \mathbf{x}_i + \alpha d$ where $d$ is a descent direction. To choose the step size $\alpha$, we model the objective along the step by its second-order Taylor expansion:
+    Consider the equality-constrained optimization problem
     \[
-        m(\alpha) = f(\mathbf{x}_i) + \alpha \nabla f(\mathbf{x}_i)^\top d + \tfrac{1}{2}\alpha^2 d^\top \nabla^2 f(\mathbf{x}_i)\, d.
+    \begin{aligned}
+        \min_{x_1, x_2} \quad & x_1 + x_2 \\
+        \text{subject to} \quad & x_1^2 + x_2^2 = 2.
+    \end{aligned}
     \]
-    Suppose we design the algorithm treating this model as exact; that is, we choose the optimal step size $\alpha_{\text{opt}}$ that minimizes $m(\alpha)$.
     \begin{enumerate}[label=(\alph*)]
-        \item Derive $\alpha_{\text{opt}}$ for steepest descent, where $d = -\nabla f(\mathbf{x}_i)$.
-        \item Derive $\alpha_{\text{opt}}$ for Newton's method, where $d = -(\nabla^2 f(\mathbf{x}_i))^{-1}\nabla f(\mathbf{x}_i)$.
+        \item Find all points $(\mathbf{x}, \lambda)$ that satisfy the first-order necessary conditions of optimality.
+        \item For each point found in part (a), determine whether $\mathbf{x}$ is a local solution (a local minimum) of the problem.
     \end{enumerate}
+    
 \end{exercise}
 
 \begin{solution}
+    
     \begin{enumerate}[label=(\alph*)]
-        \item With $d = -\nabla f(\mathbf{x}_i)$, the model becomes:
+        \item With $c(\mathbf{x}) = x_1^2 + x_2^2 - 2$, the Lagrangian is
         \[
-            m(\alpha) = f(\mathbf{x}_i) - \alpha \|\nabla f(\mathbf{x}_i)\|_2^2 + \tfrac{1}{2}\alpha^2 \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)
+            L(\mathbf{x}, \lambda) = x_1 + x_2 - \lambda (x_1^2 + x_2^2 - 2),
         \]
-        Minimizing with respect to $\alpha$:
+        and the first-order necessary conditions are
+        \begin{align*}
+            \nabla_{\mathbf{x}} L &= \begin{bmatrix} 1 - 2\lambda x_1 \\ 1 - 2\lambda x_2 \end{bmatrix} = \mathbf{0}, \\
+            \nabla_{\lambda} L &= -(x_1^2 + x_2^2 - 2) = 0.
+        \end{align*}
+        The first two equations require $\lambda \neq 0$ and give $x_1 = x_2 = \frac{1}{2\lambda}$. Substituting into the constraint gives $2 x_1^2 = 2$, so $x_1 = \pm 1$. There are two solutions:
         \[
-            \frac{dm}{d\alpha} = -\|\nabla f(\mathbf{x}_i)\|_2^2 + \alpha \nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i) = 0
+            \mathbf{x} = (1, 1)^\top, \;\; \lambda = \tfrac{1}{2}
+            \qquad \text{and} \qquad
+            \mathbf{x} = (-1, -1)^\top, \;\; \lambda = -\tfrac{1}{2}.
         \]
-        Thus:
-        \[
-            \alpha_{\text{opt}} = \frac{\nabla f(\mathbf{x}_i)^\top \nabla f(\mathbf{x}_i)}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)} = \frac{\|\nabla f(\mathbf{x}_i)\|_2^2}{\nabla f(\mathbf{x}_i)^\top \nabla^2 f(\mathbf{x}_i) \nabla f(\mathbf{x}_i)}
-        \]
-        
-        \item With $d = -\mathbf{H}^{-1}\mathbf{g}$ where $\mathbf{g} = \nabla f(\mathbf{x}_i)$ and $\mathbf{H} = \nabla^2 f(\mathbf{x}_i)$:
-        \[
-            m(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top (\mathbf{H}^{-1})^\top \mathbf{H} \mathbf{H}^{-1} \mathbf{g}
-        \]
-        Since $\mathbf{H}$ is symmetric, $(\mathbf{H}^{-1})^\top = \mathbf{H}^{-1}$, so:
-        \[
-            m(\alpha) = f(\mathbf{x}_i) - \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \tfrac{1}{2}\alpha^2 \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g}
-        \]
-        Minimizing:
-        \[
-            \frac{dm}{d\alpha} = -\mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} + \alpha \mathbf{g}^\top \mathbf{H}^{-1}\mathbf{g} = 0
-        \]
-        Thus $\alpha_{\text{opt}} = 1$. The Newton step is already optimal to the quadratic approximation when $\mathbf{H} \succ 0$.
+        \item Only $\mathbf{x} = (-1,-1)^\top$ is a local solution. The feasible set (the circle of radius $\sqrt{2}$) is closed and bounded and the objective is continuous, so the problem attains its minimum and maximum, and both must occur at points satisfying the first-order necessary conditions. Comparing the objective values, $f(-1,-1) = -2 < 2 = f(1,1)$: the point $(-1,-1)^\top$ is the (global, hence local) minimum, while $(1,1)^\top$ is the constrained \emph{maximum}, not a local solution.
+
+        \emph{Side note.} This illustrates that the first-order necessary conditions alone do not certify local optimality: they are satisfied by minima, maxima, and saddle points of the constrained problem alike.
     \end{enumerate}
+    
 \end{solution}
 
-\begin{exercise} % 2025 Review 1 Nathan Morgan
-    True or False? Briefly explain your answer.
-    \begin{enumerate}[label=(\alph*)]
-        \item We can use Newton's method to find the minimum of $f([x_1, x_2]) = \max(x_1, 0) + \max(x_2, -2)$.
-        \item If the objective function is quadratic (e.g. $f(x) = x_1^2 + 10x_2^2$), using Newton's method will get us to the minimum in a single step.
-        \item If the objective function is quadratic (e.g. $f(x) = x_1^2 + 10x_2^2$), using the steepest descent algorithm with the optimal step size given by a quadratic approximation, will get us to the minimum in a single step.
-        \item We don't need to use Hessian modification if we use the BFGS method to estimate the Hessian.
-    \end{enumerate}
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider the equality-constrained optimization problem
+    \[
+    \begin{aligned}
+        \min_{x_1, x_2} \quad & x_1^2 + x_2^2 \\
+        \text{subject to} \quad & x_1 + x_2 = 2.
+    \end{aligned}
+    \]
+    You are given the candidate pair
+    \[
+        \bar{\mathbf{x}} = (1, 1)^\top, \qquad \bar{\lambda} = 1.
+    \]
+    Verify that this pair does not satisfy the first-order necessary conditions of optimality. Does it follow that $\bar{\mathbf{x}}$ is not a local solution?
+    
 \end{exercise}
 
 \begin{solution}
-    \begin{enumerate}[label=(\alph*)]
-        \item False, Newton's method for optimization requires the derivative of the gradient, but for the $\max$ function, there are points where the second derivative isn't defined.
-        
-        \item True if the function is convex. Newton's method gets us to a stationary point, which may be a maximum or saddle point instead.
+    
+    The pair does not satisfy them. With $c(\mathbf{x}) = x_1 + x_2 - 2$, the Lagrangian is $L(\mathbf{x}, \lambda) = x_1^2 + x_2^2 - \lambda(x_1 + x_2 - 2)$, and at the given pair
+    \[
+        \nabla_{\mathbf{x}} L(\bar{\mathbf{x}}, \bar{\lambda}) = \begin{bmatrix} 2\bar{x}_1 - \bar{\lambda} \\ 2\bar{x}_2 - \bar{\lambda} \end{bmatrix} = \begin{bmatrix} 1 \\ 1 \end{bmatrix} \neq \mathbf{0}.
+    \]
+    It does not follow that $\bar{\mathbf{x}}$ is not a local solution, and in fact it is one. The first-order necessary conditions require that there \emph{exists some} multiplier making the Lagrangian stationary, not that a particular given multiplier does. Solving $2\bar{x}_i - \lambda = 0$ gives $\lambda = 2$, and the pair $(\bar{\mathbf{x}}, 2)$ satisfies both stationarity and feasibility ($1 + 1 = 2$). The objective is convex and the constraint is linear, so $\bar{\mathbf{x}}$ is in fact the global, hence local, minimum.
 
-        \item False, the quadratic approximation for optimal alpha is only searching in the direction of the negative gradient, which may not be pointing at the minimum.
+    \emph{Side note.} The supplied multiplier is simply incorrect; local optimality is a property of the point $\bar{\mathbf{x}}$, not of the multiplier handed to you.
+    
+\end{solution}
 
-        \item True, BFGS maintains a positive definite approximation of the Hessian by construction.
-    \end{enumerate}
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider the equality-constrained quadratic optimization problem
+    \[
+    \begin{aligned}
+        \min_{\mathbf{x} \in \mathbb{R}^N} \quad & \frac{1}{2} \mathbf{x}^\top \mathbf{Q} \mathbf{x} + \mathbf{q}^\top \mathbf{x} \\
+        \text{subject to} \quad & \mathbf{A}\mathbf{x} = \mathbf{b},
+    \end{aligned}
+    \]
+    where $\mathbf{Q} \in \mathbb{R}^{N \times N}$ is symmetric, $\mathbf{q} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{M \times N}$, and $\mathbf{b} \in \mathbb{R}^M$. Write the linear system of equations that corresponds to the first-order necessary conditions of optimality.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The constraints in standard form are $\mathbf{c}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b} = \mathbf{0}$, so the Lagrangian is
+    \[
+        L(\mathbf{x}, \boldsymbol{\lambda}) = \frac{1}{2} \mathbf{x}^\top \mathbf{Q} \mathbf{x} + \mathbf{q}^\top \mathbf{x} - \boldsymbol{\lambda}^\top (\mathbf{A}\mathbf{x} - \mathbf{b}).
+    \]
+    The first-order necessary conditions require the Lagrangian to be stationary with respect to both $\mathbf{x}$ and $\boldsymbol{\lambda}$:
+    \begin{align*}
+        \nabla_{\mathbf{x}} L &= \mathbf{Q}\mathbf{x} + \mathbf{q} - \mathbf{A}^\top \boldsymbol{\lambda} = \mathbf{0}, \\
+        \nabla_{\boldsymbol{\lambda}} L &= -(\mathbf{A}\mathbf{x} - \mathbf{b}) = \mathbf{0}.
+    \end{align*}
+    Both conditions are linear in $(\mathbf{x}, \boldsymbol{\lambda})$, so they can be stacked into the linear system
+    \[
+        \begin{bmatrix} \mathbf{Q} & -\mathbf{A}^\top \\ \mathbf{A} & \mathbf{0} \end{bmatrix}
+        \begin{bmatrix} \mathbf{x} \\ \boldsymbol{\lambda} \end{bmatrix}
+        =
+        \begin{bmatrix} -\mathbf{q} \\ \mathbf{b} \end{bmatrix}.
+    \]
+    
+\end{solution}
+
+
+
+% ---- Interior-point methods ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    The interior-point method applied to
+    \[
+    \begin{aligned}
+        \min_{x_1, x_2} \quad & (x_1 - 2)^2 + (x_2 - 1)^2 \\
+        \text{subject to} \quad & x_1 + x_2 \le 2
+    \end{aligned}
+    \]
+    solves a sequence of barrier subproblems
+    \[
+        \min_{\mathbf{x}} \; \phi(\mathbf{x}, \mu) = (x_1 - 2)^2 + (x_2 - 1)^2 - \mu \log\big(h(\mathbf{x})\big),
+        \qquad h(\mathbf{x}) = 2 - x_1 - x_2 .
+    \]
+    The following MATLAB function is meant to minimize one such subproblem by Newton's method.
+    \lstinputlisting{code/matlab/optimization/barrier_newton_buggy.m}
+    Called with \texttt{x0 = [1; 0]}, \texttt{mu = 1} and \texttt{tol = 1e-10}, it fails: the iterates leave the feasible region, where $h(\mathbf{x}) \le 0$ and the barrier is not defined. The function contains one bug. Find it and give the corrected line.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The Hessian is wrong: the code uses the Hessian of the objective alone and ignores the barrier term. Differentiating $\phi$ twice,
+    \[
+        \nabla^2_{\mathbf{x}} \phi(\mathbf{x}, \mu)
+        = \nabla^2 f(\mathbf{x}) - \frac{\mu}{h(\mathbf{x})} \nabla^2 h(\mathbf{x}) + \frac{\mu}{h(\mathbf{x})^2} \nabla h(\mathbf{x}) \nabla h(\mathbf{x})^\top .
+    \]
+    Here $\nabla h = (-1,-1)^\top$ and $\nabla^2 h = \mathbf{0}$, so the middle term drops out but the last one does not. The corrected line is
+    \[
+        \texttt{H = [2 0; 0 2] + (mu/h\textasciicircum 2)*[1 1; 1 1];}
+    \]
+    (The gradient in the code is already correct.) With this change the function converges from \texttt{x0 = [1; 0]} to $\mathbf{x} = (1.190983, 0.190983)^\top$, which is the exact minimizer of the barrier subproblem for $\mu = 1$.
+
+    \emph{Side note.} Although the constraint is linear, the barrier $-\mu\log h(\mathbf{x})$ is not, and the term it contributes grows like $1/h^2$ as the iterate approaches the boundary. That growth is what makes the Newton step shorten near the boundary; omitting it leaves the steps too long, which is why the buggy version walks straight out of the feasible region.
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    We want to solve the inequality-constrained optimization problem
+    \[
+    \begin{aligned}
+        \min_{x_1, x_2} \quad & (x_1 - 3)^2 + x_2^2 \\
+        \text{subject to} \quad & x_1 \le 1
+    \end{aligned}
+    \]
+    using the interior-point method: with $h(\mathbf{x}) = 1 - x_1$, we minimize the barrier subproblem
+    \[
+        \min_{\mathbf{x}} \; \phi(\mathbf{x}, \mu) = (x_1 - 3)^2 + x_2^2 - \mu \log\big(h(\mathbf{x})\big)
+    \]
+    with Newton's method for a decreasing sequence of barrier parameters $\mu$, starting from the initial point $\mathbf{x}_0 = (2, 0)^\top$. Identify the potential issue with this setup.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The initial point is infeasible, and the interior-point method requires a \emph{strictly feasible} starting point. At $\mathbf{x}_0 = (2, 0)^\top$ we have $h(\mathbf{x}_0) = 1 - 2 = -1 < 0$, so the barrier term $-\mu \log(h(\mathbf{x}_0)) = -\mu \log(-1)$ is undefined: the barrier objective $\phi$ and its derivatives cannot even be evaluated at $\mathbf{x}_0$, and Newton's method cannot start. (A starting point exactly on the boundary, with $h(\mathbf{x}_0) = 0$, fails as well, since $\log(0^+) = -\infty$.)
+
+    \emph{Side note.} The barrier only acts as a wall when approached \emph{from the interior}; it says nothing about, and cannot repair, infeasibility. The fix is to start from a strictly feasible point with $h(\mathbf{x}_0) > 0$ (here, any point with $x_1 < 1$, e.g., $\mathbf{x}_0 = (0,0)^\top$); for problems where a strictly feasible point is not obvious, a preliminary (``phase I'') problem is solved to find one, or an infeasible-start variant of the method must be used.
+    
 \end{solution}
 
 %%% Local Variables:
