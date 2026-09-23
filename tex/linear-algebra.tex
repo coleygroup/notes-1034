@@ -1586,6 +1586,7 @@ Since $\alpha < 1$ for convergent systems, a smaller $\alpha$ results in faster 
 In practice, Gauss-Seidel is preferred over Jacobi when faster convergence is desired and when the system structure permits sequential updates without significant computational overhead. For large-scale systems where parallel computation is essential, Jacobi may still be advantageous despite its slower convergence rate.
 
 \subsection{Condition Number and Convergence Rate}
+\label{sec:condition-number-convergence-rate}
 To understand the impact of the condition number on the convergence rate of iterative methods, we consider the Richardson method, an iterative method defined by the update rule
 \begin{equation*}
     \mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega (\mathbf{b} - \mathbf{A}\mathbf{x}^{(k)})
@@ -2084,6 +2085,7 @@ Plugging these results back in,
 \end{solution}
 
 \begin{exercise} % 2026 conceptual questions
+    \label{ex:cholesky}
     The \emph{Cholesky factorization} decomposes a symmetric matrix $\mathbf{A} \in \mathbb{R}^{n \times n}$ as $\mathbf{A} = \mathbf{L}\mathbf{L}^\top$, where $\mathbf{L}$ is lower triangular.
     The algorithm computes the entries of $\mathbf{L}$ column by column: for $j = 1, 2, \dots, n$,
     \begin{equation*}
