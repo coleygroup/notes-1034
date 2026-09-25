@@ -1334,6 +1334,443 @@ This chapter has introduced several important concepts and techniques for solvin
 
 
 \section{Exercises}
+% Exercises are ordered to follow the sections of this chapter.
+
+%% ---- Review: collected true/false ----
+\begin{exercise} % 2026 Sungho Shin - collected true/false problems
+    \label{ex:tf-nle}
+    
+    True or False? Briefly explain your answers. For a statement that is false, it is enough to give a counterexample.
+    \begin{enumerate}[label=(\alph*)]
+        \item Newton's method requires computing the inverse of the Jacobian at every step.
+        \item The Newton step evaluated at a root is always the zero step.
+        \item A nonlinear system either has no solutions, exactly one solution, or infinitely many solutions, but never a finite number greater than one.
+        \item Newton's method may converge to different solutions from different starting points, primarily because of finite numerical precision.
+        \item Saying that the convergence order is quadratic means that the error is at least halved at every iteration.
+        \item The step size $\epsilon = 10^{-8}$ is known to give the most accurate finite-difference derivative in double precision. The same $\epsilon$ is therefore also the most effective choice in quadruple precision.
+        \item If the factor $1/2$ in the backtracking line search of the damped Newton method is replaced by $1/4$, the method will fail to converge.
+        \item If the undamped Newton method fails to converge from a given starting point, then the damped Newton method started from the same point will fail as well; damping only reduces the error.
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item False. The step is defined by $\mathbf{J}(\mathbf{x}_k)\,\mathbf{d}_k = -\mathbf{f}(\mathbf{x}_k)$, which is a \emph{linear system}. In practice it is solved by factorizing $\mathbf{J}$ (Gaussian elimination), never by forming $\mathbf{J}^{-1}$ and multiplying.
+
+        \emph{Side note.} Forming the inverse costs more than a factorization and is less numerically stable, and for a sparse Jacobian the inverse is generally dense even when $\mathbf{J}$ is not, so it can be far more expensive to store.
+        \item True, whenever the step is defined. At a root $\mathbf{f}(\mathbf{x}^*) = \mathbf{0}$, so $\mathbf{d} = -\mathbf{J}(\mathbf{x}^*)^{-1}\mathbf{f}(\mathbf{x}^*) = \mathbf{0}$ provided $\mathbf{J}(\mathbf{x}^*)$ is nonsingular. A root is therefore a fixed point of the iteration: once there, the method stays there. (If $\mathbf{J}(\mathbf{x}^*)$ is singular the step is not defined at all.)
+        \item False. A system can have any finite number of solutions. For example, $f(x) = x^2 - 1 = 0$ has exactly two, and a polynomial of degree $N$ has at most $N$ distinct roots.
+        \item False. The limit reached depends on the starting point because each root has its own basin of attraction, and this is already true in exact arithmetic: the basins can be interleaved arbitrarily finely. Rounding can decide the outcome for a starting point that sits essentially on a basin boundary, but it is not the cause of the phenomenon.
+        \item False, for two separate reasons. First, a fixed reduction factor is the wrong description: halving the error at every iteration is \emph{linear} convergence with asymptotic error constant $C = 1/2$, whereas quadratic convergence means $\|\mathbf{e}_{k+1}\| \approx C\|\mathbf{e}_k\|^2$, so the number of correct digits roughly doubles rather than growing by a fixed amount.
+
+        Second, and more importantly, the order is an \emph{asymptotic} statement, a claim about the limit $k \to \infty$. It constrains the iterates only once they are close enough to the root, and says nothing about any particular iteration. Each step reduces the error at all only once $C\|\mathbf{e}_k\| < 1$, and at least halves it only once $C\|\mathbf{e}_k\| < 1/2$. Before that, the error can grow: a method that is ultimately quadratically convergent can still take early steps that move it further from the root, which is precisely the behavior damping exists to control.
+        \item False. The optimal step balances truncation error against subtractive cancellation, which gives $\epsilon \approx \sqrt{\epsilon_M}$ for a forward difference. In double precision $\epsilon_M \approx 2.2 \times 10^{-16}$, so $\sqrt{\epsilon_M} \approx 1.5 \times 10^{-8}$, which is where the value $10^{-8}$ comes from. In quadruple precision $\epsilon_M \approx 1.9 \times 10^{-34}$ and the optimal step is $\sqrt{\epsilon_M} \approx 1.4 \times 10^{-17}$. The best step size tracks the precision; it is not a universal constant.
+        \item False. The factor only controls how quickly the trial step is shortened. Any factor in $(0,1)$ works: with $1/4$ the step is cut more aggressively, so fewer trials are typically needed but the accepted step tends to be shorter. What guarantees progress is the acceptance test $\|\mathbf{f}(\mathbf{x}_k + \alpha\mathbf{d}_k)\|_p < \|\mathbf{f}(\mathbf{x}_k)\|_p$, not the particular factor.
+        \item False. Damping changes the global behavior of the method, not just the size of the error. The full step $\alpha = 1$ can overshoot so badly that the residual grows and the iterates diverge, while the backtracking line search rejects exactly those steps and forces $\|\mathbf{f}\|_p$ to decrease at every iteration. There are starting points from which the undamped method diverges and the damped method converges.
+    \end{enumerate}
+    
+\end{solution}
+
+%% ---- The Jacobian ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    Derive the Jacobian of the following functions directly from the definition, i.e., by computing $J_{ij} = \partial f_i / \partial x_j$.
+    \begin{enumerate}[label=(\alph*)]
+        \item $f(\mathbf{x}) = \mathbf{c}^\top \mathbf{x} + d$, where $\mathbf{c} \in \mathbb{R}^N$ and $d \in \mathbb{R}$, so that $f : \mathbb{R}^N \to \mathbb{R}$.
+        \item $\mathbf{f}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$, where $\mathbf{A} \in \mathbb{R}^{N \times M}$ and $\mathbf{b} \in \mathbb{R}^N$, so that $\mathbf{f} : \mathbb{R}^M \to \mathbb{R}^N$.
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item Writing the function out in components, $f(\mathbf{x}) = \sum_{k=1}^{N} c_k x_k + d$. Only the $k = j$ term depends on $x_j$, so
+        \[
+            \frac{\partial f}{\partial x_j} = c_j
+            \qquad \Longrightarrow \qquad
+            \mathbf{J}(\mathbf{x}) = \begin{bmatrix} c_1 & c_2 & \cdots & c_N \end{bmatrix} = \mathbf{c}^\top .
+        \]
+        The Jacobian is the \emph{row} vector $\mathbf{c}^\top \in \mathbb{R}^{1 \times N}$, not $\mathbf{c}$: for $f : \mathbb{R}^N \to \mathbb{R}$ the definition gives a $1 \times N$ matrix. It is constant, as it must be for an affine function.
+        \item The $i$th component is $f_i(\mathbf{x}) = \sum_{k=1}^{M} A_{ik} x_k - b_i$. Differentiating with respect to $x_j$ keeps only the $k = j$ term, and $b_i$ does not depend on $\mathbf{x}$, so
+        \[
+            \frac{\partial f_i}{\partial x_j} = A_{ij}
+            \qquad \Longrightarrow \qquad
+            \mathbf{J}(\mathbf{x}) = \mathbf{A} .
+        \]
+
+        \emph{Side note.} Both results say the same thing: the best linear approximation of a function that is already affine is the function itself. This is also why Newton's method solves a linear system exactly in one step: applied to $\mathbf{f}(\mathbf{x}) = \mathbf{A}\mathbf{x} - \mathbf{b}$, the first step gives $\mathbf{x}_1 = \mathbf{x}_0 - \mathbf{A}^{-1}(\mathbf{A}\mathbf{x}_0 - \mathbf{b}) = \mathbf{A}^{-1}\mathbf{b}$.
+    \end{enumerate}
+    
+\end{solution}
+
+%% ---- Linearization via Taylor expansions ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    You are given the one-dimensional Taylor theorem: for a twice continuously differentiable $\varphi : \mathbb{R} \to \mathbb{R}$,
+    \[
+        \varphi(t_0 + \Delta t) = \varphi(t_0) + \varphi'(t_0)\, \Delta t + O(\Delta t^2) .
+    \]
+    Use it to derive the first-order Taylor expansion of a system of two equations in two unknowns,
+    \[
+        \mathbf{f}(\mathbf{x} + \Delta\mathbf{x}) = \mathbf{f}(\mathbf{x}) + \mathbf{J}(\mathbf{x})\, \Delta\mathbf{x} + O\big(\|\Delta\mathbf{x}\|_2^2\big),
+        \qquad \mathbf{f} : \mathbb{R}^2 \to \mathbb{R}^2 .
+    \]
+    
+\end{exercise}
+
+\begin{solution}
+    
+    The one-dimensional theorem describes what happens as a single scalar argument is perturbed, so the first step is to turn the perturbation $\Delta\mathbf{x}$ into a scalar one. Write
+    \[
+        \Delta\mathbf{x} = s\,\mathbf{u}, \qquad s = \|\Delta\mathbf{x}\|_2, \qquad \|\mathbf{u}\|_2 = 1,
+    \]
+    so that the direction $\mathbf{u}$ is fixed and all of the size is carried by $s$. For each component $i = 1, 2$ define
+    \[
+        \varphi_i(s) = f_i(\mathbf{x} + s\,\mathbf{u}),
+    \]
+    which is a scalar function of a scalar. Applying the given theorem at $t_0 = 0$ with $\Delta t = s$,
+    \[
+        \varphi_i(s) = \varphi_i(0) + \varphi_i'(0)\, s + O(s^2),
+    \]
+    and by the chain rule $\varphi_i'(0) = \nabla f_i(\mathbf{x})^\top \mathbf{u}$. Substituting back, and using $s\,\mathbf{u} = \Delta\mathbf{x}$ and $s = \|\Delta\mathbf{x}\|_2$,
+    \[
+        f_i(\mathbf{x} + \Delta\mathbf{x}) = f_i(\mathbf{x}) + \nabla f_i(\mathbf{x})^\top \Delta\mathbf{x} + O\big(\|\Delta\mathbf{x}\|_2^2\big).
+    \]
+    Since $\nabla f_i(\mathbf{x})^\top$ is the $i$th row of $\mathbf{J}(\mathbf{x})$, stacking the two components gives
+    \[
+        \mathbf{f}(\mathbf{x} + \Delta\mathbf{x}) = \mathbf{f}(\mathbf{x}) + \mathbf{J}(\mathbf{x})\, \Delta\mathbf{x} + \mathbf{r},
+        \qquad r_i = O\big(\|\Delta\mathbf{x}\|_2^2\big) .
+    \]
+    Finally, a vector whose components are each $O(\|\Delta\mathbf{x}\|_2^2)$ is $O(\|\Delta\mathbf{x}\|_2^2)$ in the $2$-norm as well, because
+    \[
+        \|\mathbf{r}\|_2 = \sqrt{r_1^2 + r_2^2} \le \sqrt{2}\, \max_i |r_i| ,
+    \]
+    and the constant $\sqrt{2}$ is absorbed into the $O$. This gives the stated result.
+
+    \emph{Side note.} Nothing in the argument used $N = 2$. The same reduction to a scalar function along a fixed direction works for any $N$, with $\sqrt{2}$ replaced by $\sqrt{N}$ in the last step.
+    
+\end{solution}
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider the system of two equations
+    \[
+        \mathbf{f}(x, y) =
+        \begin{bmatrix}
+            x^2 y + e^{p x} - a \\
+            x + p y^2 - b
+        \end{bmatrix} = \mathbf{0},
+    \]
+    where $x$ and $y$ are the unknowns, $p$ is a parameter, and $a$ and $b$ are given data. Evaluate
+    \begin{enumerate}[label=(\alph*)]
+        \item $\nabla_{(x,y)} \mathbf{f}$, and
+        \item $\nabla_{p} \mathbf{f}$
+    \end{enumerate}
+    at $x = 1$, $y = 2$, $p = 1$, $a = 3$, $b = 2$. You may leave $e$ in your expressions.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item Differentiating each component with respect to each unknown,
+        \[
+            \nabla_{(x,y)} \mathbf{f} =
+            \begin{bmatrix}
+                2xy + p\,e^{px} & x^2 \\
+                1 & 2py
+            \end{bmatrix}
+            \;\overset{(1,2,1)}{=}\;
+            \begin{bmatrix}
+                4 + e & 1 \\
+                1 & 4
+            \end{bmatrix}.
+        \]
+        \item Differentiating each component with respect to the parameter,
+        \[
+            \nabla_{p} \mathbf{f} =
+            \begin{bmatrix}
+                x\,e^{px} \\
+                y^2
+            \end{bmatrix}
+            \;\overset{(1,2,1)}{=}\;
+            \begin{bmatrix}
+                e \\ 4
+            \end{bmatrix}.
+        \]
+    \end{enumerate}
+    The data $a$ and $b$ enter $\mathbf{f}$ additively, so they do not appear in either derivative.
+
+    \emph{Side note.} Note the shapes: $\nabla_{(x,y)}\mathbf{f}$ is $2 \times 2$ because there are two equations and two unknowns, while $\nabla_p \mathbf{f}$ is $2 \times 1$ because there is a single parameter. The second one is exactly the quantity a continuation method needs, since differentiating $\mathbf{f}(\mathbf{x}(p), p) = \mathbf{0}$ with respect to $p$ gives $\nabla_{(x,y)}\mathbf{f} \, \frac{d\mathbf{x}}{dp} = -\nabla_p \mathbf{f}$, which is how a solution branch is tracked as $p$ changes.
+    
+\end{solution}
+
+%% ---- Stopping criteria ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    The following MATLAB function implements Newton's method with a residual stopping test.
+    \lstinputlisting{code/matlab/nle/newton_residual.m}
+    It is called on $f(x) = e^{-x}$, whose derivative is $f'(x) = -e^{-x}$, starting from $x_0 = 0$ with \texttt{tol = 1e-8}. The function returns without error, reporting $x = 19$. Explain what has gone wrong, and suggest how the stopping test should be changed.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    Nothing is wrong with the code; the stopping test is being asked to do something it cannot. The equation $e^{-x} = 0$ has \emph{no solution}: $e^{-x} > 0$ for every finite $x$. What the residual test detects is only that $\|\mathbf{f}\|$ has become small, and for this function the residual tends to zero as $x \to \infty$ without any root being approached. At $x = 19$ the residual is $e^{-19} \approx 5.6 \times 10^{-9}$, below the tolerance, so the function reports success at a point that is not a root of anything.
+
+    The iterates make the situation clear. The Newton step is
+    \[
+        -\frac{f(x)}{f'(x)} = -\frac{e^{-x}}{-e^{-x}} = 1
+    \]
+    at every iterate, so the method simply marches to the right by one unit per iteration, and after $19$ steps the residual test is satisfied.
+
+    The fix is to require more than a small residual. Adding the step-size test
+    \[
+        \|\mathbf{x}_{k+1} - \mathbf{x}_k\|_p \le \varepsilon_R \|\mathbf{x}_{k+1}\|_p + \varepsilon_A
+    \]
+    catches this case immediately: the step here is exactly $1$ and never becomes small, so the two tests disagree and the iteration should not be declared converged.
+
+    \emph{Side note.} This is the complement of the failure mode discussed earlier in the chapter. There, the function was flat near a genuine root, so a small residual did not imply a nearby root. Here there is no root at all, and the residual still goes to zero. In both cases the lesson is the same: a small residual is evidence that the equations are nearly satisfied, not evidence that a solution exists or has been found.
+    
+\end{solution}
+
+%% ---- Convergence analysis ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    The three panels below show the error $\|\mathbf{e}_k\|$ against the iteration number $k$ for three different iterative methods, on a logarithmic vertical axis. For each panel, determine the order of convergence $q$ and, where it is defined, the asymptotic error constant $C$.
+    \begin{center}
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.30\textwidth, height=0.29\textwidth,
+        xlabel={$k$}, ylabel={$\|\mathbf{e}_k\|$}, title={(a)},
+        ymode=log, grid=both, grid style={gray!20},
+        xmin=0, xmax=8, ymin=1e-16, ymax=10, ytick={1e-15,1e-10,1e-5,1},
+        mark size=1.3pt, title style={yshift=-1ex},
+    ]
+        \addplot[blue, thick, mark=*] coordinates {(0,1) (1,0.5) (2,0.25) (3,0.125) (4,0.0625) (5,0.03125) (6,0.015625) (7,0.0078125) (8,0.00390625)};
+    \end{axis}
+    \end{tikzpicture}\hfill
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.30\textwidth, height=0.29\textwidth,
+        xlabel={$k$}, title={(b)},
+        ymode=log, grid=both, grid style={gray!20},
+        xmin=0, xmax=8, ymin=1e-16, ymax=10, ytick={1e-15,1e-10,1e-5,1},
+        mark size=1.3pt, title style={yshift=-1ex},
+    ]
+        \addplot[blue, thick, mark=*] coordinates {(0,1) (1,0.1) (2,0.01) (3,1e-3) (4,1e-4) (5,1e-5) (6,1e-6) (7,1e-7) (8,1e-8)};
+    \end{axis}
+    \end{tikzpicture}\hfill
+    \begin{tikzpicture}
+    \begin{axis}[
+        width=0.30\textwidth, height=0.29\textwidth,
+        xlabel={$k$}, title={(c)},
+        ymode=log, grid=both, grid style={gray!20},
+        xmin=0, xmax=8, ymin=1e-16, ymax=10, ytick={1e-15,1e-10,1e-5,1},
+        mark size=1.3pt, title style={yshift=-1ex},
+    ]
+        \addplot[blue, thick, mark=*] coordinates {(0,0.5) (1,0.25) (2,0.0625) (3,3.90625e-3) (4,1.52588e-5) (5,2.32831e-10) (6,5.42101e-20)};
+    \end{axis}
+    \end{tikzpicture}
+    \end{center}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    On a logarithmic vertical axis, linear convergence appears as a straight line, because $\|\mathbf{e}_{k+1}\| \approx C\|\mathbf{e}_k\|$ gives $\log\|\mathbf{e}_{k+1}\| \approx \log\|\mathbf{e}_k\| + \log C$, a constant drop per iteration. The slope of that line is $\log_{10} C$. Convergence of order $q > 1$ instead multiplies the exponent by $q$ at each step, so the curve bends steadily downward.
+    \begin{enumerate}[label=(\alph*)]
+        \item A straight line dropping by a factor of $2$ per iteration: linear convergence, $q = 1$, with $C = 1/2$.
+        \item A straight line dropping by a factor of $10$ per iteration, so again $q = 1$, now with $C = 1/10$. It is linear, exactly like (a), but with a smaller error constant: about one correct digit is gained per iteration, against $-\log_{10}(1/2) \approx 0.3$ digits in (a).
+        \item The curve bends downward, and the number of correct digits doubles at each step. This is quadratic convergence, $q = 2$. Reading consecutive values, $0.25 = (0.5)^2$, $0.0625 = (0.25)^2$, and $3.906 \times 10^{-3} = (0.0625)^2$, so $\|\mathbf{e}_{k+1}\| = \|\mathbf{e}_k\|^2$ and the asymptotic error constant is $C = 1$.
+    \end{enumerate}
+
+    \emph{Side note.} Panels (a) and (b) have the same \emph{order} and differ only in the constant, which is why order alone does not tell you which method is faster over a fixed number of iterations: (b) beats (c) for the first three iterations. What the higher order guarantees is the behavior once the error is small, and there the difference is decisive, since (c) passes $10^{-10}$ at $k = 5$ while (b) needs $k = 10$.
+    
+\end{solution}
+
+%% ---- Calculating the Jacobian ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    Consider the scalar function formed by composing the sine function with itself $N$ times,
+    \[
+        f_N(x) = \underbrace{\sin(\sin(\cdots \sin}_{N \text{ times}}(x)\cdots)) ,
+    \]
+    and take $N = 4$ to be concrete, so $f_4(x) = \sin(\sin(\sin(\sin(x))))$. We want $f_4'(x)$ at a single point.
+    \begin{enumerate}[label=(\alph*)]
+        \item Write $f_4'(x)$ out explicitly, as a formula in $x$ alone.
+        \item How many sine and cosine evaluations does it take to obtain the number $f_4'(x)$ by each of the following? (i) evaluating the formula from part (a) as written; (ii) automatic differentiation, which carries a derivative value alongside the function value; (iii) a forward finite difference.
+        \item Repeat the counts for general $N$, and state what you conclude.
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item By the chain rule, applied four times,
+        \[
+            f_4'(x) = \cos\big(\sin(\sin(\sin x))\big)\,\cos\big(\sin(\sin x)\big)\,\cos\big(\sin x\big)\,\cos(x) .
+        \]
+        \item Counting evaluations:
+        \begin{enumerate}[label=(\roman*)]
+            \item Evaluating the formula as written, the four factors need $3, 2, 1, 0$ sines respectively, and one cosine each: \textbf{6 sines and 4 cosines, 10 evaluations}. The nested sines are recomputed from scratch inside every factor.
+            \item Writing $s_0 = x$ and $s_{k+1} = \sin(s_k)$, automatic differentiation carries the pair $(s_k, s_k')$ forward using $s_{k+1}' = \cos(s_k)\,s_k'$, starting from $s_0' = 1$. Each of the four steps costs one sine and one cosine: \textbf{4 sines and 4 cosines, 8 evaluations}.
+            \item A forward difference needs $f_4(x+\epsilon)$ and $f_4(x)$, four sines each: \textbf{8 sines, 8 evaluations}.
+        \end{enumerate}
+        \item For general $N$ the factor $\cos(s_k)$ contains $k$ nested sines, so the written-out formula costs
+        \[
+            \sum_{k=0}^{N-1} k = \frac{N(N-1)}{2} \text{ sines } + \; N \text{ cosines} ,
+        \]
+        which grows like $N^2$, while automatic differentiation costs $N$ sines and $N$ cosines and the finite difference costs $2N$ sines, both growing like $N$. At $N = 4$ the three are $10$, $8$ and $8$, close enough that the distinction hardly matters; at $N = 20$ they are $210$, $40$ and $40$.
+
+        The conclusion is that the cost of the explicit formula grows quadratically while the function itself only grows linearly. This is \emph{expression swelling}: differentiating symbolically produces an object substantially larger than the thing being differentiated, and the gap widens with the length of the computation. Automatic differentiation avoids it by never forming the formula, and matches the finite difference in cost while being exact to machine precision, so it is the method to use.
+
+        \emph{Side note.} The quadratic count comes from rebuilding $s_k$ inside every factor. A symbolic system that recognizes the repeated subexpressions and evaluates each $s_k$ once recovers the linear count, which is essentially what automatic differentiation does by construction.
+    \end{enumerate}
+    
+\end{solution}
+
+%% ---- Continuation and homotopy ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    The following MATLAB function is intended to trace the solution of $\mathbf{h}(\mathbf{x}, \lambda) = \mathbf{0}$ as the continuation parameter $\lambda$ is stepped through the values in \texttt{lambdas}.
+    \lstinputlisting{code/matlab/nle/continuation_bad.m}
+    It works for the first few values of $\lambda$ and then starts to fail, either not converging within \texttt{maxit} iterations or returning points that jump discontinuously from one $\lambda$ to the next. Identify the bug and give the corrected line.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    Every solve is started from the same initial guess \texttt{x0}. The line
+    \begin{center}\texttt{x = x0;}\end{center}
+    should instead start from the solution obtained at the previous value of $\lambda$,
+    \begin{center}\texttt{if i == 1, x = x0; else, x = xs(:, i-1); end}\end{center}
+    (equivalently, set \texttt{x = x0} once before the loop and simply not reset it inside).
+
+    This is the entire point of continuation. Newton's method converges only from a sufficiently good starting point, and a fixed guess \texttt{x0} gets steadily worse as $\lambda$ moves away from its initial value, so eventually the solve fails or converges to a different branch, which is what produces the discontinuous jumps. The solution at the previous $\lambda$, on the other hand, is close to the solution at the next one whenever the step in $\lambda$ is small, which is what keeps every solve inside the region where Newton converges quickly.
+
+    \emph{Side note.} This also explains why continuation codes shrink the $\lambda$ step when a solve fails: a smaller step makes the previous solution a better guess. It is worth noting that no amount of shrinking helps at a turning point, where the branch ceases to exist beyond a critical $\lambda$ and the failure is not a bad guess but the absence of a nearby solution.
+    
+\end{solution}
+
+%% ---- Bifurcation analysis ----
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    To locate a bifurcation point of $\mathbf{h}(\mathbf{x},\lambda) = \mathbf{0}$ with $\mathbf{x} \in \mathbb{R}^N$, we apply Newton's method to the augmented system
+    \[
+        \mathbf{F}(\mathbf{x}, \lambda) =
+        \begin{bmatrix}
+            \mathbf{h}(\mathbf{x}, \lambda) \\
+            \det \mathbf{J}_h(\mathbf{x}, \lambda)
+        \end{bmatrix} = \mathbf{0} ,
+    \]
+    in the $N+1$ unknowns $(\mathbf{x}, \lambda)$. The Jacobian of $\mathbf{F}$ is not available analytically, so it is approximated by finite differences. What is the computational complexity of one Newton iteration, in terms of $N$?
+
+    You may use the following: a finite-difference Jacobian of a function of $n$ variables costs $n+1$ evaluations of that function; computing a determinant by Gaussian elimination on an $n \times n$ matrix costs $O(n^3)$; and solving an $n \times n$ linear system costs $O(n^3)$.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    One iteration costs $O(N^4)$.
+
+    The cost is dominated by building the Jacobian of $\mathbf{F}$. Evaluating $\mathbf{F}$ once requires evaluating $\mathbf{h}$, which is cheap, and evaluating $\det \mathbf{J}_h$, which costs $O(N^3)$ by Gaussian elimination; so a single evaluation of $\mathbf{F}$ costs $O(N^3)$. A finite-difference Jacobian of $\mathbf{F}$, a function of $N+1$ variables, needs $N+2$ such evaluations, giving
+    \[
+        (N+2) \cdot O(N^3) = O(N^4) .
+    \]
+    Solving the resulting $(N+1) \times (N+1)$ linear system for the Newton step then costs only $O(N^3)$, which is negligible beside the Jacobian construction. The total is therefore $O(N^4)$ per iteration.
+    
+\end{solution}
+
+%% ---- Damped Newton's method ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    The following MATLAB function implements the damped Newton method with a backtracking line search. It is correct, but wasteful.
+    \lstinputlisting{code/matlab/nle/damped_newton_slow.m}
+    \begin{enumerate}[label=(\alph*)]
+        \item Identify the wasted work, and explain why it is wasted.
+        \item Rewrite the iteration so that it computes the same iterates at much lower cost. State the cost of one backtracking trial before and after your change, in terms of the dimension $N$.
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item The Newton direction is recomputed inside the line search. The expression \texttt{J(x) \textbackslash\ f(x)} appears in the \texttt{while} condition, so it is evaluated afresh on every backtracking trial, and then once more on the line that updates \texttt{x}.
+
+        None of that work depends on $\alpha$. Backtracking searches along a \emph{fixed} direction: only the step length changes, while $\mathbf{d}_k = -\mathbf{J}(\mathbf{x}_k)^{-1}\mathbf{f}(\mathbf{x}_k)$ is determined once the iterate $\mathbf{x}_k$ is fixed. Every trial after the first therefore repeats an identical Jacobian evaluation and linear solve and discards the result.
+        \item Compute the direction once, before entering the line search:
+        \lstinputlisting{code/matlab/nle/damped_newton_fast.m}
+        The iterates are unchanged, since the same $\mathbf{d}_k$ and the same sequence of $\alpha$ are produced either way.
+
+        The cost of one backtracking trial is what changes. Before, each trial evaluates the Jacobian and solves an $N \times N$ system, which is $O(N^3)$, plus one evaluation of $\mathbf{f}$. After, each trial costs one scaling of a vector, $O(N)$, plus one evaluation of $\mathbf{f}$; the single $O(N^3)$ solve is paid once per Newton iteration rather than once per trial.
+
+        \emph{Side note.} Measured on a dense $N = 300$ problem, the rewrite runs about $27$ times faster and returns a bitwise identical answer. The factor depends on how many backtracking trials the problem provokes, so it is not a fixed number: on a problem where the full step $\alpha = 1$ is always accepted, the two versions still differ, because even then the original solves the system twice per iteration, once to test the step and once to take it.
+    \end{enumerate}
+    
+\end{solution}
+
+
+\begin{exercise} % 2026 Sungho Shin
+    
+    The damped Newton method of this chapter is applied to
+    \[
+        f(x) = x^2 + 1 = 0,
+    \]
+    which has no real root. At each iteration the implementation computes the Newton direction $d_k = -f(x_k)/f'(x_k)$, sets $\alpha \leftarrow 1$, and halves $\alpha$ until $|f(x_k + \alpha d_k)| < |f(x_k)|$. It stops and reports success when the residual test
+    \[
+        |f(x_k)| \le \varepsilon_f, \qquad \varepsilon_f = 10^{-8},
+    \]
+    is satisfied, and it aborts if $\alpha$ falls below $10^{-14}$ or a maximum iteration count is exceeded.
+    \begin{enumerate}[label=(\alph*)]
+        \item Do the iterates diverge? If not, what point do they converge to, and why that point?
+        \item Is the residual test ever satisfied? How does the algorithm signal that no root was found?
+    \end{enumerate}
+    
+\end{exercise}
+
+\begin{solution}
+    
+    \begin{enumerate}[label=(\alph*)]
+        \item They do not diverge: the iterates converge to $x = 0$.
+
+        The line search accepts a step only when it decreases $|f|$, and $|f(x)| = x^2 + 1$ is smallest at $x = 0$, so the iterates are driven toward the origin. This is the behavior stated in the chapter: with backtracking, the method converges to a stationary point of $\tfrac{1}{2}f(x)^2$, which here satisfies
+        \[
+            \frac{d}{dx}\left(\tfrac{1}{2}f(x)^2\right) = f(x) f'(x) = (x^2+1)(2x) = 0
+            \quad \Longrightarrow \quad x = 0 ,
+        \]
+        since $x^2 + 1$ never vanishes. The point $x = 0$ minimizes the residual, and it is not a root: $|f(0)| = 1$.
+        \item No. The residual stalls at $|f| = 1$, which is far above $\varepsilon_f = 10^{-8}$, so the success test is never satisfied.
+
+        What triggers instead is the safeguard on $\alpha$. Once the iterates are near $x = 0$, every step in either direction increases $|f|$, so the line search halves $\alpha$ without ever finding an acceptable step, and $\alpha$ falls below $10^{-14}$. The algorithm aborts there and reports failure, which is the correct outcome: it has found the best point available to it, and that point is not a root.
+
+    \end{enumerate}
+
+    \emph{Side note.} The same mechanism is what makes damped Newton robust in ordinary cases: forcing $\|\mathbf{f}\|$ to decrease is what prevents the wild overshooting of the undamped method. The price is that the method can only ever find a local minimizer of the residual, and when no root exists, that is exactly what it returns.
+    
+\end{solution}
+
+%% ---- Local uniqueness ----
+\begin{exercise} % 2026 Sungho Shin
+    
+    Give an example of a scalar nonlinear equation $f(x) = 0$ that has a solution $x^*$ which is locally unique, yet whose Jacobian is singular at that solution, i.e., $\det \mathbf{J}(x^*) = f'(x^*) = 0$.
+    
+\end{exercise}
+
+\begin{solution}
+    
+    Take $f(x) = x^3$. The only root is $x^* = 0$, so it is certainly locally unique, and $f'(x) = 3x^2$ gives $f'(0) = 0$, so the Jacobian is singular there.
+
+    \emph{Side note.} This shows that a nonsingular Jacobian is sufficient for local uniqueness but not necessary: the argument via the Taylor expansion requires $\mathbf{J}(\mathbf{x}^*)$ to be invertible in order to conclude that the linear term dominates the remainder, and when it is not, the higher-order terms may still pin the root down. Newton's method, however, does feel the difference: on $f(x) = x^3$ it converges to $0$ only linearly, with $x_{k+1} = \tfrac{2}{3}x_k$, instead of quadratically.
+    
+\end{solution}
+
 
 \begin{exercise} % 2020 Participation quiz L7
     Compute the Jacobian of $\mathbf{f}(\mathbf{x}) = \begin{pmatrix} \sin x_1 + x_2 e^{x_3} \\ x_1 x_2 x_3 \\ \cos x_3 + x_1 e^{-x_2} \end{pmatrix}$.
