@@ -1345,7 +1345,7 @@ This chapter has introduced several important concepts and techniques for solvin
         \item Newton's method requires computing the inverse of the Jacobian at every step.
         \item The Newton step evaluated at a root is always the zero step.
         \item A nonlinear system either has no solutions, exactly one solution, or infinitely many solutions, but never a finite number greater than one.
-        \item Newton's method may converge to different solutions from different starting points, primarily because of finite numerical precision.
+        \item The reason Newton's method may converge to different solutions from different starting points is  primarily because of finite numerical precision.
         \item Saying that the convergence order is quadratic means that the error is at least halved at every iteration.
         \item The step size $\epsilon = 10^{-8}$ is known to give the most accurate finite-difference derivative in double precision. The same $\epsilon$ is therefore also the most effective choice in quadruple precision.
         \item If the factor $1/2$ in the backtracking line search of the damped Newton method is replaced by $1/4$, the method will fail to converge.
@@ -1483,7 +1483,7 @@ This chapter has introduced several important concepts and techniques for solvin
                 2xy + p\,e^{px} & x^2 \\
                 1 & 2py
             \end{bmatrix}
-            \;\overset{(1,2,1)}{=}\;
+            \;=\;
             \begin{bmatrix}
                 4 + e & 1 \\
                 1 & 4
@@ -1496,7 +1496,7 @@ This chapter has introduced several important concepts and techniques for solvin
                 x\,e^{px} \\
                 y^2
             \end{bmatrix}
-            \;\overset{(1,2,1)}{=}\;
+            \;=\;
             \begin{bmatrix}
                 e \\ 4
             \end{bmatrix}.
@@ -1504,7 +1504,7 @@ This chapter has introduced several important concepts and techniques for solvin
     \end{enumerate}
     The data $a$ and $b$ enter $\mathbf{f}$ additively, so they do not appear in either derivative.
 
-    \emph{Side note.} Note the shapes: $\nabla_{(x,y)}\mathbf{f}$ is $2 \times 2$ because there are two equations and two unknowns, while $\nabla_p \mathbf{f}$ is $2 \times 1$ because there is a single parameter. The second one is exactly the quantity a continuation method needs, since differentiating $\mathbf{f}(\mathbf{x}(p), p) = \mathbf{0}$ with respect to $p$ gives $\nabla_{(x,y)}\mathbf{f} \, \frac{d\mathbf{x}}{dp} = -\nabla_p \mathbf{f}$, which is how a solution branch is tracked as $p$ changes.
+    \emph{Side note.} Note the shapes: $\nabla_{(x,y)}\mathbf{f}$ is $2 \times 2$ because there are two equations and two unknowns, while $\nabla_p \mathbf{f}$ is $2 \times 1$ because there is a single parameter. 
     
 \end{solution}
 
@@ -1521,20 +1521,11 @@ This chapter has introduced several important concepts and techniques for solvin
     
     Nothing is wrong with the code; the stopping test is being asked to do something it cannot. The equation $e^{-x} = 0$ has \emph{no solution}: $e^{-x} > 0$ for every finite $x$. What the residual test detects is only that $\|\mathbf{f}\|$ has become small, and for this function the residual tends to zero as $x \to \infty$ without any root being approached. At $x = 19$ the residual is $e^{-19} \approx 5.6 \times 10^{-9}$, below the tolerance, so the function reports success at a point that is not a root of anything.
 
-    The iterates make the situation clear. The Newton step is
-    \[
-        -\frac{f(x)}{f'(x)} = -\frac{e^{-x}}{-e^{-x}} = 1
-    \]
-    at every iterate, so the method simply marches to the right by one unit per iteration, and after $19$ steps the residual test is satisfied.
-
-    The fix is to require more than a small residual. Adding the step-size test
+    The fix is to require more than a small residual, e.g., including a step-size criterion as well:
     \[
         \|\mathbf{x}_{k+1} - \mathbf{x}_k\|_p \le \varepsilon_R \|\mathbf{x}_{k+1}\|_p + \varepsilon_A
     \]
-    catches this case immediately: the step here is exactly $1$ and never becomes small, so the two tests disagree and the iteration should not be declared converged.
-
-    \emph{Side note.} This is the complement of the failure mode discussed earlier in the chapter. There, the function was flat near a genuine root, so a small residual did not imply a nearby root. Here there is no root at all, and the residual still goes to zero. In both cases the lesson is the same: a small residual is evidence that the equations are nearly satisfied, not evidence that a solution exists or has been found.
-    
+        
 \end{solution}
 
 %% ---- Convergence analysis ----
@@ -1584,11 +1575,10 @@ This chapter has introduced several important concepts and techniques for solvin
     On a logarithmic vertical axis, linear convergence appears as a straight line, because $\|\mathbf{e}_{k+1}\| \approx C\|\mathbf{e}_k\|$ gives $\log\|\mathbf{e}_{k+1}\| \approx \log\|\mathbf{e}_k\| + \log C$, a constant drop per iteration. The slope of that line is $\log_{10} C$. Convergence of order $q > 1$ instead multiplies the exponent by $q$ at each step, so the curve bends steadily downward.
     \begin{enumerate}[label=(\alph*)]
         \item A straight line dropping by a factor of $2$ per iteration: linear convergence, $q = 1$, with $C = 1/2$.
-        \item A straight line dropping by a factor of $10$ per iteration, so again $q = 1$, now with $C = 1/10$. It is linear, exactly like (a), but with a smaller error constant: about one correct digit is gained per iteration, against $-\log_{10}(1/2) \approx 0.3$ digits in (a).
+        \item A straight line dropping by a factor of $10$ per iteration, so again $q = 1$, now with $C = 1/10$. 
         \item The curve bends downward, and the number of correct digits doubles at each step. This is quadratic convergence, $q = 2$. Reading consecutive values, $0.25 = (0.5)^2$, $0.0625 = (0.25)^2$, and $3.906 \times 10^{-3} = (0.0625)^2$, so $\|\mathbf{e}_{k+1}\| = \|\mathbf{e}_k\|^2$ and the asymptotic error constant is $C = 1$.
     \end{enumerate}
 
-    \emph{Side note.} Panels (a) and (b) have the same \emph{order} and differ only in the constant, which is why order alone does not tell you which method is faster over a fixed number of iterations: (b) beats (c) for the first three iterations. What the higher order guarantees is the behavior once the error is small, and there the difference is decisive, since (c) passes $10^{-10}$ at $k = 5$ while (b) needs $k = 10$.
     
 \end{solution}
 
@@ -1617,7 +1607,7 @@ This chapter has introduced several important concepts and techniques for solvin
         \]
         \item Counting evaluations:
         \begin{enumerate}[label=(\roman*)]
-            \item Evaluating the formula as written, the four factors need $3, 2, 1, 0$ sines respectively, and one cosine each: \textbf{6 sines and 4 cosines, 10 evaluations}. The nested sines are recomputed from scratch inside every factor.
+            \item Evaluating the formula as written, the four factors need $3, 2, 1, 0$ sines respectively, and one cosine each: \textbf{6 sines and 4 cosines, 10 evaluations}. 
             \item Writing $s_0 = x$ and $s_{k+1} = \sin(s_k)$, automatic differentiation carries the pair $(s_k, s_k')$ forward using $s_{k+1}' = \cos(s_k)\,s_k'$, starting from $s_0' = 1$. Each of the four steps costs one sine and one cosine: \textbf{4 sines and 4 cosines, 8 evaluations}.
             \item A forward difference needs $f_4(x+\epsilon)$ and $f_4(x)$, four sines each: \textbf{8 sines, 8 evaluations}.
         \end{enumerate}
@@ -1627,9 +1617,8 @@ This chapter has introduced several important concepts and techniques for solvin
         \]
         which grows like $N^2$, while automatic differentiation costs $N$ sines and $N$ cosines and the finite difference costs $2N$ sines, both growing like $N$. At $N = 4$ the three are $10$, $8$ and $8$, close enough that the distinction hardly matters; at $N = 20$ they are $210$, $40$ and $40$.
 
-        The conclusion is that the cost of the explicit formula grows quadratically while the function itself only grows linearly. This is \emph{expression swelling}: differentiating symbolically produces an object substantially larger than the thing being differentiated, and the gap widens with the length of the computation. Automatic differentiation avoids it by never forming the formula, and matches the finite difference in cost while being exact to machine precision, so it is the method to use.
+        The conclusion is that the cost of the explicit formula grows quadratically while the function itself only grows linearly. This is \emph{expression swelling}: differentiating symbolically produces an object substantially larger than the thing being differentiated, and the gap widens with the length of the computation. Automatic differentiation avoids it by never forming the formula explicitly, and matches the finite difference in cost while being exact to machine precision, so it is the preferred method.
 
-        \emph{Side note.} The quadratic count comes from rebuilding $s_k$ inside every factor. A symbolic system that recognizes the repeated subexpressions and evaluates each $s_k$ once recovers the linear count, which is essentially what automatic differentiation does by construction.
     \end{enumerate}
     
 \end{solution}
@@ -1645,15 +1634,11 @@ This chapter has introduced several important concepts and techniques for solvin
 
 \begin{solution}
     
-    Every solve is started from the same initial guess \texttt{x0}. The line
+    Every iteration's inner loop (which implements Newton's method)  is started from the same initial guess \texttt{x0}. The line
     \begin{center}\texttt{x = x0;}\end{center}
     should instead start from the solution obtained at the previous value of $\lambda$,
     \begin{center}\texttt{if i == 1, x = x0; else, x = xs(:, i-1); end}\end{center}
-    (equivalently, set \texttt{x = x0} once before the loop and simply not reset it inside).
-
-    This is the entire point of continuation. Newton's method converges only from a sufficiently good starting point, and a fixed guess \texttt{x0} gets steadily worse as $\lambda$ moves away from its initial value, so eventually the solve fails or converges to a different branch, which is what produces the discontinuous jumps. The solution at the previous $\lambda$, on the other hand, is close to the solution at the next one whenever the step in $\lambda$ is small, which is what keeps every solve inside the region where Newton converges quickly.
-
-    \emph{Side note.} This also explains why continuation codes shrink the $\lambda$ step when a solve fails: a smaller step makes the previous solution a better guess. It is worth noting that no amount of shrinking helps at a turning point, where the branch ceases to exist beyond a critical $\lambda$ and the failure is not a bad guess but the absence of a nearby solution.
+    (equivalently, set \texttt{x = x0} once before the loop and simply not reset it inside). This is the entire point of continuation. The solution at the previous $\lambda$ should be close to the solution at the next one whenever the step in $\lambda$ is small.
     
 \end{solution}
 
@@ -1669,7 +1654,7 @@ This chapter has introduced several important concepts and techniques for solvin
             \det \mathbf{J}_h(\mathbf{x}, \lambda)
         \end{bmatrix} = \mathbf{0} ,
     \]
-    in the $N+1$ unknowns $(\mathbf{x}, \lambda)$. The Jacobian of $\mathbf{F}$ is not available analytically, so it is approximated by finite differences. What is the computational complexity of one Newton iteration, in terms of $N$?
+    in the $N+1$ unknowns $(\mathbf{x}, \lambda)$. The Jacobian of $\mathbf{F}$ is not available analytically, so it may be approximated by finite differences. What is the computational complexity of one Newton iteration, in terms of $N$?
 
     You may use the following: a finite-difference Jacobian of a function of $n$ variables costs $n+1$ evaluations of that function; computing a determinant by Gaussian elimination on an $n \times n$ matrix costs $O(n^3)$; and solving an $n \times n$ linear system costs $O(n^3)$.
     
@@ -1709,9 +1694,8 @@ This chapter has introduced several important concepts and techniques for solvin
         \lstinputlisting{code/matlab/nle/damped_newton_fast.m}
         The iterates are unchanged, since the same $\mathbf{d}_k$ and the same sequence of $\alpha$ are produced either way.
 
-        The cost of one backtracking trial is what changes. Before, each trial evaluates the Jacobian and solves an $N \times N$ system, which is $O(N^3)$, plus one evaluation of $\mathbf{f}$. After, each trial costs one scaling of a vector, $O(N)$, plus one evaluation of $\mathbf{f}$; the single $O(N^3)$ solve is paid once per Newton iteration rather than once per trial.
+        The cost of one backtracking trial is what changes. Before, each trial evaluates the Jacobian and solves an $N \times N$ system, which is $O(N^3)$, plus one evaluation of $\mathbf{f}$. After, each trial costs one scaling of a vector, $O(N)$, plus one evaluation of $\mathbf{f}$; the  $O(N^3)$ cost is paid once per Newton iteration rather than once per trial.
 
-        \emph{Side note.} Measured on a dense $N = 300$ problem, the rewrite runs about $27$ times faster and returns a bitwise identical answer. The factor depends on how many backtracking trials the problem provokes, so it is not a fixed number: on a problem where the full step $\alpha = 1$ is always accepted, the two versions still differ, because even then the original solves the system twice per iteration, once to test the step and once to take it.
     \end{enumerate}
     
 \end{solution}
@@ -1723,7 +1707,7 @@ This chapter has introduced several important concepts and techniques for solvin
     \[
         f(x) = x^2 + 1 = 0,
     \]
-    which has no real root. At each iteration the implementation computes the Newton direction $d_k = -f(x_k)/f'(x_k)$, sets $\alpha \leftarrow 1$, and halves $\alpha$ until $|f(x_k + \alpha d_k)| < |f(x_k)|$. It stops and reports success when the residual test
+    which has no real root. At each iteration the implementation computes the Newton direction $d_k = -f(x_k)/f'(x_k)$, sets $\alpha$ to $1$, and halves $\alpha$ until $|f(x_k + \alpha d_k)| < |f(x_k)|$. It stops and reports success when the residual test
     \[
         |f(x_k)| \le \varepsilon_f, \qquad \varepsilon_f = 10^{-8},
     \]
@@ -1746,13 +1730,12 @@ This chapter has introduced several important concepts and techniques for solvin
             \quad \Longrightarrow \quad x = 0 ,
         \]
         since $x^2 + 1$ never vanishes. The point $x = 0$ minimizes the residual, and it is not a root: $|f(0)| = 1$.
-        \item No. The residual stalls at $|f| = 1$, which is far above $\varepsilon_f = 10^{-8}$, so the success test is never satisfied.
+        \item No. The residual remains at $|f| = 1$, which is far above $\varepsilon_f = 10^{-8}$, so the success test is never satisfied.
 
-        What triggers instead is the safeguard on $\alpha$. Once the iterates are near $x = 0$, every step in either direction increases $|f|$, so the line search halves $\alpha$ without ever finding an acceptable step, and $\alpha$ falls below $10^{-14}$. The algorithm aborts there and reports failure, which is the correct outcome: it has found the best point available to it, and that point is not a root.
+        Once the iterates are near $x = 0$, every step in either direction increases $|f|$, so the line search halves $\alpha$ without ever finding an acceptable step, and $\alpha$ falls below $10^{-14}$. The algorithm aborts there and reports failure, which is the correct outcome: it has found the best point available to it, but that point is not a root.
 
     \end{enumerate}
 
-    \emph{Side note.} The same mechanism is what makes damped Newton robust in ordinary cases: forcing $\|\mathbf{f}\|$ to decrease is what prevents the wild overshooting of the undamped method. The price is that the method can only ever find a local minimizer of the residual, and when no root exists, that is exactly what it returns.
     
 \end{solution}
 
@@ -1766,8 +1749,6 @@ This chapter has introduced several important concepts and techniques for solvin
 \begin{solution}
     
     Take $f(x) = x^3$. The only root is $x^* = 0$, so it is certainly locally unique, and $f'(x) = 3x^2$ gives $f'(0) = 0$, so the Jacobian is singular there.
-
-    \emph{Side note.} This shows that a nonsingular Jacobian is sufficient for local uniqueness but not necessary: the argument via the Taylor expansion requires $\mathbf{J}(\mathbf{x}^*)$ to be invertible in order to conclude that the linear term dominates the remainder, and when it is not, the higher-order terms may still pin the root down. Newton's method, however, does feel the difference: on $f(x) = x^3$ it converges to $0$ only linearly, with $x_{k+1} = \tfrac{2}{3}x_k$, instead of quadratically.
     
 \end{solution}
 
@@ -1777,12 +1758,14 @@ This chapter has introduced several important concepts and techniques for solvin
 \end{exercise}
 
 \begin{solution}
-    \(\boxed{\displaystyle 
-    \mathbf{J}(\mathbf{x}) = \begin{bmatrix} \cos x_1 & e^{x_3} & x_2 e^{x_3} \\ x_2 x_3 & x_1 x_3 & x_1 x_2 \\ e^{-x_2} & -x_1 e^{-x_2} & -\sin x_3 \end{bmatrix}} \) , arrived at by computing \(J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x}),\, \forall\, i,j \in \{1,2,3\}\).
+    \[\displaystyle 
+    \mathbf{J}(\mathbf{x}) = \begin{bmatrix} \cos x_1 & e^{x_3} & x_2 e^{x_3} \\ x_2 x_3 & x_1 x_3 & x_1 x_2 \\ e^{-x_2} & -x_1 e^{-x_2} & -\sin x_3 \end{bmatrix} \]
+    
+    Arrived at by computing \(J_{ij}(\mathbf{x}) = \dfrac{\partial f_i}{\partial x_j}(\mathbf{x}),\, \forall\, i,j \in \{1,2,3\}\).
 \end{solution}
 
 \begin{exercise} % 2020 Participation quiz L8
-    (*) Linearize $\mathbf{f}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\,\mathbf{x}$, about $\mathbf{x} = \mathbf{x}_0$, for $\mathbf{x} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{N \times N}$.
+    Linearize $\mathbf{f}(\mathbf{x}) = (\mathbf{x}^T \mathbf{A}\,\mathbf{x})\,\mathbf{x}$, about $\mathbf{x} = \mathbf{x}_0$, for $\mathbf{x} \in \mathbb{R}^N$, $\mathbf{A} \in \mathbb{R}^{N \times N}$.
 \end{exercise}
 
 \begin{solution}
@@ -1807,13 +1790,10 @@ This chapter has introduced several important concepts and techniques for solvin
     \[
         = (\mathbf{x}^T \mathbf{A}\mathbf{x}) \cdot \mathbf{I} + \mathbf{x}\mathbf{x}^T(\mathbf{A}+\mathbf{A}^T)
     \]
-    (``$\cdot$'' is scalar multiplication here, not a dot product!)
-    
-    Overall:
-    \(\displaystyle\boxed{
+    (``$\cdot$'' is scalar multiplication here, not a dot product!). Overall, the linearization is
+    \[\displaystyle
         \hat{\mathbf{f}}(\mathbf{x}) = (\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{x}_0 + \Bigl[(\mathbf{x}_0^T \mathbf{A}\,\mathbf{x}_0)\,\mathbf{I} + \mathbf{x}_0\,\mathbf{x}_0^T(\mathbf{A}+\mathbf{A}^T)\Bigr](\mathbf{x} - \mathbf{x}_0)
-        }
-    \)
+    \]
 \end{solution}
 
 % Commented out: more of a pure algebra exercise, not directly tied to this chapter's concepts.
